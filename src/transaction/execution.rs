@@ -14,6 +14,7 @@ pub(super) fn execute(
     worktree: &Path,
     agent_routes: &AgentRoutes,
 ) -> Result<()> {
+    agent_adapter::invoke_adapter(spec, tx_dir, worktree, &agent_routes.executor)?;
     let results = run_execution_commands(spec, worktree)?;
     fs::write(
         tx_dir.join("execution.json"),

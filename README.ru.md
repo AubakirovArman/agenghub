@@ -4,7 +4,7 @@ AgentHub — транзакционная runtime-основа для работ
 
 Языки: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
-Подробная документация: [How it works](docs/how-it-works.en.md), [LLM Gateway](docs/llm-gateway.ru.md), [Plugin ecosystem](docs/plugin-ecosystem.ru.md), [Enterprise](docs/enterprise.ru.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
+Подробная документация: [How it works](docs/how-it-works.en.md), [Agent adapters](docs/agent-adapters.ru.md), [LLM Gateway](docs/llm-gateway.ru.md), [Plugin ecosystem](docs/plugin-ecosystem.ru.md), [Enterprise](docs/enterprise.ru.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
 
 ## Текущий статус
 
@@ -18,7 +18,7 @@ AgentHub — транзакционная runtime-основа для работ
 - ограниченный repair loop и reviewer gate;
 - VCM-память: staging, promotion, failed attempts, compacted project state;
 - skill manifests и загрузка зависимостей;
-- agent adapter routing и traces;
+- agent adapter routing, CLI dry-run invocation, prompts и transcripts;
 - LLM Gateway metadata, redacted traces, optional raw traces и token/cost accounting;
 - context maps для routes, components, exports;
 - команда `ask` для предварительного AgentSpec;
@@ -97,6 +97,7 @@ agenthub run examples/command-task.yaml
 agenthub run examples/content-task.yaml
 agenthub run examples/data-task.yaml
 agenthub run examples/infra-task.yaml
+agenthub run examples/adapter-dry-run-task.yaml
 agenthub tx status
 agenthub tx report tx-...
 agenthub workspace scan --write-maps
@@ -109,6 +110,24 @@ AGENTHUB_ROLE=admin agenthub enterprise audit --limit 20
 AGENTHUB_ROLE=admin agenthub enterprise compliance
 agenthub agents list
 ```
+
+## Agent Adapters
+
+Executor можно маршрутизировать через `command`, `codex`, `kimi` или `gemini`. External CLI adapters пишут prompt и invocation artifacts, затем обычные transaction checks выполняются как раньше.
+
+```yaml
+agent:
+  adapter: codex
+  model: test-model
+  dry_run: true
+  command_template: "codex exec --prompt-file {prompt}"
+```
+
+```bash
+AGENTHUB_EXECUTOR_ADAPTER=kimi AGENTHUB_ADAPTER_DRY_RUN=1 agenthub run examples/adapter-dry-run-task.yaml
+```
+
+См. [Agent adapters](docs/agent-adapters.ru.md).
 
 ## Reviewer и Repair topology
 

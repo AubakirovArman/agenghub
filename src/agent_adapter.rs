@@ -1,72 +1,39 @@
-use std::env;
-use std::fs::{self, OpenOptions};
-use std::io::Write;
-use std::path::Path;
+mod invoke;
+#[cfg(test)]
+mod tests;
+mod transcript;
+mod types;
 
-use anyhow::{anyhow, Context, Result};
-use chrono::Utc;
-use serde::{Deserialize, Serialize};
-use serde_json::json;
+use anyhow::{anyhow, Result};
 
-use crate::command_runner::CommandResult;
 use crate::spec::{AgentConfig, AgentSpec};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct AgentRoute {
-    pub requested_adapter: String,
-    pub selected_adapter: String,
-    pub role: String,
-    pub model: Option<String>,
-    pub fallback_reason: Option<String>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct AgentRoutes {
-    pub executor: AgentRoute,
-    pub reviewer: Option<AgentRoute>,
-    pub repair: Option<AgentRoute>,
-}
+pub use invoke::{invoke_adapter, AdapterRun};
+pub use transcript::{write_agent_trace, write_transcript};
+pub use types::{AgentRoute, AgentRoutes};
 
 pub fn route(config: &AgentConfig) -> Result<AgentRoute> {
     route_for_role(config, config.role.as_deref().unwrap_or("executor"))
 }
 
 pub fn route_for_role(config: &AgentConfig, role: &str) -> Result<AgentRoute> {
-    let requested = config
-        .adapter
-        .clone()
-        .unwrap_or_else(|| "command".to_string());
     let role = config.role.clone().unwrap_or_else(|| role.to_string());
-    let model = config.model.clone();
+    let requested = adapter_from_env(&role)
+        .or_else(|| config.adapter.clone())
+        .unwrap_or_else(|| "command".to_string());
+    let model = config.model.clone().or_else(|| model_from_env(&requested));
+    let dry_run =
+        config.dry_run || std::env::var("AGENTHUB_ADAPTER_DRY_RUN").ok().as_deref() == Some("1");
+    let command_template = config
+        .command_template
+        .clone()
+        .or_else(|| template_from_env(&requested))
+        .or_else(|| default_template(&requested));
 
     match requested.as_str() {
-        "command" => Ok(AgentRoute {
-            requested_adapter: requested.clone(),
-            selected_adapter: requested,
-            role,
-            model,
-            fallback_reason: None,
-        }),
+        "command" => Ok(AgentRoute::selected(requested, role, model, None, dry_run)),
         "codex" | "kimi" | "gemini" => {
-            if executable_available(&requested) {
-                Ok(AgentRoute {
-                    requested_adapter: requested.clone(),
-                    selected_adapter: requested,
-                    role,
-                    model,
-                    fallback_reason: None,
-                })
-            } else {
-                Ok(AgentRoute {
-                    requested_adapter: requested.clone(),
-                    selected_adapter: "command".to_string(),
-                    role,
-                    model,
-                    fallback_reason: Some(format!(
-                        "adapter executable `{requested}` was not found on PATH"
-                    )),
-                })
-            }
+            route_cli_adapter(&requested, role, model, command_template, dry_run)
         }
         other => Err(anyhow!("unknown agent adapter: {other}")),
     }
@@ -100,44 +67,46 @@ pub fn supported_adapters() -> Vec<&'static str> {
     vec!["command", "codex", "kimi", "gemini"]
 }
 
-pub fn write_agent_trace(tx_dir: &Path, routes: &AgentRoutes) -> Result<()> {
-    write_json(
-        tx_dir.join("agent_trace.json").as_path(),
-        &json!({
-            "routes": routes,
-            "created_at": Utc::now(),
-        }),
-    )
-}
-
-pub fn write_transcript(
-    tx_dir: &Path,
-    route: &AgentRoute,
-    results: &[CommandResult],
-) -> Result<()> {
-    let path = tx_dir.join("agent_transcript.jsonl");
-    for result in results {
-        append_jsonl(
-            &path,
-            &json!({
-                "ts": Utc::now(),
-                "adapter": route.selected_adapter,
-                "role": route.role,
-                "command": result.command,
-                "exit_code": result.exit_code,
-                "success": result.success,
-                "timed_out": result.timed_out,
-                "duration_ms": result.duration_ms,
-            }),
-        )?;
+fn route_cli_adapter(
+    requested: &str,
+    role: String,
+    model: Option<String>,
+    template: Option<String>,
+    dry_run: bool,
+) -> Result<AgentRoute> {
+    if private_mode_enabled() {
+        return Ok(AgentRoute::selected(
+            requested.to_string(),
+            role,
+            model,
+            Some("private mode forces local command adapter".to_string()),
+            dry_run,
+        ));
     }
-    Ok(())
+    if executable_available(requested) || dry_run {
+        return Ok(AgentRoute::external(
+            requested.to_string(),
+            role,
+            model,
+            template,
+            dry_run,
+        ));
+    }
+    Ok(AgentRoute::selected(
+        requested.to_string(),
+        role,
+        model,
+        Some(format!(
+            "adapter executable `{requested}` was not found on PATH"
+        )),
+        dry_run,
+    ))
 }
 
 fn executable_available(name: &str) -> bool {
-    env::var_os("PATH")
+    std::env::var_os("PATH")
         .into_iter()
-        .flat_map(|paths| env::split_paths(&paths).collect::<Vec<_>>())
+        .flat_map(|paths| std::env::split_paths(&paths).collect::<Vec<_>>())
         .any(|dir| dir.join(name).is_file())
 }
 
@@ -146,39 +115,37 @@ fn command_config() -> AgentConfig {
         adapter: Some("command".to_string()),
         model: None,
         role: None,
+        command_template: None,
+        dry_run: false,
     }
 }
 
-fn write_json<T: Serialize>(path: &Path, value: &T) -> Result<()> {
-    if let Some(parent) = path.parent() {
-        fs::create_dir_all(parent).with_context(|| format!("create {}", parent.display()))?;
+fn default_template(adapter: &str) -> Option<String> {
+    match adapter {
+        "codex" => Some("codex exec --prompt-file {prompt}".to_string()),
+        "kimi" => Some("kimi --prompt-file {prompt}".to_string()),
+        "gemini" => Some("gemini --prompt-file {prompt}".to_string()),
+        _ => None,
     }
-    fs::write(path, serde_json::to_string_pretty(value)?)
-        .with_context(|| format!("write {}", path.display()))
 }
 
-fn append_jsonl(path: &Path, value: &serde_json::Value) -> Result<()> {
-    if let Some(parent) = path.parent() {
-        fs::create_dir_all(parent).with_context(|| format!("create {}", parent.display()))?;
-    }
-    let mut file = OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open(path)
-        .with_context(|| format!("open {}", path.display()))?;
-    writeln!(file, "{}", serde_json::to_string(value)?)?;
-    Ok(())
+fn template_from_env(adapter: &str) -> Option<String> {
+    let key = format!("AGENTHUB_ADAPTER_{}_TEMPLATE", adapter.to_ascii_uppercase());
+    std::env::var(key).ok()
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+fn adapter_from_env(role: &str) -> Option<String> {
+    let role_key = format!("AGENTHUB_{}_ADAPTER", role.to_ascii_uppercase());
+    std::env::var(role_key)
+        .ok()
+        .or_else(|| std::env::var("AGENTHUB_AGENT_ADAPTER").ok())
+}
 
-    #[test]
-    fn defaults_to_command_adapter() -> Result<()> {
-        let route = route(&AgentConfig::default())?;
-        assert_eq!(route.selected_adapter, "command");
-        assert_eq!(route.role, "executor");
-        Ok(())
-    }
+fn model_from_env(adapter: &str) -> Option<String> {
+    let key = format!("AGENTHUB_ADAPTER_{}_MODEL", adapter.to_ascii_uppercase());
+    std::env::var(key).ok()
+}
+
+fn private_mode_enabled() -> bool {
+    std::env::var("AGENTHUB_PRIVATE_MODE").ok().as_deref() == Some("1")
 }

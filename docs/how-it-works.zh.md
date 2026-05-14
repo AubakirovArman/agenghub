@@ -17,7 +17,7 @@ Agent 不应直接修改主项目。所有变更先在临时 git worktree 中执
 1. `agenthub run <spec.yaml>` 加载并验证 AgentSpec。
 2. AgentHub 创建 `.agent/tx/<tx-id>/`，写入 `plan.yaml`、`agent_ir.txt`、`dag.json`、`journal.jsonl`。
 3. 在 `.agent/workspaces/<tx-id>/` 准备 git worktree。
-4. 在隔离 worktree 中运行 `execution.commands`。
+4. Executor adapter 写入 prompt/invocation artifacts，然后在隔离 worktree 中运行 `execution.commands`。
 5. diff guard 强制执行 `scope.allow`、`scope.deny` 和 `transaction.diff_limits`。
 6. 如果 `topology.kind` 是 `executor_reviewer_repair`，先运行 reviewer commands。
 7. 运行 `verify.commands` 和可选 runtime smoke checks。
@@ -35,6 +35,11 @@ task:
 workspace:
   type: code.git
   isolation: git_worktree
+
+agent:
+  adapter: command
+  model: null
+  dry_run: false
 
 execution:
   commands:
@@ -65,6 +70,7 @@ transaction:
 
 - `task.id`: 用于报告和 memory 的稳定任务名。
 - `workspace.type`: `code.git`、`content.git`、`data.git`、`infra.git`。
+- `agent.adapter`: `command`、`codex`、`kimi` 或 `gemini`。
 - `execution.commands`: 执行变更的确定性命令。
 - `scope.allow` 和 `scope.deny`: 本次事务的文件边界。
 - `verify.commands`: commit 前必须通过的命令。
@@ -88,6 +94,33 @@ agenthub run examples/content-task.yaml
 agenthub run examples/data-task.yaml
 agenthub run examples/infra-task.yaml
 ```
+
+## Agent Adapters
+
+默认 adapter 是 `command`。External executor adapters 使用 shell template 和生成的 prompt：
+
+```yaml
+agent:
+  adapter: codex
+  model: test-model
+  dry_run: true
+  command_template: "codex exec --prompt-file {prompt}"
+```
+
+运行 dry-run 示例：
+
+```bash
+agenthub run examples/adapter-dry-run-task.yaml
+```
+
+常用 overrides：
+
+```bash
+AGENTHUB_EXECUTOR_ADAPTER=kimi AGENTHUB_ADAPTER_DRY_RUN=1 agenthub run examples/adapter-dry-run-task.yaml
+AGENTHUB_PRIVATE_MODE=1 agenthub run examples/adapter-dry-run-task.yaml
+```
+
+详细行为见 [Agent adapters](agent-adapters.zh.md)。
 
 ## Review 与 Repair
 
@@ -138,6 +171,10 @@ verify:
 - `.agent/tx/<tx-id>/journal.jsonl`: append-only 状态日志。
 - `.agent/tx/<tx-id>/report.md`: 人可读报告。
 - `.agent/tx/<tx-id>/dag.json`: execution graph。
+- `.agent/tx/<tx-id>/agent_trace.json`: 选择的 executor、reviewer 和 repair routes。
+- `.agent/tx/<tx-id>/agent_transcript.jsonl`: adapter 和 command transcript。
+- `.agent/tx/<tx-id>/agent_prompt_<role>.md`: role prompt artifact。
+- `.agent/tx/<tx-id>/adapter_invocation_<role>.json`: 使用 external adapter 时的 invocation details。
 - `.agent/tx/<tx-id>/context_pack.json`: 最小执行上下文。
 - `.agent/tx/<tx-id>/model_call_metadata.json`: planned/observed model call metadata。
 - `.agent/tx/<tx-id>/llm_gateway_summary.json`: gateway token/cost summary。

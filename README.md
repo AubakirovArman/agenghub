@@ -4,7 +4,7 @@ AgentHub is a transactional runtime foundation for AI-agent work. It turns a hum
 
 Languages: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
-Detailed docs: [How it works](docs/how-it-works.en.md), [LLM Gateway](docs/llm-gateway.en.md), [Plugin ecosystem](docs/plugin-ecosystem.en.md), [Enterprise](docs/enterprise.en.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
+Detailed docs: [How it works](docs/how-it-works.en.md), [Agent adapters](docs/agent-adapters.en.md), [LLM Gateway](docs/llm-gateway.en.md), [Plugin ecosystem](docs/plugin-ecosystem.en.md), [Enterprise](docs/enterprise.en.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
 
 ## Current Status
 
@@ -18,7 +18,7 @@ The current implementation covers the early PRD foundation:
 - bounded repair loop and reviewer gate;
 - VCM memory staging, promotion, failed attempts, and compacted project state;
 - skill manifests and dependency loading;
-- agent adapter routing and traces;
+- agent adapter routing, CLI dry-run invocation, prompts, and transcripts;
 - LLM Gateway metadata, redacted traces, optional raw traces, and token/cost accounting;
 - context maps for routes, components, and exports;
 - `ask` command for heuristic AgentSpec preview;
@@ -97,6 +97,7 @@ agenthub run examples/command-task.yaml
 agenthub run examples/content-task.yaml
 agenthub run examples/data-task.yaml
 agenthub run examples/infra-task.yaml
+agenthub run examples/adapter-dry-run-task.yaml
 agenthub tx status
 agenthub tx report tx-...
 agenthub workspace scan --write-maps
@@ -109,6 +110,24 @@ AGENTHUB_ROLE=admin agenthub enterprise audit --limit 20
 AGENTHUB_ROLE=admin agenthub enterprise compliance
 agenthub agents list
 ```
+
+## Agent Adapters
+
+Executor work can be routed through `command`, `codex`, `kimi`, or `gemini`. External CLI adapters write prompt and invocation artifacts, then the normal transaction checks still run.
+
+```yaml
+agent:
+  adapter: codex
+  model: test-model
+  dry_run: true
+  command_template: "codex exec --prompt-file {prompt}"
+```
+
+```bash
+AGENTHUB_EXECUTOR_ADAPTER=kimi AGENTHUB_ADAPTER_DRY_RUN=1 agenthub run examples/adapter-dry-run-task.yaml
+```
+
+See [Agent adapters](docs/agent-adapters.en.md).
 
 ## Reviewer And Repair Topology
 

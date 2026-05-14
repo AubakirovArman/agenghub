@@ -100,6 +100,69 @@ transaction:
 }
 
 #[test]
+fn dry_run_cli_adapter_writes_invocation_artifacts() -> Result<()> {
+    let repo = TestRepo::new()?;
+    agent_dir::init_project(repo.path(), false)?;
+    repo.commit_all("agenthub baseline")?;
+
+    let spec = repo.write_spec(
+        "adapter_dry_run.yaml",
+        r#"
+task:
+  id: adapter_dry_run
+  type: code.command
+agent:
+  adapter: codex
+  model: test-model
+  dry_run: true
+  command_template: "codex exec --prompt-file {prompt}"
+workspace:
+  type: code.git
+  isolation: git_worktree
+execution:
+  commands:
+    - mkdir -p generated
+    - printf 'adapter dry run\n' > generated/adapter.txt
+scope:
+  allow:
+    - generated/**
+verify:
+  profile: code_build
+  commands:
+    - test -f generated/adapter.txt
+transaction:
+  commit_on_success: true
+  memory_promotion: on_success
+  diff_limits:
+    max_files_changed: 2
+    max_lines_added: 5
+    max_lines_deleted: 0
+"#,
+    )?;
+
+    let outcome = transaction::run(repo.path(), &spec, false)?;
+
+    assert!(matches!(outcome.status, TransactionStatus::Committed));
+    assert!(repo.path().join("generated/adapter.txt").exists());
+    assert!(outcome
+        .report_path
+        .with_file_name("agent_prompt_executor.md")
+        .exists());
+    assert!(outcome
+        .report_path
+        .with_file_name("adapter_invocation_executor.json")
+        .exists());
+
+    let agent_trace = fs::read_to_string(outcome.report_path.with_file_name("agent_trace.json"))?;
+    let transcript =
+        fs::read_to_string(outcome.report_path.with_file_name("agent_transcript.jsonl"))?;
+    assert!(agent_trace.contains("codex"));
+    assert!(transcript.contains("\"kind\":\"adapter\""));
+    assert!(transcript.contains("\"dry_run\":true"));
+    Ok(())
+}
+
+#[test]
 fn failed_transaction_rolls_back_and_records_failed_attempt() -> Result<()> {
     let repo = TestRepo::new()?;
     agent_dir::init_project(repo.path(), false)?;

@@ -6,9 +6,11 @@ pub fn to_agent_ir(spec: &AgentSpec) -> String {
     lines.push(format!("TASK {}", spec.task.id));
     lines.push(format!("TOPOLOGY {}", spec.topology.kind));
     lines.push(format!(
-        "AGENT adapter={} role={}",
+        "AGENT adapter={} role={} model={} dry_run={}",
         spec.agent.adapter.as_deref().unwrap_or("command"),
-        spec.agent.role.as_deref().unwrap_or("executor")
+        spec.agent.role.as_deref().unwrap_or("executor"),
+        spec.agent.model.as_deref().unwrap_or("<default>"),
+        spec.agent.dry_run
     ));
     lines.push(format!(
         "WS {} iso={}",

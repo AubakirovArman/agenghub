@@ -1,0 +1,146 @@
+use std::fs;
+use std::path::{Path, PathBuf};
+use std::time::Duration;
+
+use anyhow::{anyhow, Context, Result};
+use chrono::Utc;
+use serde::{Deserialize, Serialize};
+
+use crate::agent_adapter::transcript::write_adapter_run;
+use crate::agent_adapter::AgentRoute;
+use crate::command_runner::run_shell;
+use crate::observability::redact_text;
+use crate::spec::AgentSpec;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AdapterRun {
+    pub adapter: String,
+    pub role: String,
+    pub command: Option<String>,
+    pub prompt_path: PathBuf,
+    pub success: bool,
+    pub exit_code: Option<i32>,
+    pub stdout: String,
+    pub stderr: String,
+    pub duration_ms: u128,
+    pub dry_run: bool,
+}
+
+pub fn invoke_adapter(
+    spec: &AgentSpec,
+    tx_dir: &Path,
+    worktree: &Path,
+    route: &AgentRoute,
+) -> Result<Option<AdapterRun>> {
+    let prompt_path = write_prompt(spec, tx_dir, route)?;
+    if !route.uses_external_cli() {
+        return Ok(None);
+    }
+
+    let command = render_command(route, &prompt_path)?;
+    let run = if route.dry_run {
+        AdapterRun {
+            adapter: route.selected_adapter.clone(),
+            role: route.role.clone(),
+            command: Some(command),
+            prompt_path,
+            success: true,
+            exit_code: Some(0),
+            stdout: "adapter dry-run enabled; external CLI was not executed".to_string(),
+            stderr: String::new(),
+            duration_ms: 0,
+            dry_run: true,
+        }
+    } else {
+        let result = run_shell(&command, worktree, Duration::from_secs(900))?;
+        AdapterRun {
+            adapter: route.selected_adapter.clone(),
+            role: route.role.clone(),
+            command: Some(command),
+            prompt_path,
+            success: result.success,
+            exit_code: result.exit_code,
+            stdout: redact_text(&result.stdout)?,
+            stderr: redact_text(&result.stderr)?,
+            duration_ms: result.duration_ms,
+            dry_run: false,
+        }
+    };
+
+    write_invocation(tx_dir, &run)?;
+    write_adapter_run(tx_dir, route, &run)?;
+    if !run.success {
+        return Err(anyhow!(
+            "agent adapter `{}` failed for role `{}`",
+            run.adapter,
+            run.role
+        ));
+    }
+    Ok(Some(run))
+}
+
+fn write_prompt(spec: &AgentSpec, tx_dir: &Path, route: &AgentRoute) -> Result<PathBuf> {
+    let path = tx_dir.join(format!("agent_prompt_{}.md", route.role));
+    let prompt = redact_text(&render_prompt(spec, route))?;
+    fs::write(&path, prompt).with_context(|| format!("write {}", path.display()))?;
+    Ok(path)
+}
+
+fn render_prompt(spec: &AgentSpec, route: &AgentRoute) -> String {
+    format!(
+        "# AgentHub Adapter Prompt\n\nRole: {}\nAdapter: {}\nModel: {}\nTask: {} ({})\nWorkspace: {}\n\nExecution commands:\n{}\n\nReview commands:\n{}\n\nRepair commands:\n{}\n\nVerifier commands:\n{}\n",
+        route.role,
+        route.selected_adapter,
+        route.model.as_deref().unwrap_or("<default>"),
+        spec.task.id,
+        spec.task.kind,
+        spec.workspace.kind,
+        list_commands(&spec.execution.commands),
+        list_commands(&spec.review.commands),
+        list_commands(&spec.repair.commands),
+        list_commands(&spec.verify.commands)
+    )
+}
+
+fn list_commands(commands: &[String]) -> String {
+    if commands.is_empty() {
+        return "- <none>".to_string();
+    }
+    commands
+        .iter()
+        .map(|command| format!("- `{command}`"))
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+fn render_command(route: &AgentRoute, prompt_path: &Path) -> Result<String> {
+    let template = route.command_template.as_ref().ok_or_else(|| {
+        anyhow!(
+            "adapter `{}` has no command template",
+            route.selected_adapter
+        )
+    })?;
+    Ok(template
+        .replace("{prompt}", &shell_quote(&prompt_path.display().to_string()))
+        .replace("{role}", &shell_quote(&route.role))
+        .replace(
+            "{model}",
+            &shell_quote(route.model.as_deref().unwrap_or_default()),
+        ))
+}
+
+fn shell_quote(value: &str) -> String {
+    format!("'{}'", value.replace('\'', "'\\''"))
+}
+
+fn write_invocation(tx_dir: &Path, run: &AdapterRun) -> Result<()> {
+    let path = tx_dir.join(format!("adapter_invocation_{}.json", run.role));
+    fs::write(
+        &path,
+        serde_json::to_string_pretty(&serde_json::json!({
+            "created_at": Utc::now(),
+            "run": run,
+        }))?,
+    )
+    .with_context(|| format!("write {}", path.display()))
+}

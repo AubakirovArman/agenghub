@@ -50,6 +50,10 @@ pub struct AgentConfig {
     pub model: Option<String>,
     #[serde(default)]
     pub role: Option<String>,
+    #[serde(default)]
+    pub command_template: Option<String>,
+    #[serde(default)]
+    pub dry_run: bool,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

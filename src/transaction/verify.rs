@@ -31,6 +31,9 @@ pub(super) fn run_verifier_with_repair(
             "running repair commands",
             json!({ "attempt": attempt }),
         )?;
+        if let Some(route) = agent_routes.repair.as_ref() {
+            agent_adapter::invoke_adapter(spec, tx_dir, worktree, route)?;
+        }
         let results = run_repair_commands(spec, worktree)?;
         if let Some(route) = agent_routes.repair.as_ref() {
             agent_adapter::write_transcript(tx_dir, route, &results)?;

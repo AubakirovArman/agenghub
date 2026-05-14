@@ -33,6 +33,9 @@ pub(super) fn run_review_with_repair(
             "running reviewer repair commands",
             json!({ "attempt": attempt, "phase": "review" }),
         )?;
+        if let Some(route) = agent_routes.repair.as_ref() {
+            agent_adapter::invoke_adapter(spec, tx_dir, worktree, route)?;
+        }
         let results = run_repair_commands(spec, worktree)?;
         if let Some(route) = agent_routes.repair.as_ref() {
             agent_adapter::write_transcript(tx_dir, route, &results)?;
@@ -61,6 +64,9 @@ fn run_review(
     tx_dir: &Path,
     agent_routes: &AgentRoutes,
 ) -> Result<ReviewResult> {
+    if let Some(route) = agent_routes.reviewer.as_ref() {
+        agent_adapter::invoke_adapter(spec, tx_dir, worktree, route)?;
+    }
     let review = reviewer::run(&spec.review, worktree, &tx_dir.join("reviewer.log"))?;
     if let Some(route) = agent_routes.reviewer.as_ref() {
         agent_adapter::write_transcript(tx_dir, route, &review.commands)?;

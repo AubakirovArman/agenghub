@@ -1,0 +1,41 @@
+task:
+  id: adapter_dry_run_example
+  type: code.command
+  title: Run a CLI agent adapter in dry-run mode
+
+agent:
+  adapter: codex
+  model: test-model
+  dry_run: true
+  command_template: "codex exec --prompt-file {prompt}"
+
+workspace:
+  type: code.git
+  isolation: git_worktree
+
+execution:
+  commands:
+    - mkdir -p tmp
+    - printf 'adapter dry run example\n' > tmp/agenthub-adapter.txt
+
+scope:
+  allow:
+    - tmp/**
+  deny:
+    - prd.md
+    - .agent/**
+
+verify:
+  profile: code_build
+  commands:
+    - test -f tmp/agenthub-adapter.txt
+
+transaction:
+  max_repair_attempts: 0
+  rollback_on_failure: true
+  commit_on_success: true
+  memory_promotion: on_success
+  diff_limits:
+    max_files_changed: 4
+    max_lines_added: 100
+    max_lines_deleted: 20

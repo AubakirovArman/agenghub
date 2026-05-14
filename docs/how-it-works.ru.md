@@ -17,7 +17,7 @@ intent или AgentSpec -> isolated workspace -> execution -> review -> verifica
 1. `agenthub run <spec.yaml>` загружает и валидирует AgentSpec.
 2. AgentHub создаёт `.agent/tx/<tx-id>/` и пишет `plan.yaml`, `agent_ir.txt`, `dag.json`, `journal.jsonl`.
 3. Git worktree создаётся в `.agent/workspaces/<tx-id>/`.
-4. `execution.commands` выполняются в изолированном worktree.
+4. Executor adapter пишет prompt/invocation artifacts, затем `execution.commands` выполняются в изолированном worktree.
 5. Diff guard применяет `scope.allow`, `scope.deny` и `transaction.diff_limits`.
 6. Если `topology.kind` равен `executor_reviewer_repair`, reviewer commands выполняются до verifier.
 7. Выполняются `verify.commands` и опциональные runtime smoke checks.
@@ -35,6 +35,11 @@ task:
 workspace:
   type: code.git
   isolation: git_worktree
+
+agent:
+  adapter: command
+  model: null
+  dry_run: false
 
 execution:
   commands:
@@ -65,6 +70,7 @@ transaction:
 
 - `task.id`: стабильное имя задачи для отчётов и памяти.
 - `workspace.type`: `code.git`, `content.git`, `data.git` или `infra.git`.
+- `agent.adapter`: `command`, `codex`, `kimi` или `gemini`.
 - `execution.commands`: детерминированные команды, которые делают изменение.
 - `scope.allow` и `scope.deny`: границы файлов для транзакции.
 - `verify.commands`: команды, которые должны пройти перед commit.
@@ -88,6 +94,33 @@ agenthub run examples/content-task.yaml
 agenthub run examples/data-task.yaml
 agenthub run examples/infra-task.yaml
 ```
+
+## Agent Adapters
+
+Adapter по умолчанию — `command`. External executor adapters используют shell template и сгенерированный prompt:
+
+```yaml
+agent:
+  adapter: codex
+  model: test-model
+  dry_run: true
+  command_template: "codex exec --prompt-file {prompt}"
+```
+
+Запуск dry-run example:
+
+```bash
+agenthub run examples/adapter-dry-run-task.yaml
+```
+
+Полезные overrides:
+
+```bash
+AGENTHUB_EXECUTOR_ADAPTER=kimi AGENTHUB_ADAPTER_DRY_RUN=1 agenthub run examples/adapter-dry-run-task.yaml
+AGENTHUB_PRIVATE_MODE=1 agenthub run examples/adapter-dry-run-task.yaml
+```
+
+Подробное поведение описано в [Agent adapters](agent-adapters.ru.md).
 
 ## Review и Repair
 
@@ -138,6 +171,10 @@ verify:
 - `.agent/tx/<tx-id>/journal.jsonl`: append-only лог состояний.
 - `.agent/tx/<tx-id>/report.md`: человекочитаемый отчёт.
 - `.agent/tx/<tx-id>/dag.json`: execution graph.
+- `.agent/tx/<tx-id>/agent_trace.json`: выбранные executor, reviewer и repair routes.
+- `.agent/tx/<tx-id>/agent_transcript.jsonl`: transcript adapter и command events.
+- `.agent/tx/<tx-id>/agent_prompt_<role>.md`: prompt artifact роли.
+- `.agent/tx/<tx-id>/adapter_invocation_<role>.json`: details external adapter invocation, если adapter использовался.
 - `.agent/tx/<tx-id>/context_pack.json`: минимальный контекст выполнения.
 - `.agent/tx/<tx-id>/model_call_metadata.json`: metadata planned/observed model calls.
 - `.agent/tx/<tx-id>/llm_gateway_summary.json`: token/cost summary gateway.
