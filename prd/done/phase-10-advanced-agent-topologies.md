@@ -2,7 +2,7 @@
 
 Status: Done
 
-Closing evidence: Phase 10 implementation commit.
+Closing evidence: `ae9d1cb Complete advanced topologies phase`
 
 ## Deliverables
 
