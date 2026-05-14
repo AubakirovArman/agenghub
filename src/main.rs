@@ -1,16 +1,17 @@
 mod cli;
+mod handlers;
 
 use anyhow::Result;
 use clap::Parser;
+use serde_json::json;
 
 use agenthub::{
-    agent_adapter, agent_dir, code_maps, intent, memory, plugin_registry, skill_registry,
-    transaction, workspace,
+    agent_adapter, agent_dir, code_maps, enterprise, intent, memory, skill_registry, transaction,
+    workspace,
 };
 
 use crate::cli::{
-    AgentCommands, Cli, Commands, MemoryCommands, PluginCommands, SkillCommands, TxCommands,
-    WorkspaceCommands,
+    AgentCommands, Cli, Commands, MemoryCommands, SkillCommands, TxCommands, WorkspaceCommands,
 };
 
 fn main() {
@@ -42,7 +43,31 @@ fn run() -> Result<()> {
             }
         }
         Commands::Run { spec, no_commit } => {
-            let outcome = transaction::run(&project_root, &spec, no_commit)?;
+            let actor = enterprise::authorize(&project_root, "transaction.run")?;
+            let outcome = match transaction::run(&project_root, &spec, no_commit) {
+                Ok(outcome) => outcome,
+                Err(error) => {
+                    enterprise::record_event(
+                        &project_root,
+                        &actor,
+                        "agenthub.run",
+                        "transaction.run",
+                        "error",
+                        Some(spec.display().to_string()),
+                        json!({ "error": error.to_string() }),
+                    )?;
+                    return Err(error);
+                }
+            };
+            enterprise::record_event(
+                &project_root,
+                &actor,
+                "agenthub.run",
+                "transaction.run",
+                outcome.status.as_str(),
+                Some(spec.display().to_string()),
+                json!({ "tx_id": outcome.tx_id }),
+            )?;
             println!(
                 "{} {} ({})",
                 outcome.tx_id,
@@ -52,17 +77,20 @@ fn run() -> Result<()> {
         }
         Commands::Tx { command } => match command {
             TxCommands::Status => {
+                enterprise::authorize(&project_root, "transaction.read")?;
                 for row in agent_dir::list_transactions(&project_root)? {
                     println!("{}\t{}\t{}", row.id, row.status, row.report_path.display());
                 }
             }
             TxCommands::Report { tx_id } => {
+                enterprise::authorize(&project_root, "transaction.read")?;
                 let report = agent_dir::read_report(&project_root, &tx_id)?;
                 print!("{report}");
             }
         },
         Commands::Workspace { command } => match command {
             WorkspaceCommands::Scan { write_maps } => {
+                enterprise::authorize(&project_root, "workspace.read")?;
                 let scan = workspace::scan(&project_root)?;
                 println!("git_repo: {}", scan.git_repo);
                 println!(
@@ -80,6 +108,7 @@ fn run() -> Result<()> {
         },
         Commands::Memory { command } => match command {
             MemoryCommands::Inspect => {
+                enterprise::authorize(&project_root, "memory.read")?;
                 let stats = memory::inspect(&project_root)?;
                 println!("committed: {}", stats.committed);
                 println!("failed_attempts: {}", stats.failed_attempts);
@@ -87,6 +116,7 @@ fn run() -> Result<()> {
         },
         Commands::Skills { command } => match command {
             SkillCommands::List => {
+                enterprise::authorize(&project_root, "skills.read")?;
                 for manifest in skill_registry::list_available(&project_root)? {
                     println!(
                         "{}\t{}\t{}",
@@ -95,47 +125,8 @@ fn run() -> Result<()> {
                 }
             }
         },
-        Commands::Plugins { command } => match command {
-            PluginCommands::List => {
-                for plugin in plugin_registry::list_installed(&project_root)? {
-                    println!(
-                        "{}\t{}\t{}\t{}",
-                        plugin.id, plugin.version, plugin.trust, plugin.source
-                    );
-                }
-            }
-            PluginCommands::Inspect { package } => {
-                let manifest = plugin_registry::inspect_package(&package)?;
-                println!(
-                    "{}\t{}\t{}",
-                    manifest.package.id, manifest.package.version, manifest.package.description
-                );
-                println!("skills: {}", manifest.skills.len());
-                println!("workspace_plugins: {}", manifest.workspace_plugins.len());
-                println!("verifier_plugins: {}", manifest.verifier_plugins.len());
-            }
-            PluginCommands::Install {
-                package,
-                trust,
-                allow_untrusted,
-                force,
-            } => {
-                let trust = trust.parse()?;
-                let result = plugin_registry::install_package(
-                    &project_root,
-                    &package,
-                    plugin_registry::InstallOptions {
-                        trust,
-                        allow_untrusted,
-                        force,
-                    },
-                )?;
-                println!("installed {} {}", result.package_id, result.package_version);
-                for skill in result.skills {
-                    println!("skill\t{}\t{}\t{}", skill.id, skill.version, skill.target);
-                }
-            }
-        },
+        Commands::Plugins { command } => handlers::handle_plugins(&project_root, command)?,
+        Commands::Enterprise { command } => handlers::handle_enterprise(&project_root, command)?,
         Commands::Agents { command } => match command {
             AgentCommands::List => {
                 for adapter in agent_adapter::supported_adapters() {

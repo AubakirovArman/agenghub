@@ -4,7 +4,7 @@ AgentHub is a transactional runtime foundation for AI-agent work. It turns a hum
 
 Languages: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
-Detailed docs: [How it works](docs/how-it-works.en.md), [Plugin ecosystem](docs/plugin-ecosystem.en.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
+Detailed docs: [How it works](docs/how-it-works.en.md), [Plugin ecosystem](docs/plugin-ecosystem.en.md), [Enterprise](docs/enterprise.en.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
 
 ## Current Status
 
@@ -22,6 +22,7 @@ The current implementation covers the early PRD foundation:
 - context maps for routes, components, and exports;
 - `ask` command for heuristic AgentSpec preview;
 - VS Code extension v0 for transaction, memory, and DAG inspection.
+- local enterprise policy, RBAC checks, audit log, and compliance report generation.
 
 ## Install And Build
 
@@ -103,6 +104,8 @@ agenthub skills list
 agenthub plugins inspect marketplace/skill-packs/content-basic
 agenthub plugins install marketplace/skill-packs/content-basic --trust local
 agenthub plugins list
+AGENTHUB_ROLE=admin agenthub enterprise audit --limit 20
+AGENTHUB_ROLE=admin agenthub enterprise compliance
 agenthub agents list
 ```
 
@@ -141,6 +144,15 @@ agenthub plugins list
 ```
 
 Installed plugin locks live in `.agent/plugins/installed.json`; installed skill versions are locked in `.agent/skills/installed.json`.
+
+## Enterprise
+
+Phase 14 starts with local enterprise governance. Policy lives in `.agent/enterprise/policy.yaml`; audit events are appended to `.agent/enterprise/audit.jsonl`; compliance reports are generated under `.agent/enterprise/`.
+
+```bash
+AGENTHUB_ACTOR=alice AGENTHUB_ROLE=admin agenthub enterprise compliance
+AGENTHUB_ACTOR=alice AGENTHUB_ROLE=auditor agenthub enterprise audit --limit 20
+```
 
 ## Development Rule
 

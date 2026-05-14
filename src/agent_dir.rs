@@ -19,6 +19,7 @@ pub struct AgentPaths {
     pub maps: PathBuf,
     pub skills: PathBuf,
     pub plugins: PathBuf,
+    pub enterprise: PathBuf,
     pub schemas: PathBuf,
     pub policies: PathBuf,
     pub workspaces: PathBuf,
@@ -41,6 +42,7 @@ impl AgentPaths {
             maps: agent.join("maps"),
             skills: agent.join("skills"),
             plugins: agent.join("plugins"),
+            enterprise: agent.join("enterprise"),
             schemas: agent.join("schemas"),
             policies: agent.join("policies"),
             workspaces: agent.join("workspaces"),
@@ -65,6 +67,7 @@ pub fn init_project(root: &Path, force: bool) -> Result<AgentPaths> {
         paths.maps.clone(),
         paths.skills.clone(),
         paths.plugins.clone(),
+        paths.enterprise.clone(),
         paths.schemas.clone(),
         paths.policies.clone(),
         paths.workspaces.clone(),
@@ -101,6 +104,11 @@ pub fn init_project(root: &Path, force: bool) -> Result<AgentPaths> {
     write_default(&paths.skills.join("installed.json"), "[]\n", force)?;
     write_default(&paths.plugins.join("installed.json"), "[]\n", force)?;
     write_default(
+        &paths.enterprise.join("policy.yaml"),
+        DEFAULT_ENTERPRISE_POLICY,
+        force,
+    )?;
+    write_default(
         &paths.schemas.join("content.yaml"),
         DEFAULT_CONTENT_SCHEMA,
         force,
@@ -126,6 +134,7 @@ pub fn ensure_runtime_dirs(root: &Path) -> Result<AgentPaths> {
         paths.workspaces.clone(),
         paths.cache.clone(),
         paths.plugins.clone(),
+        paths.enterprise.clone(),
         paths.cache.join("embeddings"),
         paths.cache.join("indexes"),
         paths.memory.join("compacted"),
@@ -137,6 +146,11 @@ pub fn ensure_runtime_dirs(root: &Path) -> Result<AgentPaths> {
     write_default(&paths.memory.join("committed.jsonl"), "", false)?;
     write_default(&paths.memory.join("failed_attempts.jsonl"), "", false)?;
     write_default(&paths.plugins.join("installed.json"), "[]\n", false)?;
+    write_default(
+        &paths.enterprise.join("policy.yaml"),
+        DEFAULT_ENTERPRISE_POLICY,
+        false,
+    )?;
 
     Ok(paths)
 }

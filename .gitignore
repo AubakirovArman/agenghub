@@ -3,4 +3,6 @@ target/
 .agent/workspaces/
 .agent/cache/
 .agent/memory/*.jsonl
+.agent/enterprise/audit.jsonl
+.agent/enterprise/compliance-*.md
 *.log

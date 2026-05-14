@@ -51,6 +51,10 @@ pub enum Commands {
         #[command(subcommand)]
         command: PluginCommands,
     },
+    Enterprise {
+        #[command(subcommand)]
+        command: EnterpriseCommands,
+    },
     Agents {
         #[command(subcommand)]
         command: AgentCommands,
@@ -98,6 +102,18 @@ pub enum PluginCommands {
 
         #[arg(long)]
         force: bool,
+    },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum EnterpriseCommands {
+    Audit {
+        #[arg(long, default_value_t = 20)]
+        limit: usize,
+    },
+    Compliance {
+        #[arg(short, long)]
+        output: Option<PathBuf>,
     },
 }
 

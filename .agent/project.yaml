@@ -1,6 +1,5 @@
 project:
   name: AgentHub
   type: code
-  phase: execution-kernel-foundation
+  phase: enterprise-layer-foundation
   prd: prd.md
-

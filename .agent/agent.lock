@@ -24,6 +24,11 @@ plugins:
     - trusted
     - untrusted
 
+enterprise:
+  policy: .agent/enterprise/policy.yaml
+  audit_log: .agent/enterprise/audit.jsonl
+  compliance_reports: .agent/enterprise/
+
 verifiers:
   default: code_build
 

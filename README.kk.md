@@ -4,7 +4,7 @@ AgentHub — AI агенттерінің жұмысын транзакциялы
 
 Тілдер: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
-Толық құжаттама: [How it works](docs/how-it-works.en.md), [Plugin ecosystem](docs/plugin-ecosystem.kk.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
+Толық құжаттама: [How it works](docs/how-it-works.en.md), [Plugin ecosystem](docs/plugin-ecosystem.kk.md), [Enterprise](docs/enterprise.kk.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
 
 ## Қазіргі күйі
 
@@ -22,6 +22,7 @@ AgentHub — AI агенттерінің жұмысын транзакциялы
 - routes, components, exports үшін context maps;
 - AgentSpec preview жасайтын `ask` командасы;
 - транзакция, memory және DAG көруге арналған VS Code extension v0.
+- local enterprise policy, RBAC checks, audit log және compliance report generation.
 
 ## Орнату және жинау
 
@@ -103,6 +104,8 @@ agenthub skills list
 agenthub plugins inspect marketplace/skill-packs/content-basic
 agenthub plugins install marketplace/skill-packs/content-basic --trust local
 agenthub plugins list
+AGENTHUB_ROLE=admin agenthub enterprise audit --limit 20
+AGENTHUB_ROLE=admin agenthub enterprise compliance
 agenthub agents list
 ```
 
@@ -141,6 +144,15 @@ agenthub plugins list
 ```
 
 Installed plugin locks `.agent/plugins/installed.json` ішінде сақталады; installed skill versions `.agent/skills/installed.json` ішінде бекітіледі.
+
+## Enterprise
+
+Phase 14 local enterprise governance арқылы басталады. Policy `.agent/enterprise/policy.yaml` ішінде; audit events `.agent/enterprise/audit.jsonl` ішіне append болады; compliance reports `.agent/enterprise/` ішінде жасалады.
+
+```bash
+AGENTHUB_ACTOR=alice AGENTHUB_ROLE=admin agenthub enterprise compliance
+AGENTHUB_ACTOR=alice AGENTHUB_ROLE=auditor agenthub enterprise audit --limit 20
+```
 
 ## Даму ережесі
 

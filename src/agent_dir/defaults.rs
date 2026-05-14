@@ -21,8 +21,47 @@ plugins:
     - trusted
     - untrusted
 
+enterprise:
+  policy: .agent/enterprise/policy.yaml
+  audit_log: .agent/enterprise/audit.jsonl
+  compliance_reports: .agent/enterprise/
+
 verifiers:
   default: code_build
+"#;
+
+pub(super) const DEFAULT_ENTERPRISE_POLICY: &str = r#"enterprise:
+  enabled: true
+  default_role: developer
+  roles:
+    developer:
+      permissions:
+        - transaction.run
+        - transaction.read
+        - workspace.read
+        - memory.read
+        - skills.read
+        - plugins.read
+        - plugins.install
+    auditor:
+      permissions:
+        - transaction.read
+        - memory.read
+        - plugins.read
+        - enterprise.audit.read
+        - enterprise.compliance.generate
+    admin:
+      permissions:
+        - "*"
+  secrets:
+    provider: env
+    allowed_prefixes:
+      - AGENTHUB_
+  runners:
+    default: local
+    remote: []
+  model_routing:
+    private_models: []
 "#;
 
 pub(super) const DEFAULT_CORE_POLICY: &str = r#"commands:

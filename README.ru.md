@@ -4,7 +4,7 @@ AgentHub — транзакционная runtime-основа для работ
 
 Языки: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
-Подробная документация: [How it works](docs/how-it-works.en.md), [Plugin ecosystem](docs/plugin-ecosystem.ru.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
+Подробная документация: [How it works](docs/how-it-works.en.md), [Plugin ecosystem](docs/plugin-ecosystem.ru.md), [Enterprise](docs/enterprise.ru.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
 
 ## Текущий статус
 
@@ -22,6 +22,7 @@ AgentHub — транзакционная runtime-основа для работ
 - context maps для routes, components, exports;
 - команда `ask` для предварительного AgentSpec;
 - VS Code extension v0 для просмотра транзакций, памяти и DAG.
+- локальная enterprise policy, RBAC checks, audit log и compliance report generation.
 
 ## Установка и сборка
 
@@ -103,6 +104,8 @@ agenthub skills list
 agenthub plugins inspect marketplace/skill-packs/content-basic
 agenthub plugins install marketplace/skill-packs/content-basic --trust local
 agenthub plugins list
+AGENTHUB_ROLE=admin agenthub enterprise audit --limit 20
+AGENTHUB_ROLE=admin agenthub enterprise compliance
 agenthub agents list
 ```
 
@@ -141,6 +144,15 @@ agenthub plugins list
 ```
 
 Installed plugin locks хранятся в `.agent/plugins/installed.json`; версии установленных skills фиксируются в `.agent/skills/installed.json`.
+
+## Enterprise
+
+Phase 14 начинается с локального enterprise governance. Policy находится в `.agent/enterprise/policy.yaml`; audit events дописываются в `.agent/enterprise/audit.jsonl`; compliance reports создаются в `.agent/enterprise/`.
+
+```bash
+AGENTHUB_ACTOR=alice AGENTHUB_ROLE=admin agenthub enterprise compliance
+AGENTHUB_ACTOR=alice AGENTHUB_ROLE=auditor agenthub enterprise audit --limit 20
+```
 
 ## Правило разработки
 

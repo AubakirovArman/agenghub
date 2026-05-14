@@ -1,0 +1,32 @@
+enterprise:
+  enabled: true
+  default_role: developer
+  roles:
+    developer:
+      permissions:
+        - transaction.run
+        - transaction.read
+        - workspace.read
+        - memory.read
+        - skills.read
+        - plugins.read
+        - plugins.install
+    auditor:
+      permissions:
+        - transaction.read
+        - memory.read
+        - plugins.read
+        - enterprise.audit.read
+        - enterprise.compliance.generate
+    admin:
+      permissions:
+        - "*"
+  secrets:
+    provider: env
+    allowed_prefixes:
+      - AGENTHUB_
+  runners:
+    default: local
+    remote: []
+  model_routing:
+    private_models: []
