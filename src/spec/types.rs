@@ -59,25 +59,49 @@ pub struct AgentConfig {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct RoleAgents {
     #[serde(default)]
+    pub planner: Option<AgentConfig>,
+    #[serde(default)]
     pub executor: Option<AgentConfig>,
     #[serde(default)]
     pub reviewer: Option<AgentConfig>,
     #[serde(default)]
     pub repair: Option<AgentConfig>,
+    #[serde(default)]
+    pub generator: Option<AgentConfig>,
+    #[serde(default)]
+    pub critic: Option<AgentConfig>,
+    #[serde(default)]
+    pub researcher: Option<AgentConfig>,
+    #[serde(default)]
+    pub aggregator: Option<AgentConfig>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TopologySpec {
     #[serde(default = "default_topology_kind")]
     pub kind: String,
+    #[serde(default = "default_swarm_size")]
+    pub swarm_size: usize,
+    #[serde(default)]
+    pub routing: RoutingSpec,
 }
 
 impl Default for TopologySpec {
     fn default() -> Self {
         Self {
             kind: default_topology_kind(),
+            swarm_size: default_swarm_size(),
+            routing: RoutingSpec::default(),
         }
     }
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RoutingSpec {
+    #[serde(default)]
+    pub cost_aware: bool,
+    #[serde(default)]
+    pub max_estimated_cost_usd: Option<f64>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -157,27 +181,4 @@ pub struct DiffLimitsSpec {
     pub max_lines_added: usize,
     #[serde(default = "default_max_lines_deleted")]
     pub max_lines_deleted: usize,
-}
-
-impl Default for TransactionSpec {
-    fn default() -> Self {
-        Self {
-            approval_required: false,
-            max_repair_attempts: default_max_repair_attempts(),
-            rollback_on_failure: true,
-            commit_on_success: true,
-            memory_promotion: default_memory_promotion(),
-            diff_limits: DiffLimitsSpec::default(),
-        }
-    }
-}
-
-impl Default for DiffLimitsSpec {
-    fn default() -> Self {
-        Self {
-            max_files_changed: default_max_files_changed(),
-            max_lines_added: default_max_lines_added(),
-            max_lines_deleted: default_max_lines_deleted(),
-        }
-    }
 }

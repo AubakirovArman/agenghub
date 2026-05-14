@@ -126,6 +126,10 @@ AGENTHUB_PRIVATE_MODE=1 agenthub run examples/adapter-dry-run-task.yaml
 
 详细行为见 [Agent adapters](agent-adapters.zh.md)。
 
+## Topologies
+
+AgentSpec 支持 `single_executor`、`planner_executor`、`executor_reviewer_repair`、`generator_critic` 和 `swarm_research`。Multi-role topologies 会出现在 `dag.json`、`agent_trace.json` 和 `model_call_metadata.json`。参见 [Topologies](topologies.zh.md)。
+
 ## Review 与 Repair
 
 需要独立 review gate 时使用 `executor_reviewer_repair`：

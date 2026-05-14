@@ -1,0 +1,49 @@
+task:
+  id: swarm_research_example
+  type: code.command
+  title: Plan a swarm research topology and execute deterministic output
+
+topology:
+  kind: swarm_research
+  swarm_size: 3
+  routing:
+    cost_aware: true
+
+agents:
+  researcher:
+    adapter: kimi
+    model: research-model
+    dry_run: true
+  aggregator:
+    adapter: gemini
+    model: synthesis-model
+    dry_run: true
+  executor:
+    adapter: command
+
+workspace:
+  type: code.git
+  isolation: git_worktree
+
+execution:
+  commands:
+    - mkdir -p tmp
+    - printf 'swarm research topology\n' > tmp/topology-swarm.txt
+
+scope:
+  allow:
+    - tmp/**
+  deny:
+    - prd.md
+    - .agent/**
+
+verify:
+  profile: code_build
+  commands:
+    - test -f tmp/topology-swarm.txt
+
+transaction:
+  max_repair_attempts: 0
+  rollback_on_failure: true
+  commit_on_success: true
+  memory_promotion: on_success

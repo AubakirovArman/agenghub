@@ -6,10 +6,7 @@ pub fn validate(spec: &AgentSpec) -> Result<()> {
     if spec.task.id.trim().is_empty() {
         return Err(anyhow!("task.id is required"));
     }
-    if !matches!(
-        spec.topology.kind.as_str(),
-        "single_executor" | "executor_reviewer_repair"
-    ) {
+    if !crate::topology::is_supported(&spec.topology.kind) {
         return Err(anyhow!("unsupported topology.kind: {}", spec.topology.kind));
     }
     if spec.topology.kind == "executor_reviewer_repair" && spec.review.commands.is_empty() {

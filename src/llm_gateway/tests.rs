@@ -31,3 +31,29 @@ fn writes_model_call_metadata_for_routes() -> Result<()> {
     assert!(!dir.path().join("raw_api.jsonl").exists());
     Ok(())
 }
+
+#[test]
+fn writes_model_metadata_for_topology_roles() -> Result<()> {
+    let dir = tempfile::tempdir()?;
+    let context = json!({
+        "agent_spec": { "task": { "id": "demo" } },
+        "agent_routes": {
+            "roles": [
+                { "requested_adapter": "codex", "selected_adapter": "command", "role": "planner" },
+                { "requested_adapter": "gemini", "selected_adapter": "command", "role": "critic" },
+                { "requested_adapter": "command", "selected_adapter": "command", "role": "executor" }
+            ]
+        },
+        "skills": [],
+        "memory": []
+    });
+
+    let artifacts = write_gateway_artifacts(dir.path(), &context, "hash")?;
+
+    assert_eq!(artifacts.model_calls.len(), 3);
+    assert!(artifacts
+        .model_calls
+        .iter()
+        .any(|call| call.role == "critic"));
+    Ok(())
+}

@@ -7,6 +7,7 @@ mod types;
 use anyhow::{anyhow, Result};
 
 use crate::spec::{AgentConfig, AgentSpec};
+use crate::topology;
 
 pub use invoke::{invoke_adapter, AdapterRun};
 pub use transcript::{write_agent_trace, write_transcript};
@@ -40,26 +41,25 @@ pub fn route_for_role(config: &AgentConfig, role: &str) -> Result<AgentRoute> {
 }
 
 pub fn routes_for_spec(spec: &AgentSpec) -> Result<AgentRoutes> {
-    let executor_config = spec
-        .agents
-        .executor
-        .clone()
-        .unwrap_or_else(|| spec.agent.clone());
-    let reviewer_config = spec.agents.reviewer.clone().unwrap_or_else(command_config);
-    let repair_config = spec.agents.repair.clone().unwrap_or_else(command_config);
+    let plan = topology::compile(spec)?;
+    let mut roles = Vec::new();
+    for role in &plan.roles {
+        let config = config_for_role(spec, &role.role);
+        let mut route = route_for_role(&config, &role.id)?;
+        apply_routing_policy(spec, &mut route);
+        roles.push(route);
+    }
+    let executor = roles
+        .iter()
+        .find(|route| route.role == "executor")
+        .cloned()
+        .unwrap_or_else(|| route_for_role(&spec.agent, "executor").expect("default route"));
 
     Ok(AgentRoutes {
-        executor: route_for_role(&executor_config, "executor")?,
-        reviewer: if spec.topology.kind == "executor_reviewer_repair" {
-            Some(route_for_role(&reviewer_config, "reviewer")?)
-        } else {
-            None
-        },
-        repair: if spec.transaction.max_repair_attempts > 0 && !spec.repair.commands.is_empty() {
-            Some(route_for_role(&repair_config, "repair")?)
-        } else {
-            None
-        },
+        reviewer: roles.iter().find(|route| route.role == "reviewer").cloned(),
+        repair: roles.iter().find(|route| route.role == "repair").cloned(),
+        roles,
+        executor,
     })
 }
 
@@ -117,6 +117,41 @@ fn command_config() -> AgentConfig {
         role: None,
         command_template: None,
         dry_run: false,
+    }
+}
+
+fn config_for_role(spec: &AgentSpec, role: &str) -> AgentConfig {
+    match role {
+        "planner" => spec.agents.planner.clone().unwrap_or_else(command_config),
+        "executor" => spec
+            .agents
+            .executor
+            .clone()
+            .unwrap_or_else(|| spec.agent.clone()),
+        "reviewer" => spec.agents.reviewer.clone().unwrap_or_else(command_config),
+        "repair" => spec.agents.repair.clone().unwrap_or_else(command_config),
+        "generator" => spec.agents.generator.clone().unwrap_or_else(command_config),
+        "critic" => spec.agents.critic.clone().unwrap_or_else(command_config),
+        "researcher" => spec
+            .agents
+            .researcher
+            .clone()
+            .unwrap_or_else(command_config),
+        "aggregator" => spec
+            .agents
+            .aggregator
+            .clone()
+            .unwrap_or_else(command_config),
+        _ => command_config(),
+    }
+}
+
+fn apply_routing_policy(spec: &AgentSpec, route: &mut AgentRoute) {
+    if spec.topology.routing.cost_aware {
+        route.routing_policy.push("cost_aware".to_string());
+    }
+    if spec.topology.routing.max_estimated_cost_usd.is_some() {
+        route.routing_policy.push("max_estimated_cost".to_string());
     }
 }
 

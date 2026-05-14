@@ -14,6 +14,7 @@ pub struct AgentRoute {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AgentRoutes {
+    pub roles: Vec<AgentRoute>,
     pub executor: AgentRoute,
     pub reviewer: Option<AgentRoute>,
     pub repair: Option<AgentRoute>,

@@ -1,0 +1,44 @@
+task:
+  id: planner_executor_example
+  type: code.command
+  title: Plan and execute a generated topology example
+
+topology:
+  kind: planner_executor
+  routing:
+    cost_aware: true
+
+agents:
+  planner:
+    adapter: codex
+    model: planning-model
+    dry_run: true
+  executor:
+    adapter: command
+
+workspace:
+  type: code.git
+  isolation: git_worktree
+
+execution:
+  commands:
+    - mkdir -p tmp
+    - printf 'planner executor topology\n' > tmp/topology-planner.txt
+
+scope:
+  allow:
+    - tmp/**
+  deny:
+    - prd.md
+    - .agent/**
+
+verify:
+  profile: code_build
+  commands:
+    - test -f tmp/topology-planner.txt
+
+transaction:
+  max_repair_attempts: 0
+  rollback_on_failure: true
+  commit_on_success: true
+  memory_promotion: on_success

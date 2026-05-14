@@ -1,0 +1,107 @@
+use anyhow::{anyhow, Result};
+use serde::{Deserialize, Serialize};
+
+use crate::spec::AgentSpec;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TopologyPlan {
+    pub kind: String,
+    pub roles: Vec<TopologyRole>,
+    pub edges: Vec<TopologyEdge>,
+    pub cost_aware: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TopologyRole {
+    pub id: String,
+    pub role: String,
+    pub label: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TopologyEdge {
+    pub from: String,
+    pub to: String,
+}
+
+pub fn compile(spec: &AgentSpec) -> Result<TopologyPlan> {
+    let kind = spec.topology.kind.as_str();
+    let roles = match kind {
+        "single_executor" => vec![role("executor", "executor", "Run executor")],
+        "planner_executor" => vec![
+            role("planner", "planner", "Plan work"),
+            role("executor", "executor", "Execute plan"),
+        ],
+        "executor_reviewer_repair" => reviewer_roles(spec),
+        "generator_critic" => vec![
+            role("generator", "generator", "Generate candidate"),
+            role("critic", "critic", "Criticize candidate"),
+            role("executor", "executor", "Apply accepted result"),
+        ],
+        "swarm_research" => swarm_roles(spec.topology.swarm_size),
+        other => return Err(anyhow!("unsupported topology.kind: {other}")),
+    };
+    let edges = linear_edges(&roles);
+    Ok(TopologyPlan {
+        kind: kind.to_string(),
+        roles,
+        edges,
+        cost_aware: spec.topology.routing.cost_aware,
+    })
+}
+
+pub fn is_supported(kind: &str) -> bool {
+    matches!(
+        kind,
+        "single_executor"
+            | "planner_executor"
+            | "executor_reviewer_repair"
+            | "generator_critic"
+            | "swarm_research"
+    )
+}
+
+fn reviewer_roles(spec: &AgentSpec) -> Vec<TopologyRole> {
+    let mut roles = vec![
+        role("executor", "executor", "Run executor"),
+        role("reviewer", "reviewer", "Review result"),
+    ];
+    if spec.transaction.max_repair_attempts > 0 && !spec.repair.commands.is_empty() {
+        roles.push(role("repair", "repair", "Repair result"));
+    }
+    roles
+}
+
+fn swarm_roles(size: usize) -> Vec<TopologyRole> {
+    let size = size.clamp(1, 8);
+    let mut roles = (1..=size)
+        .map(|index| {
+            role(
+                &format!("researcher_{index}"),
+                "researcher",
+                &format!("Research branch {index}"),
+            )
+        })
+        .collect::<Vec<_>>();
+    roles.push(role("aggregator", "aggregator", "Aggregate research"));
+    roles.push(role("executor", "executor", "Apply result"));
+    roles
+}
+
+fn linear_edges(roles: &[TopologyRole]) -> Vec<TopologyEdge> {
+    roles
+        .windows(2)
+        .map(|pair| TopologyEdge {
+            from: pair[0].id.clone(),
+            to: pair[1].id.clone(),
+        })
+        .collect()
+}
+
+fn role(id: &str, role: &str, label: &str) -> TopologyRole {
+    TopologyRole {
+        id: id.to_string(),
+        role: role.to_string(),
+        label: label.to_string(),
+    }
+}

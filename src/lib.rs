@@ -16,6 +16,7 @@ pub mod report;
 pub mod reviewer;
 pub mod skill_registry;
 pub mod spec;
+pub mod topology;
 pub mod transaction;
 pub mod verifier;
 pub mod workspace;

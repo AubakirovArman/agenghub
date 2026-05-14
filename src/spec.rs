@@ -1,5 +1,6 @@
 mod defaults;
 mod ir;
+mod type_defaults;
 mod types;
 mod validation;
 mod workspace;

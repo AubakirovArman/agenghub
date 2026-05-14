@@ -38,6 +38,12 @@ pub fn write_gateway_artifacts(
 fn planned_calls(context_pack: &Value, context_hash: &str) -> Result<Vec<ModelCallMetadata>> {
     let mut calls = Vec::new();
     if let Some(routes) = context_pack.get("agent_routes") {
+        if let Some(role_routes) = routes.get("roles").and_then(Value::as_array) {
+            for route in role_routes {
+                push_route(&mut calls, Some(route), "agent", context_pack, context_hash)?;
+            }
+            return Ok(calls);
+        }
         push_route(
             &mut calls,
             routes.get("executor"),

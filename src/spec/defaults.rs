@@ -10,6 +10,10 @@ pub(super) fn default_topology_kind() -> String {
     "single_executor".to_string()
 }
 
+pub(super) fn default_swarm_size() -> usize {
+    2
+}
+
 pub(super) fn default_base_url() -> String {
     "http://127.0.0.1:3000".to_string()
 }

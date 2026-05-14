@@ -11,7 +11,7 @@
 | Phase 7 — Runtime Smoke and Repair Loop | Done | `done/phase-07-runtime-smoke-repair-loop.md` | `d2bf6cb` |
 | Phase 8 — Context Maps | Done | `done/phase-08-context-maps.md` | `c55de1f` |
 | Phase 9 — Natural Language to AgentSpec | Done | `done/phase-09-natural-language-agentspec.md` | `55d4dd3` |
-| Phase 10 — Advanced Agent Topologies | Todo | `todo/phase-10-advanced-agent-topologies.md` | next |
+| Phase 10 — Advanced Agent Topologies | Done | `done/phase-10-advanced-agent-topologies.md` | Phase 10 implementation commit |
 | Phase 11 — Additional Workspaces | Partial / verify fully | `todo/phase-11-additional-workspaces.md` | existing basics in `dee96fa`; needs PRD audit |
 | Phase 12 — IDE and Visual Layer | Partial / verify fully | `todo/phase-12-ide-and-visual-layer.md` | existing v0 in `58a68b8`; needs PRD audit |
 | Phase 13 — Marketplace / Plugin Ecosystem | Partial / verify fully | `todo/phase-13-marketplace-plugin-ecosystem.md` | existing foundation in `ddd84ca`; needs PRD audit |
