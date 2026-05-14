@@ -1,0 +1,20 @@
+package:
+  id: agenthub.content.basic
+  version: 0.1.0
+  description: Basic content authoring skill package.
+  author: AgentHub
+
+skills:
+  - path: skills/content.article_outline/skill.yaml
+
+workspace_plugins:
+  - id: content.git
+    description: Git-backed content workspace profile.
+    schema_path: schemas/content.yaml
+
+verifier_plugins:
+  - id: content.markdown_presence
+    description: Checks that a markdown artifact exists and is non-empty.
+    command: test -s "${CONTENT_FILE}"
+
+signature: null

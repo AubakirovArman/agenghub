@@ -47,6 +47,10 @@ pub enum Commands {
         #[command(subcommand)]
         command: SkillCommands,
     },
+    Plugins {
+        #[command(subcommand)]
+        command: PluginCommands,
+    },
     Agents {
         #[command(subcommand)]
         command: AgentCommands,
@@ -75,6 +79,26 @@ pub enum MemoryCommands {
 #[derive(Debug, Subcommand)]
 pub enum SkillCommands {
     List,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum PluginCommands {
+    List,
+    Inspect {
+        package: PathBuf,
+    },
+    Install {
+        package: PathBuf,
+
+        #[arg(long, default_value = "local")]
+        trust: String,
+
+        #[arg(long)]
+        allow_untrusted: bool,
+
+        #[arg(long)]
+        force: bool,
+    },
 }
 
 #[derive(Debug, Subcommand)]

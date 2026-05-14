@@ -14,6 +14,13 @@ rulesets:
 
 skills: {}
 
+plugins:
+  installed_lock: .agent/plugins/installed.json
+  trust_model:
+    - local
+    - trusted
+    - untrusted
+
 verifiers:
   default: code_build
 "#;

@@ -4,7 +4,7 @@ AgentHub — AI агенттерінің жұмысын транзакциялы
 
 Тілдер: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
-Толық құжаттама: [How it works](docs/how-it-works.en.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
+Толық құжаттама: [How it works](docs/how-it-works.en.md), [Plugin ecosystem](docs/plugin-ecosystem.kk.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
 
 ## Қазіргі күйі
 
@@ -100,6 +100,9 @@ agenthub tx report tx-...
 agenthub workspace scan --write-maps
 agenthub memory inspect
 agenthub skills list
+agenthub plugins inspect marketplace/skill-packs/content-basic
+agenthub plugins install marketplace/skill-packs/content-basic --trust local
+agenthub plugins list
 agenthub agents list
 ```
 
@@ -126,6 +129,18 @@ transaction:
 ## IDE
 
 VS Code extension `editors/vscode` ішінде орналасқан. Ол zero-build JavaScript және transaction tree, memory tree, latest report, prompt-to-spec, DAG view мүмкіндіктерін береді.
+
+## Plugin Ecosystem
+
+Phase 13 жергілікті marketplace packages арқылы басталады. Package ішінде `agenthub-plugin.yaml` manifest болады; ол skills, workspace plugin metadata, verifier plugin metadata, optional signature metadata бере алады және project lock files ішіне орнатылады.
+
+```bash
+agenthub plugins inspect marketplace/skill-packs/content-basic
+agenthub plugins install marketplace/skill-packs/content-basic --trust local
+agenthub plugins list
+```
+
+Installed plugin locks `.agent/plugins/installed.json` ішінде сақталады; installed skill versions `.agent/skills/installed.json` ішінде бекітіледі.
 
 ## Даму ережесі
 

@@ -9,6 +9,7 @@ pub mod intent;
 pub mod journal;
 pub mod memory;
 pub mod observability;
+pub mod plugin_registry;
 pub mod report;
 pub mod reviewer;
 pub mod skill_registry;

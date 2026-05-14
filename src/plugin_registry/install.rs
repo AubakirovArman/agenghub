@@ -1,0 +1,141 @@
+use std::fs;
+use std::path::{Path, PathBuf};
+
+use anyhow::{anyhow, Context, Result};
+use chrono::Utc;
+
+use crate::agent_dir::ensure_runtime_dirs;
+use crate::plugin_registry::lock::{
+    upsert_skill_locks, write_plugin_lock, LockedPlugin, LockedSkill,
+};
+use crate::plugin_registry::types::{PluginManifest, PluginTrust};
+use crate::skill_registry::SkillManifest;
+
+#[derive(Debug, Clone)]
+pub struct InstallOptions {
+    pub trust: PluginTrust,
+    pub allow_untrusted: bool,
+    pub force: bool,
+}
+
+#[derive(Debug, Clone)]
+pub struct InstallResult {
+    pub package_id: String,
+    pub package_version: String,
+    pub skills: Vec<LockedSkill>,
+}
+
+pub fn inspect_package(path: &Path) -> Result<PluginManifest> {
+    let manifest_path = manifest_path(path)?;
+    let content = fs::read_to_string(&manifest_path)
+        .with_context(|| format!("read {}", manifest_path.display()))?;
+    let manifest: PluginManifest = serde_yaml::from_str(&content)
+        .with_context(|| format!("parse {}", manifest_path.display()))?;
+    manifest.validate()?;
+    Ok(manifest)
+}
+
+pub fn install_package(
+    project_root: &Path,
+    package_path: &Path,
+    options: InstallOptions,
+) -> Result<InstallResult> {
+    if options.trust == PluginTrust::Untrusted && !options.allow_untrusted {
+        return Err(anyhow!(
+            "untrusted plugin install requires --allow-untrusted"
+        ));
+    }
+
+    let paths = ensure_runtime_dirs(project_root)?;
+    let manifest_path = manifest_path(package_path)?;
+    let package_root = manifest_path.parent().expect("manifest has parent");
+    let manifest = inspect_package(package_path)?;
+    let mut locked_skills = Vec::new();
+
+    for skill in &manifest.skills {
+        let source = package_root.join(&skill.path);
+        let skill_manifest = read_skill_manifest(&source)?;
+        let target_dir = project_root.join("skills").join(&skill_manifest.skill.id);
+        let target = target_dir.join("skill.yaml");
+        if target.exists() && !options.force {
+            let existing = read_skill_manifest(&target)?;
+            if existing.skill.version != skill_manifest.skill.version {
+                return Err(anyhow!(
+                    "skill {} already installed at version {}; use --force to replace with {}",
+                    existing.skill.id,
+                    existing.skill.version,
+                    skill_manifest.skill.version
+                ));
+            }
+        }
+        fs::create_dir_all(&target_dir)
+            .with_context(|| format!("create {}", target_dir.display()))?;
+        fs::copy(&source, &target)
+            .with_context(|| format!("copy {} to {}", source.display(), target.display()))?;
+        locked_skills.push(LockedSkill {
+            id: skill_manifest.skill.id,
+            version: skill_manifest.skill.version,
+            target: target
+                .strip_prefix(project_root)
+                .unwrap_or(&target)
+                .display()
+                .to_string(),
+        });
+    }
+
+    let lock = LockedPlugin {
+        id: manifest.package.id.clone(),
+        version: manifest.package.version.clone(),
+        source: manifest_path.display().to_string(),
+        trust: options.trust.to_string(),
+        installed_at: Utc::now(),
+        skills: locked_skills.clone(),
+        workspace_plugins: manifest
+            .workspace_plugins
+            .iter()
+            .map(|plugin| plugin.id.clone())
+            .collect(),
+        verifier_plugins: manifest
+            .verifier_plugins
+            .iter()
+            .map(|plugin| plugin.id.clone())
+            .collect(),
+        signature: manifest.signature.clone(),
+    };
+
+    write_plugin_lock(project_root, lock)?;
+    upsert_skill_locks(project_root, &locked_skills, &manifest.package.id)?;
+    fs::create_dir_all(&paths.plugins)
+        .with_context(|| format!("create {}", paths.plugins.display()))?;
+
+    Ok(InstallResult {
+        package_id: manifest.package.id,
+        package_version: manifest.package.version,
+        skills: locked_skills,
+    })
+}
+
+fn manifest_path(path: &Path) -> Result<PathBuf> {
+    if path.is_file() {
+        return Ok(path.to_path_buf());
+    }
+    for name in ["agenthub-plugin.yaml", "plugin.yaml"] {
+        let candidate = path.join(name);
+        if candidate.exists() {
+            return Ok(candidate);
+        }
+    }
+    Err(anyhow!("plugin manifest not found in {}", path.display()))
+}
+
+fn read_skill_manifest(path: &Path) -> Result<SkillManifest> {
+    let content = fs::read_to_string(path).with_context(|| format!("read {}", path.display()))?;
+    let manifest: SkillManifest =
+        serde_yaml::from_str(&content).with_context(|| format!("parse {}", path.display()))?;
+    if manifest.skill.id.trim().is_empty() || manifest.skill.version.trim().is_empty() {
+        return Err(anyhow!(
+            "skill manifest requires skill.id and skill.version"
+        ));
+    }
+    Ok(manifest)
+}

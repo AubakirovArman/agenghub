@@ -4,7 +4,7 @@ AgentHub — транзакционная runtime-основа для работ
 
 Языки: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
-Подробная документация: [How it works](docs/how-it-works.en.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
+Подробная документация: [How it works](docs/how-it-works.en.md), [Plugin ecosystem](docs/plugin-ecosystem.ru.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
 
 ## Текущий статус
 
@@ -100,6 +100,9 @@ agenthub tx report tx-...
 agenthub workspace scan --write-maps
 agenthub memory inspect
 agenthub skills list
+agenthub plugins inspect marketplace/skill-packs/content-basic
+agenthub plugins install marketplace/skill-packs/content-basic --trust local
+agenthub plugins list
 agenthub agents list
 ```
 
@@ -126,6 +129,18 @@ transaction:
 ## IDE
 
 VS Code extension находится в `editors/vscode`. Это zero-build JavaScript: transaction tree, memory tree, latest report, prompt-to-spec и DAG view.
+
+## Plugin Ecosystem
+
+Phase 13 начинается с локальных marketplace packages. Пакет содержит `agenthub-plugin.yaml`, может поставлять skills, workspace plugin metadata, verifier plugin metadata, optional signature metadata и устанавливается с lock-файлами проекта.
+
+```bash
+agenthub plugins inspect marketplace/skill-packs/content-basic
+agenthub plugins install marketplace/skill-packs/content-basic --trust local
+agenthub plugins list
+```
+
+Installed plugin locks хранятся в `.agent/plugins/installed.json`; версии установленных skills фиксируются в `.agent/skills/installed.json`.
 
 ## Правило разработки
 

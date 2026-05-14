@@ -1,0 +1,8 @@
+memory_schema:
+  domain: content
+  package: agenthub.content.basic
+  types:
+    - content_format
+    - tone_of_voice
+    - audience_profile
+    - article_outline

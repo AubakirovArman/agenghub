@@ -4,11 +4,13 @@ use anyhow::Result;
 use clap::Parser;
 
 use agenthub::{
-    agent_adapter, agent_dir, code_maps, intent, memory, skill_registry, transaction, workspace,
+    agent_adapter, agent_dir, code_maps, intent, memory, plugin_registry, skill_registry,
+    transaction, workspace,
 };
 
 use crate::cli::{
-    AgentCommands, Cli, Commands, MemoryCommands, SkillCommands, TxCommands, WorkspaceCommands,
+    AgentCommands, Cli, Commands, MemoryCommands, PluginCommands, SkillCommands, TxCommands,
+    WorkspaceCommands,
 };
 
 fn main() {
@@ -90,6 +92,47 @@ fn run() -> Result<()> {
                         "{}\t{}\t{}",
                         manifest.skill.id, manifest.skill.version, manifest.skill.description
                     );
+                }
+            }
+        },
+        Commands::Plugins { command } => match command {
+            PluginCommands::List => {
+                for plugin in plugin_registry::list_installed(&project_root)? {
+                    println!(
+                        "{}\t{}\t{}\t{}",
+                        plugin.id, plugin.version, plugin.trust, plugin.source
+                    );
+                }
+            }
+            PluginCommands::Inspect { package } => {
+                let manifest = plugin_registry::inspect_package(&package)?;
+                println!(
+                    "{}\t{}\t{}",
+                    manifest.package.id, manifest.package.version, manifest.package.description
+                );
+                println!("skills: {}", manifest.skills.len());
+                println!("workspace_plugins: {}", manifest.workspace_plugins.len());
+                println!("verifier_plugins: {}", manifest.verifier_plugins.len());
+            }
+            PluginCommands::Install {
+                package,
+                trust,
+                allow_untrusted,
+                force,
+            } => {
+                let trust = trust.parse()?;
+                let result = plugin_registry::install_package(
+                    &project_root,
+                    &package,
+                    plugin_registry::InstallOptions {
+                        trust,
+                        allow_untrusted,
+                        force,
+                    },
+                )?;
+                println!("installed {} {}", result.package_id, result.package_version);
+                for skill in result.skills {
+                    println!("skill\t{}\t{}\t{}", skill.id, skill.version, skill.target);
                 }
             }
         },

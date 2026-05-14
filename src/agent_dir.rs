@@ -18,6 +18,7 @@ pub struct AgentPaths {
     pub memory: PathBuf,
     pub maps: PathBuf,
     pub skills: PathBuf,
+    pub plugins: PathBuf,
     pub schemas: PathBuf,
     pub policies: PathBuf,
     pub workspaces: PathBuf,
@@ -39,6 +40,7 @@ impl AgentPaths {
             memory: agent.join("memory"),
             maps: agent.join("maps"),
             skills: agent.join("skills"),
+            plugins: agent.join("plugins"),
             schemas: agent.join("schemas"),
             policies: agent.join("policies"),
             workspaces: agent.join("workspaces"),
@@ -62,6 +64,7 @@ pub fn init_project(root: &Path, force: bool) -> Result<AgentPaths> {
         paths.memory.clone(),
         paths.maps.clone(),
         paths.skills.clone(),
+        paths.plugins.clone(),
         paths.schemas.clone(),
         paths.policies.clone(),
         paths.workspaces.clone(),
@@ -96,6 +99,7 @@ pub fn init_project(root: &Path, force: bool) -> Result<AgentPaths> {
         force,
     )?;
     write_default(&paths.skills.join("installed.json"), "[]\n", force)?;
+    write_default(&paths.plugins.join("installed.json"), "[]\n", force)?;
     write_default(
         &paths.schemas.join("content.yaml"),
         DEFAULT_CONTENT_SCHEMA,
@@ -121,6 +125,7 @@ pub fn ensure_runtime_dirs(root: &Path) -> Result<AgentPaths> {
         paths.memory.clone(),
         paths.workspaces.clone(),
         paths.cache.clone(),
+        paths.plugins.clone(),
         paths.cache.join("embeddings"),
         paths.cache.join("indexes"),
         paths.memory.join("compacted"),
@@ -131,6 +136,7 @@ pub fn ensure_runtime_dirs(root: &Path) -> Result<AgentPaths> {
 
     write_default(&paths.memory.join("committed.jsonl"), "", false)?;
     write_default(&paths.memory.join("failed_attempts.jsonl"), "", false)?;
+    write_default(&paths.plugins.join("installed.json"), "[]\n", false)?;
 
     Ok(paths)
 }

@@ -1,0 +1,38 @@
+skill:
+  id: content.article_outline
+  version: 0.1.0
+  description: Creates a structured article outline for content workflows.
+
+inputs:
+  topic: string
+  audience: optional<string>
+  tone: optional<string>
+
+requires:
+  workspace: content.git
+  memory_schema:
+    - content_format
+    - tone_of_voice
+    - audience_profile
+
+provides:
+  actions:
+    - inspect_existing_content
+    - draft_outline
+    - check_markdown_artifact
+
+policies:
+  allow_package_change: false
+  require_scope: true
+
+verifiers:
+  - content.markdown_presence
+
+common_errors:
+  - outline_too_generic
+  - missing_target_audience
+  - wrong_brand_tone
+
+prompt_fragments:
+  - Reuse existing content structure, tone, and headings before creating a new outline pattern.
+  - Keep generated outlines in the declared content scope and verify the markdown artifact exists.

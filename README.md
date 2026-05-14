@@ -4,7 +4,7 @@ AgentHub is a transactional runtime foundation for AI-agent work. It turns a hum
 
 Languages: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
-Detailed docs: [How it works](docs/how-it-works.en.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
+Detailed docs: [How it works](docs/how-it-works.en.md), [Plugin ecosystem](docs/plugin-ecosystem.en.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
 
 ## Current Status
 
@@ -100,6 +100,9 @@ agenthub tx report tx-...
 agenthub workspace scan --write-maps
 agenthub memory inspect
 agenthub skills list
+agenthub plugins inspect marketplace/skill-packs/content-basic
+agenthub plugins install marketplace/skill-packs/content-basic --trust local
+agenthub plugins list
 agenthub agents list
 ```
 
@@ -126,6 +129,18 @@ In this mode AgentHub runs executor commands, checks the diff, runs reviewer com
 ## IDE
 
 The VS Code extension lives in `editors/vscode`. It is zero-build JavaScript and exposes transaction, memory, latest report, prompt-to-spec, and DAG views.
+
+## Plugin Ecosystem
+
+Phase 13 starts with local marketplace packages. A package has an `agenthub-plugin.yaml` manifest, can ship skills, workspace plugin metadata, verifier plugin metadata, optional signature metadata, and installs into project lock files.
+
+```bash
+agenthub plugins inspect marketplace/skill-packs/content-basic
+agenthub plugins install marketplace/skill-packs/content-basic --trust local
+agenthub plugins list
+```
+
+Installed plugin locks live in `.agent/plugins/installed.json`; installed skill versions are locked in `.agent/skills/installed.json`.
 
 ## Development Rule
 
