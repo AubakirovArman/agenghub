@@ -1,5 +1,6 @@
 use anyhow::Result;
 use regex::Regex;
+use serde_json::Value;
 
 pub fn redact_text(input: &str) -> Result<String> {
     let replacements = [
@@ -21,6 +22,23 @@ pub fn redact_text(input: &str) -> Result<String> {
         output = regex.replace_all(&output, replacement).to_string();
     }
     Ok(output)
+}
+
+pub fn redact_value(value: &Value) -> Result<Value> {
+    match value {
+        Value::String(text) => Ok(Value::String(redact_text(text)?)),
+        Value::Array(items) => Ok(Value::Array(
+            items.iter().map(redact_value).collect::<Result<Vec<_>>>()?,
+        )),
+        Value::Object(map) => {
+            let mut redacted = serde_json::Map::new();
+            for (key, value) in map {
+                redacted.insert(key.clone(), redact_value(value)?);
+            }
+            Ok(Value::Object(redacted))
+        }
+        other => Ok(other.clone()),
+    }
 }
 
 #[cfg(test)]

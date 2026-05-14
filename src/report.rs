@@ -120,6 +120,19 @@ impl TransactionReport {
                 cost.estimated_tokens
             ));
             md.push_str(&format!("- Total cost: `${:.6}`\n", cost.total_usd));
+            if !cost.breakdown.is_empty() {
+                md.push_str("\nCost breakdown:\n\n");
+                for item in &cost.breakdown {
+                    md.push_str(&format!(
+                        "- {}: `{}` tokens, `${:.6}`\n",
+                        item.label, item.estimated_tokens, item.cost_usd
+                    ));
+                }
+            }
+            md.push_str("\nGateway artifacts:\n\n");
+            md.push_str("- `model_call_metadata.json`\n");
+            md.push_str("- `llm_gateway_summary.json`\n");
+            md.push_str("- `redacted_api.jsonl`\n");
             if let Some(fingerprint) = &self.error_fingerprint {
                 md.push_str(&format!("- Error fingerprint: `{fingerprint}`\n"));
             }

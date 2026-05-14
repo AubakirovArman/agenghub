@@ -1,5 +1,7 @@
+mod hash;
 mod redaction;
 mod storage;
+mod tokens;
 
 use std::path::Path;
 
@@ -7,15 +9,20 @@ use anyhow::Result;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use sha2::{Digest, Sha256};
 
-pub use redaction::redact_text;
-use storage::{append_jsonl, write_json};
+use crate::llm_gateway::{self, GatewaySummary};
+
+pub use hash::sha256_json;
+use hash::{normalize_reason, sha256_short};
+pub use redaction::{redact_text, redact_value};
+pub use storage::{append_jsonl as write_jsonl, write_json as write_pretty_json};
+use tokens::estimate_tokens;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ObservabilityArtifacts {
     pub context_pack_trace: ContextPackTrace,
     pub cost_profile: CostProfile,
+    pub gateway_summary: GatewaySummary,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -52,6 +59,15 @@ pub struct ErrorFingerprint {
     pub created_at: DateTime<Utc>,
 }
 
+pub fn write_context_pack_artifacts(tx_dir: &Path, context: &Value) -> Result<Value> {
+    let redacted = redact_value(context)?;
+    write_pretty_json(&tx_dir.join("context_pack.json"), &redacted)?;
+    if raw_traces_enabled() {
+        write_pretty_json(&tx_dir.join("raw_context_pack.json"), context)?;
+    }
+    Ok(redacted)
+}
+
 pub fn write_start_artifacts(
     tx_dir: &Path,
     context_pack: &Value,
@@ -67,51 +83,24 @@ pub fn write_start_artifacts(
         policy_rules: vec!["least_context".to_string(), "scope_only".to_string()],
         estimated_tokens,
     };
-    let cost_profile = CostProfile {
-        currency: "USD".to_string(),
-        total_usd: 0.0,
-        estimated_tokens,
-        breakdown: vec![
-            CostItem {
-                label: "Intent Normalization".to_string(),
-                estimated_tokens: 0,
-                cost_usd: 0.0,
-            },
-            CostItem {
-                label: "Context Pack Build".to_string(),
-                estimated_tokens,
-                cost_usd: 0.0,
-            },
-            CostItem {
-                label: "Agent Execution".to_string(),
-                estimated_tokens: 0,
-                cost_usd: 0.0,
-            },
-        ],
-    };
+    let gateway =
+        llm_gateway::write_gateway_artifacts(tx_dir, context_pack, &trace.context_pack_hash)?;
+    let cost_profile = build_cost_profile(estimated_tokens, &gateway.summary);
 
-    write_json(tx_dir.join("context_pack_trace.json").as_path(), &trace)?;
-    write_json(tx_dir.join("cost.json").as_path(), &cost_profile)?;
-    write_json(
-        tx_dir.join("skill_trace.json").as_path(),
+    write_pretty_json(&tx_dir.join("context_pack_trace.json"), &trace)?;
+    write_pretty_json(&tx_dir.join("cost.json"), &cost_profile)?;
+    write_pretty_json(
+        &tx_dir.join("skill_trace.json"),
         &json!({
             "active_skills": skill_ids,
             "loaded_at": Utc::now(),
-        }),
-    )?;
-    append_redacted_trace(
-        tx_dir,
-        &json!({
-            "type": "llm_gateway",
-            "event": "no_model_calls",
-            "redaction": "enabled",
-            "created_at": Utc::now(),
         }),
     )?;
 
     Ok(ObservabilityArtifacts {
         context_pack_trace: trace,
         cost_profile,
+        gateway_summary: gateway.summary,
     })
 }
 
@@ -133,54 +122,35 @@ pub fn write_error_fingerprint(
         reason: redact_text(reason)?,
         created_at: Utc::now(),
     };
-    write_json(tx_dir.join("error_fingerprint.json").as_path(), &event)?;
+    write_pretty_json(&tx_dir.join("error_fingerprint.json"), &event)?;
     Ok(event)
 }
 
-fn append_redacted_trace(tx_dir: &Path, event: &Value) -> Result<()> {
-    append_jsonl(&tx_dir.join("redacted_api.jsonl"), event)?;
-
-    if std::env::var("AGENTHUB_RAW_TRACES").ok().as_deref() == Some("1") {
-        append_jsonl(&tx_dir.join("raw_api.jsonl"), event)?;
+fn build_cost_profile(context_tokens: usize, gateway: &GatewaySummary) -> CostProfile {
+    CostProfile {
+        currency: "USD".to_string(),
+        total_usd: gateway.total_cost_usd,
+        estimated_tokens: context_tokens + gateway.total_tokens,
+        breakdown: vec![
+            CostItem {
+                label: "Intent Normalization".to_string(),
+                estimated_tokens: 0,
+                cost_usd: 0.0,
+            },
+            CostItem {
+                label: "Context Pack Build".to_string(),
+                estimated_tokens: context_tokens,
+                cost_usd: 0.0,
+            },
+            CostItem {
+                label: "LLM Gateway Planned Calls".to_string(),
+                estimated_tokens: gateway.total_tokens,
+                cost_usd: gateway.total_cost_usd,
+            },
+        ],
     }
-
-    Ok(())
 }
 
-fn sha256_json(value: &Value) -> Result<String> {
-    let bytes = serde_json::to_vec(value)?;
-    Ok(sha256_hex(&bytes))
-}
-
-fn sha256_short(bytes: &[u8]) -> String {
-    sha256_hex(bytes)[..12].to_string()
-}
-
-fn sha256_hex(bytes: &[u8]) -> String {
-    let mut hasher = Sha256::new();
-    hasher.update(bytes);
-    format!("{:x}", hasher.finalize())
-}
-
-fn estimate_tokens(value: &Value) -> usize {
-    serde_json::to_string(value)
-        .map(|text| (text.len() / 4).max(1))
-        .unwrap_or(0)
-}
-
-fn normalize_reason(reason: &str) -> String {
-    let mut normalized = reason
-        .chars()
-        .map(|ch| {
-            if ch.is_ascii_alphanumeric() {
-                ch.to_ascii_lowercase()
-            } else {
-                '_'
-            }
-        })
-        .collect::<String>();
-    while normalized.contains("__") {
-        normalized = normalized.replace("__", "_");
-    }
-    normalized.trim_matches('_').chars().take(40).collect()
+fn raw_traces_enabled() -> bool {
+    std::env::var("AGENTHUB_RAW_TRACES").ok().as_deref() == Some("1")
 }

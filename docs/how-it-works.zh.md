@@ -139,6 +139,9 @@ verify:
 - `.agent/tx/<tx-id>/report.md`: 人可读报告。
 - `.agent/tx/<tx-id>/dag.json`: execution graph。
 - `.agent/tx/<tx-id>/context_pack.json`: 最小执行上下文。
+- `.agent/tx/<tx-id>/model_call_metadata.json`: planned/observed model call metadata。
+- `.agent/tx/<tx-id>/llm_gateway_summary.json`: gateway token/cost summary。
+- `.agent/tx/<tx-id>/redacted_api.jsonl`: redacted gateway trace。
 - `.agent/tx/<tx-id>/memory_staging.jsonl`: 事务阶段暂存的 memory。
 
 成功事务会把 memory 提升到 `.agent/memory/committed.jsonl`。失败事务会写入 `.agent/memory/failed_attempts.jsonl` 和 error fingerprint。

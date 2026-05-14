@@ -8,6 +8,7 @@ pub mod enterprise;
 pub mod git;
 pub mod intent;
 pub mod journal;
+pub mod llm_gateway;
 pub mod memory;
 pub mod observability;
 pub mod plugin_registry;

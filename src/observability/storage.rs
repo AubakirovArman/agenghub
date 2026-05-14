@@ -6,7 +6,7 @@ use anyhow::{Context, Result};
 use serde::Serialize;
 use serde_json::Value;
 
-pub(super) fn write_json<T: Serialize>(path: &Path, value: &T) -> Result<()> {
+pub fn write_json<T: Serialize>(path: &Path, value: &T) -> Result<()> {
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent).with_context(|| format!("create {}", parent.display()))?;
     }
@@ -14,7 +14,7 @@ pub(super) fn write_json<T: Serialize>(path: &Path, value: &T) -> Result<()> {
         .with_context(|| format!("write {}", path.display()))
 }
 
-pub(super) fn append_jsonl(path: &Path, value: &Value) -> Result<()> {
+pub fn append_jsonl(path: &Path, value: &Value) -> Result<()> {
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent).with_context(|| format!("create {}", parent.display()))?;
     }

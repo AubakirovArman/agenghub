@@ -4,7 +4,7 @@ AgentHub — транзакционная runtime-основа для работ
 
 Языки: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
-Подробная документация: [How it works](docs/how-it-works.en.md), [Plugin ecosystem](docs/plugin-ecosystem.ru.md), [Enterprise](docs/enterprise.ru.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
+Подробная документация: [How it works](docs/how-it-works.en.md), [LLM Gateway](docs/llm-gateway.ru.md), [Plugin ecosystem](docs/plugin-ecosystem.ru.md), [Enterprise](docs/enterprise.ru.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
 
 ## Текущий статус
 
@@ -19,6 +19,7 @@ AgentHub — транзакционная runtime-основа для работ
 - VCM-память: staging, promotion, failed attempts, compacted project state;
 - skill manifests и загрузка зависимостей;
 - agent adapter routing и traces;
+- LLM Gateway metadata, redacted traces, optional raw traces и token/cost accounting;
 - context maps для routes, components, exports;
 - команда `ask` для предварительного AgentSpec;
 - VS Code extension v0 для просмотра транзакций, памяти и DAG.

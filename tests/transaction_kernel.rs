@@ -64,6 +64,14 @@ transaction:
         .report_path
         .with_file_name("context_pack_trace.json")
         .exists());
+    assert!(outcome
+        .report_path
+        .with_file_name("model_call_metadata.json")
+        .exists());
+    assert!(outcome
+        .report_path
+        .with_file_name("llm_gateway_summary.json")
+        .exists());
     assert!(outcome.report_path.with_file_name("cost.json").exists());
     assert!(outcome
         .report_path
@@ -72,6 +80,10 @@ transaction:
     assert!(outcome
         .report_path
         .with_file_name("redacted_api.jsonl")
+        .exists());
+    assert!(!outcome
+        .report_path
+        .with_file_name("raw_context_pack.json")
         .exists());
     assert!(outcome
         .report_path

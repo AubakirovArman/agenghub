@@ -139,6 +139,9 @@ verify:
 - `.agent/tx/<tx-id>/report.md`: человекочитаемый отчёт.
 - `.agent/tx/<tx-id>/dag.json`: execution graph.
 - `.agent/tx/<tx-id>/context_pack.json`: минимальный контекст выполнения.
+- `.agent/tx/<tx-id>/model_call_metadata.json`: metadata planned/observed model calls.
+- `.agent/tx/<tx-id>/llm_gateway_summary.json`: token/cost summary gateway.
+- `.agent/tx/<tx-id>/redacted_api.jsonl`: redacted gateway trace.
 - `.agent/tx/<tx-id>/memory_staging.jsonl`: память, подготовленная транзакцией.
 
 Успешные транзакции продвигают память в `.agent/memory/committed.jsonl`. Ошибочные транзакции пишут `.agent/memory/failed_attempts.jsonl` и error fingerprint.

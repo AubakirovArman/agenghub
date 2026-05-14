@@ -1,4 +1,3 @@
-use std::fs;
 use std::path::Path;
 
 use anyhow::Result;
@@ -85,9 +84,5 @@ pub(super) fn write_context_pack(
         "maps": maps,
         "policy": { "least_context": true, "scope_only": true }
     });
-    fs::write(
-        tx_dir.join("context_pack.json"),
-        serde_json::to_string_pretty(&context)?,
-    )?;
-    Ok(context)
+    observability::write_context_pack_artifacts(tx_dir, &context)
 }

@@ -139,6 +139,9 @@ Every transaction writes:
 - `.agent/tx/<tx-id>/report.md`: human-readable result.
 - `.agent/tx/<tx-id>/dag.json`: execution graph.
 - `.agent/tx/<tx-id>/context_pack.json`: minimal context for execution.
+- `.agent/tx/<tx-id>/model_call_metadata.json`: planned/observed model call metadata.
+- `.agent/tx/<tx-id>/llm_gateway_summary.json`: gateway token and cost summary.
+- `.agent/tx/<tx-id>/redacted_api.jsonl`: redacted gateway trace.
 - `.agent/tx/<tx-id>/memory_staging.jsonl`: memory staged during the transaction.
 
 Successful transactions promote memory to `.agent/memory/committed.jsonl`. Failed transactions write `.agent/memory/failed_attempts.jsonl` and an error fingerprint.

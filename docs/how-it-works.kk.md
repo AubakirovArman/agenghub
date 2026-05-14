@@ -139,6 +139,9 @@ verify:
 - `.agent/tx/<tx-id>/report.md`: адам оқитын есеп.
 - `.agent/tx/<tx-id>/dag.json`: execution graph.
 - `.agent/tx/<tx-id>/context_pack.json`: орындауға арналған минималды context.
+- `.agent/tx/<tx-id>/model_call_metadata.json`: planned/observed model call metadata.
+- `.agent/tx/<tx-id>/llm_gateway_summary.json`: gateway token/cost summary.
+- `.agent/tx/<tx-id>/redacted_api.jsonl`: redacted gateway trace.
 - `.agent/tx/<tx-id>/memory_staging.jsonl`: транзакцияда дайындалған memory.
 
 Сәтті транзакциялар memory жазбасын `.agent/memory/committed.jsonl` ішіне көтереді. Қате транзакциялар `.agent/memory/failed_attempts.jsonl` және error fingerprint жазады.
