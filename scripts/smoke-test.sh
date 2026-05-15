@@ -19,10 +19,27 @@ run_agenthub() {
   fi
 }
 
+dump_tx_artifacts() {
+  local tx_root="$PROJECT/.agent/tx"
+  if [[ ! -d "$tx_root" ]]; then
+    return
+  fi
+  find "$tx_root" -maxdepth 2 -type f \( \
+    -name report.md -o \
+    -name journal.jsonl -o \
+    -name execution.json -o \
+    -name diff_guard.json -o \
+    -name verifier.json -o \
+    -name sync.json \
+  \) -print -exec sed -n '1,160p' {} \;
+}
+
 mkdir -p "$PROJECT"
 git -C "$PROJECT" init -q
 git -C "$PROJECT" config user.email "agenthub@example.invalid"
 git -C "$PROJECT" config user.name "AgentHub Smoke"
+git -C "$PROJECT" config core.autocrlf false
+git -C "$PROJECT" config core.eol lf
 printf '# AgentHub smoke fixture\n' > "$PROJECT/README.md"
 git -C "$PROJECT" add README.md
 git -C "$PROJECT" commit -q -m "Initial smoke fixture"
@@ -77,6 +94,7 @@ case "$run_output" in
   *" NOOP "*|*" NOOP ("*) ;;
   *)
     printf 'expected no-commit smoke transaction to finish with NOOP\n' >&2
+    dump_tx_artifacts >&2
     exit 1
     ;;
 esac
