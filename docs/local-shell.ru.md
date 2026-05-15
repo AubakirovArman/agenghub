@@ -8,7 +8,7 @@ agenthub
 agenthub shell
 ```
 
-Оболочка нужна для local-first работы. Внутри можно смотреть прошлые транзакции, открывать отчёты, создавать draft AgentSpec из обычного сообщения, запускать запросы без выхода из prompt и держать выбранную текущую транзакцию. Эти сессии — AgentHub transaction sessions, а не свободные chat rooms: каждое выполненное сообщение становится отслеживаемой транзакцией с report, journal, effects, verifier output и memory behavior.
+Оболочка нужна для local-first работы. Внутри можно смотреть прошлые транзакции, открывать отчёты, создавать draft AgentSpec из обычного сообщения, запускать запросы без выхода из prompt и держать выбранную текущую транзакцию. Shell также хранит лёгкие chat transcripts в `.agent/shell/chats/`, чтобы к сообщениям можно было вернуться позже. Выполненные сообщения всё равно становятся отслеживаемыми transactions с report, journal, effects, verifier output и memory behavior.
 
 Shell стартует в режиме `plan`. В этом режиме обычный текст только создаёт draft. Если хочешь, чтобы обычный текст сразу выполнялся, включи `mode run`.
 
@@ -20,6 +20,9 @@ init                         инициализировать .agent
 mode plan|run                выбрать поведение обычного текста
 current                      показать выбранную транзакцию
 close                        сбросить выбранную транзакцию
+chats                        список shell chat transcripts
+chat [new|latest|id]         показать, создать или выбрать chat
+messages                     показать выбранный chat transcript
 sessions or history          список последних транзакций
 session [tx-id|latest]       список сессий или открыть одну
 doctor                       проверить локальную готовность

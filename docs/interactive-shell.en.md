@@ -19,7 +19,9 @@ agenthub:run> add a generated health-check file
 
 ## Session Model
 
-Shell sessions are transaction sessions, not free-form chat rooms. When a message is executed, AgentHub creates a transaction with:
+The shell now keeps lightweight chat transcripts under `.agent/shell/chats/`. Use `chats`, `chat latest`, `chat new`, and `messages` to move through the transcript history.
+
+Executed messages are still transaction sessions, not free-form provider chat rooms. When a message is executed, AgentHub creates a transaction with:
 
 - journal and WAL;
 - effect ledger;
@@ -29,7 +31,7 @@ Shell sessions are transaction sessions, not free-form chat rooms. When a messag
 - memory promotion or failed-attempt warning;
 - dashboard visibility.
 
-Use `sessions`, `open latest`, `report`, `effects`, and `explain` to move through past work.
+Use `sessions`, `open latest`, `report`, `effects`, and `explain` to move through past transaction work.
 
 ## Core Commands
 
@@ -42,6 +44,10 @@ ask <request>         write a draft spec
 do <request>          create a draft and run it
 mode run              execute future plain text directly
 sessions              list previous transactions
+chats                 list shell chat transcripts
+chat latest           select the latest chat transcript
+chat new              start a new chat transcript
+messages              print the selected chat transcript
 open latest           select the latest transaction
 watch latest          follow the live journal
 report latest         print the report

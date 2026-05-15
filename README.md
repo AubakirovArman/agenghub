@@ -55,7 +55,7 @@ agenthub tx report latest
 agenthub open dashboard
 ```
 
-Running `agenthub` without a subcommand opens the local shell. In shell mode you can use `sessions`, `session latest`, `doctor`, `providers status`, `provider codex`, `config show`, `dashboard`, and plain text requests. Plain text starts in `plan` mode; use `mode run` to execute future requests immediately.
+Running `agenthub` without a subcommand opens the local shell. In shell mode you can use `chats`, `chat latest`, `messages`, `sessions`, `open latest`, `doctor`, `providers status`, `provider codex`, `config show`, `dashboard`, and plain text requests. Plain text starts in `plan` mode; use `mode run` to execute future requests immediately.
 
 ## Use With Codex, Gemini, Kimi
 

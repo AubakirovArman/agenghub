@@ -8,7 +8,7 @@ agenthub
 agenthub shell
 ```
 
-Бұл shell local-first жұмысқа арналған. Оның ішінде бұрынғы transaction сессияларын көруге, report ашуға, табиғи тілден draft AgentSpec жасауға, request-ті prompt ішінен іске қосуға және ағымдағы transaction таңдаулы күйде ұстауға болады. Бұл сессиялар AgentHub transaction sessions, еркін chat rooms емес: әр орындалған хабар tracked transaction болады және report, journal, effects, verifier output, memory behavior сақтайды.
+Бұл shell local-first жұмысқа арналған. Оның ішінде бұрынғы transaction сессияларын көруге, report ашуға, табиғи тілден draft AgentSpec жасауға, request-ті prompt ішінен іске қосуға және ағымдағы transaction таңдаулы күйде ұстауға болады. Shell `.agent/shell/chats/` ішінде lightweight chat transcripts сақтайды, сондықтан message history-ге кейін оралуға болады. Executed messages бәрібір tracked transactions болады және report, journal, effects, verifier output, memory behavior сақтайды.
 
 Shell әдепкіде `plan` режимінде ашылады. Бұл режимде жай мәтін тек draft жасайды. Жай мәтін бірден орындалсын десең, `mode run` қос.
 
@@ -20,6 +20,9 @@ init                         .agent инициализациялау
 mode plan|run                жай мәтін әрекетін таңдау
 current                      таңдалған transaction көрсету
 close                        таңдалған transaction тазалау
+chats                        shell chat transcripts тізімі
+chat [new|latest|id]         chat көрсету, жасау немесе таңдау
+messages                     таңдалған chat transcript шығару
 sessions or history          соңғы transaction тізімі
 session [tx-id|latest]       сессия тізімі немесе біреуін ашу
 doctor                       жергілікті readiness тексеру

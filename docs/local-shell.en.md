@@ -8,7 +8,7 @@ agenthub
 agenthub shell
 ```
 
-The shell is for local-first work. It lets you inspect transaction sessions, open reports, create draft specs from natural language, run requests without leaving the prompt, and keep a current transaction selected. These sessions are AgentHub transaction sessions, not free-form chat rooms: every executed message becomes a tracked transaction with report, journal, effects, verifier output, and memory behavior.
+The shell is for local-first work. It lets you inspect transaction sessions, open reports, create draft specs from natural language, run requests without leaving the prompt, and keep a current transaction selected. It also stores lightweight chat transcripts in `.agent/shell/chats/`, so you can return to messages later. Executed messages still become tracked transactions with report, journal, effects, verifier output, and memory behavior.
 
 Shell starts in `plan` mode. In this mode, plain text creates a draft only. Use `mode run` when you want plain text to execute immediately.
 
@@ -20,6 +20,9 @@ init                         initialize .agent
 mode plan|run                set plain-text behavior
 current                      show selected transaction
 close                        clear selected transaction
+chats                        list shell chat transcripts
+chat [new|latest|id]         show, create, or select a chat
+messages                     print selected chat transcript
 sessions or history          list recent transactions
 session [tx-id|latest]       list sessions or open one
 doctor                       check local readiness

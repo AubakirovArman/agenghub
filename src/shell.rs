@@ -1,10 +1,13 @@
 mod actions;
+mod chat;
+mod chat_display;
 mod commands;
+mod help;
 mod product;
 mod run;
 
 use std::io::{self, BufRead, Write};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use anyhow::Result;
 
@@ -15,18 +18,26 @@ pub fn run(project_root: &Path) -> Result<()> {
     let stdin = io::stdin();
     let mut stdout = io::stdout();
     let mut current_tx: Option<String> = None;
+    let mut current_chat = chat::create(project_root)?;
     let mut mode = ShellMode::Plan;
     writeln!(
         stdout,
         "AgentHub local shell. Type `help` for commands. Use `mode run` to execute plain text."
     )?;
+    writeln!(stdout, "chat {}", current_chat.id)?;
     loop {
         prompt(&mut stdout, mode, current_tx.as_deref())?;
         let mut line = String::new();
         if stdin.lock().read_line(&mut line)? == 0 {
             break;
         }
-        if !handle(project_root, parse_line(&line), &mut current_tx, &mut mode)? {
+        if !handle(
+            project_root,
+            parse_line(&line),
+            &mut current_tx,
+            &mut current_chat,
+            &mut mode,
+        )? {
             break;
         }
     }
@@ -37,12 +48,13 @@ fn handle(
     root: &Path,
     command: ShellCommand,
     current_tx: &mut Option<String>,
+    current_chat: &mut chat::ChatSession,
     mode: &mut ShellMode,
 ) -> Result<bool> {
     match command {
         ShellCommand::Empty => {}
         ShellCommand::Exit => return Ok(false),
-        ShellCommand::Help => print_help(*mode),
+        ShellCommand::Help => help::print(*mode),
         ShellCommand::Init => {
             agent_dir::init_project(root, false)?;
             println!("initialized {}", root.display());
@@ -52,7 +64,10 @@ fn handle(
             *current_tx = None;
             println!("current session cleared");
         }
-        ShellCommand::Mode(next) => update_mode(next, mode),
+        ShellCommand::Mode(next) => update_mode(next, mode, current_chat)?,
+        ShellCommand::Chats => chat_display::print_chats(root)?,
+        ShellCommand::Chat(target) => update_chat(root, target.as_deref(), current_chat)?,
+        ShellCommand::Messages => chat_display::print_messages(current_chat)?,
         ShellCommand::Sessions => actions::list_sessions(root)?,
         ShellCommand::Doctor => product::print_doctor(root)?,
         ShellCommand::Providers(args) => product::handle_providers(root, args.as_deref())?,
@@ -93,18 +108,27 @@ fn handle(
             *current_tx = Some(actions::undo_tx(root, &target)?);
         }
         ShellCommand::Ask(request) => {
+            chat::append_user(current_chat, mode.as_str(), &request)?;
             let path = run::write_draft(root, &request)?;
+            chat::append_draft(current_chat, &request, &path)?;
             println!("draft {}", path.display());
             println!("run {}  # execute", path.display());
         }
         ShellCommand::Do(request) => {
-            *current_tx = Some(run::run_request(root, &request, false)?);
+            chat::append_user(current_chat, mode.as_str(), &request)?;
+            let tx_id = run::run_request(root, &request, false)?;
+            chat::append_tx(current_chat, &request, &tx_id, &report_path(root, &tx_id))?;
+            *current_tx = Some(tx_id);
         }
         ShellCommand::Run { target, no_commit } => {
             let path = run::resolve_run_target(root, &target)?;
-            *current_tx = Some(run::run_spec(root, &path, no_commit)?);
+            let tx_id = run::run_spec(root, &path, no_commit)?;
+            chat::append_tx(current_chat, &target, &tx_id, &report_path(root, &tx_id))?;
+            *current_tx = Some(tx_id);
         }
-        ShellCommand::Message(request) => handle_message(root, &request, *mode, current_tx)?,
+        ShellCommand::Message(request) => {
+            handle_message(root, &request, *mode, current_tx, current_chat)?
+        }
     }
     Ok(true)
 }
@@ -118,62 +142,57 @@ fn prompt(stdout: &mut io::Stdout, mode: ShellMode, current_tx: Option<&str>) ->
     Ok(())
 }
 
-fn print_help(mode: ShellMode) {
-    println!("current mode: {}", mode.as_str());
-    println!("help or /help                show commands");
-    println!("init                         initialize .agent");
-    println!("mode plan|run                set plain-text behavior");
-    println!("current                      show selected transaction");
-    println!("close                        clear selected transaction");
-    println!("sessions or history          list transactions");
-    println!("doctor                       check local readiness");
-    println!("providers [status|setup|test|diagnose]");
-    println!("provider <id>                setup default provider");
-    println!("config [show|set key value]  inspect or update config");
-    println!("dashboard                    write local web dashboard");
-    println!("open <tx-id|latest>          open report and select tx");
-    println!("latest                       open latest transaction");
-    println!("watch [tx-id|latest]         follow live transaction journal");
-    println!("cancel [tx-id|latest]        request transaction cancellation");
-    println!("report [tx-id|latest]        print report");
-    println!("effects [tx-id|latest]       print effect ledger");
-    println!("explain [tx-id|latest]       explain failure/result and next steps");
-    println!("memory [summary|audit]       show memory summary or audit");
-    println!("skills [scorecard]           list skills or show scorecard");
-    println!("undo [tx-id|last]            git revert a committed transaction");
-    println!("ask <request>                write a draft spec");
-    println!("do <request>                 write a draft and run it");
-    println!("run <spec|request> [--no-commit]");
-    println!("quit                         exit");
-    println!("plain text                   plan mode: draft; run mode: execute");
-    println!(
-        "slash commands               /sessions /open latest /report /explain /memory /skills"
-    );
-}
-
 fn handle_message(
     root: &Path,
     request: &str,
     mode: ShellMode,
     current_tx: &mut Option<String>,
+    current_chat: &chat::ChatSession,
 ) -> Result<()> {
+    chat::append_user(current_chat, mode.as_str(), request)?;
     match mode {
         ShellMode::Plan => {
             let path = run::write_draft(root, request)?;
+            chat::append_draft(current_chat, request, &path)?;
             println!("draft {}", path.display());
             println!("mode run  # execute future plain text directly");
             println!("run {}  # execute this draft", path.display());
         }
         ShellMode::Run => {
-            *current_tx = Some(run::run_request(root, request, false)?);
+            let tx_id = run::run_request(root, request, false)?;
+            chat::append_tx(current_chat, request, &tx_id, &report_path(root, &tx_id))?;
+            *current_tx = Some(tx_id);
         }
     }
     Ok(())
 }
 
-fn update_mode(next: Option<ShellMode>, mode: &mut ShellMode) {
+fn update_mode(
+    next: Option<ShellMode>,
+    mode: &mut ShellMode,
+    current_chat: &chat::ChatSession,
+) -> Result<()> {
     if let Some(next) = next {
         *mode = next;
     }
+    chat::append_command(current_chat, "mode_changed", mode.as_str())?;
     println!("mode {}", mode.as_str());
+    Ok(())
+}
+
+fn update_chat(
+    root: &Path,
+    target: Option<&str>,
+    current_chat: &mut chat::ChatSession,
+) -> Result<()> {
+    match target.map(str::trim).filter(|value| !value.is_empty()) {
+        Some("new") => *current_chat = chat::create(root)?,
+        Some(target) => *current_chat = chat::open(root, target)?,
+        None => {}
+    }
+    chat_display::print_summary(current_chat)
+}
+
+fn report_path(root: &Path, tx_id: &str) -> PathBuf {
+    root.join(".agent").join("tx").join(tx_id).join("report.md")
 }

@@ -55,7 +55,7 @@ agenthub tx report latest
 agenthub open dashboard
 ```
 
-`agenthub` subcommand жоқ іске қосылса local shell ашылады. Shell ішінде `sessions`, `session latest`, `doctor`, `providers status`, `provider codex`, `config show`, `dashboard` және plain text requests қолдануға болады. Plain text әдепкіде `plan` mode; `mode run` future requests бірден орындауға ауыстырады.
+`agenthub` subcommand жоқ іске қосылса local shell ашылады. Shell ішінде `chats`, `chat latest`, `messages`, `sessions`, `open latest`, `doctor`, `providers status`, `provider codex`, `config show`, `dashboard` және plain text requests қолдануға болады. Plain text әдепкіде `plan` mode; `mode run` future requests бірден орындауға ауыстырады.
 
 ## Codex, Gemini, Kimi бірге қолдану
 

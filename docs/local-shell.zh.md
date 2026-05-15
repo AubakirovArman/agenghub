@@ -8,7 +8,7 @@ agenthub
 agenthub shell
 ```
 
-这个 shell 面向 local-first 使用。你可以查看历史事务会话、打开报告、用自然语言生成 draft AgentSpec、在同一个 prompt 中运行请求，并保持一个当前选中的 transaction。这些会话是 AgentHub transaction sessions，不是自由聊天房间：每条被执行的消息都会成为可追踪的 transaction，并带有 report、journal、effects、verifier output 和 memory behavior。
+这个 shell 面向 local-first 使用。你可以查看历史事务会话、打开报告、用自然语言生成 draft AgentSpec、在同一个 prompt 中运行请求，并保持一个当前选中的 transaction。Shell 也会在 `.agent/shell/chats/` 保存轻量 chat transcripts，方便之后回到消息历史。已执行的消息仍然会成为可追踪的 transaction，并带有 report、journal、effects、verifier output 和 memory behavior。
 
 Shell 默认以 `plan` 模式启动。在该模式下，普通文本只会创建 draft。使用 `mode run` 后，普通文本会立即执行。
 
@@ -20,6 +20,9 @@ init                         初始化 .agent
 mode plan|run                设置普通文本行为
 current                      显示当前选中的 transaction
 close                        清除当前选中的 transaction
+chats                        列出 shell chat transcripts
+chat [new|latest|id]         显示、创建或选择 chat
+messages                     打印当前 chat transcript
 sessions or history          列出最近事务
 session [tx-id|latest]       列出会话或打开一个会话
 doctor                       检查本地 readiness

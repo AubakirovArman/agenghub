@@ -7,6 +7,9 @@ pub(super) enum ShellCommand {
     Current,
     Close,
     Mode(Option<ShellMode>),
+    Chats,
+    Chat(Option<String>),
+    Messages,
     Sessions,
     Doctor,
     Providers(Option<String>),
@@ -56,6 +59,9 @@ pub(super) fn parse_line(line: &str) -> ShellCommand {
         "current" | "status" => ShellCommand::Current,
         "close" | "clear" => ShellCommand::Close,
         "mode" => ShellCommand::Mode(parse_mode(rest)),
+        "chats" | "threads" => ShellCommand::Chats,
+        "chat" | "thread" => ShellCommand::Chat(optional(rest)),
+        "messages" | "transcript" => ShellCommand::Messages,
         "sessions" | "history" | "tx" | "list" => ShellCommand::Sessions,
         "session" => parse_session(rest),
         "doctor" => ShellCommand::Doctor,
@@ -110,6 +116,12 @@ mod tests {
     #[test]
     fn parses_shell_commands_and_plain_text() {
         assert_eq!(parse_line("sessions"), ShellCommand::Sessions);
+        assert_eq!(parse_line("chats"), ShellCommand::Chats);
+        assert_eq!(parse_line("messages"), ShellCommand::Messages);
+        assert_eq!(
+            parse_line("chat latest"),
+            ShellCommand::Chat(Some("latest".into()))
+        );
         assert_eq!(parse_line("session"), ShellCommand::Sessions);
         assert_eq!(
             parse_line("session latest"),

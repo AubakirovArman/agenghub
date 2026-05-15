@@ -19,7 +19,9 @@ agenthub:run> add a generated health-check file
 
 ## Session Model
 
-Shell sessions — transaction sessions, free-form chat rooms емес. Message орындалғанда AgentHub transaction жасайды және мынаны сақтайды:
+Shell енді lightweight chat transcripts файлдарын `.agent/shell/chats/` ішінде сақтайды. Message history көру үшін `chats`, `chat latest`, `chat new` және `messages` қолдан.
+
+Executed messages бәрібір transaction sessions болады, free-form provider chat rooms емес. Message орындалғанда AgentHub transaction жасайды және мынаны сақтайды:
 
 - journal және WAL;
 - effect ledger;
@@ -29,7 +31,7 @@ Shell sessions — transaction sessions, free-form chat rooms емес. Message 
 - memory promotion немесе failed-attempt warning;
 - dashboard visibility.
 
-Бұрынғы жұмыстарға өту үшін `sessions`, `open latest`, `report`, `effects` және `explain` қолдан.
+Бұрынғы transaction work көру үшін `sessions`, `open latest`, `report`, `effects` және `explain` қолдан.
 
 ## Негізгі Commands
 
@@ -42,6 +44,10 @@ ask <request>         draft spec жазу
 do <request>          draft жасап, іске қосу
 mode run              келесі plain text бірден орындалады
 sessions              previous transactions тізімі
+chats                 shell chat transcripts тізімі
+chat latest           latest chat transcript таңдау
+chat new              жаңа chat transcript бастау
+messages              таңдалған chat transcript шығару
 open latest           latest transaction таңдау
 watch latest          live journal бақылау
 report latest         report шығару
