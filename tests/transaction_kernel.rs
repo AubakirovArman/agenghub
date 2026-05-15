@@ -364,7 +364,7 @@ fn smart_sync_rebases_independent_main_changes() -> Result<()> {
     fs::create_dir_all(repo.path().join("generated"))?;
     fs::write(repo.path().join("generated/existing.txt"), "baseline\n")?;
     repo.commit_all("agenthub baseline")?;
-    let root = repo.path().display();
+    let root = shell_path(repo.path());
     let spec = repo.write_spec(
         "smart_sync_rebase.yaml",
         &format!(
@@ -420,7 +420,7 @@ fn smart_sync_blocks_overlapping_main_changes() -> Result<()> {
     let repo = TestRepo::new()?;
     agent_dir::init_project(repo.path(), false)?;
     repo.commit_all("agenthub baseline")?;
-    let root = repo.path().display();
+    let root = shell_path(repo.path());
     let spec = repo.write_spec(
         "smart_sync_overlap.yaml",
         &format!(
@@ -622,7 +622,9 @@ transaction:
 
     assert!(matches!(outcome.status, TransactionStatus::Committed));
     assert_eq!(
-        fs::read_to_string(repo.path().join("generated/remote.txt"))?,
+        normalize_newlines(&fs::read_to_string(
+            repo.path().join("generated/remote.txt")
+        )?),
         "local-remote\n"
     );
     let execution = fs::read_to_string(outcome.report_path.with_file_name("execution.json"))?;
@@ -1392,4 +1394,12 @@ fn run_git(root: &Path, args: &[&str]) -> Result<()> {
         );
     }
     Ok(())
+}
+
+fn shell_path(path: &Path) -> String {
+    path.display().to_string().replace('\\', "/")
+}
+
+fn normalize_newlines(text: &str) -> String {
+    text.replace("\r\n", "\n")
 }

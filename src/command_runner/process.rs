@@ -46,6 +46,8 @@ pub(super) fn terminate_process_tree(child: &mut Child) {
     let pid = child.id().to_string();
     let _ = Command::new("taskkill")
         .args(["/PID", &pid, "/T", "/F"])
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
         .status();
     let _ = child.kill();
 }
