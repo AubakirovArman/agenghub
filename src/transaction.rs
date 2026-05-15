@@ -2,6 +2,7 @@ mod commit;
 mod context;
 mod execution;
 mod guards;
+mod policy;
 mod review;
 mod runner;
 mod verify;
@@ -67,12 +68,6 @@ pub(super) struct RunState {
     status: Option<TransactionStatus>,
 }
 
-impl RunState {
-    fn status(&self) -> TransactionStatus {
-        self.status.unwrap_or(TransactionStatus::RolledBack)
-    }
-}
-
 pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<TransactionOutcome> {
     let started_at = Utc::now();
     let paths = ensure_runtime_dirs(project_root)?;
@@ -99,19 +94,22 @@ pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<Tra
     )?;
 
     let mut state = RunState::default();
-    let result = runner::run_inner(
-        project_root,
-        &paths,
-        &spec,
-        &tx_id,
-        &tx_dir,
-        &journal,
-        &skills,
-        &agent_routes,
-        workspace_profile,
-        no_commit,
-        &mut state,
-    );
+    let result = (|| -> Result<()> {
+        policy::enforce(project_root, &spec, &tx_dir, &journal, &mut state)?;
+        runner::run_inner(
+            project_root,
+            &paths,
+            &spec,
+            &tx_id,
+            &tx_dir,
+            &journal,
+            &skills,
+            &agent_routes,
+            workspace_profile,
+            no_commit,
+            &mut state,
+        )
+    })();
 
     if let Err(error) = result {
         handle_failure(
@@ -126,7 +124,7 @@ pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<Tra
     }
 
     let report_path = tx_dir.join("report.md");
-    let status = state.status();
+    let status = state.status.unwrap_or(TransactionStatus::RolledBack);
     TransactionReport {
         tx_id: tx_id.clone(),
         task_id: spec.task.id.clone(),
@@ -167,7 +165,10 @@ fn handle_failure(
 ) -> Result<()> {
     let error_text = error.to_string();
     state.failure_reason = Some(error_text.clone());
-    if matches!(state.status(), TransactionStatus::BlockedOnHuman) {
+    if matches!(
+        state.status.unwrap_or(TransactionStatus::RolledBack),
+        TransactionStatus::BlockedOnHuman
+    ) {
         journal.append_data(
             "BLOCKED_ON_HUMAN",
             "transaction requires human intervention",

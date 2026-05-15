@@ -219,6 +219,10 @@ agenthub workspace scan --write-maps
 
 Каждая транзакция также пишет `map_context`: subset maps, выбранный по `scope.allow` и task hints. AgentHub пересчитывает hashes mapped files; stale или missing map entries отражаются в `map_context.validation`. См. [Context maps](context-maps.ru.md).
 
+## Command Policy
+
+Перед execution AgentHub проверяет `.agent/policies/core.yaml` и пишет `command_policy.json`. Commands из `needs_approval` требуют `transaction.approval_required: true`; иначе transaction получает `BLOCKED_ON_HUMAN`. `restricted` commands отклоняются до выполнения. См. [Command Policy](command-policy.ru.md).
+
 ## VS Code Extension
 
 Extension в `editors/vscode` даёт:

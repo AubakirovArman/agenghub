@@ -218,6 +218,77 @@ transaction:
 }
 
 #[test]
+fn command_policy_blocks_needs_approval_without_flag() -> Result<()> {
+    let repo = TestRepo::new()?;
+    agent_dir::init_project(repo.path(), false)?;
+    repo.commit_all("agenthub baseline")?;
+
+    let spec = repo.write_spec(
+        "needs_approval.yaml",
+        r#"
+task:
+  id: needs_approval_command
+  type: code.command
+workspace:
+  type: code.git
+  isolation: git_worktree
+execution:
+  commands:
+    - npm install left-pad
+scope:
+  allow:
+    - package.json
+transaction:
+  commit_on_success: true
+"#,
+    )?;
+
+    let outcome = transaction::run(repo.path(), &spec, false)?;
+
+    assert!(matches!(outcome.status, TransactionStatus::BlockedOnHuman));
+    let policy = fs::read_to_string(outcome.report_path.with_file_name("command_policy.json"))?;
+    assert!(policy.contains("needs_approval"));
+    Ok(())
+}
+
+#[test]
+fn command_policy_rejects_restricted_command() -> Result<()> {
+    let repo = TestRepo::new()?;
+    agent_dir::init_project(repo.path(), false)?;
+    repo.commit_all("agenthub baseline")?;
+
+    let spec = repo.write_spec(
+        "restricted.yaml",
+        r#"
+task:
+  id: restricted_command
+  type: code.command
+workspace:
+  type: code.git
+  isolation: git_worktree
+execution:
+  commands:
+    - rm -rf generated
+scope:
+  allow:
+    - generated/**
+transaction:
+  commit_on_success: true
+"#,
+    )?;
+
+    let outcome = transaction::run(repo.path(), &spec, false)?;
+
+    assert!(matches!(outcome.status, TransactionStatus::RolledBack));
+    let policy = fs::read_to_string(outcome.report_path.with_file_name("command_policy.json"))?;
+    assert!(policy.contains("restricted"));
+    let failed_memory =
+        fs::read_to_string(repo.path().join(".agent/memory/failed_attempts.jsonl"))?;
+    assert!(failed_memory.contains("restricted_command"));
+    Ok(())
+}
+
+#[test]
 fn verifier_failure_can_be_repaired_before_commit() -> Result<()> {
     let repo = TestRepo::new()?;
     agent_dir::init_project(repo.path(), false)?;

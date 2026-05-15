@@ -25,4 +25,5 @@ These PRD areas are implemented in the current repository and have tests, docs, 
 - Specialized `db_migration` verifier profile with migration, dry-run, rollback, and seed artifact checks.
 - Plugin ecosystem with package manifest, scaffold, trust model, optional signature metadata, and locks.
 - Enterprise RBAC, policy source, audit log, secret checks, runner inventory, private model route metadata, and compliance reports.
+- Command policy enforcement for `safe`, `needs_approval`, and restricted command lists at transaction preflight.
 - README and feature docs on English, Russian, Chinese, and Kazakh for recent phases.

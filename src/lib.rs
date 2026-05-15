@@ -2,6 +2,7 @@ pub mod aal;
 pub mod agent_adapter;
 pub mod agent_dir;
 pub mod code_maps;
+pub mod command_policy;
 pub mod command_runner;
 pub mod compiler;
 pub mod diff_guard;

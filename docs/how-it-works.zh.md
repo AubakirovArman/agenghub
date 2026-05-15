@@ -219,6 +219,10 @@ agenthub workspace scan --write-maps
 
 每个事务还会写入 `map_context`：根据 `scope.allow` 和 task hints 选择出的 maps 子集。AgentHub 会重新计算 mapped files 的 hashes；stale 或 missing map entries 会出现在 `map_context.validation`。参见 [Context maps](context-maps.zh.md)。
 
+## Command Policy
+
+execution 前，AgentHub 会检查 `.agent/policies/core.yaml` 并写入 `command_policy.json`。`needs_approval` commands 需要 `transaction.approval_required: true`；否则 transaction 变为 `BLOCKED_ON_HUMAN`。`restricted` commands 会在执行前被拒绝。参见 [Command Policy](command-policy.zh.md)。
+
 ## VS Code Extension
 
 `editors/vscode` 中的 extension 提供：

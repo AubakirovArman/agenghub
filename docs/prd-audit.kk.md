@@ -16,4 +16,4 @@ ls prd/source
 ls prd/audit/open
 ```
 
-Негізгі open areas: command policy enforcement, strong sandbox levels, real remote runner execution, cryptographic plugin signing, metrics dashboards және formal WAL.
+Негізгі open areas: strong sandbox levels, real remote runner execution, cryptographic plugin signing, metrics dashboards және formal WAL.

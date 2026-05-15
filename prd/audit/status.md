@@ -6,7 +6,7 @@ Source: [`../../prd.md`](../../prd.md)
 
 The staged roadmap in section 21 is done: Phase 1 through Phase 14 are in [`../done`](../done), and [`../todo`](../todo) has no phase files.
 
-The full PRD is broader than those phases. Some long-term product points remain partial or open: full command policy enforcement, sandbox levels beyond local control, real remote runner execution, cryptographic package signing, metrics dashboards, and a formal WAL layer.
+The full PRD is broader than those phases. Some long-term product points remain partial or open: sandbox levels beyond local control, real remote runner execution, cryptographic package signing, metrics dashboards, and a formal WAL layer.
 
 ## Top-Level Section Matrix
 
@@ -31,7 +31,7 @@ The full PRD is broader than those phases. Some long-term product points remain 
 | 16. Agent Orchestration | Mostly done | single, planner/executor, generator/critic, reviewer/repair, swarm research, manager/worker, and tournament exist; deeper adaptive orchestration remains future work. |
 | 17. LLM Gateway and Observability | Mostly done | Redaction, raw traces, token/cost estimates, metadata, reports exist; it is not a full provider network gateway yet. |
 | 18. `.agent/` Project Structure | Done | Runtime directories, locks, maps, policies, schemas, memory, tx artifacts, plugins, and enterprise files exist. |
-| 19. Security and Policy | Partial | RBAC, diff guard, secret checks, and enterprise policy exist; command allowlist enforcement and sandbox levels 1-3 are open. |
+| 19. Security and Policy | Partial | RBAC, command policy, diff guard, secret checks, and enterprise policy exist; sandbox levels 1-3 are open. |
 | 20. Domain Profiles | Mostly done | Code, Infra, Data, Content, Media, and Research exist. |
 | 21. Development Roadmap | Done | Phases 1-14 are done with commit evidence in `prd/status.md`. |
 | 22. Technical Stack | Mostly done | Rust core and VS Code extension exist; research/ML plugins are future. |
@@ -77,7 +77,7 @@ The full PRD is broader than those phases. Some long-term product points remain 
 | Orchestration | single, planner/executor, generator/critic, reviewer/repair, swarm, manager/worker, tournament | deeper adaptive orchestration |
 | LLM Gateway | metadata, redaction, raw trace option, cost estimates, private model routing metadata | full provider proxy |
 | Enterprise | RBAC, policy source, audit, secrets check, runners inventory, compliance | real remote runner execution and network policy server |
-| Security | scope/diff guards, redaction, enterprise permissions | command allowlist enforcement and strong sandbox levels |
+| Security | command policy, scope/diff guards, redaction, enterprise permissions | strong sandbox levels |
 | Domains | Code, Infra, Data, Content, Media, Research | deeper specialized profile tooling |
 | Metrics | artifacts include cost/tokens/status and Web Dashboard project metrics | aggregated KPI dashboards |
 
