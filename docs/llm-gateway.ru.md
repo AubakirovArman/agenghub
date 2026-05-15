@@ -37,6 +37,27 @@ LLM Gateway — provider control и observability boundary для model work. О
 }
 ```
 
+## Real Provider Execution
+
+PRD v3 добавляет первые реальные execution paths, сохраняя совместимость с planned metadata:
+
+- `CliProvider` может запускать настроенный CLI command template, писать prompt file, собирать stdout/stderr и добавлять provider transcript JSONL.
+- `HttpProvider` может вызывать OpenAI-compatible `http://` endpoint на `/v1/chat/completions`.
+- `complete_with_retry` оборачивает provider calls retry/backoff логикой и optional attempt transcript records.
+
+Проверка локального OpenAI-compatible endpoint:
+
+```bash
+AGENTHUB_OPENAI_COMPAT_BASE_URL=http://127.0.0.1:8000 agenthub providers test openai-http
+```
+
+Optional variables:
+
+```text
+AGENTHUB_OPENAI_COMPAT_API_KEY
+AGENTHUB_OPENAI_COMPAT_MODEL
+```
+
 ## Budget Policy
 
 Transaction budget задаётся через `topology.routing.max_estimated_cost_usd`:

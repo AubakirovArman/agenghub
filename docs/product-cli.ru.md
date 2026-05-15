@@ -28,6 +28,7 @@ agenthub providers status
 agenthub providers setup command
 agenthub providers setup codex
 agenthub providers test codex
+AGENTHUB_OPENAI_COMPAT_BASE_URL=http://127.0.0.1:8000 agenthub providers test openai-http
 ```
 
 Поддерживаемые providers:
@@ -36,6 +37,7 @@ agenthub providers test codex
 - `codex`: wrapper для внешнего Codex CLI.
 - `gemini`: wrapper для внешнего Gemini CLI.
 - `kimi`: wrapper для внешнего Kimi CLI.
+- `openai-http`: локальный OpenAI-compatible HTTP endpoint.
 
 `setup` настраивает provider только если он доступен. Если binary не найден, AgentHub выводит actionable install/PATH message.
 

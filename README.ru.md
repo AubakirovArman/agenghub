@@ -42,6 +42,7 @@ Governance docs: [Governance v2](docs/governance-v2.ru.md)
 - analytics history с JSONL records, summary snapshots, CSV export и dashboard trend metrics;
 - hosted/team export payloads для project, approval, policy, runner, audit, report и analytics summaries;
 - product CLI commands для `doctor`, `version`, providers и config inspection;
+- real LLM Gateway provider execution для CLI templates и OpenAI-compatible HTTP endpoints с retry/backoff;
 - VS Code extension для просмотра транзакций, memory, AgentSpec, approval и DAG;
 - enterprise policy sources including HTTP policy server, RBAC checks, secret checks, runner/model routing, audit log и compliance reports.
 - governance v2 lock layers, drift detection, policy bundles, approval history и compliance summaries.

@@ -42,6 +42,7 @@ The current implementation covers the early PRD foundation:
 - analytics history with JSONL records, summary snapshots, CSV export, and dashboard trend metrics;
 - hosted/team export payloads for project, approval, policy, runner, audit, report, and analytics summaries;
 - product CLI commands for `doctor`, `version`, providers, and config inspection;
+- real LLM Gateway provider execution for CLI templates and OpenAI-compatible HTTP endpoints with retry/backoff;
 - VS Code extension for transaction, memory, AgentSpec, approval, and DAG inspection;
 - enterprise policy sources including HTTP policy server, RBAC checks, secret checks, runner/model routing, audit log, and compliance reports.
 - governance v2 lock layers, drift detection, policy bundles, approval history, and compliance summaries.

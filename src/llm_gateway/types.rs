@@ -56,6 +56,8 @@ pub struct LlmRequest {
     pub role: String,
     pub provider: String,
     pub model: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub prompt: Option<String>,
     pub context_pack_hash: String,
     pub prompt_hash: String,
     pub prompt_tokens: usize,

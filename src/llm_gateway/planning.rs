@@ -14,6 +14,7 @@ fn plan_for_call(call: &ModelCallMetadata) -> ProviderCallPlan {
         role: call.role.clone(),
         provider: call.selected_adapter.clone(),
         model: call.model.clone(),
+        prompt: None,
         context_pack_hash: call.context_pack_hash.clone(),
         prompt_hash: call.prompt_hash.clone(),
         prompt_tokens: call.prompt_tokens,

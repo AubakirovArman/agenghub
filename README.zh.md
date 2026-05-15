@@ -42,6 +42,7 @@ Governance docs: [Governance v2](docs/governance-v2.zh.md)
 - analytics history，包含 JSONL records、summary snapshots、CSV export 和 dashboard trend metrics；
 - hosted/team export payloads，用于 project、approval、policy、runner、audit、report 和 analytics summaries；
 - product CLI commands，用于 `doctor`、`version`、providers 和 config inspection；
+- real LLM Gateway provider execution，用于 CLI templates 和带 retry/backoff 的 OpenAI-compatible HTTP endpoints；
 - VS Code extension，用于查看 transaction、memory、AgentSpec、approval 和 DAG；
 - enterprise policy sources including HTTP policy server、RBAC checks、secret checks、runner/model routing、audit log 和 compliance reports。
 - governance v2 lock layers、drift detection、policy bundles、approval history 和 compliance summaries。
