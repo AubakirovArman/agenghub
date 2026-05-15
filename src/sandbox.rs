@@ -1,9 +1,12 @@
 use std::error::Error;
 use std::fmt;
+use std::path::Path;
 
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
+use crate::command_runner::RemoteRunner;
+use crate::enterprise;
 use crate::spec::AgentSpec;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -13,6 +16,7 @@ pub struct SandboxReport {
     pub effective_level: u8,
     pub mode: String,
     pub reason: String,
+    pub runner: Option<RemoteRunner>,
 }
 
 #[derive(Debug)]
@@ -21,32 +25,56 @@ pub struct SandboxError {
     reason: String,
 }
 
-pub fn evaluate(spec: &AgentSpec) -> SandboxReport {
+pub fn evaluate(project_root: &Path, spec: &AgentSpec) -> Result<SandboxReport> {
     let level = spec.execution.sandbox.level;
-    match level {
+    let report = match level {
         0 => report(
             true,
             0,
             0,
             "local_controlled",
             "process groups and timeouts",
+            None,
         ),
-        1 => report(true, 1, 1, "local_sandbox", "sanitized command environment"),
-        2 => report(
-            false,
-            2,
-            0,
-            "strong_isolation_required",
-            "requires container, namespace, microVM, or remote runner",
+        1 => report(
+            true,
+            1,
+            1,
+            "local_sandbox",
+            "sanitized command environment",
+            None,
         ),
-        _ => report(
-            false,
-            level,
-            0,
-            "enterprise_runner_required",
-            "requires enterprise isolated runner",
-        ),
-    }
+        2 => match select_runner(project_root, false)? {
+            Some(runner) => report(true, 2, 2, "remote_runner", "remote dispatch", Some(runner)),
+            None => report(
+                false,
+                2,
+                0,
+                "remote_runner_required",
+                "no remote runner configured",
+                None,
+            ),
+        },
+        _ => match select_runner(project_root, true)? {
+            Some(runner) => report(
+                true,
+                level,
+                level,
+                "enterprise_runner",
+                "enterprise remote dispatch",
+                Some(runner),
+            ),
+            None => report(
+                false,
+                level,
+                0,
+                "enterprise_runner_required",
+                "no enterprise runner configured",
+                None,
+            ),
+        },
+    };
+    Ok(report)
 }
 
 impl SandboxReport {
@@ -80,6 +108,7 @@ fn report(
     effective_level: u8,
     mode: &str,
     reason: &str,
+    runner: Option<RemoteRunner>,
 ) -> SandboxReport {
     SandboxReport {
         passed,
@@ -87,5 +116,21 @@ fn report(
         effective_level,
         mode: mode.to_string(),
         reason: reason.to_string(),
+        runner,
     }
+}
+
+fn select_runner(project_root: &Path, enterprise_only: bool) -> Result<Option<RemoteRunner>> {
+    let inventory = enterprise::runner_inventory(project_root)?;
+    let selected = inventory.remote.into_iter().find(|runner| {
+        !enterprise_only
+            || runner
+                .labels
+                .iter()
+                .any(|label| matches!(label.as_str(), "enterprise" | "isolated"))
+    });
+    Ok(selected.map(|runner| RemoteRunner {
+        id: runner.id,
+        endpoint: runner.endpoint,
+    }))
 }

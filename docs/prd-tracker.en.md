@@ -23,4 +23,4 @@ The complete PRD split and completion audit are tracked separately:
 
 - `prd/source/`: top-level split of `prd.md`.
 - `prd/audit/`: done, partial, and open PRD areas.
-- `prd/todo/open-*.md`: long-term PRD tasks; current task is `open-12-remote-runner-execution.md`.
+- `prd/todo/open-*.md`: long-term PRD tasks; current task is `open-13-network-policy-server.md`.

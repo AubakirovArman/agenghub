@@ -1,6 +1,7 @@
 use anyhow::Result;
 
 use super::*;
+use crate::command_runner::RemoteRunner;
 use crate::spec::{
     AgentConfig, AgentSpec, ExecutionSpec, RepairSpec, ReviewSpec, RoleAgents, ScopeSpec, TaskSpec,
     TopologySpec, TransactionSpec, VerifySpec, WorkspaceSpec,
@@ -41,12 +42,41 @@ fn dry_run_invocation_writes_prompt_and_transcript() -> Result<()> {
     };
     let route = route(&spec.agent)?;
 
-    let run = invoke_adapter(&spec, dir.path(), dir.path(), &route)?;
+    let run = invoke_adapter(&spec, dir.path(), dir.path(), &route, None)?;
 
     assert!(run.is_some());
     assert!(dir.path().join("agent_prompt_executor.md").exists());
     assert!(dir.path().join("adapter_invocation_executor.json").exists());
     assert!(dir.path().join("agent_transcript.jsonl").exists());
+    Ok(())
+}
+
+#[test]
+fn external_adapter_uses_remote_runner() -> Result<()> {
+    let dir = tempfile::tempdir()?;
+    let mut spec = fixture_spec();
+    spec.execution.sandbox.level = 2;
+    let route = AgentRoute::external(
+        "codex".to_string(),
+        "executor".to_string(),
+        None,
+        Some("printf \"$AGENTHUB_REMOTE_RUNNER\" > adapter-remote.txt".to_string()),
+        false,
+    );
+    let runner = RemoteRunner {
+        id: "adapter-runner".to_string(),
+        endpoint: "local://adapter".to_string(),
+    };
+
+    let run = invoke_adapter(&spec, dir.path(), dir.path(), &route, Some(&runner))?
+        .expect("external adapter run");
+
+    assert!(run.remote);
+    assert_eq!(run.runner.as_deref(), Some("adapter-runner"));
+    assert_eq!(
+        std::fs::read_to_string(dir.path().join("adapter-remote.txt"))?,
+        "adapter-runner"
+    );
     Ok(())
 }
 

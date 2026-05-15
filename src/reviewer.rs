@@ -6,7 +6,7 @@ use std::time::Duration;
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 
-use crate::command_runner::{run_shell_with_sandbox, CommandResult, CommandSandbox};
+use crate::command_runner::{run_shell_with_sandbox, CommandResult, CommandSandbox, RemoteRunner};
 use crate::spec::{ReviewSpec, SandboxSpec};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -18,6 +18,7 @@ pub struct ReviewResult {
 pub fn run(
     review: &ReviewSpec,
     sandbox: &SandboxSpec,
+    remote_runner: Option<&RemoteRunner>,
     worktree: &Path,
     log_path: &Path,
 ) -> Result<ReviewResult> {
@@ -31,9 +32,7 @@ pub fn run(
             command,
             worktree,
             Duration::from_secs(300),
-            CommandSandbox {
-                level: sandbox.level,
-            },
+            sandbox_for(sandbox.level, remote_runner),
         )?;
         append_log(log_path, &result)?;
         let success = result.success;
@@ -50,6 +49,13 @@ pub fn run(
         passed: true,
         commands: results,
     })
+}
+
+fn sandbox_for(level: u8, remote_runner: Option<&RemoteRunner>) -> CommandSandbox {
+    CommandSandbox {
+        level,
+        remote_runner: remote_runner.cloned(),
+    }
 }
 
 fn append_log(path: &Path, result: &CommandResult) -> Result<()> {

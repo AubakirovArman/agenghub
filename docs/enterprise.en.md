@@ -99,7 +99,7 @@ Without a name, AgentHub checks `enterprise.secrets.required`.
 
 ## Runners And Model Routing
 
-Remote runners are policy metadata. Private model routing selects `model_routing.private_runner` when the requested model is listed in `private_models`.
+Remote runners are policy metadata and execution targets for `execution.sandbox.level: 2` or higher. Private model routing selects `model_routing.private_runner` when the requested model is listed in `private_models`.
 
 ```bash
 AGENTHUB_ROLE=admin agenthub enterprise runners

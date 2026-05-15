@@ -225,7 +225,7 @@ agenthub workspace scan --write-maps
 
 ## Sandbox Levels
 
-`execution.sandbox.level` управляет command isolation. Level 0 — local controlled execution, Level 1 использует очищенное local command environment, а Levels 2-3 распознаются, но блокируются до настройки strong или enterprise runner. Каждая transaction пишет `sandbox.json`. См. [Sandbox Levels](sandbox-levels.ru.md).
+`execution.sandbox.level` управляет command isolation. Level 0 — local controlled execution, Level 1 использует очищенное local command environment, а Levels 2-3 dispatch commands в настроенные remote runners. Каждая transaction пишет `sandbox.json`. См. [Sandbox Levels](sandbox-levels.ru.md) и [Remote Runner](remote-runner.ru.md).
 
 ## VS Code Extension
 

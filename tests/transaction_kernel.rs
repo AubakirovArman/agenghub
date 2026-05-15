@@ -356,7 +356,60 @@ transaction:
 
     assert!(matches!(outcome.status, TransactionStatus::BlockedOnHuman));
     let sandbox = fs::read_to_string(outcome.report_path.with_file_name("sandbox.json"))?;
-    assert!(sandbox.contains("strong_isolation_required"));
+    assert!(sandbox.contains("remote_runner_required"));
+    Ok(())
+}
+
+#[test]
+fn remote_runner_dispatch_collects_results() -> Result<()> {
+    let repo = TestRepo::new()?;
+    agent_dir::init_project(repo.path(), false)?;
+    fs::write(
+        repo.path().join(".agent/enterprise/policy.yaml"),
+        "enterprise:\n  runners:\n    default: local\n    remote:\n      - id: local-remote\n        endpoint: local://runner\n        labels:\n          - strong-isolation\n",
+    )?;
+    repo.commit_all("agenthub baseline")?;
+
+    let spec = repo.write_spec(
+        "remote_runner.yaml",
+        r#"
+task:
+  id: remote_runner_demo
+  type: code.command
+workspace:
+  type: code.git
+  isolation: git_worktree
+execution:
+  sandbox:
+    level: 2
+  commands:
+    - mkdir -p generated
+    - printf "$AGENTHUB_REMOTE_RUNNER\n" > generated/remote.txt
+scope:
+  allow:
+    - generated/**
+verify:
+  commands:
+    - test -f generated/remote.txt
+transaction:
+  commit_on_success: true
+  memory_promotion: on_success
+  diff_limits:
+    max_files_changed: 2
+    max_lines_added: 5
+    max_lines_deleted: 0
+"#,
+    )?;
+    let outcome = transaction::run(repo.path(), &spec, false)?;
+
+    assert!(matches!(outcome.status, TransactionStatus::Committed));
+    assert_eq!(
+        fs::read_to_string(repo.path().join("generated/remote.txt"))?,
+        "local-remote\n"
+    );
+    let execution = fs::read_to_string(outcome.report_path.with_file_name("execution.json"))?;
+    assert!(execution.contains("\"remote\": true"));
+    assert!(execution.contains("local-remote"));
     Ok(())
 }
 

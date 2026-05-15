@@ -6,7 +6,7 @@ Source: [`../../prd.md`](../../prd.md)
 
 The staged roadmap in section 21 is done: Phase 1 through Phase 14 are in [`../done`](../done), and [`../todo`](../todo) has no phase files.
 
-The full PRD is broader than those phases. Some long-term product points remain partial or open: real remote runner execution, cryptographic package signing, metrics dashboards, and a formal WAL layer.
+The full PRD is broader than those phases. Some long-term product points remain partial or open: networked central policy server, cryptographic package signing, metrics dashboards, and a formal WAL layer.
 
 ## Top-Level Section Matrix
 
@@ -76,8 +76,8 @@ The full PRD is broader than those phases. Some long-term product points remain 
 | Verifiers | command, runtime smoke, content/data/infra/media/research/backend_tdd/db_migration domain checks | deeper external verifier integrations |
 | Orchestration | single, planner/executor, generator/critic, reviewer/repair, swarm, manager/worker, tournament | deeper adaptive orchestration |
 | LLM Gateway | metadata, redaction, raw trace option, cost estimates, private model routing metadata | full provider proxy |
-| Enterprise | RBAC, policy source, audit, secrets check, runners inventory, compliance | real remote runner execution and network policy server |
-| Security | command policy, sandbox level gates, scope/diff guards, redaction, enterprise permissions | strong runner backends |
+| Enterprise | RBAC, policy source, audit, secrets check, runners inventory, remote runner execution, compliance | network policy server |
+| Security | command policy, sandbox level gates, scope/diff guards, redaction, enterprise permissions, remote dispatch | hardened runner backends |
 | Domains | Code, Infra, Data, Content, Media, Research | deeper specialized profile tooling |
 | Metrics | artifacts include cost/tokens/status and Web Dashboard project metrics | aggregated KPI dashboards |
 

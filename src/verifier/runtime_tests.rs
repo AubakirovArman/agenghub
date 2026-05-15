@@ -22,6 +22,7 @@ fn runtime_smoke_checks_http_route() -> Result<()> {
     let result = run(
         &verify,
         &SandboxSpec::default(),
+        None,
         dir.path(),
         &dir.path().join("verifier.log"),
     )?;
@@ -50,6 +51,7 @@ fn runtime_smoke_catches_route_failure_after_commands_pass() -> Result<()> {
     let result = run(
         &verify,
         &SandboxSpec::default(),
+        None,
         dir.path(),
         &dir.path().join("verifier.log"),
     )?;

@@ -225,7 +225,7 @@ Execution алдында AgentHub `.agent/policies/core.yaml` тексереді
 
 ## Sandbox Levels
 
-`execution.sandbox.level` command isolation басқарады. Level 0 — local controlled execution, Level 1 тазартылған local command environment қолданады, ал Levels 2-3 танылады, бірақ strong немесе enterprise runner бапталғанша блокталады. Әр transaction `sandbox.json` жазады. Қара: [Sandbox Levels](sandbox-levels.kk.md).
+`execution.sandbox.level` command isolation басқарады. Level 0 — local controlled execution, Level 1 тазартылған local command environment қолданады, ал Levels 2-3 commands бапталған remote runners ішіне dispatch жасайды. Әр transaction `sandbox.json` жазады. Қара: [Sandbox Levels](sandbox-levels.kk.md) және [Remote Runner](remote-runner.kk.md).
 
 ## VS Code Extension
 

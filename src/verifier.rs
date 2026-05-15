@@ -13,7 +13,7 @@ use std::time::Duration;
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 
-use crate::command_runner::{run_shell_with_sandbox, CommandResult, CommandSandbox};
+use crate::command_runner::{run_shell_with_sandbox, CommandResult, CommandSandbox, RemoteRunner};
 use crate::spec::{SandboxSpec, VerifySpec};
 
 pub use domain::{DomainCheckResult, DomainVerificationResult};
@@ -32,6 +32,7 @@ pub struct VerifierResult {
 pub fn run(
     verify: &VerifySpec,
     sandbox: &SandboxSpec,
+    remote_runner: Option<&RemoteRunner>,
     worktree: &Path,
     log_path: &Path,
 ) -> Result<VerifierResult> {
@@ -45,9 +46,7 @@ pub fn run(
             command,
             worktree,
             Duration::from_secs(300),
-            CommandSandbox {
-                level: sandbox.level,
-            },
+            sandbox_for(sandbox.level, remote_runner),
         )?;
         append_log(log_path, &result)?;
         let success = result.success;
@@ -100,6 +99,13 @@ pub fn run(
         domain,
         runtime_smoke,
     })
+}
+
+fn sandbox_for(level: u8, remote_runner: Option<&RemoteRunner>) -> CommandSandbox {
+    CommandSandbox {
+        level,
+        remote_runner: remote_runner.cloned(),
+    }
 }
 
 pub fn detects_missing_env(result: &VerifierResult) -> bool {

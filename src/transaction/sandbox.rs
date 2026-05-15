@@ -10,12 +10,14 @@ use crate::spec::AgentSpec;
 use super::{RunState, TransactionStatus};
 
 pub(super) fn enforce(
+    project_root: &Path,
     spec: &AgentSpec,
     tx_dir: &Path,
     journal: &Journal,
     state: &mut RunState,
 ) -> Result<()> {
-    let report = sandbox_policy::evaluate(spec);
+    let report = sandbox_policy::evaluate(project_root, spec)?;
+    state.remote_runner = report.runner.clone();
     fs::write(
         tx_dir.join("sandbox.json"),
         serde_json::to_string_pretty(&report)?,

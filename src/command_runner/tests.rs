@@ -29,7 +29,7 @@ fn level_one_sandbox_sets_metadata_and_tmpdir() -> Result<()> {
         "test \"$AGENTHUB_SANDBOX_LEVEL\" = 1 && test -d \"$TMPDIR\"",
         dir.path(),
         Duration::from_secs(1),
-        CommandSandbox { level: 1 },
+        CommandSandbox::level(1),
     )?;
 
     assert!(result.success);

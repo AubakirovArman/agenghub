@@ -99,7 +99,7 @@ AGENTHUB_ROLE=admin agenthub enterprise secrets
 
 ## Runners And Model Routing
 
-Remote runners 是 policy metadata。Private model routing 会在 requested model 位于 `private_models` 时选择 `model_routing.private_runner`。
+Remote runners 是 policy metadata，也是 `execution.sandbox.level: 2` 或更高时的 execution targets。Private model routing 会在 requested model 位于 `private_models` 时选择 `model_routing.private_runner`。
 
 ```bash
 AGENTHUB_ROLE=admin agenthub enterprise runners

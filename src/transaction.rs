@@ -18,6 +18,7 @@ use serde_json::json;
 
 use crate::agent_adapter;
 use crate::agent_dir::ensure_runtime_dirs;
+use crate::command_runner::RemoteRunner;
 use crate::compiler;
 use crate::diff_guard::DiffGuardResult;
 use crate::journal::Journal;
@@ -65,6 +66,7 @@ pub(super) struct RunState {
     cost_profile: Option<CostProfile>,
     error_fingerprint: Option<String>,
     failure_reason: Option<String>,
+    remote_runner: Option<RemoteRunner>,
     committed: bool,
     status: Option<TransactionStatus>,
 }
@@ -97,7 +99,7 @@ pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<Tra
     let mut state = RunState::default();
     let result = (|| -> Result<()> {
         policy::enforce(project_root, &spec, &tx_dir, &journal, &mut state)?;
-        sandbox::enforce(&spec, &tx_dir, &journal, &mut state)?;
+        sandbox::enforce(project_root, &spec, &tx_dir, &journal, &mut state)?;
         runner::run_inner(
             project_root,
             &paths,

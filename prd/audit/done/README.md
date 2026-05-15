@@ -26,5 +26,6 @@ These PRD areas are implemented in the current repository and have tests, docs, 
 - Plugin ecosystem with package manifest, scaffold, trust model, optional signature metadata, and locks.
 - Enterprise RBAC, policy source, audit log, secret checks, runner inventory, private model route metadata, and compliance reports.
 - Command policy enforcement for `safe`, `needs_approval`, and restricted command lists at transaction preflight.
-- Sandbox Level 0/1 execution controls plus Level 2/3 safe blocking until strong or enterprise runners are available.
+- Sandbox Level 0/1 execution controls plus Level 2/3 remote runner dispatch and result collection.
+- Remote runner execution for sandbox Level 2/3 with `local://` and `ssh://` endpoints.
 - README and feature docs on English, Russian, Chinese, and Kazakh for recent phases.

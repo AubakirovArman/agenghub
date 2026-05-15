@@ -16,4 +16,4 @@ ls prd/source
 ls prd/audit/open
 ```
 
-Негізгі open areas: real remote runner execution, cryptographic plugin signing, metrics dashboards және formal WAL.
+Негізгі open areas: networked central policy server, cryptographic plugin signing, metrics dashboards және formal WAL.

@@ -50,7 +50,13 @@ pub(super) fn run_inner(
         },
         state,
     )?;
-    execute(spec, tx_dir, &prepared.worktree_path, agent_routes)?;
+    execute(
+        spec,
+        tx_dir,
+        &prepared.worktree_path,
+        agent_routes,
+        state.remote_runner.as_ref(),
+    )?;
     let diff_guard = guard_and_review(
         spec,
         tx_dir,
@@ -118,8 +124,15 @@ fn guard_and_review(
     }
     if spec.topology.kind == "executor_reviewer_repair" {
         journal.append("REVIEWING", "running reviewer gate")?;
-        let (review, reviewed_diff_guard) =
-            run_review_with_repair(spec, worktree, tx_dir, journal, agent_routes, diff_guard)?;
+        let (review, reviewed_diff_guard) = run_review_with_repair(
+            spec,
+            worktree,
+            tx_dir,
+            journal,
+            agent_routes,
+            state.remote_runner.as_ref(),
+            diff_guard,
+        )?;
         diff_guard = reviewed_diff_guard;
         fs::write(
             tx_dir.join("review.json"),
@@ -152,6 +165,7 @@ fn verify(
         tx_dir,
         journal,
         agent_routes,
+        state.remote_runner.as_ref(),
         &tx_dir.join("verifier.log"),
     )?;
     fs::write(

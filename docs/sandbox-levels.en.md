@@ -8,8 +8,8 @@ AgentHub evaluates `execution.sandbox.level` before command execution and writes
 
 - `0`: local controlled execution with worktree isolation, process groups, timeouts, and command policy.
 - `1`: local sandbox mode with sanitized command environment, sandbox TMPDIR, and `AGENTHUB_SANDBOX_LEVEL=1`.
-- `2`: strong isolation required; transaction is blocked until a container, namespace, microVM, or remote runner is available.
-- `3`: enterprise runner required; transaction is blocked until an enterprise isolated runner is configured.
+- `2`: remote runner mode; dispatches commands to a configured remote runner or blocks with `remote_runner_required`.
+- `3`: enterprise runner mode; dispatches to a remote runner labeled `enterprise` or `isolated`, otherwise blocks.
 
 ## Example
 
@@ -26,3 +26,5 @@ Run:
 ```bash
 agenthub run examples/sandbox-level-task.yaml
 ```
+
+Remote dispatch details are in [Remote Runner Execution](remote-runner.en.md).

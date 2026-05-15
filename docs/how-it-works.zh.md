@@ -225,7 +225,7 @@ execution 前，AgentHub 会检查 `.agent/policies/core.yaml` 并写入 `comman
 
 ## Sandbox Levels
 
-`execution.sandbox.level` 控制 command isolation。Level 0 是 local controlled execution，Level 1 使用清理后的 local command environment，Levels 2-3 会被识别，但在 strong 或 enterprise runner 配置前会阻塞。每个 transaction 都会写入 `sandbox.json`。参见 [Sandbox Levels](sandbox-levels.zh.md)。
+`execution.sandbox.level` 控制 command isolation。Level 0 是 local controlled execution，Level 1 使用清理后的 local command environment，Levels 2-3 会把 commands dispatch 到配置好的 remote runners。每个 transaction 都会写入 `sandbox.json`。参见 [Sandbox Levels](sandbox-levels.zh.md) 和 [Remote Runner](remote-runner.zh.md)。
 
 ## VS Code Extension
 

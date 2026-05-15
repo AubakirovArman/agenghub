@@ -99,7 +99,7 @@ Name берілмесе, AgentHub `enterprise.secrets.required` тексеред
 
 ## Runners And Model Routing
 
-Remote runners policy metadata ретінде беріледі. Requested model `private_models` ішінде болса, private model routing `model_routing.private_runner` таңдайды.
+Remote runners policy metadata ретінде беріледі және `execution.sandbox.level: 2` немесе одан жоғары болса execution targets болады. Requested model `private_models` ішінде болса, private model routing `model_routing.private_runner` таңдайды.
 
 ```bash
 AGENTHUB_ROLE=admin agenthub enterprise runners

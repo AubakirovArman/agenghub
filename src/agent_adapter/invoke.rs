@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::agent_adapter::transcript::write_adapter_run;
 use crate::agent_adapter::AgentRoute;
-use crate::command_runner::{run_shell_with_sandbox, CommandSandbox};
+use crate::command_runner::{run_shell_with_sandbox, CommandSandbox, RemoteRunner};
 use crate::observability::redact_text;
 use crate::spec::AgentSpec;
 
@@ -24,6 +24,8 @@ pub struct AdapterRun {
     pub stderr: String,
     pub duration_ms: u128,
     pub dry_run: bool,
+    pub remote: bool,
+    pub runner: Option<String>,
 }
 
 pub fn invoke_adapter(
@@ -31,6 +33,7 @@ pub fn invoke_adapter(
     tx_dir: &Path,
     worktree: &Path,
     route: &AgentRoute,
+    remote_runner: Option<&RemoteRunner>,
 ) -> Result<Option<AdapterRun>> {
     let prompt_path = write_prompt(spec, tx_dir, route)?;
     if !route.uses_external_cli() {
@@ -50,15 +53,15 @@ pub fn invoke_adapter(
             stderr: String::new(),
             duration_ms: 0,
             dry_run: true,
+            remote: false,
+            runner: None,
         }
     } else {
         let result = run_shell_with_sandbox(
             &command,
             worktree,
             Duration::from_secs(900),
-            CommandSandbox {
-                level: spec.execution.sandbox.level,
-            },
+            adapter_sandbox(spec.execution.sandbox.level, remote_runner),
         )?;
         AdapterRun {
             adapter: route.selected_adapter.clone(),
@@ -71,6 +74,8 @@ pub fn invoke_adapter(
             stderr: redact_text(&result.stderr)?,
             duration_ms: result.duration_ms,
             dry_run: false,
+            remote: result.remote,
+            runner: result.runner,
         }
     };
 
@@ -84,6 +89,13 @@ pub fn invoke_adapter(
         ));
     }
     Ok(Some(run))
+}
+
+fn adapter_sandbox(level: u8, remote_runner: Option<&RemoteRunner>) -> CommandSandbox {
+    CommandSandbox {
+        level,
+        remote_runner: remote_runner.cloned(),
+    }
 }
 
 fn write_prompt(spec: &AgentSpec, tx_dir: &Path, route: &AgentRoute) -> Result<PathBuf> {
