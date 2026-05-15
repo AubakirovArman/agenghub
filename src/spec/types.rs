@@ -106,6 +106,8 @@ pub struct RoutingSpec {
     pub cost_aware: bool,
     #[serde(default)]
     pub max_estimated_cost_usd: Option<f64>,
+    #[serde(default)]
+    pub adaptive: bool,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

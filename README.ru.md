@@ -6,6 +6,8 @@ AgentHub — транзакционная runtime-основа для работ
 
 Подробная документация: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.ru.md), [PRD audit](docs/prd-audit.ru.md), [PRD v2](docs/prd-v2.ru.md), [TUI](docs/tui.ru.md), [Web Dashboard](docs/web-dashboard.ru.md), [Metrics Dashboard](docs/metrics-dashboard.ru.md), [AAL](docs/aal.ru.md), [Workspaces](docs/workspaces.ru.md), [Workspace Runtime](docs/workspace-runtime.ru.md), [MediaWorkspace](docs/media-workspace.ru.md), [Research](docs/research-profile.ru.md), [Backend TDD](docs/backend-tdd-verifier.ru.md), [DB Migration](docs/db-migration-verifier.ru.md), [Command Policy](docs/command-policy.ru.md), [Sandbox Levels](docs/sandbox-levels.ru.md), [Remote Runner](docs/remote-runner.ru.md), [Hardened Runner](docs/hardened-runner.ru.md), [Network Policy](docs/network-policy-server.ru.md), [WAL](docs/wal.ru.md), [Effect Ledger](docs/effect-ledger.ru.md), [Rollback Handlers](docs/rollback-handlers.ru.md), [Resume/Retry](docs/resume-retry.ru.md), [Smart Sync](docs/smart-sync.ru.md), [VCM-OS Memory](docs/vcm-os-memory.ru.md), [Reference Web Fixture](docs/reference-web-fixture.ru.md), [IDE](docs/ide.ru.md), [Natural language](docs/natural-language.ru.md), [Topologies](docs/topologies.ru.md), [Agent adapters](docs/agent-adapters.ru.md), [Runtime and repair](docs/runtime-repair.ru.md), [Context maps](docs/context-maps.ru.md), [LLM Gateway](docs/llm-gateway.ru.md), [Plugin ecosystem](docs/plugin-ecosystem.ru.md), [Plugin signatures](docs/plugin-signatures.ru.md), [Enterprise](docs/enterprise.ru.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
 
+Adaptive docs: [Adaptive Orchestration](docs/adaptive-orchestration.ru.md)
+
 ## Текущий статус
 
 Сейчас реализована фундаментальная часть PRD:
@@ -23,6 +25,7 @@ AgentHub — транзакционная runtime-основа для работ
 - plugin package scaffold, manifest validation, SHA-256 signature verification, trust model и lock files;
 - agent adapter routing, CLI dry-run invocation, prompts и transcripts;
 - multi-role topologies для planner/executor, generator/critic, reviewer/repair, swarm research, manager/worker и tournament DAGs;
+- opt-in adaptive orchestration с task classification, topology selection, report artifacts и project scoreboard;
 - LLM Gateway metadata, provider plans, budget decisions, redacted traces, optional raw traces и token/cost accounting;
 - context maps для routes, components, exports, stale-hash detection и map-based context selection;
 - команда `ask` для AgentSpec preview с defaults, approval marking и clarification questions;

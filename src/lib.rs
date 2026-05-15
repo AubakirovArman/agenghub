@@ -1,4 +1,5 @@
 pub mod aal;
+pub mod adaptive;
 pub mod agent_adapter;
 pub mod agent_dir;
 pub mod baseline;

@@ -138,6 +138,8 @@ fn is_runtime_agent_path(path: &str) -> bool {
     path.starts_with(".agent/tx/")
         || path.starts_with(".agent/workspaces/")
         || path.starts_with(".agent/cache/")
+        || path.starts_with(".agent/metrics/")
+        || path == ".agent/enterprise/audit.jsonl"
         || path == ".agent/memory/committed.jsonl"
         || path == ".agent/memory/failed_attempts.jsonl"
 }

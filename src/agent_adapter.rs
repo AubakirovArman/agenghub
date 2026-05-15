@@ -155,6 +155,9 @@ fn apply_routing_policy(spec: &AgentSpec, route: &mut AgentRoute) {
     if spec.topology.routing.max_estimated_cost_usd.is_some() {
         route.routing_policy.push("max_estimated_cost".to_string());
     }
+    if spec.topology.routing.adaptive {
+        route.routing_policy.push("adaptive_topology".to_string());
+    }
 }
 
 fn default_template(adapter: &str) -> Option<String> {

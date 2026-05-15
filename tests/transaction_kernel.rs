@@ -1077,6 +1077,64 @@ transaction:
 }
 
 #[test]
+fn adaptive_orchestration_records_decision_report_and_scoreboard() -> Result<()> {
+    let repo = TestRepo::new()?;
+    agent_dir::init_project(repo.path(), false)?;
+    repo.commit_all("agenthub baseline")?;
+
+    let spec = repo.write_spec(
+        "adaptive.yaml",
+        r#"
+task:
+  id: adaptive_feature_demo
+  type: code.command
+  title: Add adaptive feature output
+topology:
+  kind: single_executor
+  routing:
+    adaptive: true
+workspace:
+  type: code.git
+  isolation: git_worktree
+execution:
+  commands:
+    - mkdir -p generated
+    - printf 'adaptive\n' > generated/adaptive.txt
+scope:
+  allow:
+    - generated/**
+verify:
+  commands:
+    - test -f generated/adaptive.txt
+transaction:
+  commit_on_success: true
+  memory_promotion: on_success
+  diff_limits:
+    max_files_changed: 2
+    max_lines_added: 5
+    max_lines_deleted: 0
+"#,
+    )?;
+    let outcome = transaction::run(repo.path(), &spec, false)?;
+
+    assert!(matches!(outcome.status, TransactionStatus::Committed));
+    let adaptive = fs::read_to_string(outcome.report_path.with_file_name("adaptive.json"))?;
+    assert!(adaptive.contains("\"enabled\": true"));
+    assert!(adaptive.contains("\"selected_topology\": \"manager_worker\""));
+    assert!(adaptive.contains("\"inputs\""));
+    let report = fs::read_to_string(&outcome.report_path)?;
+    assert!(report.contains("## Adaptive Orchestration"));
+    assert!(report.contains("manager_worker"));
+    let scoreboard = fs::read_to_string(
+        repo.path()
+            .join(".agent/metrics/orchestration_scoreboard.json"),
+    )?;
+    assert!(scoreboard.contains("\"topology\": \"manager_worker\""));
+    assert!(scoreboard.contains("\"success\": 1"));
+    Ok(())
+}
+
+#[test]
 fn tournament_topology_writes_agent_trace() -> Result<()> {
     let repo = TestRepo::new()?;
     agent_dir::init_project(repo.path(), false)?;

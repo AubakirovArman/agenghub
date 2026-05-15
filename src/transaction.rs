@@ -4,6 +4,7 @@ mod execution;
 mod failure;
 mod guards;
 mod id;
+mod orchestration;
 mod policy;
 mod prepare;
 mod review;
@@ -18,6 +19,7 @@ use anyhow::{Context, Result};
 use chrono::Utc;
 use serde_json::json;
 
+use crate::adaptive::AdaptiveDecision;
 use crate::agent_adapter;
 use crate::agent_dir::ensure_runtime_dirs;
 use crate::command_runner::RemoteRunner;
@@ -70,6 +72,7 @@ pub(super) struct RunState {
     workspace_runtime: Option<WorkspaceRuntimeMetadata>,
     runner: Option<RunnerMetadata>,
     cost_profile: Option<CostProfile>,
+    adaptive: Option<AdaptiveDecision>,
     error_fingerprint: Option<String>,
     failure_reason: Option<String>,
     remote_runner: Option<RemoteRunner>,
@@ -80,15 +83,18 @@ pub(super) struct RunState {
 pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<TransactionOutcome> {
     let started_at = Utc::now();
     let paths = ensure_runtime_dirs(project_root)?;
-    let spec = AgentSpec::load(spec_path)?;
+    let mut spec = AgentSpec::load(spec_path)?;
     let tx_id = id::new_tx_id();
     let tx_dir = paths.tx_dir(&tx_id);
     fs::create_dir_all(&tx_dir).with_context(|| format!("create {}", tx_dir.display()))?;
     fs::copy(spec_path, tx_dir.join("plan.yaml"))
         .with_context(|| format!("copy {}", spec_path.display()))?;
+    let mut adaptive_decision = orchestration::apply(&mut spec, &tx_dir)?;
 
     let skills = skill_registry::load_requested(project_root, &spec.skills)?;
     let agent_routes = agent_adapter::routes_for_spec(&spec)?;
+    let adaptive_data =
+        orchestration::finish_decision(&tx_dir, &agent_routes, &mut adaptive_decision)?;
     let workspace_profile = spec.workspace.profile()?;
     let dag = compiler::compile(&spec)?;
     fs::write(tx_dir.join("agent_ir.txt"), spec.to_agent_ir())?;
@@ -103,8 +109,16 @@ pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<Tra
         "loaded and validated AgentSpec",
         json!({ "task_id": &spec.task.id }),
     )?;
+    journal.append_data(
+        "ADAPTIVE_ORCHESTRATION",
+        "classified task and selected topology",
+        adaptive_data,
+    )?;
 
-    let mut state = RunState::default();
+    let mut state = RunState {
+        adaptive: Some(adaptive_decision),
+        ..RunState::default()
+    };
     let result = (|| -> Result<()> {
         policy::enforce(project_root, &spec, &tx_dir, &journal, &mut state)?;
         sandbox::enforce(project_root, &spec, &tx_dir, &journal, &mut state)?;
@@ -137,12 +151,21 @@ pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<Tra
 
     let report_path = tx_dir.join("report.md");
     let status = state.status.unwrap_or(TransactionStatus::RolledBack);
+    let finished_at = Utc::now();
+    orchestration::record_scoreboard(
+        project_root,
+        &tx_dir,
+        &state,
+        status.as_str(),
+        started_at,
+        finished_at,
+    )?;
     TransactionReport {
         tx_id: tx_id.clone(),
         task_id: spec.task.id.clone(),
         status: status.as_str().to_string(),
         started_at,
-        finished_at: Utc::now(),
+        finished_at,
         base_head: state
             .prepared
             .as_ref()
@@ -156,6 +179,7 @@ pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<Tra
         workspace_runtime: state.workspace_runtime,
         runner: state.runner,
         cost_profile: state.cost_profile,
+        adaptive: state.adaptive,
         error_fingerprint: state.error_fingerprint,
         failure_reason: state.failure_reason,
     }
