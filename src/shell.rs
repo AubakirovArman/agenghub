@@ -2,12 +2,14 @@ mod actions;
 mod chat;
 mod chat_display;
 mod commands;
+mod control;
+mod flow;
 mod help;
 mod product;
 mod run;
 
 use std::io::{self, BufRead, Write};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use anyhow::Result;
 
@@ -64,9 +66,9 @@ fn handle(
             *current_tx = None;
             println!("current session cleared");
         }
-        ShellCommand::Mode(next) => update_mode(next, mode, current_chat)?,
+        ShellCommand::Mode(next) => flow::update_mode(next, mode, current_chat)?,
         ShellCommand::Chats => chat_display::print_chats(root)?,
-        ShellCommand::Chat(target) => update_chat(root, target.as_deref(), current_chat)?,
+        ShellCommand::Chat(target) => flow::update_chat(root, target.as_deref(), current_chat)?,
         ShellCommand::Messages => chat_display::print_messages(current_chat)?,
         ShellCommand::Sessions => actions::list_sessions(root)?,
         ShellCommand::Doctor => product::print_doctor(root)?,
@@ -88,6 +90,17 @@ fn handle(
         ShellCommand::Cancel(tx_id) => {
             let tx = actions::resolve_tx(root, tx_id.as_deref(), current_tx.as_deref())?;
             actions::cancel_tx(root, &tx)?;
+        }
+        ShellCommand::Approve(args) => {
+            let tx = control::approve_tx(root, current_tx.as_deref(), &args)?;
+            chat::append_command(current_chat, "approved", &tx)?;
+            *current_tx = Some(tx);
+        }
+        ShellCommand::Resume(tx_id) => {
+            let tx = actions::resolve_tx(root, tx_id.as_deref(), current_tx.as_deref())?;
+            let resumed = control::resume_tx(root, &tx)?;
+            chat::append_command(current_chat, "resumed", &resumed)?;
+            *current_tx = Some(resumed);
         }
         ShellCommand::Report(tx_id) => {
             let tx = actions::resolve_tx(root, tx_id.as_deref(), current_tx.as_deref())?;
@@ -117,17 +130,27 @@ fn handle(
         ShellCommand::Do(request) => {
             chat::append_user(current_chat, mode.as_str(), &request)?;
             let tx_id = run::run_request(root, &request, false)?;
-            chat::append_tx(current_chat, &request, &tx_id, &report_path(root, &tx_id))?;
+            chat::append_tx(
+                current_chat,
+                &request,
+                &tx_id,
+                &flow::report_path(root, &tx_id),
+            )?;
             *current_tx = Some(tx_id);
         }
         ShellCommand::Run { target, no_commit } => {
             let path = run::resolve_run_target(root, &target)?;
             let tx_id = run::run_spec(root, &path, no_commit)?;
-            chat::append_tx(current_chat, &target, &tx_id, &report_path(root, &tx_id))?;
+            chat::append_tx(
+                current_chat,
+                &target,
+                &tx_id,
+                &flow::report_path(root, &tx_id),
+            )?;
             *current_tx = Some(tx_id);
         }
         ShellCommand::Message(request) => {
-            handle_message(root, &request, *mode, current_tx, current_chat)?
+            flow::handle_message(root, &request, *mode, current_tx, current_chat)?
         }
     }
     Ok(true)
@@ -140,59 +163,4 @@ fn prompt(stdout: &mut io::Stdout, mode: ShellMode, current_tx: Option<&str>) ->
     }
     stdout.flush()?;
     Ok(())
-}
-
-fn handle_message(
-    root: &Path,
-    request: &str,
-    mode: ShellMode,
-    current_tx: &mut Option<String>,
-    current_chat: &chat::ChatSession,
-) -> Result<()> {
-    chat::append_user(current_chat, mode.as_str(), request)?;
-    match mode {
-        ShellMode::Plan => {
-            let path = run::write_draft(root, request)?;
-            chat::append_draft(current_chat, request, &path)?;
-            println!("draft {}", path.display());
-            println!("mode run  # execute future plain text directly");
-            println!("run {}  # execute this draft", path.display());
-        }
-        ShellMode::Run => {
-            let tx_id = run::run_request(root, request, false)?;
-            chat::append_tx(current_chat, request, &tx_id, &report_path(root, &tx_id))?;
-            *current_tx = Some(tx_id);
-        }
-    }
-    Ok(())
-}
-
-fn update_mode(
-    next: Option<ShellMode>,
-    mode: &mut ShellMode,
-    current_chat: &chat::ChatSession,
-) -> Result<()> {
-    if let Some(next) = next {
-        *mode = next;
-    }
-    chat::append_command(current_chat, "mode_changed", mode.as_str())?;
-    println!("mode {}", mode.as_str());
-    Ok(())
-}
-
-fn update_chat(
-    root: &Path,
-    target: Option<&str>,
-    current_chat: &mut chat::ChatSession,
-) -> Result<()> {
-    match target.map(str::trim).filter(|value| !value.is_empty()) {
-        Some("new") => *current_chat = chat::create(root)?,
-        Some(target) => *current_chat = chat::open(root, target)?,
-        None => {}
-    }
-    chat_display::print_summary(current_chat)
-}
-
-fn report_path(root: &Path, tx_id: &str) -> PathBuf {
-    root.join(".agent").join("tx").join(tx_id).join("report.md")
 }

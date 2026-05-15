@@ -50,6 +50,8 @@ chat new              start a new chat transcript
 messages              print the selected chat transcript
 open latest           select the latest transaction
 watch latest          follow the live journal
+approve <note>        record a human resolution on the selected transaction
+resume latest         resume a blocked transaction after approval
 report latest         print the report
 effects latest        print the effect ledger
 explain latest        explain result and next action

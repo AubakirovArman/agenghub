@@ -34,6 +34,8 @@ open <tx-id|latest>          открыть report и сделать tx теку
 latest                       открыть последнюю транзакцию
 watch [tx-id|latest]         следить за live journal транзакции
 cancel [tx-id|latest]        запросить cancellation транзакции
+approve [tx-id] <note>       записать human approval/resolution
+resume [tx-id|latest]        продолжить blocked transaction
 report [tx-id]               показать report, по умолчанию текущей tx
 effects [tx-id]              показать effect ledger
 explain [tx-id]              объяснить результат, причину failure и next steps
@@ -86,6 +88,8 @@ agenthub:plan> sessions
 agenthub:plan> session latest
 agenthub:plan> open latest
 agenthub:plan[tx-20260515123000-abcd1234]> watch
+agenthub:plan[tx-20260515123000-abcd1234]> approve Approved after checking env
+agenthub:plan[tx-20260515123000-abcd1234]> resume
 agenthub:plan[tx-20260515123000-abcd1234]> explain
 agenthub:plan[tx-20260515123000-abcd1234]> effects
 agenthub:plan[tx-20260515123000-abcd1234]> memory audit

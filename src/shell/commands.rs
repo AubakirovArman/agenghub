@@ -18,6 +18,8 @@ pub(super) enum ShellCommand {
     Open(String),
     Watch(Option<String>),
     Cancel(Option<String>),
+    Approve(String),
+    Resume(Option<String>),
     Report(Option<String>),
     Effects(Option<String>),
     Explain(Option<String>),
@@ -73,6 +75,8 @@ pub(super) fn parse_line(line: &str) -> ShellCommand {
         "open" => ShellCommand::Open(rest.trim().to_string()),
         "watch" => ShellCommand::Watch(optional(rest)),
         "cancel" => ShellCommand::Cancel(optional(rest)),
+        "approve" | "resolve" => ShellCommand::Approve(rest.trim().to_string()),
+        "resume" => ShellCommand::Resume(optional(rest)),
         "report" => ShellCommand::Report(optional(rest)),
         "effects" => ShellCommand::Effects(optional(rest)),
         "explain" => ShellCommand::Explain(optional(rest)),
@@ -153,6 +157,14 @@ mod tests {
         assert_eq!(
             parse_line("/explain latest"),
             ShellCommand::Explain(Some("latest".into()))
+        );
+        assert_eq!(
+            parse_line("approve latest package install approved"),
+            ShellCommand::Approve("latest package install approved".into())
+        );
+        assert_eq!(
+            parse_line("resume latest"),
+            ShellCommand::Resume(Some("latest".into()))
         );
         assert_eq!(parse_line("undo"), ShellCommand::Undo(None));
         assert_eq!(

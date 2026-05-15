@@ -55,7 +55,7 @@ agenthub tx report latest
 agenthub open dashboard
 ```
 
-不带 subcommand 运行 `agenthub` 会打开 local shell。Shell 内可以使用 `chats`、`chat latest`、`messages`、`sessions`、`open latest`、`doctor`、`providers status`、`provider codex`、`config show`、`dashboard` 和普通文本请求。普通文本默认是 `plan` 模式；使用 `mode run` 后，之后的请求会立即执行。
+不带 subcommand 运行 `agenthub` 会打开 local shell。Shell 内可以使用 `chats`、`chat latest`、`messages`、`sessions`、`open latest`、`approve`、`resume`、`doctor`、`providers status`、`provider codex`、`config show`、`dashboard` 和普通文本请求。普通文本默认是 `plan` 模式；使用 `mode run` 后，之后的请求会立即执行。
 
 ## 与 Codex、Gemini、Kimi 一起使用
 

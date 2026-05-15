@@ -34,6 +34,8 @@ open <tx-id|latest>          open a transaction report and set it current
 latest                       open latest transaction
 watch [tx-id|latest]         follow the live transaction journal
 cancel [tx-id|latest]        request transaction cancellation
+approve [tx-id] <note>       record human approval/resolution
+resume [tx-id|latest]        resume a blocked transaction
 report [tx-id]               print a report, defaulting to current tx
 effects [tx-id]              print the effect ledger
 explain [tx-id]              explain result, failure cause, and next steps
@@ -86,6 +88,8 @@ agenthub:plan> sessions
 agenthub:plan> session latest
 agenthub:plan> open latest
 agenthub:plan[tx-20260515123000-abcd1234]> watch
+agenthub:plan[tx-20260515123000-abcd1234]> approve Approved after checking env
+agenthub:plan[tx-20260515123000-abcd1234]> resume
 agenthub:plan[tx-20260515123000-abcd1234]> explain
 agenthub:plan[tx-20260515123000-abcd1234]> effects
 agenthub:plan[tx-20260515123000-abcd1234]> memory audit

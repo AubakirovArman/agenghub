@@ -50,6 +50,8 @@ chat new              开始新的 chat transcript
 messages              打印当前 chat transcript
 open latest           选择 latest transaction
 watch latest          跟随 live journal
+approve <note>        为当前 transaction 记录 human resolution
+resume latest         approval 后继续 blocked transaction
 report latest         输出 report
 effects latest        输出 effect ledger
 explain latest        解释结果和 next action

@@ -20,6 +20,8 @@ pub(super) fn print(mode: ShellMode) {
     println!("latest                       open latest transaction");
     println!("watch [tx-id|latest]         follow live transaction journal");
     println!("cancel [tx-id|latest]        request transaction cancellation");
+    println!("approve [tx-id] <note>       record human approval/resolution");
+    println!("resume [tx-id|latest]        resume a blocked transaction");
     println!("report [tx-id|latest]        print report");
     println!("effects [tx-id|latest]       print effect ledger");
     println!("explain [tx-id|latest]       explain failure/result and next steps");

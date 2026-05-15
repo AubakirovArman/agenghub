@@ -34,6 +34,8 @@ open <tx-id|latest>          打开事务报告并设为当前事务
 latest                       打开最新 transaction
 watch [tx-id|latest]         跟随实时 transaction journal
 cancel [tx-id|latest]        请求取消 transaction
+approve [tx-id] <note>       记录 human approval/resolution
+resume [tx-id|latest]        继续 blocked transaction
 report [tx-id]               打印报告，默认使用当前事务
 effects [tx-id]              打印 effect ledger
 explain [tx-id]              解释结果、失败原因和下一步
@@ -86,6 +88,8 @@ agenthub:plan> sessions
 agenthub:plan> session latest
 agenthub:plan> open latest
 agenthub:plan[tx-20260515123000-abcd1234]> watch
+agenthub:plan[tx-20260515123000-abcd1234]> approve Approved after checking env
+agenthub:plan[tx-20260515123000-abcd1234]> resume
 agenthub:plan[tx-20260515123000-abcd1234]> explain
 agenthub:plan[tx-20260515123000-abcd1234]> effects
 agenthub:plan[tx-20260515123000-abcd1234]> memory audit

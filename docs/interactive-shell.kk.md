@@ -50,6 +50,8 @@ chat new              жаңа chat transcript бастау
 messages              таңдалған chat transcript шығару
 open latest           latest transaction таңдау
 watch latest          live journal бақылау
+approve <note>        таңдалған transaction үшін human resolution жазу
+resume latest         approval кейін blocked transaction жалғастыру
 report latest         report шығару
 effects latest        effect ledger шығару
 explain latest        result және next action түсіндіру

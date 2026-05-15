@@ -34,6 +34,8 @@ open <tx-id|latest>          report ашу және tx-ті ағымдағы е�
 latest                       соңғы transaction ашу
 watch [tx-id|latest]         transaction journal-ды live бақылау
 cancel [tx-id|latest]        transaction cancellation сұрау
+approve [tx-id] <note>       human approval/resolution жазу
+resume [tx-id|latest]        blocked transaction жалғастыру
 report [tx-id]               report шығару, әдепкісі ағымдағы tx
 effects [tx-id]              effect ledger шығару
 explain [tx-id]              нәтиже, failure себебі және next steps түсіндіру
@@ -86,6 +88,8 @@ agenthub:plan> sessions
 agenthub:plan> session latest
 agenthub:plan> open latest
 agenthub:plan[tx-20260515123000-abcd1234]> watch
+agenthub:plan[tx-20260515123000-abcd1234]> approve Approved after checking env
+agenthub:plan[tx-20260515123000-abcd1234]> resume
 agenthub:plan[tx-20260515123000-abcd1234]> explain
 agenthub:plan[tx-20260515123000-abcd1234]> effects
 agenthub:plan[tx-20260515123000-abcd1234]> memory audit

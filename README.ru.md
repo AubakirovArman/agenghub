@@ -55,7 +55,7 @@ agenthub tx report latest
 agenthub open dashboard
 ```
 
-Запуск `agenthub` без subcommand открывает local shell. Внутри можно использовать `chats`, `chat latest`, `messages`, `sessions`, `open latest`, `doctor`, `providers status`, `provider codex`, `config show`, `dashboard` и обычные текстовые запросы. Plain text стартует в режиме `plan`; команда `mode run` включает немедленное выполнение будущих запросов.
+Запуск `agenthub` без subcommand открывает local shell. Внутри можно использовать `chats`, `chat latest`, `messages`, `sessions`, `open latest`, `approve`, `resume`, `doctor`, `providers status`, `provider codex`, `config show`, `dashboard` и обычные текстовые запросы. Plain text стартует в режиме `plan`; команда `mode run` включает немедленное выполнение будущих запросов.
 
 ## Использование с Codex, Gemini, Kimi
 
