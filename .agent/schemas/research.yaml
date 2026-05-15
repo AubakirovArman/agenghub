@@ -1,0 +1,14 @@
+memory_schema:
+  domain: research
+  version: 1
+  description: ResearchWorkspace memory tracks sources, citations, claims, research graph nodes, critic notes, and final reports.
+  types:
+    source: { fields: [id, title, url, retrieved_at] }
+    citation: { fields: [source_id, locator, quote] }
+    claim: { fields: [id, text, citations, confidence] }
+    research_graph_node: { fields: [id, label, kind] }
+    research_graph_edge: { fields: [from, to, relation] }
+    critic_note: { fields: [claim_id, concern, severity] }
+    research_report: { fields: [path, summary, cited_sources] }
+    research_change: { fields: [task_id, changed_files, summary] }
+    failed_attempt: { fields: [task_id, reason, fingerprint] }

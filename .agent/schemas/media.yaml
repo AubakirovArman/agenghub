@@ -1,0 +1,15 @@
+memory_schema:
+  domain: media
+  version: 1
+  description: MediaWorkspace memory tracks prompts, scripts, voice tracks, assets, render settings, and platform formats.
+  types:
+    scene: { fields: [id, script, prompt] }
+    shot: { fields: [scene_id, duration, camera, prompt] }
+    prompt_template: { fields: [name, template, model] }
+    asset: { fields: [path, media_type, checksum] }
+    voice_track: { fields: [path, voice, language] }
+    render_setting: { fields: [resolution, fps, format] }
+    video_style: { fields: [name, palette, motion] }
+    platform_requirement: { fields: [platform, aspect_ratio, duration_limit] }
+    media_change: { fields: [task_id, changed_files, summary] }
+    failed_attempt: { fields: [task_id, reason, fingerprint] }

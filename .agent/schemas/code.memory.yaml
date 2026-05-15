@@ -1,0 +1,15 @@
+memory_schema:
+  domain: code
+  version: 1
+  description: Code memory tracks architecture, routes, APIs, components, tests, and dependency constraints.
+  types:
+    architecture_decision: { fields: [decision, status, supersedes, evidence, last_verified_commit] }
+    dependency_policy: { fields: [package, policy, reason, status] }
+    route: { fields: [path, component, status] }
+    component: { fields: [name, path, purpose] }
+    api_endpoint: { fields: [method, path, contract] }
+    test_policy: { fields: [scope, command, required] }
+    build_error: { fields: [fingerprint, command, fix] }
+    known_failure: { fields: [fingerprint, reason, warning_only] }
+    forbidden_library: { fields: [package, reason] }
+    code_change: { fields: [task_id, changed_files, summary] }

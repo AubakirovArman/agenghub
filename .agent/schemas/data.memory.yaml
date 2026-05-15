@@ -1,0 +1,11 @@
+memory_schema:
+  domain: data
+  version: 1
+  description: DataWorkspace memory tracks datasets, metrics, artifacts, and quality rules.
+  types:
+    dataset: { fields: [name, source, snapshot] }
+    data_quality_rule: { fields: [rule, threshold, severity] }
+    metric: { fields: [name, value, unit] }
+    artifact: { fields: [path, media_type, checksum] }
+    data_change: { fields: [task_id, changed_files, summary] }
+    failed_attempt: { fields: [task_id, reason, fingerprint] }

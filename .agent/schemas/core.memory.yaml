@@ -1,0 +1,10 @@
+memory_schema:
+  domain: core
+  version: 1
+  description: Core memory tracks global project truth, decisions, policies, and known failures.
+  types:
+    architecture_decision: { fields: [decision, status, supersedes, evidence, last_verified_commit] }
+    dependency_policy: { fields: [package, policy, reason, status] }
+    route: { fields: [path, owner, status] }
+    known_failure: { fields: [fingerprint, reason, warning_only] }
+    failed_attempt: { fields: [task_id, reason, fingerprint] }
