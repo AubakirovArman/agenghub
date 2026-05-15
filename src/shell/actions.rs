@@ -2,7 +2,7 @@ use std::path::Path;
 
 use anyhow::{anyhow, Result};
 
-use crate::{agent_dir, enterprise, tx_control, tx_explain, tx_watch};
+use crate::{agent_dir, enterprise, tx_control, tx_explain, tx_undo, tx_watch};
 
 pub(super) fn list_sessions(root: &Path) -> Result<()> {
     enterprise::authorize(root, "transaction.read")?;
@@ -64,6 +64,16 @@ pub(super) fn cancel_tx(root: &Path, tx_id: &str) -> Result<()> {
     let report = tx_control::cancel(root, tx_id, &actor, "requested from shell")?;
     println!("cancel_requested {} {}", report.tx_id, report.reason);
     Ok(())
+}
+
+pub(super) fn undo_tx(root: &Path, target: &str) -> Result<String> {
+    enterprise::authorize(root, "transaction.run")?;
+    let report = tx_undo::undo(root, target)?;
+    println!(
+        "reverted {} {} {}",
+        report.tx_id, report.reverted_commit, report.revert_head
+    );
+    Ok(report.tx_id)
 }
 
 pub(super) fn latest_tx(root: &Path) -> Result<String> {

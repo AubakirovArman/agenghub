@@ -38,6 +38,15 @@ agenthub tx explain tx-20260515123000-abcd1234
 
 `tx explain` кратко показывает, почему transaction failed или succeeded, что произошло, что делать дальше и какие artifacts смотреть.
 
+## Undo
+
+```bash
+agenthub undo last
+agenthub undo tx-20260515123000-abcd1234
+```
+
+`undo` создаёт обычный Git revert для committed AgentHub transaction. Команда отказывается работать, если в working tree есть unrelated uncommitted changes, и записывает `.agent/tx/<tx-id>/undo.json`.
+
 ## Providers
 
 ```bash

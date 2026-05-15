@@ -3,6 +3,10 @@ use std::process::Command;
 
 use anyhow::{anyhow, Context, Result};
 
+mod history;
+
+pub use history::{find_commit_by_subject, revert_no_edit};
+
 #[derive(Debug, Clone)]
 pub struct GitOutput {
     pub stdout: String,
@@ -139,7 +143,10 @@ fn is_runtime_agent_path(path: &str) -> bool {
         || path.starts_with(".agent/workspaces/")
         || path.starts_with(".agent/cache/")
         || path.starts_with(".agent/metrics/")
+        || path.starts_with(".agent/memory/compacted/")
+        || path.starts_with(".agent/memory/views/")
         || path == ".agent/enterprise/audit.jsonl"
+        || path == ".agent/memory/audit.json"
         || path == ".agent/memory/committed.jsonl"
         || path == ".agent/memory/failed_attempts.jsonl"
 }

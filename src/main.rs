@@ -9,7 +9,7 @@ use clap::Parser;
 
 use agenthub::{
     aal, agent_adapter, agent_dir, code_maps, enterprise, memory, shell, skill_registry, team, tui,
-    web_dashboard, workspace,
+    tx_undo, web_dashboard, workspace,
 };
 
 use crate::cli::{
@@ -52,6 +52,14 @@ fn run() -> Result<()> {
         } => handlers::handle_ask(&request, output.as_deref(), approval_required)?,
         Commands::Run { target, no_commit } => {
             handlers::handle_run(&project_root, &target, no_commit)?
+        }
+        Commands::Undo { target } => {
+            enterprise::authorize(&project_root, "transaction.run")?;
+            let report = tx_undo::undo(&project_root, &target)?;
+            println!(
+                "reverted\t{}\t{}\t{}",
+                report.tx_id, report.reverted_commit, report.revert_head
+            );
         }
         Commands::Tui => {
             enterprise::authorize(&project_root, "transaction.read")?;

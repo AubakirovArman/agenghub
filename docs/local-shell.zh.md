@@ -28,6 +28,7 @@ cancel [tx-id|latest]        请求取消 transaction
 report [tx-id]               打印报告，默认使用当前事务
 effects [tx-id]              打印 effect ledger
 explain [tx-id]              解释结果、失败原因和下一步
+undo [tx-id|last]            git revert 一个 committed transaction
 ask <request>                写入 draft AgentSpec
 do <request>                 写入 draft 并立即执行
 run <spec|request> [--no-commit]
@@ -75,6 +76,7 @@ agenthub:plan> open latest
 agenthub:plan[tx-20260515123000-abcd1234]> watch
 agenthub:plan[tx-20260515123000-abcd1234]> explain
 agenthub:plan[tx-20260515123000-abcd1234]> effects
+agenthub:plan[tx-20260515123000-abcd1234]> undo
 ```
 
 ## 安全性

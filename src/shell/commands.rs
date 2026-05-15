@@ -14,6 +14,7 @@ pub(super) enum ShellCommand {
     Report(Option<String>),
     Effects(Option<String>),
     Explain(Option<String>),
+    Undo(Option<String>),
     Ask(String),
     Do(String),
     Run { target: String, no_commit: bool },
@@ -57,6 +58,7 @@ pub(super) fn parse_line(line: &str) -> ShellCommand {
         "report" => ShellCommand::Report(optional(rest)),
         "effects" => ShellCommand::Effects(optional(rest)),
         "explain" => ShellCommand::Explain(optional(rest)),
+        "undo" => ShellCommand::Undo(optional(rest)),
         "ask" => ShellCommand::Ask(rest.trim().to_string()),
         "do" => ShellCommand::Do(rest.trim().to_string()),
         "run" => ShellCommand::Run {
@@ -100,6 +102,7 @@ mod tests {
             parse_line("/explain latest"),
             ShellCommand::Explain(Some("latest".into()))
         );
+        assert_eq!(parse_line("undo"), ShellCommand::Undo(None));
         assert_eq!(
             parse_line("сделай страницу"),
             ShellCommand::Message("сделай страницу".into())

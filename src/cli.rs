@@ -54,6 +54,10 @@ pub enum Commands {
         #[arg(long)]
         no_commit: bool,
     },
+    Undo {
+        #[arg(default_value = "last")]
+        target: String,
+    },
     Tui,
     Dashboard {
         #[arg(short, long, default_value = ".agent/reports/dashboard")]
