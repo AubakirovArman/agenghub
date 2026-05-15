@@ -5,6 +5,14 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIST="${AGENTHUB_PACKAGE_DIST:-$ROOT/dist}"
 TARGET="${AGENTHUB_PACKAGE_TARGET:-}"
 
+powershell_path() {
+  if command -v cygpath >/dev/null 2>&1; then
+    cygpath -w "$1"
+  else
+    printf '%s\n' "$1"
+  fi
+}
+
 host_triple="$(rustc -vV | awk '/^host:/ {print $2}')"
 asset_triple="${TARGET:-$host_triple}"
 
@@ -39,9 +47,13 @@ cp "$ROOT/README.md" "$ROOT/LICENSE" "$ROOT/CHANGELOG.md" "$stage/"
 if [[ "$asset_triple" == *"windows"* ]]; then
   archive="$DIST/$stage_name.zip"
   if command -v powershell.exe >/dev/null 2>&1; then
-    powershell.exe -NoLogo -NoProfile -Command "Compress-Archive -Path '$stage' -DestinationPath '$archive' -Force"
+    ps_stage="$(powershell_path "$stage")"
+    ps_archive="$(powershell_path "$archive")"
+    powershell.exe -NoLogo -NoProfile -Command "Compress-Archive -Path '$ps_stage' -DestinationPath '$ps_archive' -Force"
   elif command -v pwsh >/dev/null 2>&1; then
-    pwsh -NoLogo -NoProfile -Command "Compress-Archive -Path '$stage' -DestinationPath '$archive' -Force"
+    ps_stage="$(powershell_path "$stage")"
+    ps_archive="$(powershell_path "$archive")"
+    pwsh -NoLogo -NoProfile -Command "Compress-Archive -Path '$ps_stage' -DestinationPath '$ps_archive' -Force"
   elif command -v zip >/dev/null 2>&1; then
     (cd "$tmp" && zip -qr "$archive" "$stage_name")
   else
