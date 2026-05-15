@@ -11,7 +11,8 @@ PRD v4 AgentHub-ты бірінші tagged local developer preview үшін да
 - Repeatable local product checks үшін `scripts/dogfood.sh` қосу.
 - Release validation, packaging, local install, `version` және `doctor` үшін `scripts/release-readiness.sh` қосу.
 - GitHub Release assets тек Linux, macOS және Windows CI жасыл болғаннан кейін жариялау.
+- Owner approval кейін project `UNLICENSED` күйінен Apache-2.0 open source күйіне ауыстыру.
 
 ## Scope құрамына кірмейді
 
-PRD v4 product license таңдамайды, hosted SaaS қоспайды және full security sandbox бар деп мәлімдемейді. Бұлар бөлек product decision немесе later hardening tracks болып қалады.
+PRD v4 hosted SaaS қоспайды және full security sandbox бар деп мәлімдемейді. Бұлар later product немесе hardening tracks болып қалады.

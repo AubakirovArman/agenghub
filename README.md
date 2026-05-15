@@ -275,3 +275,7 @@ AGENTHUB_ACTOR=alice AGENTHUB_ROLE=auditor agenthub enterprise audit --limit 20
 ## Development Rule
 
 Code should stay modular. Aim for files under 200 lines; split by responsibility before a module becomes hard to scan. Check it with `scripts/check-module-size.sh 200`.
+
+## License
+
+AgentHub is open source under the Apache License 2.0. Commercial use, modification, redistribution, and derivative works are allowed under the license terms. Keep `LICENSE` and `NOTICE` with redistributed copies.

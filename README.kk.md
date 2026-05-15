@@ -275,3 +275,7 @@ AGENTHUB_ACTOR=alice AGENTHUB_ROLE=auditor agenthub enterprise audit --limit 20
 ## Даму ережесі
 
 Код модульді болуы керек. Бағдар — файлды 200 жолдан асырмау; модульді оқу қиындай бастаса, жауапкершілік бойынша бөлу керек. Тексеру: `scripts/check-module-size.sh 200`.
+
+## License
+
+AgentHub — Apache License 2.0 бойынша open-source project. Commercial use, modification, redistribution және derivative works license шарттары бойынша рұқсат етіледі. Redistribution кезінде `LICENSE` және `NOTICE` сақтаңыз.

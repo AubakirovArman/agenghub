@@ -4,9 +4,9 @@
 
 AgentHub `0.2.0-local-preview` 是可安装的 local developer preview，不是稳定的 public 或 enterprise product。
 
-## 法律状态
+## 许可证
 
-当前仓库是 `UNLICENSED`。在项目所有者选择 open-source 或 commercial license 之前，外部使用、复制、修改或再分发都需要版权持有者的明确许可。
+AgentHub 以 Apache License 2.0 作为 open-source 发布。你可以按照许可证条款使用、复制、修改、分发，并用于商业用途。再分发项目或衍生作品时，需要保留许可证和 attribution notices。
 
 ## Sandbox 范围
 

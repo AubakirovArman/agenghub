@@ -4,9 +4,9 @@
 
 AgentHub `0.2.0-local-preview` — installable local developer preview, stable public немесе enterprise product емес.
 
-## Құқықтық статус
+## License
 
-Repository қазір `UNLICENSED`. Project owner open-source немесе commercial license таңдағанға дейін external use, copy, modification немесе redistribution үшін copyright holder нақты рұқсаты керек.
+AgentHub Apache License 2.0 бойынша open-source ретінде таратылады. Оны license шарттары бойынша use, copy, modify, distribute және commercial мақсатта қолдануға болады. Project немесе derivative works таратқанда license және attribution notices сақталуы керек.
 
 ## Sandbox шекарасы
 

@@ -3,7 +3,7 @@ name = "agenthub"
 version = "0.2.0-local-preview"
 edition = "2021"
 description = "Transactional runtime foundation for AI-agent workflows."
-license = "UNLICENSED"
+license = "Apache-2.0"
 
 [dependencies]
 anyhow = "1.0"

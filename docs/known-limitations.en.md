@@ -4,9 +4,9 @@ Languages: [English](known-limitations.en.md), [Русский](known-limitation
 
 AgentHub `0.2.0-local-preview` is an installable local developer preview, not a stable public or enterprise product.
 
-## Legal Status
+## License
 
-The repository is currently `UNLICENSED`. External use, copying, modification, or redistribution requires explicit permission from the copyright holder until the project owner chooses an open-source or commercial license.
+AgentHub is open source under the Apache License 2.0. You may use, copy, modify, distribute, and use it commercially under the license terms. Keep the license and attribution notices when redistributing the project or derivative works.
 
 ## Sandbox Scope
 

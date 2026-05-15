@@ -45,4 +45,4 @@ agenthub-x86_64-pc-windows-msvc.zip
 
 ## Project Metadata
 
-`CHANGELOG.md`、`LICENSE`、`SECURITY.md` 和 `CONTRIBUTING.md` 构成第一层公开维护界面。当前 license 仍为 `UNLICENSED`，直到项目所有者选择 open-source 或 commercial license。
+`CHANGELOG.md`、`LICENSE`、`NOTICE`、`SECURITY.md` 和 `CONTRIBUTING.md` 构成第一层公开维护界面。AgentHub 使用 Apache-2.0 open-source 许可证，包括商业用途。

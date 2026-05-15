@@ -13,6 +13,7 @@ All notable AgentHub changes are tracked here.
 - Add sandbox hardening reports, resource limit policy, and OS capability detection for cgroups, containers, Windows process control, and network policy.
 - Add V4 release preview readiness checks, known limitations, and dogfood automation.
 - Limit preview release assets to Linux x86_64, macOS Apple Silicon, and Windows x86_64.
+- Change project licensing from `UNLICENSED` to Apache-2.0 open source and add `NOTICE`.
 
 ## 0.1.0
 

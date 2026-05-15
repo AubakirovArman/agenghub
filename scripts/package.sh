@@ -42,7 +42,7 @@ stage_name="agenthub-$asset_triple"
 stage="$tmp/$stage_name"
 mkdir -p "$stage" "$DIST"
 cp "$binary" "$stage/"
-cp "$ROOT/README.md" "$ROOT/LICENSE" "$ROOT/CHANGELOG.md" "$stage/"
+cp "$ROOT/README.md" "$ROOT/LICENSE" "$ROOT/NOTICE" "$ROOT/CHANGELOG.md" "$stage/"
 
 if [[ "$asset_triple" == *"windows"* ]]; then
   archive="$DIST/$stage_name.zip"

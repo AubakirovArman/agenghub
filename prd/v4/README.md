@@ -18,10 +18,11 @@ Success criteria:
 4. Release-readiness script validates checks, packaging, local install, `version`, and `doctor`.
 5. GitHub Actions passes on Linux, macOS Apple Silicon, and Windows before tagging.
 6. Tag `v0.2.0-local-preview` publishes Linux x86_64, macOS Apple Silicon, and Windows x86_64 release artifacts.
+7. Owner-approved license is Apache-2.0 open source for all uses, including commercial use.
 
 ## Rules
 
-- Do not choose an open-source license without owner approval.
+- Do not change the Apache-2.0 license without owner approval.
 - Keep local-first CLI usage working.
 - Keep docs in four languages for user-facing changes.
 - Keep implementation files near the 200-line module limit.

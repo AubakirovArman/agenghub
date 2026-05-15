@@ -2,6 +2,8 @@
 
 AgentHub is currently moving toward an installable local developer preview. Keep changes scoped, transactional, and documented.
 
+By submitting a contribution, you agree that it is licensed under Apache License 2.0.
+
 ## Local Checks
 
 Run the same checks expected by CI:

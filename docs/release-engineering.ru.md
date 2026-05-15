@@ -45,4 +45,4 @@ agenthub-x86_64-pc-windows-msvc.zip
 
 ## Project Metadata
 
-`CHANGELOG.md`, `LICENSE`, `SECURITY.md` и `CONTRIBUTING.md` задают первый публичный maintenance surface. Текущая license остаётся `UNLICENSED`, пока владелец проекта не выберет open-source или commercial license.
+`CHANGELOG.md`, `LICENSE`, `NOTICE`, `SECURITY.md` и `CONTRIBUTING.md` задают первый публичный maintenance surface. AgentHub лицензирован как Apache-2.0 open-source, включая коммерческое использование.

@@ -275,3 +275,7 @@ AGENTHUB_ACTOR=alice AGENTHUB_ROLE=auditor agenthub enterprise audit --limit 20
 ## 开发规则
 
 代码必须保持模块化。目标是单文件不超过 200 行；当模块难以快速阅读时，应按职责拆分。检查命令：`scripts/check-module-size.sh 200`。
+
+## 许可证
+
+AgentHub 是 Apache License 2.0 下的 open-source 项目。商业使用、修改、再分发和衍生作品都按许可证条款允许。再分发时请保留 `LICENSE` 和 `NOTICE`。

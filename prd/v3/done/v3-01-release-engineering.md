@@ -12,7 +12,7 @@ Add the release engineering foundation required for an installable local develop
 - CI runs `cargo fmt -- --check`, `cargo clippy -- -D warnings`, `cargo test`, `scripts/check-module-size.sh 200`, AAL parse smoke, and no-commit transaction smoke where supported.
 - Add release workflow skeleton for tagged builds.
 - Add `scripts/smoke-test.sh`.
-- Add `CHANGELOG.md`, `LICENSE`, `SECURITY.md`, and `CONTRIBUTING.md`.
+- Add `CHANGELOG.md`, `LICENSE`, `NOTICE`, `SECURITY.md`, and `CONTRIBUTING.md`.
 - Update README/docs in English, Russian, Chinese, and Kazakh.
 - Module-size check stays under 200 lines per Rust/JS implementation file.
 
@@ -21,7 +21,7 @@ Add the release engineering foundation required for an installable local develop
 - Added `.github/workflows/ci.yml` with Linux, macOS, and Windows checks.
 - Added `.github/workflows/release.yml` for tagged release binary archives.
 - Added `scripts/smoke-test.sh` for a temporary Git project, AgentHub init, no-commit transaction, tx status, and dashboard smoke path.
-- Added `CHANGELOG.md`, `LICENSE`, `SECURITY.md`, and `CONTRIBUTING.md`.
+- Added `CHANGELOG.md`, `LICENSE`, `NOTICE`, `SECURITY.md`, and `CONTRIBUTING.md`.
 - Added release-engineering documentation in English, Russian, Chinese, and Kazakh.
 - Linked release-engineering docs from all four README files.
 
