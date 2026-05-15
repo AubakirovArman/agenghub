@@ -10,11 +10,24 @@ skills:
 workspace_plugins:
   - id: content.git
     description: Git-backed content workspace profile.
+    kind: git
+    profile: content
     schema_path: schemas/content.yaml
+    capabilities:
+      - markdown
+      - frontmatter
 
 verifier_plugins:
   - id: content.markdown_presence
     description: Checks that a markdown artifact exists and is non-empty.
     command: test -s "${CONTENT_FILE}"
+    profiles:
+      - content_quality
+    artifact_globs:
+      - content/**/*.md
+    timeout_secs: 30
 
-signature: null
+signature:
+  algorithm: none
+  signer: AgentHub local marketplace
+  value: unsigned

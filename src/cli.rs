@@ -94,6 +94,24 @@ pub enum PluginCommands {
     Inspect {
         package: PathBuf,
     },
+    Scaffold {
+        output: PathBuf,
+
+        #[arg(long)]
+        package_id: String,
+
+        #[arg(long)]
+        skill_id: String,
+
+        #[arg(long)]
+        description: String,
+
+        #[arg(long)]
+        author: Option<String>,
+
+        #[arg(long)]
+        force: bool,
+    },
     Install {
         package: PathBuf,
 

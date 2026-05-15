@@ -17,4 +17,4 @@ sed -n '1,120p' prd/status.md
 - Переносить фазу в `prd/done/` только после code, tests, acceptance и docs на 4 языках.
 - Добавлять closing commit hash в файл фазы и `prd/status.md`.
 
-Текущая следующая фаза: Phase 13, marketplace and plugin ecosystem.
+Текущая следующая фаза: Phase 14, enterprise layer.

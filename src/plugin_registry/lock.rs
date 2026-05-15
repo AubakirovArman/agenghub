@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use crate::agent_dir::ensure_runtime_dirs;
+use crate::plugin_registry::types::SignatureMetadata;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LockedPlugin {
@@ -16,9 +17,16 @@ pub struct LockedPlugin {
     pub trust: String,
     pub installed_at: DateTime<Utc>,
     pub skills: Vec<LockedSkill>,
+    #[serde(default)]
     pub workspace_plugins: Vec<String>,
+    #[serde(default)]
     pub verifier_plugins: Vec<String>,
-    pub signature: Option<String>,
+    #[serde(default)]
+    pub workspace_plugin_metadata: Vec<LockedWorkspacePlugin>,
+    #[serde(default)]
+    pub verifier_plugin_metadata: Vec<LockedVerifierPlugin>,
+    #[serde(default)]
+    pub signature: Option<SignatureMetadata>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -26,6 +34,24 @@ pub struct LockedSkill {
     pub id: String,
     pub version: String,
     pub target: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LockedWorkspacePlugin {
+    pub id: String,
+    pub kind: String,
+    pub profile: Option<String>,
+    pub schema_path: Option<String>,
+    pub capabilities: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LockedVerifierPlugin {
+    pub id: String,
+    pub command: String,
+    pub profiles: Vec<String>,
+    pub artifact_globs: Vec<String>,
+    pub timeout_secs: Option<u64>,
 }
 
 pub fn list_installed(project_root: &Path) -> Result<Vec<LockedPlugin>> {

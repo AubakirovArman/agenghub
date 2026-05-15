@@ -14,7 +14,7 @@
 | Phase 10 — Advanced Agent Topologies | Done | `done/phase-10-advanced-agent-topologies.md` | `ae9d1cb` |
 | Phase 11 — Additional Workspaces | Done | `done/phase-11-additional-workspaces.md` | `fbbe0bd` |
 | Phase 12 — IDE and Visual Layer | Done | `done/phase-12-ide-and-visual-layer.md` | `d3517eb` |
-| Phase 13 — Marketplace / Plugin Ecosystem | Partial / verify fully | `todo/phase-13-marketplace-plugin-ecosystem.md` | existing foundation in `ddd84ca`; needs PRD audit |
+| Phase 13 — Marketplace / Plugin Ecosystem | Done | `done/phase-13-marketplace-plugin-ecosystem.md` | Phase 13 implementation commit |
 | Phase 14 — Enterprise Layer | Partial / verify fully | `todo/phase-14-enterprise-layer.md` | existing foundation in `20cf11b`; needs PRD audit |
 
 ## Move Rule

@@ -28,6 +28,35 @@ pub fn handle_plugins(project_root: &Path, command: PluginCommands) -> Result<()
             println!("skills: {}", manifest.skills.len());
             println!("workspace_plugins: {}", manifest.workspace_plugins.len());
             println!("verifier_plugins: {}", manifest.verifier_plugins.len());
+            println!(
+                "signature: {}",
+                if manifest.signature.is_some() {
+                    "present"
+                } else {
+                    "none"
+                }
+            );
+        }
+        PluginCommands::Scaffold {
+            output,
+            package_id,
+            skill_id,
+            description,
+            author,
+            force,
+        } => {
+            enterprise::authorize(project_root, "plugins.install")?;
+            let manifest = plugin_registry::scaffold_package(
+                &output,
+                plugin_registry::ScaffoldOptions {
+                    package_id,
+                    skill_id,
+                    description,
+                    author,
+                    force,
+                },
+            )?;
+            println!("{}", manifest.display());
         }
         PluginCommands::Install {
             package,

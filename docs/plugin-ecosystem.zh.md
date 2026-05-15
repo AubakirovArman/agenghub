@@ -4,7 +4,7 @@
 
 ## 目的
 
-Phase 13 引入本地 marketplace/package layer。一个 package 可以发布 skills、workspace plugin metadata、verifier plugin metadata 和 optional signature metadata。安装时会把 skills 复制到项目中，并写入 lock files。
+Phase 13 引入本地 marketplace/package layer。一个 package 可以发布 skills、workspace plugin metadata、verifier plugin metadata 和 optional signature metadata。安装时会把 skills 复制到项目中，验证 referenced files，并写入 lock files。
 
 ## Package 结构
 
@@ -30,15 +30,48 @@ skills:
 workspace_plugins:
   - id: content.git
     description: Git-backed content workspace profile.
+    kind: git
+    profile: content
     schema_path: schemas/content.yaml
+    capabilities:
+      - markdown
+      - frontmatter
 
 verifier_plugins:
   - id: content.markdown_presence
     description: Checks that a markdown artifact exists and is non-empty.
     command: test -s "${CONTENT_FILE}"
+    profiles:
+      - content_quality
+    artifact_globs:
+      - content/**/*.md
+    timeout_secs: 30
 
-signature: null
+signature:
+  algorithm: none
+  signer: AgentHub local marketplace
+  value: unsigned
 ```
+
+## Authoring Flow
+
+外部作者可以 scaffold 一个可发布 package：
+
+```bash
+agenthub plugins scaffold marketplace/skill-packs/my-pack \
+  --package-id com.example.my-pack \
+  --skill-id com.example.article_outline \
+  --description "Article outline skill" \
+  --author "Example Author"
+```
+
+然后编辑 `agenthub-plugin.yaml`，按需添加 workspace 或 verifier metadata，并运行：
+
+```bash
+agenthub plugins inspect marketplace/skill-packs/my-pack
+```
+
+`inspect` 会验证 `package.version` 为 `major.minor.patch`，验证 safe relative paths，并检查 referenced skill manifests 和 workspace schemas 是否存在。
 
 ## 安装流程
 
@@ -74,11 +107,13 @@ agenthub plugins list
 agenthub plugins install ./some-package --trust untrusted --allow-untrusted
 ```
 
+`signature` 是 optional metadata。Phase 13 会把它写入 lock file；cryptographic verification 留给后续层，因此当前 enforcement 仍由 `--trust` 控制。
+
 ## Lock Files
 
 AgentHub 写入两个 lock files：
 
-- `.agent/plugins/installed.json`: package id、version、source、trust、installed skills、verifier plugins、workspace plugins、signature metadata。
+- `.agent/plugins/installed.json`: package id、version、source、trust、installed skills、verifier plugin metadata、workspace plugin metadata、signature metadata。
 - `.agent/skills/installed.json`: skill id、version、target path 和 source package。
 
 这些 lock files 让 plugin 和 skill versions 在未来事务中可复现。

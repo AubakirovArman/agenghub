@@ -4,7 +4,7 @@
 
 ## Мақсаты
 
-Phase 13 жергілікті marketplace/package layer қосады. Package skills, workspace plugin metadata, verifier plugin metadata және optional signature metadata жариялай алады. Орнату кезінде skills жобаға көшіріледі және lock files жазылады.
+Phase 13 жергілікті marketplace/package layer қосады. Package skills, workspace plugin metadata, verifier plugin metadata және optional signature metadata жариялай алады. Орнату кезінде skills жобаға көшіріледі, referenced files тексеріледі және lock files жазылады.
 
 ## Package құрылымы
 
@@ -30,15 +30,48 @@ skills:
 workspace_plugins:
   - id: content.git
     description: Git-backed content workspace profile.
+    kind: git
+    profile: content
     schema_path: schemas/content.yaml
+    capabilities:
+      - markdown
+      - frontmatter
 
 verifier_plugins:
   - id: content.markdown_presence
     description: Checks that a markdown artifact exists and is non-empty.
     command: test -s "${CONTENT_FILE}"
+    profiles:
+      - content_quality
+    artifact_globs:
+      - content/**/*.md
+    timeout_secs: 30
 
-signature: null
+signature:
+  algorithm: none
+  signer: AgentHub local marketplace
+  value: unsigned
 ```
+
+## Authoring flow
+
+Сыртқы автор publishable package scaffold жасай алады:
+
+```bash
+agenthub plugins scaffold marketplace/skill-packs/my-pack \
+  --package-id com.example.my-pack \
+  --skill-id com.example.article_outline \
+  --description "Article outline skill" \
+  --author "Example Author"
+```
+
+Содан кейін `agenthub-plugin.yaml` өңдеп, қажет болса workspace немесе verifier metadata қосып, мынаны іске қос:
+
+```bash
+agenthub plugins inspect marketplace/skill-packs/my-pack
+```
+
+`inspect` `package.version` мәнін `major.minor.patch` ретінде тексереді, safe relative paths тексереді және referenced skill manifests пен workspace schemas бар екенін қарайды.
 
 ## Install flow
 
@@ -74,11 +107,13 @@ agenthub plugins list
 agenthub plugins install ./some-package --trust untrusted --allow-untrusted
 ```
 
+`signature` optional metadata. Phase 13 оны lock file ішіне жазады; cryptographic verification кейінгі қабатқа қалдырылды, сондықтан қазір enforcement `--trust` арқылы жүреді.
+
 ## Lock files
 
 AgentHub екі lock file жазады:
 
-- `.agent/plugins/installed.json`: package id, version, source, trust, installed skills, verifier plugins, workspace plugins, signature metadata.
+- `.agent/plugins/installed.json`: package id, version, source, trust, installed skills, verifier plugin metadata, workspace plugin metadata, signature metadata.
 - `.agent/skills/installed.json`: skill id, version, target path және source package.
 
 Бұл lock files болашақ транзакциялар үшін plugin және skill versions қайталанатын етеді.

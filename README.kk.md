@@ -18,6 +18,7 @@ AgentHub — AI агенттерінің жұмысын транзакциялы
 - шектелген repair loop және reviewer gate;
 - VCM memory staging, promotion, failed attempts, compacted project state;
 - skill manifests және dependency loading;
+- plugin package scaffold, manifest validation, trust model және lock files;
 - agent adapter routing, CLI dry-run invocation, prompts және transcripts;
 - planner/executor, generator/critic, reviewer/repair және swarm research DAGs үшін multi-role topologies;
 - LLM Gateway metadata, redacted traces, optional raw traces және token/cost accounting;
@@ -109,6 +110,7 @@ agenthub tx report tx-...
 agenthub workspace scan --write-maps
 agenthub memory inspect
 agenthub skills list
+agenthub plugins scaffold marketplace/skill-packs/my-pack --package-id com.example.my-pack --skill-id com.example.article_outline --description "Article outline skill"
 agenthub plugins inspect marketplace/skill-packs/content-basic
 agenthub plugins install marketplace/skill-packs/content-basic --trust local
 agenthub plugins list
@@ -166,12 +168,13 @@ VS Code extension `editors/vscode` ішінде орналасқан. Ол zero-
 Phase 13 жергілікті marketplace packages арқылы басталады. Package ішінде `agenthub-plugin.yaml` manifest болады; ол skills, workspace plugin metadata, verifier plugin metadata, optional signature metadata бере алады және project lock files ішіне орнатылады.
 
 ```bash
+agenthub plugins scaffold marketplace/skill-packs/my-pack --package-id com.example.my-pack --skill-id com.example.article_outline --description "Article outline skill"
 agenthub plugins inspect marketplace/skill-packs/content-basic
 agenthub plugins install marketplace/skill-packs/content-basic --trust local
 agenthub plugins list
 ```
 
-Installed plugin locks `.agent/plugins/installed.json` ішінде сақталады; installed skill versions `.agent/skills/installed.json` ішінде бекітіледі.
+`inspect` semver package versions, safe relative paths, referenced skill manifests және workspace schemas тексереді. Installed plugin locks `.agent/plugins/installed.json` ішінде сақталады; installed skill versions `.agent/skills/installed.json` ішінде бекітіледі.
 
 ## Enterprise
 

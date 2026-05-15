@@ -18,6 +18,7 @@ The current implementation covers the early PRD foundation:
 - bounded repair loop and reviewer gate;
 - VCM memory staging, promotion, failed attempts, and compacted project state;
 - skill manifests and dependency loading;
+- plugin package scaffold, manifest validation, trust model, and lock files;
 - agent adapter routing, CLI dry-run invocation, prompts, and transcripts;
 - multi-role topologies for planner/executor, generator/critic, reviewer/repair, and swarm research DAGs;
 - LLM Gateway metadata, redacted traces, optional raw traces, and token/cost accounting;
@@ -109,6 +110,7 @@ agenthub tx report tx-...
 agenthub workspace scan --write-maps
 agenthub memory inspect
 agenthub skills list
+agenthub plugins scaffold marketplace/skill-packs/my-pack --package-id com.example.my-pack --skill-id com.example.article_outline --description "Article outline skill"
 agenthub plugins inspect marketplace/skill-packs/content-basic
 agenthub plugins install marketplace/skill-packs/content-basic --trust local
 agenthub plugins list
@@ -166,12 +168,13 @@ The VS Code extension lives in `editors/vscode`. It is zero-build JavaScript and
 Phase 13 starts with local marketplace packages. A package has an `agenthub-plugin.yaml` manifest, can ship skills, workspace plugin metadata, verifier plugin metadata, optional signature metadata, and installs into project lock files.
 
 ```bash
+agenthub plugins scaffold marketplace/skill-packs/my-pack --package-id com.example.my-pack --skill-id com.example.article_outline --description "Article outline skill"
 agenthub plugins inspect marketplace/skill-packs/content-basic
 agenthub plugins install marketplace/skill-packs/content-basic --trust local
 agenthub plugins list
 ```
 
-Installed plugin locks live in `.agent/plugins/installed.json`; installed skill versions are locked in `.agent/skills/installed.json`.
+`inspect` validates semver package versions, safe relative paths, referenced skill manifests, and workspace schemas. Installed plugin locks live in `.agent/plugins/installed.json`; installed skill versions are locked in `.agent/skills/installed.json`.
 
 ## Enterprise
 

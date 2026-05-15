@@ -18,6 +18,7 @@ AgentHub — транзакционная runtime-основа для работ
 - ограниченный repair loop и reviewer gate;
 - VCM-память: staging, promotion, failed attempts, compacted project state;
 - skill manifests и загрузка зависимостей;
+- plugin package scaffold, manifest validation, trust model и lock files;
 - agent adapter routing, CLI dry-run invocation, prompts и transcripts;
 - multi-role topologies для planner/executor, generator/critic, reviewer/repair и swarm research DAGs;
 - LLM Gateway metadata, redacted traces, optional raw traces и token/cost accounting;
@@ -109,6 +110,7 @@ agenthub tx report tx-...
 agenthub workspace scan --write-maps
 agenthub memory inspect
 agenthub skills list
+agenthub plugins scaffold marketplace/skill-packs/my-pack --package-id com.example.my-pack --skill-id com.example.article_outline --description "Article outline skill"
 agenthub plugins inspect marketplace/skill-packs/content-basic
 agenthub plugins install marketplace/skill-packs/content-basic --trust local
 agenthub plugins list
@@ -166,12 +168,13 @@ VS Code extension находится в `editors/vscode`. Это zero-build Java
 Phase 13 начинается с локальных marketplace packages. Пакет содержит `agenthub-plugin.yaml`, может поставлять skills, workspace plugin metadata, verifier plugin metadata, optional signature metadata и устанавливается с lock-файлами проекта.
 
 ```bash
+agenthub plugins scaffold marketplace/skill-packs/my-pack --package-id com.example.my-pack --skill-id com.example.article_outline --description "Article outline skill"
 agenthub plugins inspect marketplace/skill-packs/content-basic
 agenthub plugins install marketplace/skill-packs/content-basic --trust local
 agenthub plugins list
 ```
 
-Installed plugin locks хранятся в `.agent/plugins/installed.json`; версии установленных skills фиксируются в `.agent/skills/installed.json`.
+`inspect` проверяет semver package versions, safe relative paths, referenced skill manifests и workspace schemas. Installed plugin locks хранятся в `.agent/plugins/installed.json`; версии установленных skills фиксируются в `.agent/skills/installed.json`.
 
 ## Enterprise
 

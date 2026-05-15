@@ -6,7 +6,8 @@ use chrono::Utc;
 
 use crate::agent_dir::ensure_runtime_dirs;
 use crate::plugin_registry::lock::{
-    upsert_skill_locks, write_plugin_lock, LockedPlugin, LockedSkill,
+    upsert_skill_locks, write_plugin_lock, LockedPlugin, LockedSkill, LockedVerifierPlugin,
+    LockedWorkspacePlugin,
 };
 use crate::plugin_registry::types::{PluginManifest, PluginTrust};
 use crate::skill_registry::SkillManifest;
@@ -27,11 +28,13 @@ pub struct InstallResult {
 
 pub fn inspect_package(path: &Path) -> Result<PluginManifest> {
     let manifest_path = manifest_path(path)?;
+    let package_root = manifest_path.parent().expect("manifest has parent");
     let content = fs::read_to_string(&manifest_path)
         .with_context(|| format!("read {}", manifest_path.display()))?;
     let manifest: PluginManifest = serde_yaml::from_str(&content)
         .with_context(|| format!("parse {}", manifest_path.display()))?;
     manifest.validate()?;
+    validate_package_files(package_root, &manifest)?;
     Ok(manifest)
 }
 
@@ -100,6 +103,31 @@ pub fn install_package(
             .iter()
             .map(|plugin| plugin.id.clone())
             .collect(),
+        workspace_plugin_metadata: manifest
+            .workspace_plugins
+            .iter()
+            .map(|plugin| LockedWorkspacePlugin {
+                id: plugin.id.clone(),
+                kind: plugin.kind.clone(),
+                profile: plugin.profile.clone(),
+                schema_path: plugin
+                    .schema_path
+                    .as_ref()
+                    .map(|path| path.display().to_string()),
+                capabilities: plugin.capabilities.clone(),
+            })
+            .collect(),
+        verifier_plugin_metadata: manifest
+            .verifier_plugins
+            .iter()
+            .map(|plugin| LockedVerifierPlugin {
+                id: plugin.id.clone(),
+                command: plugin.command.clone(),
+                profiles: plugin.profiles.clone(),
+                artifact_globs: plugin.artifact_globs.clone(),
+                timeout_secs: plugin.timeout_secs,
+            })
+            .collect(),
         signature: manifest.signature.clone(),
     };
 
@@ -138,4 +166,22 @@ fn read_skill_manifest(path: &Path) -> Result<SkillManifest> {
         ));
     }
     Ok(manifest)
+}
+
+fn validate_package_files(package_root: &Path, manifest: &PluginManifest) -> Result<()> {
+    for skill in &manifest.skills {
+        let path = package_root.join(&skill.path);
+        if !path.exists() {
+            return Err(anyhow!("skill manifest not found at {}", path.display()));
+        }
+    }
+    for workspace in &manifest.workspace_plugins {
+        if let Some(schema_path) = &workspace.schema_path {
+            let path = package_root.join(schema_path);
+            if !path.exists() {
+                return Err(anyhow!("workspace schema not found at {}", path.display()));
+            }
+        }
+    }
+    Ok(())
 }
