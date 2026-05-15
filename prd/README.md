@@ -27,3 +27,8 @@ git diff --check
 ## Status Index
 
 See [`status.md`](status.md).
+
+## Source Split And Audit
+
+- [`source/`](source/) is a top-level split of the master [`../prd.md`](../prd.md).
+- [`audit/`](audit/) records what is done, partial, and open across the full PRD, not only the phase roadmap.

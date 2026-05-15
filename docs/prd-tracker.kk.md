@@ -18,3 +18,8 @@ sed -n '1,120p' prd/status.md
 - Closing commit hash phase file және `prd/status.md` ішіне жазылады.
 
 Қазіргі келесі phase: жоқ; барлық tracked PRD phases done.
+
+Толық PRD split және completion audit бөлек жүргізіледі:
+
+- `prd/source/`: `prd.md` файлының top-level split.
+- `prd/audit/`: done, partial және open PRD areas.

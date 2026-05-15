@@ -18,3 +18,8 @@ Rules:
 - Add the closing commit hash to the phase file and `prd/status.md`.
 
 Current next phase: none; all tracked PRD phases are done.
+
+The complete PRD split and completion audit are tracked separately:
+
+- `prd/source/`: top-level split of `prd.md`.
+- `prd/audit/`: done, partial, and open PRD areas.

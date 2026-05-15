@@ -18,3 +18,8 @@ sed -n '1,120p' prd/status.md
 - 在 phase 文件和 `prd/status.md` 中记录 closing commit hash。
 
 当前下一阶段：无；所有 tracked PRD phases 已完成。
+
+完整 PRD split 和 completion audit 单独维护：
+
+- `prd/source/`: `prd.md` 的 top-level split。
+- `prd/audit/`: done、partial、open PRD areas。

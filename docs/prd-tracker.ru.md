@@ -18,3 +18,8 @@ sed -n '1,120p' prd/status.md
 - Добавлять closing commit hash в файл фазы и `prd/status.md`.
 
 Текущая следующая фаза: нет; все tracked PRD phases сделаны.
+
+Полный split PRD и completion audit ведутся отдельно:
+
+- `prd/source/`: top-level split файла `prd.md`.
+- `prd/audit/`: done, partial и open PRD areas.
