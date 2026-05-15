@@ -1,6 +1,7 @@
 pub mod config;
 pub mod doctor;
 mod env;
+pub mod open;
 pub mod providers;
 
 #[cfg(test)]

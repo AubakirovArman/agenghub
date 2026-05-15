@@ -2,9 +2,9 @@ use std::path::Path;
 
 use anyhow::{bail, Result};
 
-use agenthub::product_cli::{config, doctor, providers, version};
+use agenthub::product_cli::{config, doctor, open, providers, version};
 
-use crate::cli::{ConfigCommands, ProviderCommands};
+use crate::cli::{ConfigCommands, OpenCommands, ProviderCommands};
 
 pub fn handle_doctor(project_root: &Path) -> Result<()> {
     let report = doctor::inspect(project_root)?;
@@ -61,4 +61,35 @@ pub fn handle_config(project_root: &Path, command: ConfigCommands) -> Result<()>
         }
     }
     Ok(())
+}
+
+pub fn handle_open(project_root: &Path, command: OpenCommands) -> Result<()> {
+    match command {
+        OpenCommands::Dashboard => {
+            authorize_dashboard(project_root)?;
+            print_open(open::dashboard(project_root)?);
+        }
+        OpenCommands::Report { tx_id } => {
+            agenthub::enterprise::authorize(project_root, "transaction.read")?;
+            print_open(open::report(project_root, &tx_id)?);
+        }
+    }
+    Ok(())
+}
+
+fn authorize_dashboard(project_root: &Path) -> Result<()> {
+    agenthub::enterprise::authorize(project_root, "transaction.read")?;
+    agenthub::enterprise::authorize(project_root, "memory.read")?;
+    agenthub::enterprise::authorize(project_root, "skills.read")?;
+    agenthub::enterprise::authorize(project_root, "enterprise.policy.read")?;
+    Ok(())
+}
+
+fn print_open(result: open::OpenResult) {
+    println!(
+        "open\t{}\t{}\tlaunched:{}",
+        result.kind,
+        result.path.display(),
+        result.launched
+    );
 }

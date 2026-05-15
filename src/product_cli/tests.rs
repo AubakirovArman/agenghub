@@ -1,6 +1,8 @@
 use anyhow::Result;
 
-use super::{config, doctor, providers};
+use crate::agent_dir;
+
+use super::{config, doctor, open, providers};
 
 #[test]
 fn config_set_and_show_round_trips() -> Result<()> {
@@ -84,5 +86,27 @@ fn doctor_reports_missing_project_as_warning() -> Result<()> {
     assert!(rendered.contains("[ok] shell.sh"));
     assert!(rendered.contains("[ok] provider.default"));
     assert!(rendered.contains("[warn] project"));
+    Ok(())
+}
+
+#[test]
+fn open_dashboard_and_report_return_paths_without_launching() -> Result<()> {
+    std::env::set_var("AGENTHUB_OPEN_DRY_RUN", "1");
+    let dir = tempfile::tempdir()?;
+    agent_dir::init_project(dir.path(), false)?;
+    let tx = dir.path().join(".agent/tx/tx-open");
+    std::fs::create_dir_all(&tx)?;
+    std::fs::write(tx.join("journal.jsonl"), "")?;
+    std::fs::write(tx.join("report.md"), "# Report\n")?;
+
+    let dashboard = open::dashboard(dir.path())?;
+    let report = open::report(dir.path(), "tx-open")?;
+
+    assert_eq!(dashboard.kind, "dashboard");
+    assert!(dashboard.path.ends_with("index.html"));
+    assert!(!dashboard.launched);
+    assert_eq!(report.kind, "report");
+    assert!(report.path.ends_with("report.md"));
+    assert!(!report.launched);
     Ok(())
 }

@@ -98,6 +98,15 @@ agenthub config set default_provider codex
 
 Configuration is stored in `.agent/config.yaml` as simple key/value settings. `default_provider` falls back to `command` when no config file exists.
 
+## Open
+
+```bash
+agenthub open dashboard
+agenthub open report tx-20260515123000-abcd1234
+```
+
+`open dashboard` refreshes the static dashboard and opens `.agent/reports/dashboard/index.html` when the host has a desktop opener. `open report` opens a transaction `report.md`. In CI or with `AGENTHUB_OPEN_DRY_RUN=1`, AgentHub prints the path without launching an external process.
+
 ## Memory
 
 ```bash

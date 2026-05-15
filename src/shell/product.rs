@@ -5,10 +5,9 @@ use anyhow::{anyhow, Result};
 use crate::{
     enterprise,
     product_cli::{
-        config, doctor,
+        config, doctor, open,
         providers::{self},
     },
-    team, web_dashboard,
 };
 
 pub(super) fn print_doctor(root: &Path) -> Result<()> {
@@ -75,11 +74,8 @@ pub(super) fn open_dashboard(root: &Path) -> Result<()> {
     enterprise::authorize(root, "memory.read")?;
     enterprise::authorize(root, "skills.read")?;
     enterprise::authorize(root, "enterprise.policy.read")?;
-    let output = root.join(".agent/reports/dashboard");
-    let result = web_dashboard::write_dashboard(root, &output)?;
-    let projects = vec![root.to_path_buf()];
-    team::write_export(&projects, &root.join(".agent/reports/team"))?;
-    println!("{}", result.index_path.display());
+    let result = open::dashboard(root)?;
+    println!("{}", result.path.display());
     Ok(())
 }
 

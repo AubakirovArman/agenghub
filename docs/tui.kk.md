@@ -6,14 +6,17 @@
 
 ```bash
 agenthub tui
+agenthub tui --live
 ```
 
 Панельдер:
 
 - `Transactions`: `.agent/tx` ішіндегі соңғы transaction ids және statuses.
-- `Latest Transaction`: DAG node/edge counts, DAG roles, verifier status, verifier log tail, cost және estimated tokens.
+- `Latest Transaction`: ағымдағы stage, last event, DAG node/edge counts, DAG roles, verifier status, verifier log tail, cost, estimated tokens, provider, effects саны, heartbeat және last output tail.
 - `Memory`: committed records, failed attempts және recent workspace changes.
 - `Approvals`: `approval_required: true` бар AgentSpec drafts және human input күтіп тұрған transactions.
+
+`--live` сол plain-text dashboard мәнін тоқтатылғанға дейін жаңартып тұрады. `--interval-ms <n>` refresh жиілігін басқарады; `--once` scripts және tests үшін бір live frame шығарады.
 
 Мысал:
 
@@ -28,4 +31,6 @@ Project: /repo
 - DAG: 5 nodes, 4 edges
 - verifier passed: true
 - cost: 0.000000 USD
+- provider: codex
+- effects: 4
 ```

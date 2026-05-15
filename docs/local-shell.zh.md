@@ -26,7 +26,7 @@ doctor                       检查本地 readiness
 providers [status|...]       列出、setup、test 或 diagnose providers
 provider <id>                设置 default provider
 config [show|set key value]  查看或更新 config
-dashboard                    写入本地 web dashboard
+dashboard                    写入/打开本地 web dashboard
 open <tx-id|latest>          打开事务报告并设为当前事务
 latest                       打开最新 transaction
 watch [tx-id|latest]         跟随实时 transaction journal

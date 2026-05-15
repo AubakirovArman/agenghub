@@ -59,9 +59,20 @@ fn run() -> Result<()> {
                 report.tx_id, report.reverted_commit, report.revert_head
             );
         }
-        Commands::Tui => {
+        Commands::Tui {
+            live,
+            interval_ms,
+            once,
+        } => {
             enterprise::authorize(&project_root, "transaction.read")?;
-            print!("{}", tui::dashboard_text(&project_root)?);
+            if live {
+                tui::live_dashboard(&project_root, tui::LiveOptions { interval_ms, once })?;
+            } else {
+                print!("{}", tui::dashboard_text(&project_root)?);
+            }
+        }
+        Commands::Open { command } => {
+            handlers::handle_open(&project_root, command)?;
         }
         Commands::Dashboard { output } => {
             enterprise::authorize(&project_root, "transaction.read")?;

@@ -6,14 +6,17 @@
 
 ```bash
 agenthub tui
+agenthub tui --live
 ```
 
 面板：
 
 - `Transactions`: 来自 `.agent/tx` 的最新 transaction ids 和 statuses。
-- `Latest Transaction`: DAG node/edge counts、DAG roles、verifier status、verifier log tail、cost、estimated tokens。
+- `Latest Transaction`: 当前 stage、last event、DAG node/edge counts、DAG roles、verifier status、verifier log tail、cost、estimated tokens、provider、effects count、heartbeat 和 last output tail。
 - `Memory`: committed records、failed attempts、recent workspace changes。
 - `Approvals`: 带 `approval_required: true` 的 AgentSpec drafts，以及等待 human input 的 transactions。
+
+`--live` 会持续刷新同一个 plain-text dashboard，直到用户中断。`--interval-ms <n>` 控制刷新频率；`--once` 为 scripts 和 tests 输出一个 live frame。
 
 示例：
 
@@ -28,4 +31,6 @@ Project: /repo
 - DAG: 5 nodes, 4 edges
 - verifier passed: true
 - cost: 0.000000 USD
+- provider: codex
+- effects: 4
 ```

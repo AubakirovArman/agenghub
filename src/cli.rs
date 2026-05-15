@@ -7,7 +7,7 @@ mod product;
 mod tx;
 
 pub use admin::{AgentCommands, EnterpriseCommands, PluginCommands};
-pub use product::{ConfigCommands, ProviderCommands};
+pub use product::{ConfigCommands, OpenCommands, ProviderCommands};
 pub use tx::TxCommands;
 
 #[derive(Debug, Parser)]
@@ -58,7 +58,20 @@ pub enum Commands {
         #[arg(default_value = "last")]
         target: String,
     },
-    Tui,
+    Tui {
+        #[arg(long)]
+        live: bool,
+
+        #[arg(long, default_value_t = 1000)]
+        interval_ms: u64,
+
+        #[arg(long)]
+        once: bool,
+    },
+    Open {
+        #[command(subcommand)]
+        command: OpenCommands,
+    },
     Dashboard {
         #[arg(short, long, default_value = ".agent/reports/dashboard")]
         output: PathBuf,

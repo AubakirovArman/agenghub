@@ -33,6 +33,12 @@ fn render_latest(out: &mut String, latest: Option<&LatestTransaction>) {
     };
     push_line(out, &format!("- id: {}", latest.id));
     push_line(out, &format!("- status: {}", latest.status));
+    if let Some(stage) = &latest.stage {
+        push_line(out, &format!("- stage: {stage}"));
+    }
+    if let Some(event) = &latest.last_event {
+        push_line(out, &format!("- last event: {}", trim_line(event, 100)));
+    }
     push_line(
         out,
         &format!(
@@ -48,6 +54,7 @@ fn render_latest(out: &mut String, latest: Option<&LatestTransaction>) {
     }
     render_verifier(out, latest);
     render_cost(out, latest);
+    render_runtime(out, latest);
     push_line(out, "");
 }
 
@@ -78,6 +85,28 @@ fn render_cost(out: &mut String, latest: &LatestTransaction) {
         .unwrap_or_else(|| "unknown".to_string());
     push_line(out, &format!("- cost: {cost}"));
     push_line(out, &format!("- estimated tokens: {tokens}"));
+}
+
+fn render_runtime(out: &mut String, latest: &LatestTransaction) {
+    let provider = latest.provider.as_deref().unwrap_or("unknown");
+    push_line(out, &format!("- provider: {provider}"));
+    push_line(out, &format!("- effects: {}", latest.effects));
+    if let Some(node) = &latest.heartbeat_node {
+        let last_output = latest
+            .last_output_sec
+            .map(|value| format!("{value}s ago"))
+            .unwrap_or_else(|| "unknown".to_string());
+        push_line(
+            out,
+            &format!("- heartbeat: {node}, last output {last_output}"),
+        );
+    }
+    if !latest.output_tail.is_empty() {
+        push_line(out, "- last output:");
+        for line in &latest.output_tail {
+            push_line(out, &format!("  {}", trim_line(line, 100)));
+        }
+    }
 }
 
 fn render_memory(out: &mut String, memory: &MemoryPanel) {

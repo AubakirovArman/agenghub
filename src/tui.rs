@@ -1,4 +1,6 @@
 mod collect;
+mod live;
+mod read;
 mod render;
 #[cfg(test)]
 mod tests;
@@ -8,6 +10,7 @@ use std::path::Path;
 use anyhow::Result;
 
 pub use collect::collect_dashboard;
+pub use live::{live_dashboard, LiveOptions};
 pub use render::render_dashboard;
 
 #[derive(Debug, Clone, Default)]
@@ -29,6 +32,8 @@ pub struct TransactionSummary {
 pub struct LatestTransaction {
     pub id: String,
     pub status: String,
+    pub stage: Option<String>,
+    pub last_event: Option<String>,
     pub dag_nodes: usize,
     pub dag_edges: usize,
     pub dag_roles: Vec<String>,
@@ -36,6 +41,11 @@ pub struct LatestTransaction {
     pub verifier_tail: Vec<String>,
     pub cost_usd: Option<f64>,
     pub estimated_tokens: Option<usize>,
+    pub effects: usize,
+    pub provider: Option<String>,
+    pub heartbeat_node: Option<String>,
+    pub last_output_sec: Option<u64>,
+    pub output_tail: Vec<String>,
 }
 
 #[derive(Debug, Clone, Default)]

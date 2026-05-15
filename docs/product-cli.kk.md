@@ -98,6 +98,15 @@ agenthub config set default_provider codex
 
 Configuration `.agent/config.yaml` ішінде simple key/value settings ретінде сақталады. Config file жоқ болса, `default_provider` мәні `command` болып есептеледі.
 
+## Open
+
+```bash
+agenthub open dashboard
+agenthub open report tx-20260515123000-abcd1234
+```
+
+`open dashboard` static dashboard жаңартып, host ішінде desktop opener болса `.agent/reports/dashboard/index.html` ашады. `open report` көрсетілген transaction үшін `report.md` ашады. CI ішінде немесе `AGENTHUB_OPEN_DRY_RUN=1` қойылса, AgentHub external process қоспай path шығарады.
+
 ## Memory
 
 ```bash

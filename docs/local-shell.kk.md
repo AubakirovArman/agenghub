@@ -26,7 +26,7 @@ doctor                       жергілікті readiness тексеру
 providers [status|...]       providers list/setup/test/diagnose
 provider <id>                default provider орнату
 config [show|set key value]  config көру немесе жаңарту
-dashboard                    жергілікті web dashboard жазу
+dashboard                    жергілікті web dashboard жазу/ашу
 open <tx-id|latest>          report ашу және tx-ті ағымдағы ету
 latest                       соңғы transaction ашу
 watch [tx-id|latest]         transaction journal-ды live бақылау

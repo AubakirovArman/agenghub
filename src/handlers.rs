@@ -14,7 +14,9 @@ mod run_commands;
 mod run_summary;
 
 pub use plugin_commands::handle_plugins;
-pub use product_commands::{handle_config, handle_doctor, handle_providers, handle_version};
+pub use product_commands::{
+    handle_config, handle_doctor, handle_open, handle_providers, handle_version,
+};
 pub use run_commands::{handle_ask, handle_plan, handle_run};
 
 pub fn handle_tx(project_root: &Path, command: TxCommands) -> Result<()> {

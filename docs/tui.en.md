@@ -6,14 +6,17 @@ Languages: [English](tui.en.md), [Русский](tui.ru.md), [中文](tui.zh.md
 
 ```bash
 agenthub tui
+agenthub tui --live
 ```
 
 Panels:
 
 - `Transactions`: latest transaction ids and statuses from `.agent/tx`.
-- `Latest Transaction`: DAG node/edge counts, DAG roles, verifier status, verifier log tail, cost, and estimated tokens.
+- `Latest Transaction`: current stage, last event, DAG node/edge counts, DAG roles, verifier status, verifier log tail, cost, estimated tokens, provider, effect count, heartbeat, and last output tail.
 - `Memory`: committed records, failed attempts, and recent workspace changes.
 - `Approvals`: AgentSpec drafts with `approval_required: true` and transactions blocked on human input.
+
+`--live` refreshes the same plain-text dashboard until interrupted. Use `--interval-ms <n>` to control refresh speed; `--once` renders one live frame for scripts and tests.
 
 Example:
 
@@ -28,4 +31,6 @@ Project: /repo
 - DAG: 5 nodes, 4 edges
 - verifier passed: true
 - cost: 0.000000 USD
+- provider: codex
+- effects: 4
 ```

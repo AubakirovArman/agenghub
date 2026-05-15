@@ -26,7 +26,7 @@ doctor                       check local readiness
 providers [status|...]       list, setup, test, or diagnose providers
 provider <id>                setup default provider
 config [show|set key value]  inspect or update config
-dashboard                    write the local web dashboard
+dashboard                    write/open the local web dashboard
 open <tx-id|latest>          open a transaction report and set it current
 latest                       open latest transaction
 watch [tx-id|latest]         follow the live transaction journal

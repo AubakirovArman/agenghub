@@ -5,7 +5,12 @@ use anyhow::{Context, Result};
 use serde_json::Value;
 
 use crate::agent_dir::{self, AgentPaths};
+use crate::journal::JournalEvent;
 use crate::memory;
+use crate::tui::read::{
+    array_len, count_lines, latest_output_tail, provider_label, read_json, read_jsonl,
+    read_latest_jsonl, tail_lines,
+};
 use crate::tui::{ApprovalPanel, Dashboard, LatestTransaction, MemoryPanel, TransactionSummary};
 
 pub fn collect_dashboard(project_root: &Path) -> Result<Dashboard> {
@@ -42,10 +47,15 @@ fn collect_latest(project_root: &Path, tx_id: &str, status: &str) -> Result<Late
     let dag = read_json(&tx_dir.join("dag.json")).unwrap_or(Value::Null);
     let verifier = read_json(&tx_dir.join("verifier.json")).unwrap_or(Value::Null);
     let cost = read_json(&tx_dir.join("cost.json")).unwrap_or(Value::Null);
+    let journal = read_jsonl::<JournalEvent>(&tx_dir.join("journal.jsonl"))?;
+    let latest_event = journal.last();
+    let heartbeat = read_latest_jsonl(&tx_dir.join("heartbeat.jsonl"))?;
 
     Ok(LatestTransaction {
         id: tx_id.to_string(),
         status: status.to_string(),
+        stage: latest_event.map(|event| event.state.clone()),
+        last_event: latest_event.map(|event| event.message.clone()),
         dag_nodes: array_len(&dag, "nodes"),
         dag_edges: array_len(&dag, "edges"),
         dag_roles: dag_roles(&dag),
@@ -56,6 +66,18 @@ fn collect_latest(project_root: &Path, tx_id: &str, status: &str) -> Result<Late
             .get("estimated_tokens")
             .and_then(Value::as_u64)
             .map(|value| value as usize),
+        effects: count_lines(&tx_dir.join("effects.jsonl"))?,
+        provider: provider_label(&tx_dir),
+        heartbeat_node: heartbeat
+            .as_ref()
+            .and_then(|value| value.get("node"))
+            .and_then(Value::as_str)
+            .map(str::to_string),
+        last_output_sec: heartbeat
+            .as_ref()
+            .and_then(|value| value.get("last_output_sec"))
+            .and_then(Value::as_u64),
+        output_tail: latest_output_tail(&tx_dir, 3)?,
     })
 }
 
@@ -113,34 +135,6 @@ fn dag_roles(dag: &Value) -> Vec<String> {
                 .collect()
         })
         .unwrap_or_default()
-}
-
-fn tail_lines(path: &Path, limit: usize) -> Result<Vec<String>> {
-    if !path.exists() {
-        return Ok(Vec::new());
-    }
-    let text = fs::read_to_string(path).with_context(|| format!("read {}", path.display()))?;
-    let mut lines = text
-        .lines()
-        .rev()
-        .take(limit)
-        .map(str::to_string)
-        .collect::<Vec<_>>();
-    lines.reverse();
-    Ok(lines)
-}
-
-fn read_json(path: &Path) -> Result<Value> {
-    let text = fs::read_to_string(path).with_context(|| format!("read {}", path.display()))?;
-    serde_json::from_str(&text).with_context(|| format!("parse {}", path.display()))
-}
-
-fn array_len(value: &Value, field: &str) -> usize {
-    value
-        .get(field)
-        .and_then(Value::as_array)
-        .map(Vec::len)
-        .unwrap_or(0)
 }
 
 fn file_contains(path: &Path, needle: &str) -> Result<bool> {

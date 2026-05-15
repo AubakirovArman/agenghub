@@ -16,7 +16,7 @@ AgentHub даёт transactional isolation, Git worktrees, command policy checks,
 
 CLI providers вроде Codex, Gemini и Kimi находятся через локальные binaries и используют authentication на стороне самого provider. AgentHub может проверить binary presence, version output, templates и dry-run readiness, но не может полностью доказать, что каждый provider account залогинен.
 
-`openai-http` рассчитан на local/dev OpenAI-compatible `http://` endpoints. Direct HTTPS SaaS providers, streaming API calls и provider-specific auth flows запланированы позже.
+`openai-http` поддерживает OpenAI-compatible HTTP и HTTPS endpoints с bearer-token auth, timeouts и structured error bodies. Streaming API calls и provider-specific auth flows запланированы позже.
 
 ## Team и Enterprise
 

@@ -28,6 +28,23 @@ fn renders_terminal_dashboard_panels() -> Result<()> {
         tx.join("cost.json"),
         r#"{"total_usd":0.01,"estimated_tokens":42}"#,
     )?;
+    fs::write(
+        tx.join("effects.jsonl"),
+        "{\"effect_id\":\"eff-1\",\"status\":\"verified\"}\n",
+    )?;
+    fs::write(
+        tx.join("heartbeat.jsonl"),
+        "{\"event\":\"HEARTBEAT\",\"node\":\"executor\",\"last_output_sec\":4}\n",
+    )?;
+    fs::write(
+        tx.join("agent_trace.json"),
+        r#"{"routes":{"executor":{"selected_adapter":"codex"}}}"#,
+    )?;
+    fs::create_dir_all(tx.join("logs"))?;
+    fs::write(
+        tx.join("logs/execution-0.stdout.log"),
+        "line one\nline two\n",
+    )?;
     fs::create_dir_all(dir.path().join(".agent/specs"))?;
     fs::write(
         dir.path().join(".agent/specs/approval.yaml"),
@@ -39,6 +56,11 @@ fn renders_terminal_dashboard_panels() -> Result<()> {
     assert!(dashboard.contains("AgentHub TUI Dashboard"));
     assert!(dashboard.contains("[Transactions]"));
     assert!(dashboard.contains("tx-20260101000000-demo COMMITTED"));
+    assert!(dashboard.contains("- stage: COMMITTED"));
+    assert!(dashboard.contains("- provider: codex"));
+    assert!(dashboard.contains("- effects: 1"));
+    assert!(dashboard.contains("- heartbeat: executor, last output 4s ago"));
+    assert!(dashboard.contains("line two"));
     assert!(dashboard.contains("- DAG: 1 nodes, 0 edges"));
     assert!(dashboard.contains("- pending specs: 1"));
     Ok(())

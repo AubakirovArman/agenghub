@@ -28,3 +28,9 @@ pub enum ConfigCommands {
     Show,
     Set { key: String, value: String },
 }
+
+#[derive(Debug, Subcommand)]
+pub enum OpenCommands {
+    Dashboard,
+    Report { tx_id: String },
+}

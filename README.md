@@ -98,6 +98,8 @@ agenthub ask "Добавь страницу курсов в стиле dashboard
 agenthub run examples/command-task.yaml
 agenthub tx status
 agenthub tx report tx-...
+agenthub tui --live
+agenthub open dashboard
 ```
 
 Running `agenthub` without a subcommand opens the local shell. Inside it you can use `sessions`, `session latest`, `doctor`, `providers status`, `provider codex`, `config show`, `dashboard`, and plain text requests. Shell sessions are transaction sessions: executed messages produce tracked transactions with reports, effects, verifier logs, and memory behavior.
@@ -173,7 +175,10 @@ agenthub run examples/topology-planner-task.yaml
 agenthub run examples/topology-swarm-task.yaml
 agenthub run examples/topology-manager-worker-task.yaml
 agenthub tui
+agenthub tui --live
 agenthub dashboard
+agenthub open dashboard
+agenthub open report tx-...
 agenthub dashboard --output tmp/agenthub-dashboard
 agenthub aal parse examples/add-courses.aal --output tmp/add-courses.yaml
 agenthub tx status
@@ -251,6 +256,8 @@ Generate a browser dashboard without a frontend build:
 
 ```bash
 agenthub dashboard
+agenthub open dashboard
+agenthub open report tx-...
 agenthub dashboard --output tmp/agenthub-dashboard
 ```
 

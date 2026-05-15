@@ -26,7 +26,7 @@ doctor                       проверить локальную готовн�
 providers [status|...]       список, setup, test или diagnose providers
 provider <id>                настроить default provider
 config [show|set key value]  посмотреть или обновить config
-dashboard                    записать локальный web dashboard
+dashboard                    записать/открыть локальный web dashboard
 open <tx-id|latest>          открыть report и сделать tx текущей
 latest                       открыть последнюю транзакцию
 watch [tx-id|latest]         следить за live journal транзакции

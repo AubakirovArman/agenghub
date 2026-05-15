@@ -16,7 +16,7 @@ AgentHub transactional isolation, Git worktrees, command policy checks, rollback
 
 Codex, Gemini және Kimi сияқты CLI providers local binaries арқылы табылады және authentication provider CLI жағында басқарылады. AgentHub binary presence, version output, templates және dry-run readiness тексере алады, бірақ әр provider account logged in екенін толық дәлелдей алмайды.
 
-`openai-http` local/dev OpenAI-compatible `http://` endpoints үшін арналған. Direct HTTPS SaaS providers, streaming API calls және provider-specific auth flows кейінгі нұсқаларға жоспарланған.
+`openai-http` OpenAI-compatible HTTP және HTTPS endpoints қолдайды, bearer-token auth, timeouts және structured error bodies бар. Streaming API calls және provider-specific auth flows кейінгі нұсқаларға жоспарланған.
 
 ## Team және Enterprise
 
