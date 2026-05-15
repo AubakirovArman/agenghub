@@ -8,24 +8,31 @@ agenthub
 agenthub shell
 ```
 
-这个 shell 面向 local-first 使用。你可以查看历史事务会话、打开报告、用自然语言生成 draft AgentSpec，并在同一个 prompt 中运行 spec。
+这个 shell 面向 local-first 使用。你可以查看历史事务会话、打开报告、用自然语言生成 draft AgentSpec、在同一个 prompt 中运行请求，并保持一个当前选中的 transaction。
+
+Shell 默认以 `plan` 模式启动。在该模式下，普通文本只会创建 draft。使用 `mode run` 后，普通文本会立即执行。
 
 ## 命令
 
 ```text
 help                         显示命令
 init                         初始化 .agent
-sessions                     列出最近事务
-open <tx-id>                 打开事务报告并设为当前事务
-watch [tx-id]                跟随实时 transaction journal
-cancel [tx-id]               请求取消 transaction
+mode plan|run                设置普通文本行为
+current                      显示当前选中的 transaction
+close                        清除当前选中的 transaction
+sessions or history          列出最近事务
+open <tx-id|latest>          打开事务报告并设为当前事务
+latest                       打开最新 transaction
+watch [tx-id|latest]         跟随实时 transaction journal
+cancel [tx-id|latest]        请求取消 transaction
 report [tx-id]               打印报告，默认使用当前事务
 effects [tx-id]              打印 effect ledger
 ask <request>                写入 draft AgentSpec
 do <request>                 写入 draft 并立即执行
 run <spec|request> [--no-commit]
 quit                         退出
-普通文本                     等同于 ask <request>
+普通文本                     plan 模式: draft；run 模式: 执行
+/sessions /open /report      交互式 slash 别名
 ```
 
 ## 示例
@@ -37,26 +44,35 @@ agenthub> add /courses page in the dashboard style
 draft .agent/drafts/shell-20260515123000.yaml
 ```
 
+切换到立即执行：
+
+```text
+agenthub:plan> mode run
+mode run
+agenthub:run> add a generated health-check file
+tx-... COMMITTED (.agent/tx/tx-.../report.md)
+```
+
 运行 spec：
 
 ```text
-agenthub> run .agent/drafts/shell-20260515123000.yaml
+agenthub:plan> run .agent/drafts/shell-20260515123000.yaml
 tx-... COMMITTED (.agent/tx/tx-.../report.md)
 ```
 
 立即运行自然语言请求：
 
 ```text
-agenthub> do add a generated health-check file
+agenthub:plan> do add a generated health-check file
 ```
 
 浏览历史会话：
 
 ```text
-agenthub> sessions
-agenthub> open tx-20260515123000-abcd1234
-agenthub[tx-20260515123000-abcd1234]> watch
-agenthub[tx-20260515123000-abcd1234]> effects
+agenthub:plan> sessions
+agenthub:plan> open latest
+agenthub:plan[tx-20260515123000-abcd1234]> watch
+agenthub:plan[tx-20260515123000-abcd1234]> effects
 ```
 
 ## 安全性

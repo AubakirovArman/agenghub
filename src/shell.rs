@@ -1,191 +1,153 @@
+mod actions;
 mod commands;
+mod run;
 
 use std::io::{self, BufRead, Write};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
-use anyhow::{anyhow, Context, Result};
-use chrono::Utc;
+use anyhow::Result;
 
-use crate::{agent_dir, enterprise, intent, transaction, tx_watch};
-use commands::{parse_line, ShellCommand};
+use crate::agent_dir;
+use commands::{parse_line, ShellCommand, ShellMode};
 
 pub fn run(project_root: &Path) -> Result<()> {
     let stdin = io::stdin();
     let mut stdout = io::stdout();
     let mut current_tx: Option<String> = None;
-    writeln!(stdout, "AgentHub local shell. Type `help` for commands.")?;
+    let mut mode = ShellMode::Plan;
+    writeln!(
+        stdout,
+        "AgentHub local shell. Type `help` for commands. Use `mode run` to execute plain text."
+    )?;
     loop {
-        prompt(&mut stdout, current_tx.as_deref())?;
+        prompt(&mut stdout, mode, current_tx.as_deref())?;
         let mut line = String::new();
         if stdin.lock().read_line(&mut line)? == 0 {
             break;
         }
-        if !handle(project_root, parse_line(&line), &mut current_tx)? {
+        if !handle(project_root, parse_line(&line), &mut current_tx, &mut mode)? {
             break;
         }
     }
     Ok(())
 }
 
-fn handle(root: &Path, command: ShellCommand, current_tx: &mut Option<String>) -> Result<bool> {
+fn handle(
+    root: &Path,
+    command: ShellCommand,
+    current_tx: &mut Option<String>,
+    mode: &mut ShellMode,
+) -> Result<bool> {
     match command {
         ShellCommand::Empty => {}
         ShellCommand::Exit => return Ok(false),
-        ShellCommand::Help => print_help(),
+        ShellCommand::Help => print_help(*mode),
         ShellCommand::Init => {
             agent_dir::init_project(root, false)?;
             println!("initialized {}", root.display());
         }
-        ShellCommand::Sessions => list_sessions(root)?,
-        ShellCommand::Open(tx_id) => {
-            print_report(root, &tx_id)?;
-            *current_tx = Some(tx_id);
+        ShellCommand::Current => actions::print_current(root, current_tx.as_deref())?,
+        ShellCommand::Close => {
+            *current_tx = None;
+            println!("current session cleared");
         }
-        ShellCommand::Watch(tx_id) => watch_tx(root, &require_tx(tx_id, current_tx)?)?,
-        ShellCommand::Cancel(tx_id) => cancel_tx(root, &require_tx(tx_id, current_tx)?)?,
-        ShellCommand::Report(tx_id) => print_report(root, &require_tx(tx_id, current_tx)?)?,
-        ShellCommand::Effects(tx_id) => print_effects(root, &require_tx(tx_id, current_tx)?)?,
+        ShellCommand::Mode(next) => update_mode(next, mode),
+        ShellCommand::Sessions => actions::list_sessions(root)?,
+        ShellCommand::Open(tx_id) => {
+            let requested = (!tx_id.trim().is_empty()).then_some(tx_id.as_str());
+            let opened = requested
+                .map(|value| actions::resolve_tx(root, Some(value), current_tx.as_deref()))
+                .unwrap_or_else(|| actions::latest_tx(root))?;
+            actions::print_report(root, &opened)?;
+            *current_tx = Some(opened);
+        }
+        ShellCommand::Watch(tx_id) => {
+            let tx = actions::resolve_tx(root, tx_id.as_deref(), current_tx.as_deref())?;
+            actions::watch_tx(root, &tx)?;
+        }
+        ShellCommand::Cancel(tx_id) => {
+            let tx = actions::resolve_tx(root, tx_id.as_deref(), current_tx.as_deref())?;
+            actions::cancel_tx(root, &tx)?;
+        }
+        ShellCommand::Report(tx_id) => {
+            let tx = actions::resolve_tx(root, tx_id.as_deref(), current_tx.as_deref())?;
+            actions::print_report(root, &tx)?;
+        }
+        ShellCommand::Effects(tx_id) => {
+            let tx = actions::resolve_tx(root, tx_id.as_deref(), current_tx.as_deref())?;
+            actions::print_effects(root, &tx)?;
+        }
         ShellCommand::Ask(request) => {
-            let path = write_draft(root, &request)?;
+            let path = run::write_draft(root, &request)?;
             println!("draft {}", path.display());
             println!("run {}  # execute", path.display());
         }
-        ShellCommand::Do(request) => run_request(root, &request, false, current_tx)?,
-        ShellCommand::Run { target, no_commit } => {
-            let path = resolve_run_target(root, &target)?;
-            run_spec(root, &path, no_commit, current_tx)?;
+        ShellCommand::Do(request) => {
+            *current_tx = Some(run::run_request(root, &request, false)?);
         }
+        ShellCommand::Run { target, no_commit } => {
+            let path = run::resolve_run_target(root, &target)?;
+            *current_tx = Some(run::run_spec(root, &path, no_commit)?);
+        }
+        ShellCommand::Message(request) => handle_message(root, &request, *mode, current_tx)?,
     }
     Ok(true)
 }
 
-fn prompt(stdout: &mut io::Stdout, current_tx: Option<&str>) -> Result<()> {
+fn prompt(stdout: &mut io::Stdout, mode: ShellMode, current_tx: Option<&str>) -> Result<()> {
     match current_tx {
-        Some(tx) => write!(stdout, "agenthub[{tx}]> ")?,
-        None => write!(stdout, "agenthub> ")?,
+        Some(tx) => write!(stdout, "agenthub:{}[{tx}]> ", mode.as_str())?,
+        None => write!(stdout, "agenthub:{}> ", mode.as_str())?,
     }
     stdout.flush()?;
     Ok(())
 }
 
-fn print_help() {
-    println!("help                         show commands");
+fn print_help(mode: ShellMode) {
+    println!("current mode: {}", mode.as_str());
+    println!("help or /help                show commands");
     println!("init                         initialize .agent");
-    println!("sessions                     list transactions");
-    println!("open <tx-id>                 open transaction report");
-    println!("watch [tx-id]                follow live transaction journal");
-    println!("cancel [tx-id]               request transaction cancellation");
-    println!("report [tx-id]               print report");
-    println!("effects [tx-id]              print effect ledger");
+    println!("mode plan|run                set plain-text behavior");
+    println!("current                      show selected transaction");
+    println!("close                        clear selected transaction");
+    println!("sessions or history          list transactions");
+    println!("open <tx-id|latest>          open report and select tx");
+    println!("latest                       open latest transaction");
+    println!("watch [tx-id|latest]         follow live transaction journal");
+    println!("cancel [tx-id|latest]        request transaction cancellation");
+    println!("report [tx-id|latest]        print report");
+    println!("effects [tx-id|latest]       print effect ledger");
     println!("ask <request>                write a draft spec");
     println!("do <request>                 write a draft and run it");
     println!("run <spec|request> [--no-commit]");
     println!("quit                         exit");
-    println!("plain text                   same as ask <request>");
+    println!("plain text                   plan mode: draft; run mode: execute");
+    println!("slash commands               /sessions /open latest /report /effects");
 }
 
-fn list_sessions(root: &Path) -> Result<()> {
-    enterprise::authorize(root, "transaction.read")?;
-    let mut rows = agent_dir::list_transactions(root)?;
-    rows.reverse();
-    for row in rows.into_iter().take(25) {
-        println!("{}\t{}\t{}", row.id, row.status, row.report_path.display());
-    }
-    Ok(())
-}
-
-fn print_report(root: &Path, tx_id: &str) -> Result<()> {
-    enterprise::authorize(root, "transaction.read")?;
-    print!("{}", agent_dir::read_report(root, tx_id)?);
-    Ok(())
-}
-
-fn print_effects(root: &Path, tx_id: &str) -> Result<()> {
-    enterprise::authorize(root, "transaction.read")?;
-    print!("{}", agent_dir::read_effects(root, tx_id)?);
-    Ok(())
-}
-
-fn watch_tx(root: &Path, tx_id: &str) -> Result<()> {
-    enterprise::authorize(root, "transaction.read")?;
-    tx_watch::watch(
-        root,
-        tx_id,
-        tx_watch::WatchOptions {
-            interval_ms: 1000,
-            once: false,
-        },
-    )
-}
-
-fn cancel_tx(root: &Path, tx_id: &str) -> Result<()> {
-    enterprise::authorize(root, "transaction.run")?;
-    let actor = std::env::var("AGENTHUB_ACTOR").unwrap_or_else(|_| "local".to_string());
-    let report = crate::tx_control::cancel(root, tx_id, &actor, "requested from shell")?;
-    println!("cancel_requested {} {}", report.tx_id, report.reason);
-    Ok(())
-}
-
-fn run_request(
+fn handle_message(
     root: &Path,
     request: &str,
-    no_commit: bool,
+    mode: ShellMode,
     current_tx: &mut Option<String>,
 ) -> Result<()> {
-    let path = write_draft(root, request)?;
-    run_spec(root, &path, no_commit, current_tx)
-}
-
-fn run_spec(
-    root: &Path,
-    spec: &Path,
-    no_commit: bool,
-    current_tx: &mut Option<String>,
-) -> Result<()> {
-    enterprise::authorize(root, "transaction.run")?;
-    let outcome = transaction::run(root, spec, no_commit)?;
-    println!(
-        "{} {} ({})",
-        outcome.tx_id,
-        outcome.status.as_str(),
-        outcome.report_path.display()
-    );
-    *current_tx = Some(outcome.tx_id);
+    match mode {
+        ShellMode::Plan => {
+            let path = run::write_draft(root, request)?;
+            println!("draft {}", path.display());
+            println!("mode run  # execute future plain text directly");
+            println!("run {}  # execute this draft", path.display());
+        }
+        ShellMode::Run => {
+            *current_tx = Some(run::run_request(root, request, false)?);
+        }
+    }
     Ok(())
 }
 
-fn write_draft(root: &Path, request: &str) -> Result<PathBuf> {
-    let preview = intent::normalize_to_spec(request);
-    let path = draft_path(root);
-    intent::write_preview(&preview, &path)?;
-    for question in preview.questions {
-        eprintln!("question [{}] {}", question.id, question.question);
+fn update_mode(next: Option<ShellMode>, mode: &mut ShellMode) {
+    if let Some(next) = next {
+        *mode = next;
     }
-    Ok(path)
-}
-
-fn draft_path(root: &Path) -> PathBuf {
-    root.join(".agent")
-        .join("drafts")
-        .join(format!("shell-{}.yaml", Utc::now().format("%Y%m%d%H%M%S")))
-}
-
-fn resolve_run_target(root: &Path, target: &str) -> Result<PathBuf> {
-    let no_flag = target.replace(" --no-commit", "").trim().to_string();
-    let path = PathBuf::from(&no_flag);
-    let resolved = if path.is_absolute() {
-        path
-    } else {
-        root.join(path)
-    };
-    if resolved.exists() {
-        return Ok(resolved);
-    }
-    write_draft(root, &no_flag).with_context(|| format!("create draft for `{no_flag}`"))
-}
-
-fn require_tx(tx_id: Option<String>, current_tx: &Option<String>) -> Result<String> {
-    tx_id
-        .or_else(|| current_tx.clone())
-        .ok_or_else(|| anyhow!("no current transaction; use `sessions` or `open <tx-id>`"))
+    println!("mode {}", mode.as_str());
 }

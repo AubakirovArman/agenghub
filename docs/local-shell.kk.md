@@ -8,24 +8,31 @@ agenthub
 agenthub shell
 ```
 
-Бұл shell local-first жұмысқа арналған. Оның ішінде бұрынғы transaction сессияларын көруге, report ашуға, табиғи тілден draft AgentSpec жасауға және spec-ті prompt ішінен іске қосуға болады.
+Бұл shell local-first жұмысқа арналған. Оның ішінде бұрынғы transaction сессияларын көруге, report ашуға, табиғи тілден draft AgentSpec жасауға, request-ті prompt ішінен іске қосуға және ағымдағы transaction таңдаулы күйде ұстауға болады.
+
+Shell әдепкіде `plan` режимінде ашылады. Бұл режимде жай мәтін тек draft жасайды. Жай мәтін бірден орындалсын десең, `mode run` қос.
 
 ## Командалар
 
 ```text
 help                         командаларды көрсету
 init                         .agent инициализациялау
-sessions                     соңғы transaction тізімі
-open <tx-id>                 report ашу және tx-ті ағымдағы ету
-watch [tx-id]                transaction journal-ды live бақылау
-cancel [tx-id]               transaction cancellation сұрау
+mode plan|run                жай мәтін әрекетін таңдау
+current                      таңдалған transaction көрсету
+close                        таңдалған transaction тазалау
+sessions or history          соңғы transaction тізімі
+open <tx-id|latest>          report ашу және tx-ті ағымдағы ету
+latest                       соңғы transaction ашу
+watch [tx-id|latest]         transaction journal-ды live бақылау
+cancel [tx-id|latest]        transaction cancellation сұрау
 report [tx-id]               report шығару, әдепкісі ағымдағы tx
 effects [tx-id]              effect ledger шығару
 ask <request>                draft AgentSpec жазу
 do <request>                 draft жазып, бірден іске қосу
 run <spec|request> [--no-commit]
 quit                         шығу
-жай мәтін                    ask <request> сияқты
+жай мәтін                    plan режимі: draft; run режимі: орындау
+/sessions /open /report      интерактив slash aliases
 ```
 
 ## Мысалдар
@@ -37,26 +44,35 @@ agenthub> dashboard стилінде /courses бет қос
 draft .agent/drafts/shell-20260515123000.yaml
 ```
 
+Бірден орындау режиміне ауысу:
+
+```text
+agenthub:plan> mode run
+mode run
+agenthub:run> generated health-check file қос
+tx-... COMMITTED (.agent/tx/tx-.../report.md)
+```
+
 Spec іске қосу:
 
 ```text
-agenthub> run .agent/drafts/shell-20260515123000.yaml
+agenthub:plan> run .agent/drafts/shell-20260515123000.yaml
 tx-... COMMITTED (.agent/tx/tx-.../report.md)
 ```
 
 Табиғи сұранысты бірден орындау:
 
 ```text
-agenthub> do generated health-check file қос
+agenthub:plan> do generated health-check file қос
 ```
 
 Бұрынғы сессияларды қарау:
 
 ```text
-agenthub> sessions
-agenthub> open tx-20260515123000-abcd1234
-agenthub[tx-20260515123000-abcd1234]> watch
-agenthub[tx-20260515123000-abcd1234]> effects
+agenthub:plan> sessions
+agenthub:plan> open latest
+agenthub:plan[tx-20260515123000-abcd1234]> watch
+agenthub:plan[tx-20260515123000-abcd1234]> effects
 ```
 
 ## Қауіпсіздік

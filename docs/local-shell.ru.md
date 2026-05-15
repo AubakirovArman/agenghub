@@ -8,24 +8,31 @@ agenthub
 agenthub shell
 ```
 
-Оболочка нужна для local-first работы. Внутри можно смотреть прошлые транзакции, открывать отчёты, создавать draft AgentSpec из обычного сообщения и запускать spec без выхода из prompt.
+Оболочка нужна для local-first работы. Внутри можно смотреть прошлые транзакции, открывать отчёты, создавать draft AgentSpec из обычного сообщения, запускать запросы без выхода из prompt и держать выбранную текущую транзакцию.
+
+Shell стартует в режиме `plan`. В этом режиме обычный текст только создаёт draft. Если хочешь, чтобы обычный текст сразу выполнялся, включи `mode run`.
 
 ## Команды
 
 ```text
 help                         показать команды
 init                         инициализировать .agent
-sessions                     список последних транзакций
-open <tx-id>                 открыть report и сделать tx текущей
-watch [tx-id]                следить за live journal транзакции
-cancel [tx-id]               запросить cancellation транзакции
+mode plan|run                выбрать поведение обычного текста
+current                      показать выбранную транзакцию
+close                        сбросить выбранную транзакцию
+sessions or history          список последних транзакций
+open <tx-id|latest>          открыть report и сделать tx текущей
+latest                       открыть последнюю транзакцию
+watch [tx-id|latest]         следить за live journal транзакции
+cancel [tx-id|latest]        запросить cancellation транзакции
 report [tx-id]               показать report, по умолчанию текущей tx
 effects [tx-id]              показать effect ledger
 ask <request>                записать draft AgentSpec
 do <request>                 записать draft и сразу выполнить
 run <spec|request> [--no-commit]
 quit                         выйти
-обычный текст                то же самое, что ask <request>
+обычный текст                plan mode: draft; run mode: выполнить
+/sessions /open /report      slash-алиасы для интерактивной работы
 ```
 
 ## Примеры
@@ -37,26 +44,35 @@ agenthub> добавь страницу /courses в стиле dashboard
 draft .agent/drafts/shell-20260515123000.yaml
 ```
 
+Переключиться на немедленное выполнение:
+
+```text
+agenthub:plan> mode run
+mode run
+agenthub:run> добавь generated health-check файл
+tx-... COMMITTED (.agent/tx/tx-.../report.md)
+```
+
 Запустить spec:
 
 ```text
-agenthub> run .agent/drafts/shell-20260515123000.yaml
+agenthub:plan> run .agent/drafts/shell-20260515123000.yaml
 tx-... COMMITTED (.agent/tx/tx-.../report.md)
 ```
 
 Сразу выполнить естественный запрос:
 
 ```text
-agenthub> do добавь generated health-check файл
+agenthub:plan> do добавь generated health-check файл
 ```
 
 Открыть прошлые сессии:
 
 ```text
-agenthub> sessions
-agenthub> open tx-20260515123000-abcd1234
-agenthub[tx-20260515123000-abcd1234]> watch
-agenthub[tx-20260515123000-abcd1234]> effects
+agenthub:plan> sessions
+agenthub:plan> open latest
+agenthub:plan[tx-20260515123000-abcd1234]> watch
+agenthub:plan[tx-20260515123000-abcd1234]> effects
 ```
 
 ## Безопасность
