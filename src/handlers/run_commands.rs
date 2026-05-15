@@ -1,0 +1,156 @@
+use std::path::{Path, PathBuf};
+
+use anyhow::{anyhow, Context, Result};
+use chrono::Utc;
+use serde_json::json;
+
+use agenthub::diff_guard::DiffGuardResult;
+use agenthub::{enterprise, intent, transaction};
+
+pub fn handle_ask(request: &str, output: Option<&Path>, approval_required: bool) -> Result<()> {
+    let preview = intent::normalize_to_spec_with_options(
+        request,
+        intent::IntentOptions { approval_required },
+    );
+    if let Some(output) = output {
+        println!("{}", intent::write_preview(&preview, output)?.display());
+    } else {
+        print!("{}", preview.agent_spec_yaml);
+    }
+    print_questions(&preview);
+    Ok(())
+}
+
+pub fn handle_plan(
+    root: &Path,
+    request: &str,
+    output: Option<&Path>,
+    approval_required: bool,
+) -> Result<()> {
+    let preview = intent::normalize_to_spec_with_options(
+        request,
+        intent::IntentOptions { approval_required },
+    );
+    let path = output
+        .map(Path::to_path_buf)
+        .unwrap_or_else(|| draft_path(root, "plan"));
+    println!("{}", intent::write_preview(&preview, &path)?.display());
+    print_questions(&preview);
+    Ok(())
+}
+
+pub fn handle_run(root: &Path, target: &str, no_commit: bool) -> Result<()> {
+    let spec = resolve_run_spec(root, target)?;
+    let actor = enterprise::authorize(root, "transaction.run")?;
+    let outcome = match transaction::run(root, &spec, no_commit) {
+        Ok(outcome) => outcome,
+        Err(error) => {
+            enterprise::record_event(
+                root,
+                &actor,
+                "agenthub.run",
+                "transaction.run",
+                "error",
+                Some(spec.display().to_string()),
+                json!({ "error": error.to_string() }),
+            )?;
+            return Err(error);
+        }
+    };
+    enterprise::record_event(
+        root,
+        &actor,
+        "agenthub.run",
+        "transaction.run",
+        outcome.status.as_str(),
+        Some(spec.display().to_string()),
+        json!({ "tx_id": outcome.tx_id }),
+    )?;
+    print_run_summary(&spec, &outcome)
+}
+
+fn resolve_run_spec(root: &Path, target: &str) -> Result<PathBuf> {
+    let path = PathBuf::from(target);
+    let resolved = if path.is_absolute() {
+        path
+    } else {
+        root.join(path)
+    };
+    if resolved.exists() {
+        return Ok(resolved);
+    }
+    if looks_like_path(target) {
+        return Err(anyhow!("AgentSpec file does not exist: {target}"));
+    }
+    let preview = intent::normalize_to_spec(target);
+    let output = draft_path(root, "run");
+    intent::write_preview(&preview, &output)?;
+    print_questions(&preview);
+    Ok(output)
+}
+
+fn print_run_summary(spec: &Path, outcome: &transaction::TransactionOutcome) -> Result<()> {
+    println!(
+        "{} {} ({})",
+        outcome.tx_id,
+        outcome.status.as_str(),
+        outcome.report_path.display()
+    );
+    println!();
+    println!("AgentHub transaction {}", outcome.status.as_str());
+    println!("Spec: {}", spec.display());
+    println!("Report: {}", outcome.report_path.display());
+    println!("Watch: agenthub tx watch {}", outcome.tx_id);
+    if let Some(files) = changed_files(&outcome.report_path)? {
+        println!("Files changed: {files}");
+    }
+    Ok(())
+}
+
+fn changed_files(report_path: &Path) -> Result<Option<usize>> {
+    let path = report_path.with_file_name("diff_guard.json");
+    if !path.exists() {
+        return Ok(None);
+    }
+    let content =
+        std::fs::read_to_string(&path).with_context(|| format!("read {}", path.display()))?;
+    let diff: DiffGuardResult = serde_json::from_str(&content)?;
+    Ok(Some(diff.summary.files_changed))
+}
+
+fn print_questions(preview: &intent::IntentPreview) {
+    if !preview.unknowns.is_empty() {
+        eprintln!("unknowns: {}", preview.unknowns.join(", "));
+    }
+    if !preview.questions.is_empty() {
+        eprintln!("questions:");
+        for question in &preview.questions {
+            eprintln!("- [{}] {}", question.id, question.question);
+        }
+    }
+}
+
+fn draft_path(root: &Path, prefix: &str) -> PathBuf {
+    root.join(".agent").join("drafts").join(format!(
+        "{prefix}-{}.yaml",
+        Utc::now().format("%Y%m%d%H%M%S")
+    ))
+}
+
+fn looks_like_path(target: &str) -> bool {
+    target.ends_with(".yaml")
+        || target.ends_with(".yml")
+        || target.contains('/')
+        || target.contains('\\')
+}
+
+#[cfg(test)]
+mod tests {
+    use super::looks_like_path;
+
+    #[test]
+    fn separates_paths_from_natural_requests() {
+        assert!(looks_like_path("examples/task.yaml"));
+        assert!(!looks_like_path("add a generated health file"));
+    }
+}

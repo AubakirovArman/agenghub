@@ -12,6 +12,12 @@
 agenthub ask "Add /pricing page in the current dashboard style"
 ```
 
+Сразу создать draft-файл:
+
+```bash
+agenthub plan "Add /pricing page in the current dashboard style"
+```
+
 Записать в файл:
 
 ```bash
@@ -52,4 +58,10 @@ Defaults resolver сейчас выбирает:
 
 ```bash
 agenthub run .agent/plans/pricing.yaml
+```
+
+Для первого UX `run` также принимает natural request. Если target существует, AgentHub считает его AgentSpec path. Если это не path, AgentHub создаёт `.agent/drafts/run-<timestamp>.yaml` и запускает его:
+
+```bash
+agenthub run "Add /pricing page in the current dashboard style"
 ```

@@ -9,9 +9,11 @@ use crate::cli::{EnterpriseCommands, TxCommands};
 
 mod plugin_commands;
 mod product_commands;
+mod run_commands;
 
 pub use plugin_commands::handle_plugins;
 pub use product_commands::{handle_config, handle_doctor, handle_providers, handle_version};
+pub use run_commands::{handle_ask, handle_plan, handle_run};
 
 pub fn handle_tx(project_root: &Path, command: TxCommands) -> Result<()> {
     match command {

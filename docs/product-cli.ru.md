@@ -20,6 +20,16 @@ agenthub version
 
 Печатает установленную версию AgentHub.
 
+## Plan And Run
+
+```bash
+agenthub plan "Add /courses page in the current dashboard style"
+agenthub run "Add /courses page in the current dashboard style"
+agenthub run examples/command-task.yaml
+```
+
+`plan` пишет draft AgentSpec в `.agent/drafts/`, если не указан `--output`. `run` принимает существующий AgentSpec path или natural request. Natural request сначала превращается в draft spec, затем выполняется через обычный transaction engine. Первая строка вывода сохраняет компактный формат `tx-id STATUS (report)` для скриптов; следующие строки показывают human-readable summary с report и watch command.
+
 ## Providers
 
 ```bash

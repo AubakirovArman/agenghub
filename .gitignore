@@ -3,7 +3,9 @@ target/
 .agent/workspaces/
 .agent/cache/
 .agent/reports/
+.agent/memory/
 .agent/memory/*.jsonl
+.agent/metrics/
 .agent/enterprise/audit.jsonl
 .agent/enterprise/compliance-*.md
 *.log

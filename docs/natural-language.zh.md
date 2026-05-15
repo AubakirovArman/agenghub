@@ -12,6 +12,12 @@
 agenthub ask "Add /pricing page in the current dashboard style"
 ```
 
+直接创建 draft 文件：
+
+```bash
+agenthub plan "Add /pricing page in the current dashboard style"
+```
+
 写入文件：
 
 ```bash
@@ -52,4 +58,10 @@ Defaults resolver 当前选择：
 
 ```bash
 agenthub run .agent/plans/pricing.yaml
+```
+
+为了更好的 first-run UX，`run` 也接受 natural request。如果目标存在，AgentHub 会把它当作 AgentSpec path；如果它不是 path，AgentHub 会创建 `.agent/drafts/run-<timestamp>.yaml` 并运行：
+
+```bash
+agenthub run "Add /pricing page in the current dashboard style"
 ```

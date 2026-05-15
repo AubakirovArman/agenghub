@@ -20,6 +20,16 @@ agenthub version
 
 Prints the installed AgentHub version.
 
+## Plan And Run
+
+```bash
+agenthub plan "Add /courses page in the current dashboard style"
+agenthub run "Add /courses page in the current dashboard style"
+agenthub run examples/command-task.yaml
+```
+
+`plan` writes a draft AgentSpec under `.agent/drafts/` unless `--output` is provided. `run` accepts either an existing AgentSpec path or a natural request. Natural requests are converted into a draft spec first, then executed through the normal transaction engine. The first output line keeps the compact `tx-id STATUS (report)` format for scripts; the following lines show a human-readable summary with the report and watch command.
+
 ## Providers
 
 ```bash

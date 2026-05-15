@@ -12,6 +12,12 @@ Languages: [English](natural-language.en.md), [Русский](natural-language.
 agenthub ask "Add /pricing page in the current dashboard style"
 ```
 
+Create a draft file directly:
+
+```bash
+agenthub plan "Add /pricing page in the current dashboard style"
+```
+
 Write it to a file:
 
 ```bash
@@ -52,4 +58,10 @@ Review the generated YAML before running:
 
 ```bash
 agenthub run .agent/plans/pricing.yaml
+```
+
+For first-run UX, `run` also accepts a natural request. If the target exists, AgentHub treats it as an AgentSpec path. If it is not a path, AgentHub creates `.agent/drafts/run-<timestamp>.yaml` and runs it:
+
+```bash
+agenthub run "Add /pricing page in the current dashboard style"
 ```

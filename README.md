@@ -90,6 +90,8 @@ agenthub providers status
 agenthub providers setup command
 agenthub providers test command
 agenthub
+agenthub plan "Добавь страницу курсов в стиле dashboard"
+agenthub run "Добавь generated health-check файл" --no-commit
 agenthub ask "Добавь страницу курсов в стиле dashboard" --output .agent/drafts/courses.yaml
 agenthub run examples/command-task.yaml
 agenthub tx status
@@ -151,8 +153,10 @@ AAL supports `aal "0.2"`, `import skill`, `import rules`, semantic diagnostics, 
 
 ```bash
 agenthub init
+agenthub plan "Add /courses page in the current dashboard style"
 agenthub ask "Add /courses page in the current dashboard style"
 agenthub ask --approval-required "Create a useful page"
+agenthub run "Add a generated health-check file" --no-commit
 agenthub run examples/command-task.yaml
 agenthub run examples/content-task.yaml
 agenthub run examples/data-task.yaml

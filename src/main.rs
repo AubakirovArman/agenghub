@@ -6,11 +6,10 @@ use std::fs;
 
 use anyhow::Result;
 use clap::Parser;
-use serde_json::json;
 
 use agenthub::{
-    aal, agent_adapter, agent_dir, code_maps, enterprise, intent, memory, shell, skill_registry,
-    team, transaction, tui, web_dashboard, workspace,
+    aal, agent_adapter, agent_dir, code_maps, enterprise, memory, shell, skill_registry, team, tui,
+    web_dashboard, workspace,
 };
 
 use crate::cli::{
@@ -36,63 +35,23 @@ fn run() -> Result<()> {
         Commands::Doctor => handlers::handle_doctor(&project_root)?,
         Commands::Version => handlers::handle_version()?,
         Commands::Shell => shell::run(&project_root)?,
+        Commands::Plan {
+            request,
+            output,
+            approval_required,
+        } => handlers::handle_plan(
+            &project_root,
+            &request,
+            output.as_deref(),
+            approval_required,
+        )?,
         Commands::Ask {
             request,
             output,
             approval_required,
-        } => {
-            let preview = intent::normalize_to_spec_with_options(
-                &request,
-                intent::IntentOptions { approval_required },
-            );
-            if let Some(output) = output {
-                let path = intent::write_preview(&preview, &output)?;
-                println!("{}", path.display());
-            } else {
-                print!("{}", preview.agent_spec_yaml);
-            }
-            if !preview.unknowns.is_empty() {
-                eprintln!("unknowns: {}", preview.unknowns.join(", "));
-            }
-            if !preview.questions.is_empty() {
-                eprintln!("questions:");
-                for question in &preview.questions {
-                    eprintln!("- [{}] {}", question.id, question.question);
-                }
-            }
-        }
-        Commands::Run { spec, no_commit } => {
-            let actor = enterprise::authorize(&project_root, "transaction.run")?;
-            let outcome = match transaction::run(&project_root, &spec, no_commit) {
-                Ok(outcome) => outcome,
-                Err(error) => {
-                    enterprise::record_event(
-                        &project_root,
-                        &actor,
-                        "agenthub.run",
-                        "transaction.run",
-                        "error",
-                        Some(spec.display().to_string()),
-                        json!({ "error": error.to_string() }),
-                    )?;
-                    return Err(error);
-                }
-            };
-            enterprise::record_event(
-                &project_root,
-                &actor,
-                "agenthub.run",
-                "transaction.run",
-                outcome.status.as_str(),
-                Some(spec.display().to_string()),
-                json!({ "tx_id": outcome.tx_id }),
-            )?;
-            println!(
-                "{} {} ({})",
-                outcome.tx_id,
-                outcome.status.as_str(),
-                outcome.report_path.display()
-            );
+        } => handlers::handle_ask(&request, output.as_deref(), approval_required)?,
+        Commands::Run { target, no_commit } => {
+            handlers::handle_run(&project_root, &target, no_commit)?
         }
         Commands::Tui => {
             enterprise::authorize(&project_root, "transaction.read")?;

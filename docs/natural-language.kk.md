@@ -12,6 +12,12 @@
 agenthub ask "Add /pricing page in the current dashboard style"
 ```
 
+Draft файлын бірден жасау:
+
+```bash
+agenthub plan "Add /pricing page in the current dashboard style"
+```
+
 Файлға жазу:
 
 ```bash
@@ -52,4 +58,10 @@ Run алдында YAML тексер:
 
 ```bash
 agenthub run .agent/plans/pricing.yaml
+```
+
+First-run UX үшін `run` natural request те қабылдайды. Target бар болса, AgentHub оны AgentSpec path деп оқиды. Path болмаса, `.agent/drafts/run-<timestamp>.yaml` жасап, соны іске қосады:
+
+```bash
+agenthub run "Add /pricing page in the current dashboard style"
 ```
