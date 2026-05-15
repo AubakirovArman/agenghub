@@ -126,10 +126,14 @@ fn write_expected_artifacts(
 
 fn compare_file(path: &Path, actual: &str) -> Result<()> {
     let expected = fs::read_to_string(path).with_context(|| format!("read {}", path.display()))?;
-    if expected != actual {
+    if normalize_newlines(&expected) != normalize_newlines(actual) {
         bail!("AAL golden mismatch: {}", path.display());
     }
     Ok(())
+}
+
+fn normalize_newlines(value: &str) -> String {
+    value.replace("\r\n", "\n")
 }
 
 fn write_output(path: &Path, content: &str) -> Result<()> {
@@ -149,7 +153,6 @@ fn print_diagnostics(parsed: &aal::AalParseOutput) {
 #[cfg(test)]
 mod tests {
     use super::*;
-
     #[test]
     fn aal_check_matches_expected_artifacts() -> Result<()> {
         let dir = tempfile::tempdir()?;
@@ -180,9 +183,17 @@ change Demo {
         )?;
 
         let result = check_artifacts(&input, Some(&expected), false)?;
-
         assert_eq!(result.task_id, "demo");
         assert_eq!(result.expected_dir.as_deref(), Some(expected.as_path()));
+        Ok(())
+    }
+
+    #[test]
+    fn aal_check_accepts_crlf_golden_files() -> Result<()> {
+        let dir = tempfile::tempdir()?;
+        let path = dir.path().join("golden.txt");
+        fs::write(&path, "a\r\nb\r\n")?;
+        compare_file(&path, "a\nb\n")?;
         Ok(())
     }
 }
