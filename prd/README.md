@@ -23,7 +23,7 @@ git diff --check
 ## Current Queue
 
 - All tracked PRD phases are in `done/`.
-- Long-term open PRD tasks continue in [`todo/`](todo/). Current task: `todo/open-04-media-workspace.md`.
+- Long-term open PRD tasks continue in [`todo/`](todo/). Current task: `todo/open-05-research-profile.md`.
 
 ## Status Index
 

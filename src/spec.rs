@@ -82,7 +82,13 @@ mod tests {
 
     #[test]
     fn supports_additional_git_workspace_profiles() {
-        for kind in ["code.git", "content.git", "data.git", "infra.git"] {
+        for kind in [
+            "code.git",
+            "content.git",
+            "data.git",
+            "infra.git",
+            "media.git",
+        ] {
             let workspace = WorkspaceSpec {
                 kind: kind.to_string(),
                 isolation: Some("git_worktree".to_string()),

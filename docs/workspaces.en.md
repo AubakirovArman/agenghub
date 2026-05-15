@@ -4,7 +4,7 @@ Languages: [English](workspaces.en.md), [Русский](workspaces.ru.md), [中
 
 ## Purpose
 
-Phase 11 proves that the same transaction manager can execute non-code tasks. AgentHub supports git-worktree backed `code.git`, `content.git`, `data.git`, and `infra.git` profiles.
+Phase 11 proves that the same transaction manager can execute non-code tasks. AgentHub supports git-worktree backed `code.git`, `content.git`, `data.git`, `infra.git`, and `media.git` profiles.
 
 ## ContentWorkspace
 
@@ -63,6 +63,25 @@ Run:
 agenthub run examples/infra-task.yaml
 ```
 
+## MediaWorkspace
+
+```yaml
+workspace:
+  type: media.git
+  isolation: git_worktree
+
+verify:
+  profile: media_render
+```
+
+`media_render` runs configured commands, then checks that media artifacts under `media/` exist, are non-empty, and have valid JSON/YAML manifests when those formats are present. Memory kind: `media_change`.
+
+Run:
+
+```bash
+agenthub run examples/media-task.yaml
+```
+
 ## Domain Memory Schemas
 
 Tracked schemas live in:
@@ -70,5 +89,6 @@ Tracked schemas live in:
 - `.agent/schemas/content.yaml`
 - `.agent/schemas/data.yaml`
 - `.agent/schemas/infra.yaml`
+- `.agent/schemas/media.yaml`
 
 They define domain-specific memory object types and fields used by committed memory and reports.

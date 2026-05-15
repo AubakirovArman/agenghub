@@ -16,7 +16,8 @@ These PRD areas are implemented in the current repository and have tests, docs, 
 - Runtime smoke checks and bounded repair loop.
 - Advanced topologies for planner/executor, generator/critic, reviewer/repair, and swarm research.
 - Code, Content, Data, and Infra workspaces.
-- Domain verifiers for content, data, and infra.
+- MediaWorkspace with media memory schema and `media_render` verifier profile.
+- Domain verifiers for content, data, infra, and media.
 - Plugin ecosystem with package manifest, scaffold, trust model, optional signature metadata, and locks.
 - Enterprise RBAC, policy source, audit log, secret checks, runner inventory, private model route metadata, and compliance reports.
 - README and feature docs on English, Russian, Chinese, and Kazakh for recent phases.

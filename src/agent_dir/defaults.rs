@@ -117,6 +117,11 @@ pub(super) const DEFAULT_VERIFIER_PROFILES: &str = r#"profiles:
       - command
       - plan_validation
       - policy_check
+  media_render:
+    checks:
+      - command
+      - asset_presence
+      - manifest_validation
 "#;
 
 pub(super) const DEFAULT_CONTENT_SCHEMA: &str = r#"memory_schema:
@@ -153,5 +158,21 @@ pub(super) const DEFAULT_INFRA_SCHEMA: &str = r#"memory_schema:
     cost_constraint: { fields: [limit, currency, period] }
     rollback_procedure: { fields: [plan_path, owner, steps] }
     infra_change: { fields: [task_id, changed_files, summary] }
+    failed_attempt: { fields: [task_id, reason, fingerprint] }
+"#;
+
+pub(super) const DEFAULT_MEDIA_SCHEMA: &str = r#"memory_schema:
+  domain: media
+  description: MediaWorkspace memory tracks prompts, scripts, voice tracks, assets, render settings, and platform formats.
+  types:
+    scene: { fields: [id, script, prompt] }
+    shot: { fields: [scene_id, duration, camera, prompt] }
+    prompt_template: { fields: [name, template, model] }
+    asset: { fields: [path, media_type, checksum] }
+    voice_track: { fields: [path, voice, language] }
+    render_setting: { fields: [resolution, fps, format] }
+    video_style: { fields: [name, palette, motion] }
+    platform_requirement: { fields: [platform, aspect_ratio, duration_limit] }
+    media_change: { fields: [task_id, changed_files, summary] }
     failed_attempt: { fields: [task_id, reason, fingerprint] }
 "#;

@@ -4,7 +4,7 @@
 
 ## Мақсаты
 
-Phase 11 бір transaction manager non-code tasks орындай алатынын дәлелдейді. AgentHub git-worktree backed `code.git`, `content.git`, `data.git`, `infra.git` profiles қолдайды.
+Phase 11 бір transaction manager non-code tasks орындай алатынын дәлелдейді. AgentHub git-worktree backed `code.git`, `content.git`, `data.git`, `infra.git`, `media.git` profiles қолдайды.
 
 ## ContentWorkspace
 
@@ -63,6 +63,25 @@ verify:
 agenthub run examples/infra-task.yaml
 ```
 
+## MediaWorkspace
+
+```yaml
+workspace:
+  type: media.git
+  isolation: git_worktree
+
+verify:
+  profile: media_render
+```
+
+`media_render` configured commands орындайды, кейін `media/` ішіндегі media artifacts бар, бос емес және JSON/YAML manifests қолданылса valid екенін тексереді. Memory kind: `media_change`.
+
+Іске қосу:
+
+```bash
+agenthub run examples/media-task.yaml
+```
+
 ## Domain Memory Schemas
 
 Tracked schemas:
@@ -70,5 +89,6 @@ Tracked schemas:
 - `.agent/schemas/content.yaml`
 - `.agent/schemas/data.yaml`
 - `.agent/schemas/infra.yaml`
+- `.agent/schemas/media.yaml`
 
 Олар committed memory және reports үшін domain-specific memory object types мен fields анықтайды.

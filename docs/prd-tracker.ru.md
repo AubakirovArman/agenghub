@@ -23,4 +23,4 @@ sed -n '1,120p' prd/status.md
 
 - `prd/source/`: top-level split файла `prd.md`.
 - `prd/audit/`: done, partial и open PRD areas.
-- `prd/todo/open-*.md`: long-term PRD tasks; current task — `open-04-media-workspace.md`.
+- `prd/todo/open-*.md`: long-term PRD tasks; current task — `open-05-research-profile.md`.

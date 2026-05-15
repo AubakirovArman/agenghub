@@ -4,7 +4,7 @@
 
 ## 目的
 
-Phase 11 证明同一个 transaction manager 可以执行 non-code tasks。AgentHub 支持基于 git worktree 的 `code.git`、`content.git`、`data.git`、`infra.git` profiles。
+Phase 11 证明同一个 transaction manager 可以执行 non-code tasks。AgentHub 支持基于 git worktree 的 `code.git`、`content.git`、`data.git`、`infra.git`、`media.git` profiles。
 
 ## ContentWorkspace
 
@@ -63,6 +63,25 @@ verify:
 agenthub run examples/infra-task.yaml
 ```
 
+## MediaWorkspace
+
+```yaml
+workspace:
+  type: media.git
+  isolation: git_worktree
+
+verify:
+  profile: media_render
+```
+
+`media_render` 先运行 configured commands，然后检查 `media/` 下的 media artifacts 是否存在、非空，并在使用 JSON/YAML manifests 时验证其格式。Memory kind: `media_change`。
+
+运行：
+
+```bash
+agenthub run examples/media-task.yaml
+```
+
 ## Domain Memory Schemas
 
 Tracked schemas 位于：
@@ -70,5 +89,6 @@ Tracked schemas 位于：
 - `.agent/schemas/content.yaml`
 - `.agent/schemas/data.yaml`
 - `.agent/schemas/infra.yaml`
+- `.agent/schemas/media.yaml`
 
 它们定义 domain-specific memory object types 和 fields，用于 committed memory 和 reports。

@@ -26,6 +26,7 @@ pub fn run(profile: Option<&str>, worktree: &Path) -> Result<Option<DomainVerifi
         "content_quality" => content_checks(worktree)?,
         "data_quality" => data_checks(worktree)?,
         "infra_plan" => infra_checks(worktree)?,
+        "media_render" => media_checks(worktree)?,
         _ => return Ok(None),
     };
     Ok(Some(DomainVerificationResult {
@@ -56,6 +57,21 @@ fn infra_checks(root: &Path) -> Result<Vec<DomainCheckResult>> {
     Ok(vec![
         present("infra_artifacts_present", &files),
         infra_artifacts_valid("infra_artifacts_valid", &files)?,
+    ])
+}
+
+fn media_checks(root: &Path) -> Result<Vec<DomainCheckResult>> {
+    let files = collect_files(
+        &root.join("media"),
+        &[
+            "md", "txt", "json", "yaml", "yml", "mp3", "wav", "mp4", "mov", "png", "jpg", "jpeg",
+            "webp",
+        ],
+    )?;
+    Ok(vec![
+        present("media_assets_present", &files),
+        all_non_empty("media_assets_non_empty", &files)?,
+        media_manifests_valid("media_manifests_valid", &files)?,
     ])
 }
 
@@ -109,6 +125,27 @@ fn infra_artifacts_valid(name: &str, files: &[PathBuf]) -> Result<DomainCheckRes
         invalid == 0 && !files.is_empty(),
         format!("{invalid} invalid"),
     ))
+}
+
+fn media_manifests_valid(name: &str, files: &[PathBuf]) -> Result<DomainCheckResult> {
+    let mut invalid = 0;
+    for file in files {
+        let content = fs::read_to_string(file).unwrap_or_else(|_| String::from("binary asset"));
+        if content.trim().is_empty() || json_invalid(file, &content) || yaml_invalid(file, &content)
+        {
+            invalid += 1;
+        }
+    }
+    Ok(check(
+        name,
+        invalid == 0 && !files.is_empty(),
+        format!("{invalid} invalid"),
+    ))
+}
+
+fn json_invalid(file: &Path, content: &str) -> bool {
+    file.extension().and_then(|ext| ext.to_str()) == Some("json")
+        && serde_json::from_str::<serde_json::Value>(content).is_err()
 }
 
 fn yaml_invalid(file: &Path, content: &str) -> bool {

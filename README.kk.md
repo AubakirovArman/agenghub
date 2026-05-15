@@ -4,14 +4,14 @@ AgentHub — AI агенттерінің жұмысын транзакциялы
 
 Тілдер: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
-Толық құжаттама: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.kk.md), [PRD audit](docs/prd-audit.kk.md), [TUI](docs/tui.kk.md), [Web Dashboard](docs/web-dashboard.kk.md), [AAL](docs/aal.kk.md), [Workspaces](docs/workspaces.kk.md), [IDE](docs/ide.kk.md), [Natural language](docs/natural-language.kk.md), [Topologies](docs/topologies.kk.md), [Agent adapters](docs/agent-adapters.kk.md), [Runtime and repair](docs/runtime-repair.kk.md), [Context maps](docs/context-maps.kk.md), [LLM Gateway](docs/llm-gateway.kk.md), [Plugin ecosystem](docs/plugin-ecosystem.kk.md), [Enterprise](docs/enterprise.kk.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
+Толық құжаттама: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.kk.md), [PRD audit](docs/prd-audit.kk.md), [TUI](docs/tui.kk.md), [Web Dashboard](docs/web-dashboard.kk.md), [AAL](docs/aal.kk.md), [Workspaces](docs/workspaces.kk.md), [MediaWorkspace](docs/media-workspace.kk.md), [IDE](docs/ide.kk.md), [Natural language](docs/natural-language.kk.md), [Topologies](docs/topologies.kk.md), [Agent adapters](docs/agent-adapters.kk.md), [Runtime and repair](docs/runtime-repair.kk.md), [Context maps](docs/context-maps.kk.md), [LLM Gateway](docs/llm-gateway.kk.md), [Plugin ecosystem](docs/plugin-ecosystem.kk.md), [Enterprise](docs/enterprise.kk.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
 
 ## Қазіргі күйі
 
 Қазір PRD-дегі негізгі қабаттар іске асырылды:
 
 - транзакциялық орындау ядросы;
-- git worktree арқылы оқшауланған `CodeWorkspace`, `ContentWorkspace`, `DataWorkspace`, `InfraWorkspace`;
+- git worktree арқылы оқшауланған `CodeWorkspace`, `ContentWorkspace`, `DataWorkspace`, `InfraWorkspace`, `MediaWorkspace`;
 - journal, report, DAG, AgentIR, context pack және verifier logs;
 - diff guard, sync check, rollback және commit-on-success;
 - verifier commands, runtime smoke checks және content/data/infra үшін domain verifiers;
@@ -113,6 +113,7 @@ agenthub run examples/command-task.yaml
 agenthub run examples/content-task.yaml
 agenthub run examples/data-task.yaml
 agenthub run examples/infra-task.yaml
+agenthub run examples/media-task.yaml
 agenthub run examples/adapter-dry-run-task.yaml
 agenthub run examples/runtime-smoke-task.yaml
 agenthub run examples/topology-planner-task.yaml

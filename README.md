@@ -4,14 +4,14 @@ AgentHub is a transactional runtime foundation for AI-agent work. It turns a hum
 
 Languages: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
-Detailed docs: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.en.md), [PRD audit](docs/prd-audit.en.md), [TUI](docs/tui.en.md), [Web Dashboard](docs/web-dashboard.en.md), [AAL](docs/aal.en.md), [Workspaces](docs/workspaces.en.md), [IDE](docs/ide.en.md), [Natural language](docs/natural-language.en.md), [Topologies](docs/topologies.en.md), [Agent adapters](docs/agent-adapters.en.md), [Runtime and repair](docs/runtime-repair.en.md), [Context maps](docs/context-maps.en.md), [LLM Gateway](docs/llm-gateway.en.md), [Plugin ecosystem](docs/plugin-ecosystem.en.md), [Enterprise](docs/enterprise.en.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
+Detailed docs: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.en.md), [PRD audit](docs/prd-audit.en.md), [TUI](docs/tui.en.md), [Web Dashboard](docs/web-dashboard.en.md), [AAL](docs/aal.en.md), [Workspaces](docs/workspaces.en.md), [MediaWorkspace](docs/media-workspace.en.md), [IDE](docs/ide.en.md), [Natural language](docs/natural-language.en.md), [Topologies](docs/topologies.en.md), [Agent adapters](docs/agent-adapters.en.md), [Runtime and repair](docs/runtime-repair.en.md), [Context maps](docs/context-maps.en.md), [LLM Gateway](docs/llm-gateway.en.md), [Plugin ecosystem](docs/plugin-ecosystem.en.md), [Enterprise](docs/enterprise.en.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
 
 ## Current Status
 
 The current implementation covers the early PRD foundation:
 
 - transactional execution kernel;
-- worktree-isolated `CodeWorkspace`, `ContentWorkspace`, `DataWorkspace`, and `InfraWorkspace`;
+- worktree-isolated `CodeWorkspace`, `ContentWorkspace`, `DataWorkspace`, `InfraWorkspace`, and `MediaWorkspace`;
 - transaction journal, report, DAG, AgentIR, context pack, and verifier logs;
 - diff guard, sync check, rollback, and commit-on-success;
 - verifier commands, runtime smoke checks, and domain verifiers for content/data/infra;
@@ -113,6 +113,7 @@ agenthub run examples/command-task.yaml
 agenthub run examples/content-task.yaml
 agenthub run examples/data-task.yaml
 agenthub run examples/infra-task.yaml
+agenthub run examples/media-task.yaml
 agenthub run examples/adapter-dry-run-task.yaml
 agenthub run examples/runtime-smoke-task.yaml
 agenthub run examples/topology-planner-task.yaml

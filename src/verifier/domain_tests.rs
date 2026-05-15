@@ -31,3 +31,23 @@ fn infra_plan_accepts_yaml_plan() -> Result<()> {
     assert!(result.passed);
     Ok(())
 }
+
+#[test]
+fn media_render_accepts_manifest_and_assets() -> Result<()> {
+    let dir = tempfile::tempdir()?;
+    fs::create_dir_all(dir.path().join("media/renders"))?;
+    fs::write(
+        dir.path().join("media/manifest.json"),
+        r#"{"scene":"intro","format":"mp4"}"#,
+    )?;
+    fs::write(dir.path().join("media/renders/intro.mp4"), b"video-bytes")?;
+
+    let result = domain::run(Some("media_render"), dir.path())?.expect("domain result");
+
+    assert!(result.passed);
+    assert!(result
+        .checks
+        .iter()
+        .any(|check| check.name == "media_assets_present" && check.success));
+    Ok(())
+}

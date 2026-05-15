@@ -1,4 +1,5 @@
 mod defaults;
+mod schemas;
 
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -108,17 +109,7 @@ pub fn init_project(root: &Path, force: bool) -> Result<AgentPaths> {
         DEFAULT_ENTERPRISE_POLICY,
         force,
     )?;
-    write_default(
-        &paths.schemas.join("content.yaml"),
-        DEFAULT_CONTENT_SCHEMA,
-        force,
-    )?;
-    write_default(&paths.schemas.join("data.yaml"), DEFAULT_DATA_SCHEMA, force)?;
-    write_default(
-        &paths.schemas.join("infra.yaml"),
-        DEFAULT_INFRA_SCHEMA,
-        force,
-    )?;
+    schemas::write_defaults(&paths, force)?;
     write_default(&paths.memory.join("committed.jsonl"), "", force)?;
     write_default(&paths.memory.join("failed_attempts.jsonl"), "", force)?;
 
