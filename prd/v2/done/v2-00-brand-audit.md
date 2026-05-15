@@ -15,5 +15,5 @@ Verify that the product brand is consistently `AgentHub` and avoid mixing it wit
 
 ## Evidence
 
-- Implementation commit: pending.
-- Checks: pending.
+- Implementation commit: `5531f56`.
+- Checks: `git diff --check`.
