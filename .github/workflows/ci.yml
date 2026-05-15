@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  checks:
+    name: checks / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Format
+        run: cargo fmt -- --check
+
+      - name: Build
+        run: cargo build --locked
+
+      - name: Clippy
+        run: cargo clippy --locked -- -D warnings
+
+      - name: Test
+        run: cargo test --locked
+
+      - name: Module size
+        shell: bash
+        run: scripts/check-module-size.sh 200
+
+      - name: VS Code extension check
+        run: npm --prefix editors/vscode run check
+
+      - name: CLI smoke
+        shell: bash
+        run: |
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            export AGENTHUB_BIN="$PWD/target/debug/agenthub.exe"
+          else
+            export AGENTHUB_BIN="$PWD/target/debug/agenthub"
+          fi
+          "$AGENTHUB_BIN" aal parse examples/add-courses.aal --output target/agenthub-ci/add-courses.yaml
+          scripts/smoke-test.sh
