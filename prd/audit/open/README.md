@@ -2,4 +2,4 @@
 
 These are explicit PRD items that are not fully implemented yet.
 
-- Full end-to-end reference web application fixture for "Add Page to Existing Web App".
+No explicit open PRD areas are currently tracked. Broader long-term product expansions remain listed under partial areas.

@@ -6,7 +6,7 @@ The master PRD is [`../prd.md`](../prd.md). It is now split by top-level section
 
 ## Result
 
-All numbered roadmap phases 1-14 are done. The broader PRD is still a long-term product vision, so several non-roadmap items remain partial or open.
+All numbered roadmap phases 1-14 are done. The broader PRD is still a long-term product vision, so several non-roadmap items remain partial, but no explicit open PRD area is currently tracked.
 
 Use:
 
@@ -16,4 +16,4 @@ ls prd/source
 ls prd/audit/open
 ```
 
-Main open area: reference web fixture.
+Main open area: none currently tracked.

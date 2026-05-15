@@ -6,7 +6,7 @@ These tasks continue the long-term PRD beyond the completed phase roadmap.
 
 ## Current Queue
 
-- Current: `open-17-reference-web-fixture.md`
+- Current: none.
 - Done: `../done/open-01-tui.md`
 - Done: `../done/open-02-web-dashboard.md`
 - Done: `../done/open-03-aal-grammar.md`
@@ -23,9 +23,10 @@ These tasks continue the long-term PRD beyond the completed phase roadmap.
 - Done: `../done/open-14-plugin-signature-verification.md`
 - Done: `../done/open-15-metrics-dashboards.md`
 - Done: `../done/open-16-formal-wal.md`
+- Done: `../done/open-17-reference-web-fixture.md`
 
 ## Remaining Tasks
 
-1. `open-17-reference-web-fixture.md` — end-to-end reference web app fixture.
+No open long-term PRD task files are currently tracked.
 
 Work in numeric order unless a later task becomes a blocker for the current one.

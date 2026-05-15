@@ -1,0 +1,8 @@
+skill:
+  id: verifier.web_runtime_smoke
+  version: 1.0.0
+  description: Build the web app and verify the new route through HTTP runtime smoke.
+verifiers:
+  - web_runtime_smoke
+provides:
+  route_smoke: true

@@ -6,7 +6,7 @@ Master PRD [`../prd.md`](../prd.md) ішінде. Ол top-level sections бой
 
 ## Нәтиже
 
-Numbered roadmap phases 1-14 толық done. Бірақ толық PRD phase roadmap-тан кең: ол long-term product vision, сондықтан кейбір roadmap емес пункттер partial немесе open болып қалады.
+Numbered roadmap phases 1-14 толық done. Бірақ толық PRD phase roadmap-тан кең: ол long-term product vision, сондықтан кейбір roadmap емес пункттер partial болып қалады; қазіргі explicit open PRD area жоқ.
 
 Қолдану:
 
@@ -16,4 +16,4 @@ ls prd/source
 ls prd/audit/open
 ```
 
-Негізгі open area: reference web fixture.
+Негізгі open area: қазіргі уақытта жоқ.

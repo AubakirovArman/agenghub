@@ -1,0 +1,8 @@
+skill:
+  id: code.nextjs.add_page
+  version: 1.0.0
+  description: Add a route under src/app while preserving existing app structure.
+provides:
+  route_kind: app_router_page
+policies:
+  scope_required: true

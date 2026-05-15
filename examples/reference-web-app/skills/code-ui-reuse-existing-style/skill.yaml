@@ -1,0 +1,8 @@
+skill:
+  id: code.ui.reuse_existing_style
+  version: 1.0.0
+  description: Reuse existing typography, spacing, and card styles before adding new UI.
+provides:
+  style_policy: reuse_first
+policies:
+  avoid_new_design_system: true

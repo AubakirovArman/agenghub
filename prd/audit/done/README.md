@@ -11,6 +11,7 @@ These PRD areas are implemented in the current repository and have tests, docs, 
 - Terminal TUI dashboard for transactions, DAG, verifier, cost, memory, and approvals.
 - Static browser dashboard for transactions, timeline, agent trace, memory graph, skills, policies, costs, and reports.
 - Aggregated metrics dashboard for reliability, context, quality, trust, and cost KPIs.
+- End-to-end reference web app fixture for adding `/courses` with build, runtime smoke, scope rollback, memory, report, cost, and WAL evidence.
 - Standalone AAL parser, diagnostics, AgentSpec YAML output, and language reference.
 - Natural language `ask` preview with defaults, clarification questions, and approval marking.
 - Context maps and least-context context pack trace.

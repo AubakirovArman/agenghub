@@ -6,7 +6,7 @@ Source: [`../../prd.md`](../../prd.md)
 
 The staged roadmap in section 21 is done: Phase 1 through Phase 14 are in [`../done`](../done), and [`../todo`](../todo) has no phase files.
 
-The full PRD is broader than those phases. Some long-term product points remain partial or open: a reference web fixture.
+The full PRD is broader than those phases. No explicit open PRD areas are currently tracked, but several long-term product points remain partial.
 
 ## Top-Level Section Matrix
 
@@ -35,10 +35,10 @@ The full PRD is broader than those phases. Some long-term product points remain 
 | 20. Domain Profiles | Mostly done | Code, Infra, Data, Content, Media, and Research exist. |
 | 21. Development Roadmap | Done | Phases 1-14 are done with commit evidence in `prd/status.md`. |
 | 22. Technical Stack | Mostly done | Rust core and VS Code extension exist; research/ML plugins are future. |
-| 23. Success Metrics | Mostly done | Artifacts expose reliability/context/cost data and the Web Dashboard aggregates KPI metrics. |
+| 23. Success Metrics | Mostly done | Artifacts expose reliability/context/cost data and the Web Dashboard aggregates KPI metrics; deeper trend history remains future work. |
 | 24. Major Risks | Mostly mitigated | Transaction, verifier, memory, security, cost, and skill risks have mitigations, but remain ongoing product risks. |
 | 25. Open Questions | Partial | Several decisions are answered; some long-term questions remain open. |
-| 26. Reference Scenario | Partial | Transaction examples exist; a full real web-app add-page scenario is not shipped as an end-to-end fixture. |
+| 26. Reference Scenario | Done | End-to-end reference web app fixture adds `/courses` with isolated worktree execution, scope guard, build, runtime smoke, report, cost, memory, and WAL artifacts. |
 | 27. WAL and VCM-OS Connection | Done | Journal, formal WAL, replay validation, and VCM memory exist. |
 | 28. Final Product Thesis | Partial | Foundation is real, but full product thesis is broader than current implementation. |
 | 29. Immediate Next Documents | Partial | Many docs exist in 4 languages; full AAL spec, plugin author guide depth, and marketplace governance docs can expand. |

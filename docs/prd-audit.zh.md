@@ -6,7 +6,7 @@ Master PRD 位于 [`../prd.md`](../prd.md)。它已按 top-level sections 拆分
 
 ## 结果
 
-编号 roadmap phases 1-14 全部完成。但完整 PRD 比 phase roadmap 更大，它也是 long-term product vision，因此一些非 roadmap 项仍为 partial 或 open。
+编号 roadmap phases 1-14 全部完成。但完整 PRD 比 phase roadmap 更大，它也是 long-term product vision，因此一些非 roadmap 项仍为 partial；当前没有 explicit open PRD area。
 
 使用方式：
 
@@ -16,4 +16,4 @@ ls prd/source
 ls prd/audit/open
 ```
 
-主要 open area：reference web fixture。
+主要 open area：当前无。

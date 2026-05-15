@@ -1,0 +1,74 @@
+task:
+  id: reference_web_add_courses
+  type: code.add_page
+  title: Add /courses page to the reference web app
+
+workspace:
+  type: code.git
+  isolation: git_worktree
+
+skills:
+  - code.nextjs.add_page
+  - code.ui.reuse_existing_style
+  - verifier.web_runtime_smoke
+
+execution:
+  commands:
+    - mkdir -p src/app/courses
+    - |
+      cat > src/app/courses/page.html <<'HTML'
+      <!doctype html>
+      <html lang="en">
+        <head>
+          <meta charset="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <title>Courses</title>
+          <link rel="stylesheet" href="/styles/dashboard.css" />
+        </head>
+        <body>
+          <main class="dashboard-shell">
+            <section class="page-header">
+              <p class="eyebrow">Learning</p>
+              <h1>Courses</h1>
+              <p class="lede">Browse operational courses using the same spacing, typography, and cards as the dashboard.</p>
+            </section>
+            <section class="metric-grid" aria-label="Course catalog">
+              <article class="metric-card"><span>Available courses</span><strong>12</strong></article>
+              <article class="metric-card"><span>Active cohorts</span><strong>4</strong></article>
+            </section>
+          </main>
+        </body>
+      </html>
+      HTML
+
+scope:
+  allow:
+    - src/app/courses/**
+  deny:
+    - src/app/dashboard/**
+    - src/app/styles/**
+    - package.json
+    - scripts/**
+
+verify:
+  profile: web_runtime_smoke
+  commands:
+    - npm run build
+    - test -f .next/agenthub/courses/index.html
+  runtime:
+    start_command: npm run dev -- --host 127.0.0.1 --port 49231
+    base_url: http://127.0.0.1:49231
+    timeout_secs: 10
+  routes:
+    - path: /courses
+      expect: 200
+
+transaction:
+  max_repair_attempts: 0
+  rollback_on_failure: true
+  commit_on_success: true
+  memory_promotion: on_success
+  diff_limits:
+    max_files_changed: 1
+    max_lines_added: 24
+    max_lines_deleted: 0

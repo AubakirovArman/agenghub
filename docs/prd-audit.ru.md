@@ -6,7 +6,7 @@ Master PRD находится в [`../prd.md`](../prd.md). Он разложен
 
 ## Результат
 
-Все numbered roadmap phases 1-14 сделаны. Но полный PRD шире, чем phase roadmap: это long-term product vision, поэтому часть не-roadmap пунктов остаётся partial или open.
+Все numbered roadmap phases 1-14 сделаны. Но полный PRD шире, чем phase roadmap: это long-term product vision, поэтому часть не-roadmap пунктов остаётся partial, хотя explicit open PRD area сейчас не отслеживается.
 
 Использование:
 
@@ -16,4 +16,4 @@ ls prd/source
 ls prd/audit/open
 ```
 
-Главный open area: reference web fixture.
+Главный open area: сейчас нет.
