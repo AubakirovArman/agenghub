@@ -6,6 +6,7 @@ pub enum ProviderCommands {
     Status,
     Setup { provider: String },
     Test { provider: String },
+    Diagnose { provider: String },
 }
 
 #[derive(Debug, Subcommand)]

@@ -38,6 +38,17 @@ fn http_provider_calls_openai_compatible_stub() -> Result<()> {
 }
 
 #[test]
+fn http_provider_accepts_only_http_or_https_urls() {
+    let provider = HttpProvider::new("ftp://127.0.0.1", None, None);
+
+    let error = provider
+        .complete(request("bad-url", "hello"))
+        .expect_err("unsupported scheme should fail");
+
+    assert!(error.to_string().contains("http:// or https://"));
+}
+
+#[test]
 fn retry_repeats_until_provider_succeeds() -> Result<()> {
     let provider = FlakyProvider::default();
     let policy = RetryPolicy {

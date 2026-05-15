@@ -30,6 +30,9 @@ pub fn handle_providers(project_root: &Path, command: ProviderCommands) -> Resul
         ProviderCommands::Test { provider } => {
             print!("{}", providers::test_provider(project_root, &provider)?);
         }
+        ProviderCommands::Diagnose { provider } => {
+            print!("{}", providers::diagnose_provider(project_root, &provider)?);
+        }
     }
     Ok(())
 }

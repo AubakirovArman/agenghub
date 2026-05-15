@@ -55,7 +55,9 @@ agenthub providers status
 agenthub providers setup command
 agenthub providers setup codex
 agenthub providers test codex
+agenthub providers diagnose codex
 AGENTHUB_OPENAI_COMPAT_BASE_URL=http://127.0.0.1:8000 agenthub providers test openai-http
+AGENTHUB_OPENAI_COMPAT_BASE_URL=https://api.example.com agenthub providers diagnose openai-http
 ```
 
 支持的 providers：
@@ -64,7 +66,7 @@ AGENTHUB_OPENAI_COMPAT_BASE_URL=http://127.0.0.1:8000 agenthub providers test op
 - `codex`: 外部 Codex CLI wrapper。
 - `gemini`: 外部 Gemini CLI wrapper。
 - `kimi`: 外部 Kimi CLI wrapper。
-- `openai-http`: 本地 OpenAI-compatible HTTP endpoint。
+- `openai-http`: OpenAI-compatible HTTP 或 HTTPS endpoint。
 
 `setup` 只会在 provider 可用时配置它。成功后会写入 `default_provider`，为 CLI providers 保存 command template，打印 binary 或 endpoint，显示 dry-run mode，并给出下一条 `agenthub ask` command。
 
@@ -79,7 +81,9 @@ dry_run	built-in deterministic runner ready
 next	agenthub ask "describe the change" --output .agent/drafts/task.yaml
 ```
 
-`providers test command` 验证内置 runner。CLI providers 会验证 binary discovery、可用时的 version output、以及 template readiness；live authentication 仍由 provider CLI 管理。`providers test openai-http` 会执行真实的 OpenAI-compatible HTTP completion request。
+`providers diagnose <id>` 输出 binary 或 endpoint location、可用时的 version、rendered command template、auth hint、install hint 和 provider-specific details。`openai-http` diagnose 会显示 scheme、model、API-key presence，并提示用 `providers test` 做 live request。
+
+`providers test command` 验证内置 runner。CLI providers 会验证 binary discovery、可用时的 version output、以及 template readiness；live authentication 仍由 provider CLI 管理。`providers test openai-http` 会执行真实的 OpenAI-compatible HTTP/HTTPS completion request。
 
 ## Config
 

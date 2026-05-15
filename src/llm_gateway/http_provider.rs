@@ -1,5 +1,4 @@
-use std::io::{Read, Write};
-use std::net::TcpStream;
+use std::time::Duration;
 
 use anyhow::{anyhow, Context, Result};
 use serde_json::{json, Value};
@@ -84,66 +83,48 @@ fn completion_url(endpoint: &str) -> String {
 }
 
 fn post_json(url: &str, api_key: Option<&str>, body: &Value) -> Result<Value> {
-    let parsed = HttpUrl::parse(url)?;
-    let body = serde_json::to_string(body)?;
-    let mut request = format!(
-        "POST {} HTTP/1.1\r\nHost: {}\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n",
-        parsed.path,
-        parsed.host_header(),
-        body.len()
-    );
+    ensure_supported_scheme(url)?;
+    let agent = ureq::AgentBuilder::new()
+        .timeout(Duration::from_secs(60))
+        .build();
+    let mut request = agent.post(url).set("Content-Type", "application/json");
     if let Some(api_key) = api_key.filter(|key| !key.is_empty()) {
-        request.push_str(&format!("Authorization: Bearer {api_key}\r\n"));
+        request = request.set("Authorization", &format!("Bearer {api_key}"));
     }
-    request.push_str("\r\n");
-    request.push_str(&body);
-
-    let mut stream = TcpStream::connect((parsed.host.as_str(), parsed.port))
-        .with_context(|| format!("connect {}", parsed.host_header()))?;
-    stream.write_all(request.as_bytes())?;
-    let mut response = String::new();
-    stream.read_to_string(&mut response)?;
-    parse_response(&response)
+    let response = request
+        .send_json(body.clone())
+        .map_err(provider_error)?
+        .into_string()
+        .context("read OpenAI-compatible response body")?;
+    serde_json::from_str(response.trim()).context("parse OpenAI-compatible response JSON")
 }
 
-fn parse_response(response: &str) -> Result<Value> {
-    let (head, body) = response
-        .split_once("\r\n\r\n")
-        .ok_or_else(|| anyhow!("invalid HTTP response"))?;
-    let status = head.lines().next().unwrap_or_default();
-    if !status.contains(" 2") {
-        return Err(anyhow!("HTTP provider returned {status}"));
+fn provider_error(error: ureq::Error) -> anyhow::Error {
+    match error {
+        ureq::Error::Status(code, response) => {
+            let body = response.into_string().unwrap_or_default();
+            anyhow!("HTTP provider returned status {code}: {}", trim_body(&body))
+        }
+        ureq::Error::Transport(transport) => anyhow!("HTTP provider transport error: {transport}"),
     }
-    serde_json::from_str(body.trim()).context("parse OpenAI-compatible response JSON")
 }
 
-#[derive(Debug)]
-struct HttpUrl {
-    host: String,
-    port: u16,
-    path: String,
+fn ensure_supported_scheme(url: &str) -> Result<()> {
+    if url.starts_with("http://") || url.starts_with("https://") {
+        Ok(())
+    } else {
+        Err(anyhow!(
+            "OpenAI-compatible endpoints must start with http:// or https://"
+        ))
+    }
 }
 
-impl HttpUrl {
-    fn parse(url: &str) -> Result<Self> {
-        let rest = url
-            .strip_prefix("http://")
-            .ok_or_else(|| anyhow!("only http:// OpenAI-compatible endpoints are supported"))?;
-        let (host_port, path) = rest.split_once('/').unwrap_or((rest, ""));
-        let (host, port) = if let Some((host, port)) = host_port.rsplit_once(':') {
-            (host.to_string(), port.parse::<u16>()?)
-        } else {
-            (host_port.to_string(), 80)
-        };
-        Ok(Self {
-            host,
-            port,
-            path: format!("/{}", path),
-        })
-    }
-
-    fn host_header(&self) -> String {
-        format!("{}:{}", self.host, self.port)
+fn trim_body(body: &str) -> String {
+    let trimmed = body.trim();
+    if trimmed.chars().count() > 500 {
+        format!("{}...", trimmed.chars().take(500).collect::<String>())
+    } else {
+        trimmed.to_string()
     }
 }
 

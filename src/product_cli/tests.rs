@@ -20,6 +20,7 @@ fn providers_list_and_command_test_are_user_facing() -> Result<()> {
     let list = providers::render_list();
     let setup = providers::setup_provider(dir.path(), "command")?;
     let test = providers::test_provider(dir.path(), "command")?;
+    let diagnose = providers::diagnose_provider(dir.path(), "command")?;
 
     assert!(list.contains("codex"));
     assert!(list.contains("gemini"));
@@ -28,6 +29,27 @@ fn providers_list_and_command_test_are_user_facing() -> Result<()> {
     assert!(setup.contains("next\tagenthub ask"));
     assert!(test.contains("ok\tcommand"));
     assert!(test.contains("version\tagenthub"));
+    assert!(diagnose.contains("provider\tcommand"));
+    assert!(diagnose.contains("auth\tnot_required"));
+    Ok(())
+}
+
+#[test]
+fn provider_diagnose_reports_openai_http_endpoint_details() -> Result<()> {
+    let dir = tempfile::tempdir()?;
+    std::env::set_var(
+        "AGENTHUB_OPENAI_COMPAT_BASE_URL",
+        "https://api.example.test",
+    );
+    std::env::set_var("AGENTHUB_OPENAI_COMPAT_API_KEY", "test-key");
+
+    let diagnose = providers::diagnose_provider(dir.path(), "openai-http")?;
+
+    assert!(diagnose.contains("provider\topenai-http"));
+    assert!(diagnose.contains("scheme\thttps"));
+    assert!(diagnose.contains("auth\tset"));
+    std::env::remove_var("AGENTHUB_OPENAI_COMPAT_BASE_URL");
+    std::env::remove_var("AGENTHUB_OPENAI_COMPAT_API_KEY");
     Ok(())
 }
 

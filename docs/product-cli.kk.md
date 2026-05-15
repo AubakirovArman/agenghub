@@ -55,7 +55,9 @@ agenthub providers status
 agenthub providers setup command
 agenthub providers setup codex
 agenthub providers test codex
+agenthub providers diagnose codex
 AGENTHUB_OPENAI_COMPAT_BASE_URL=http://127.0.0.1:8000 agenthub providers test openai-http
+AGENTHUB_OPENAI_COMPAT_BASE_URL=https://api.example.com agenthub providers diagnose openai-http
 ```
 
 Supported providers:
@@ -64,7 +66,7 @@ Supported providers:
 - `codex`: external Codex CLI wrapper.
 - `gemini`: external Gemini CLI wrapper.
 - `kimi`: external Kimi CLI wrapper.
-- `openai-http`: local OpenAI-compatible HTTP endpoint.
+- `openai-http`: OpenAI-compatible HTTP немесе HTTPS endpoint.
 
 `setup` provider қолжетімді болса ғана config жазады. Сәтті болса `default_provider` жазады, CLI providers үшін command template сақтайды, binary немесе endpoint көрсетеді, dry-run mode шығарады және келесі `agenthub ask` command ұсынады.
 
@@ -79,7 +81,9 @@ dry_run	built-in deterministic runner ready
 next	agenthub ask "describe the change" --output .agent/drafts/task.yaml
 ```
 
-`providers test command` built-in runner тексереді. CLI providers binary discovery, version output available болса, және template readiness тексереді; live authentication provider CLI жағында қалады. `providers test openai-http` real OpenAI-compatible HTTP completion request орындайды.
+`providers diagnose <id>` binary немесе endpoint location, version available болса, rendered command template, auth hint, install hint және provider-specific details шығарады. `openai-http` diagnose scheme, model, API-key presence көрсетіп, live request үшін `providers test` ұсынады.
+
+`providers test command` built-in runner тексереді. CLI providers binary discovery, version output available болса, және template readiness тексереді; live authentication provider CLI жағында қалады. `providers test openai-http` real OpenAI-compatible HTTP/HTTPS completion request орындайды.
 
 ## Config
 

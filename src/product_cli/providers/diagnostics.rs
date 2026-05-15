@@ -35,6 +35,22 @@ pub fn test_success(status: &ProviderStatus) -> String {
     out
 }
 
+pub fn diagnose(status: &ProviderStatus) -> String {
+    let mut out = format!("provider\t{}\n", status.info.id);
+    out.push_str(&format!("available\t{}\n", status.available));
+    append_location(&mut out, status);
+    append_template(&mut out, status);
+    append_template_render(&mut out, status);
+    append_version(&mut out, status);
+    append_auth_hint(&mut out, status);
+    out.push_str(&format!("dry_run\t{}\n", dry_run_message(status.info.id)));
+    out.push_str(&format!("install_hint\t{}\n", status.info.note));
+    if status.info.id == "openai-http" {
+        append_http_details(&mut out, status);
+    }
+    out
+}
+
 fn append_location(out: &mut String, status: &ProviderStatus) {
     if status.info.id == "command" {
         out.push_str("runner\tbuilt-in\n");
@@ -63,6 +79,54 @@ fn append_version(out: &mut String, status: &ProviderStatus) {
             out.push_str(&format!("version\t{version}\n"));
         }
     }
+}
+
+fn append_template_render(out: &mut String, status: &ProviderStatus) {
+    if let Some(template) = status.info.template {
+        let rendered = template
+            .replace("{prompt}", ".agent/diagnostics/provider-test.prompt.txt")
+            .replace("{model}", "default")
+            .replace("{role}", "diagnose");
+        out.push_str(&format!("template_render\t{rendered}\n"));
+    }
+}
+
+fn append_auth_hint(out: &mut String, status: &ProviderStatus) {
+    match status.info.id {
+        "command" => out.push_str("auth\tnot_required\n"),
+        "openai-http" => {
+            let present = std::env::var("AGENTHUB_OPENAI_COMPAT_API_KEY")
+                .ok()
+                .is_some_and(|value| !value.is_empty());
+            out.push_str(&format!(
+                "auth\t{}\tAGENTHUB_OPENAI_COMPAT_API_KEY\n",
+                if present {
+                    "set"
+                } else {
+                    "missing_or_optional"
+                }
+            ));
+        }
+        _ => out.push_str("auth\tunknown\tprovider CLI manages authentication\n"),
+    }
+}
+
+fn append_http_details(out: &mut String, status: &ProviderStatus) {
+    let Some(endpoint) = &status.endpoint else {
+        out.push_str("endpoint\tmissing\tAGENTHUB_OPENAI_COMPAT_BASE_URL\n");
+        return;
+    };
+    let scheme = endpoint
+        .split_once("://")
+        .map(|(scheme, _)| scheme)
+        .unwrap_or("unknown");
+    let model = std::env::var("AGENTHUB_OPENAI_COMPAT_MODEL")
+        .ok()
+        .filter(|value| !value.is_empty())
+        .unwrap_or_else(|| "default".to_string());
+    out.push_str(&format!("scheme\t{scheme}\n"));
+    out.push_str(&format!("model\t{model}\n"));
+    out.push_str("models_check\toptional\tuse `agenthub providers test openai-http`\n");
 }
 
 fn dry_run_message(provider: &str) -> &'static str {

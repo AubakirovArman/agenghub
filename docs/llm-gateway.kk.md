@@ -42,13 +42,14 @@ LLM Gateway — model work үшін provider control және observability boun
 PRD v3 алғашқы real execution paths қосады және planned metadata compatibility сақтайды:
 
 - `CliProvider` configured CLI command template іске қосады, prompt file жазады, stdout/stderr жинайды және provider transcript JSONL қосады.
-- `HttpProvider` OpenAI-compatible `http://` endpoint ішіндегі `/v1/chat/completions` жолын шақыра алады.
+- `HttpProvider` `/v1/chat/completions` үшін OpenAI-compatible `http://` немесе `https://` endpoint шақыра алады, timeout, bearer token және structured error body handling қолдайды.
 - `complete_with_retry` provider calls үшін retry/backoff және optional attempt transcript records қосады.
 
 Local OpenAI-compatible endpoint тексеру:
 
 ```bash
 AGENTHUB_OPENAI_COMPAT_BASE_URL=http://127.0.0.1:8000 agenthub providers test openai-http
+AGENTHUB_OPENAI_COMPAT_BASE_URL=https://api.example.com agenthub providers diagnose openai-http
 ```
 
 Optional variables:

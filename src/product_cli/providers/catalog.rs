@@ -53,7 +53,8 @@ pub fn supported() -> Vec<ProviderInfo> {
             binary: None,
             endpoint_env: Some("AGENTHUB_OPENAI_COMPAT_BASE_URL"),
             template: None,
-            note: "set AGENTHUB_OPENAI_COMPAT_BASE_URL for an OpenAI-compatible HTTP endpoint",
+            note:
+                "set AGENTHUB_OPENAI_COMPAT_BASE_URL for an OpenAI-compatible HTTP/HTTPS endpoint",
         },
     ]
 }

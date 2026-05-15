@@ -103,6 +103,11 @@ pub fn test_provider(project_root: &Path, provider: &str) -> Result<String> {
     ))
 }
 
+pub fn diagnose_provider(project_root: &Path, provider: &str) -> Result<String> {
+    let status = status_for(project_root, provider)?;
+    Ok(diagnostics::diagnose(&status))
+}
+
 fn test_http_provider(status: ProviderStatus) -> Result<String> {
     let Some(endpoint) = status.endpoint else {
         return Ok(format!(

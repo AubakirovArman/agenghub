@@ -42,13 +42,14 @@ Example:
 PRD v3 adds first real execution paths while keeping planned metadata compatibility:
 
 - `CliProvider` can run a configured CLI command template, write a prompt file, capture stdout/stderr, and append provider transcript JSONL.
-- `HttpProvider` can call an OpenAI-compatible `http://` endpoint at `/v1/chat/completions`.
+- `HttpProvider` can call an OpenAI-compatible `http://` or `https://` endpoint at `/v1/chat/completions`, with timeout, bearer token, and structured error body handling.
 - `complete_with_retry` wraps provider calls with retry/backoff and optional attempt transcript records.
 
 Local OpenAI-compatible endpoint test:
 
 ```bash
 AGENTHUB_OPENAI_COMPAT_BASE_URL=http://127.0.0.1:8000 agenthub providers test openai-http
+AGENTHUB_OPENAI_COMPAT_BASE_URL=https://api.example.com agenthub providers diagnose openai-http
 ```
 
 Optional variables:
