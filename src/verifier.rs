@@ -1,6 +1,9 @@
 mod domain;
 #[cfg(test)]
 mod domain_tests;
+mod integration;
+#[cfg(test)]
+mod integration_tests;
 mod runtime;
 #[cfg(test)]
 mod runtime_tests;
@@ -17,6 +20,10 @@ use crate::command_runner::{run_shell_with_sandbox, CommandResult, CommandSandbo
 use crate::spec::{SandboxSpec, VerifySpec};
 
 pub use domain::{DomainCheckResult, DomainVerificationResult};
+pub use integration::{
+    build_integration_artifact, VerifierCheck, VerifierFingerprint, VerifierIntegrationArtifact,
+    VerifierPluginCompatibility, VerifierTrend,
+};
 use runtime::run_runtime_smoke;
 pub use runtime::{RouteCheckResult, RuntimeSmokeResult};
 

@@ -19,7 +19,7 @@ use super::execution::execute;
 use super::guards::check_diff_guard;
 use super::prepare::prepare_workspace;
 use super::review::run_review_with_repair;
-use super::verify::verify_transaction;
+use super::verify::{verify_transaction, VerifyContext};
 use super::RunState;
 
 #[allow(clippy::too_many_arguments)]
@@ -105,11 +105,15 @@ pub(super) fn run_inner(
         &diff_guard.summary.changed_files,
     )?;
     verify_transaction(
-        spec,
-        tx_dir,
-        journal,
-        agent_routes,
-        &prepared.worktree_path,
+        VerifyContext {
+            project_root,
+            spec,
+            tx_id,
+            tx_dir,
+            journal,
+            agent_routes,
+            worktree: &prepared.worktree_path,
+        },
         state,
     )?;
     sync_and_commit(

@@ -12,7 +12,7 @@ use crate::spec::AgentSpec;
 use crate::workspace;
 
 use super::guards::check_diff_guard;
-use super::verify::verify_transaction;
+use super::verify::{verify_transaction, VerifyContext};
 use super::{RunState, TransactionStatus};
 
 pub(super) struct CommitContext<'a> {
@@ -49,7 +49,7 @@ pub(super) fn sync_and_commit(ctx: CommitContext<'_>, state: &mut RunState) -> R
         git::rebase_onto(&prepared.worktree_path, &sync.current_head)?;
         ctx.journal
             .append_data("SYNC_REBASED", "rebased transaction worktree", json!(&sync))?;
-        rerun_guards_and_verifier(ctx.spec, ctx.tx_dir, ctx.journal, ctx.agent_routes, state)?;
+        rerun_guards_and_verifier(&ctx, state)?;
     }
     if ctx.no_commit || !ctx.spec.transaction.commit_on_success {
         state.status = Some(TransactionStatus::Noop);
@@ -89,30 +89,28 @@ fn evaluate_sync(
     smart_sync::evaluate(project_root, prepared, &files)
 }
 
-fn rerun_guards_and_verifier(
-    spec: &AgentSpec,
-    tx_dir: &Path,
-    journal: &Journal,
-    agent_routes: &AgentRoutes,
-    state: &mut RunState,
-) -> Result<()> {
+fn rerun_guards_and_verifier(ctx: &CommitContext<'_>, state: &mut RunState) -> Result<()> {
     let prepared = state
         .prepared
         .as_ref()
         .expect("prepared workspace exists")
         .clone();
-    let diff_guard = check_diff_guard(spec, &prepared.worktree_path, tx_dir)?;
+    let diff_guard = check_diff_guard(ctx.spec, &prepared.worktree_path, ctx.tx_dir)?;
     if !diff_guard.passed {
         state.diff_guard = Some(diff_guard);
         return Err(anyhow!("diff guard failed after smart sync rebase"));
     }
     state.diff_guard = Some(diff_guard);
     verify_transaction(
-        spec,
-        tx_dir,
-        journal,
-        agent_routes,
-        &prepared.worktree_path,
+        VerifyContext {
+            project_root: ctx.project_root,
+            spec: ctx.spec,
+            tx_id: ctx.tx_id,
+            tx_dir: ctx.tx_dir,
+            journal: ctx.journal,
+            agent_routes: ctx.agent_routes,
+            worktree: &prepared.worktree_path,
+        },
         state,
     )
     .map_err(|_| anyhow!("verifier failed after smart sync rebase"))

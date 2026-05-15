@@ -711,6 +711,19 @@ transaction:
     let repair = fs::read_to_string(outcome.report_path.with_file_name("repair.json"))?;
     assert!(repair.contains("\"attempt\": 1"));
     assert!(!repair.contains("\"attempt\": 2"));
+    let structured = fs::read_to_string(
+        outcome
+            .report_path
+            .with_file_name("verifier_integration.json"),
+    )?;
+    assert!(structured.contains("\"fingerprints\""));
+    assert!(structured.contains("\"check_id\": \"command-0\""));
+    let report = fs::read_to_string(&outcome.report_path)?;
+    assert!(report.contains("Structured checks"));
+    assert!(report.contains("Verifier fingerprints"));
+    let failed_memory =
+        fs::read_to_string(repo.path().join(".agent/memory/failed_attempts.jsonl"))?;
+    assert!(failed_memory.contains("fingerprint"));
     Ok(())
 }
 

@@ -8,6 +8,8 @@ AgentHub — транзакционная runtime-основа для работ
 
 Adaptive docs: [Adaptive Orchestration](docs/adaptive-orchestration.ru.md)
 
+Verifier docs: [Verifier Integrations](docs/verifier-integrations.ru.md)
+
 ## Текущий статус
 
 Сейчас реализована фундаментальная часть PRD:
@@ -17,6 +19,7 @@ Adaptive docs: [Adaptive Orchestration](docs/adaptive-orchestration.ru.md)
 - journal, formal WAL with replay validation, effect ledger, report, DAG, AgentIR, context pack и verifier logs;
 - command policy enforcement, sandbox level evaluation, hardened runner metadata, remote runner dispatch, diff guard, smart sync, rollback handlers и commit-on-success;
 - команды verifier, runtime smoke checks и domain verifiers для content/data/infra/media/research/backend TDD/DB migration;
+- structured verifier integrations с unified check records, fingerprints, trend data и plugin metadata compatibility;
 - end-to-end reference web fixture для добавления `/courses` в existing app с build, runtime smoke, scope rollback, memory, report, cost и WAL evidence;
 - ограниченный repair loop и reviewer gate;
 - transaction resolve, retry planning и supported resume для human-blocked transactions;

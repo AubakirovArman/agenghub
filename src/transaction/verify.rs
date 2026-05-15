@@ -14,45 +14,68 @@ use crate::verifier::{self, VerifierResult};
 use super::execution::run_repair_commands;
 use super::{RunState, TransactionStatus};
 
-pub(super) fn verify_transaction(
-    spec: &AgentSpec,
-    tx_dir: &Path,
-    journal: &Journal,
-    agent_routes: &AgentRoutes,
-    worktree: &Path,
-    state: &mut RunState,
-) -> Result<()> {
-    journal.append("VERIFYING", "running verifier commands")?;
+pub(super) struct VerifyContext<'a> {
+    pub(super) project_root: &'a Path,
+    pub(super) spec: &'a AgentSpec,
+    pub(super) tx_id: &'a str,
+    pub(super) tx_dir: &'a Path,
+    pub(super) journal: &'a Journal,
+    pub(super) agent_routes: &'a AgentRoutes,
+    pub(super) worktree: &'a Path,
+}
+
+pub(super) fn verify_transaction(ctx: VerifyContext<'_>, state: &mut RunState) -> Result<()> {
+    ctx.journal
+        .append("VERIFYING", "running verifier commands")?;
     let verifier = run_verifier_with_repair(
-        spec,
-        worktree,
-        tx_dir,
-        journal,
-        agent_routes,
+        ctx.spec,
+        ctx.worktree,
+        ctx.tx_dir,
+        ctx.journal,
+        ctx.agent_routes,
         state.remote_runner.as_ref(),
-        &tx_dir.join("verifier.log"),
+        &ctx.tx_dir.join("verifier.log"),
     )?;
     fs::write(
-        tx_dir.join("verifier.json"),
+        ctx.tx_dir.join("verifier.json"),
         serde_json::to_string_pretty(&verifier)?,
+    )?;
+    let integration = verifier::build_integration_artifact(ctx.project_root, &verifier)?;
+    fs::write(
+        ctx.tx_dir.join("verifier_integration.json"),
+        serde_json::to_string_pretty(&integration)?,
     )?;
     if !verifier.passed {
         if verifier::detects_missing_env(&verifier) {
             state.status = Some(TransactionStatus::BlockedOnHuman);
             state.verifier = Some(verifier);
+            state.verifier_integration = Some(integration);
             return Err(anyhow!(
                 "verifier failed because required environment appears to be missing"
             ));
         }
+        let fingerprint = integration
+            .fingerprints
+            .first()
+            .map(|item| item.fingerprint.clone())
+            .unwrap_or_else(|| "none".to_string());
         state.verifier = Some(verifier);
-        state.failure_reason = Some("verifier failed".to_string());
-        return Err(anyhow!("verifier failed"));
+        state.verifier_integration = Some(integration);
+        state.failure_reason = Some(format!(
+            "verifier failed in transaction {}; fingerprint {fingerprint}",
+            ctx.tx_id
+        ));
+        return Err(anyhow!(
+            "verifier failed in transaction {}; fingerprint {fingerprint}",
+            ctx.tx_id
+        ));
     }
     if let Some(diff_guard) = &state.diff_guard {
-        EffectLedger::for_tx_dir(tx_dir)
+        EffectLedger::for_tx_dir(ctx.tx_dir)
             .record_verified_files("verifier", &diff_guard.summary.changed_files)?;
     }
     state.verifier = Some(verifier);
+    state.verifier_integration = Some(integration);
     Ok(())
 }
 

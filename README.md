@@ -8,6 +8,8 @@ Detailed docs: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-t
 
 Adaptive docs: [Adaptive Orchestration](docs/adaptive-orchestration.en.md)
 
+Verifier docs: [Verifier Integrations](docs/verifier-integrations.en.md)
+
 ## Current Status
 
 The current implementation covers the early PRD foundation:
@@ -17,6 +19,7 @@ The current implementation covers the early PRD foundation:
 - transaction journal, formal WAL with replay validation, effect ledger, report, DAG, AgentIR, context pack, and verifier logs;
 - command policy enforcement, sandbox level evaluation, hardened runner metadata, remote runner dispatch, diff guard, smart sync, rollback handlers, and commit-on-success;
 - verifier commands, runtime smoke checks, and domain verifiers for content/data/infra/media/research/backend TDD/DB migration;
+- structured verifier integrations with unified check records, fingerprints, trend data, and plugin metadata compatibility;
 - end-to-end reference web fixture for adding `/courses` to an existing app with build, runtime smoke, scope rollback, memory, report, cost, and WAL evidence;
 - bounded repair loop and reviewer gate;
 - transaction resolve, retry planning, and supported resume for human-blocked transactions;

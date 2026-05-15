@@ -13,7 +13,7 @@ use crate::diff_guard::DiffGuardResult;
 use crate::observability::CostProfile;
 use crate::reviewer::ReviewResult;
 use crate::smart_sync::SmartSyncDecision;
-use crate::verifier::VerifierResult;
+use crate::verifier::{VerifierIntegrationArtifact, VerifierResult};
 use crate::workspace::WorkspaceRuntimeMetadata;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -29,6 +29,7 @@ pub struct TransactionReport {
     pub diff_guard: Option<DiffGuardResult>,
     pub review: Option<ReviewResult>,
     pub verifier: Option<VerifierResult>,
+    pub verifier_integration: Option<VerifierIntegrationArtifact>,
     pub sync: Option<SmartSyncDecision>,
     pub workspace_runtime: Option<WorkspaceRuntimeMetadata>,
     pub runner: Option<RunnerMetadata>,

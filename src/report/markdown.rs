@@ -1,3 +1,5 @@
+mod verifier_section;
+
 use crate::report::TransactionReport;
 
 pub(super) fn render(report: &TransactionReport) -> String {
@@ -15,7 +17,7 @@ pub(super) fn render(report: &TransactionReport) -> String {
     adaptive(&mut md, report);
     diff_guard(&mut md, report);
     reviewer(&mut md, report);
-    verifier(&mut md, report);
+    verifier_section::render(&mut md, report);
     sync(&mut md, report);
     workspace_runtime(&mut md, report);
     runner(&mut md, report);
@@ -70,39 +72,6 @@ fn reviewer(md: &mut String, report: &TransactionReport) {
     md.push_str(&format!("- Passed: `{}`\n", review.passed));
     for command in &review.commands {
         command_line(md, command);
-    }
-}
-
-fn verifier(md: &mut String, report: &TransactionReport) {
-    let Some(verifier) = &report.verifier else {
-        return;
-    };
-    md.push_str("\n## Verifier\n\n");
-    md.push_str(&format!("- Passed: `{}`\n", verifier.passed));
-    md.push_str(&format!(
-        "- Profile: `{}`\n",
-        verifier.profile.as_deref().unwrap_or("<none>")
-    ));
-    for command in &verifier.commands {
-        command_line(md, command);
-    }
-    if let Some(domain) = &verifier.domain {
-        md.push_str(&format!("- Domain checks: `{}`\n", domain.passed));
-        for check in &domain.checks {
-            md.push_str(&format!(
-                "- `{}` -> success `{}` detail `{}`\n",
-                check.name, check.success, check.detail
-            ));
-        }
-    }
-    if let Some(runtime) = &verifier.runtime_smoke {
-        md.push_str(&format!("- Runtime smoke: `{}`\n", runtime.passed));
-        for check in &runtime.checks {
-            md.push_str(&format!(
-                "- `{}` expected `{}` actual `{:?}`\n",
-                check.path, check.expected, check.actual
-            ));
-        }
     }
 }
 
@@ -182,7 +151,7 @@ fn failure(md: &mut String, report: &TransactionReport) {
     }
 }
 
-fn command_line(md: &mut String, command: &crate::command_runner::CommandResult) {
+pub(super) fn command_line(md: &mut String, command: &crate::command_runner::CommandResult) {
     md.push_str(&format!(
         "- `{}` -> success `{}` exit `{:?}` timeout `{}`\n",
         command.command, command.success, command.exit_code, command.timed_out

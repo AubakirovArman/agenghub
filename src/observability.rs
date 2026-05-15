@@ -12,8 +12,8 @@ use serde_json::{json, Value};
 
 use crate::llm_gateway::{self, GatewaySummary};
 
-pub use hash::sha256_json;
-use hash::{normalize_reason, sha256_short};
+use hash::normalize_reason;
+pub use hash::{sha256_json, sha256_short};
 pub use redaction::{redact_text, redact_value};
 pub use storage::{append_jsonl as write_jsonl, write_json as write_pretty_json};
 use tokens::estimate_tokens;

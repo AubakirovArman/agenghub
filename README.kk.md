@@ -8,6 +8,8 @@ AgentHub — AI агенттерінің жұмысын транзакциялы
 
 Adaptive docs: [Adaptive Orchestration](docs/adaptive-orchestration.kk.md)
 
+Verifier docs: [Verifier Integrations](docs/verifier-integrations.kk.md)
+
 ## Қазіргі күйі
 
 Қазір PRD-дегі негізгі қабаттар іске асырылды:
@@ -17,6 +19,7 @@ Adaptive docs: [Adaptive Orchestration](docs/adaptive-orchestration.kk.md)
 - journal, replay validation бар formal WAL, effect ledger, report, DAG, AgentIR, context pack және verifier logs;
 - command policy enforcement, sandbox level evaluation, hardened runner metadata, remote runner dispatch, diff guard, smart sync, rollback handlers және commit-on-success;
 - verifier commands, runtime smoke checks және content/data/infra/media/research/backend TDD/DB migration үшін domain verifiers;
+- unified check records, fingerprints, trend data және plugin metadata compatibility бар structured verifier integrations;
 - existing app ішіне `/courses` қосатын end-to-end reference web fixture: build, runtime smoke, scope rollback, memory, report, cost және WAL evidence тексереді;
 - шектелген repair loop және reviewer gate;
 - transaction resolve, retry planning және human-blocked transactions үшін supported resume;
