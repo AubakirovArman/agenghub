@@ -20,6 +20,7 @@ pub enum WorkspaceProfile {
     Data,
     Infra,
     Media,
+    Research,
 }
 
 impl WorkspaceSpec {
@@ -30,8 +31,9 @@ impl WorkspaceSpec {
             "data.git" => Ok(WorkspaceProfile::Data),
             "infra.git" => Ok(WorkspaceProfile::Infra),
             "media.git" => Ok(WorkspaceProfile::Media),
+            "research.git" => Ok(WorkspaceProfile::Research),
             other => Err(anyhow!(
-                "unsupported workspace.type `{other}`; supported: code.git, content.git, data.git, infra.git, media.git"
+                "unsupported workspace.type `{other}`; supported: code.git, content.git, data.git, infra.git, media.git, research.git"
             )),
         }
     }
@@ -45,6 +47,7 @@ impl WorkspaceProfile {
             Self::Data => "data",
             Self::Infra => "infra",
             Self::Media => "media",
+            Self::Research => "research",
         }
     }
 
@@ -55,6 +58,7 @@ impl WorkspaceProfile {
             Self::Data => "data_change",
             Self::Infra => "infra_change",
             Self::Media => "media_change",
+            Self::Research => "research_change",
         }
     }
 }

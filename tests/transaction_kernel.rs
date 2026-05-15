@@ -613,6 +613,57 @@ transaction:
     Ok(())
 }
 
+#[test]
+fn research_workspace_uses_same_transaction_kernel() -> Result<()> {
+    let repo = TestRepo::new()?;
+    agent_dir::init_project(repo.path(), false)?;
+    repo.commit_all("agenthub baseline")?;
+
+    let spec = repo.write_spec("research.yaml", research_spec())?;
+    let outcome = transaction::run(repo.path(), &spec, false)?;
+
+    assert!(matches!(outcome.status, TransactionStatus::Committed));
+    assert!(repo.path().join("research/report.md").exists());
+    let verifier = fs::read_to_string(outcome.report_path.with_file_name("verifier.json"))?;
+    assert!(verifier.contains("research_claims_cited"));
+    let committed_memory = fs::read_to_string(repo.path().join(".agent/memory/committed.jsonl"))?;
+    assert!(committed_memory.contains("research_change"));
+    Ok(())
+}
+
+fn research_spec() -> &'static str {
+    r#"
+task:
+  id: research_brief
+  type: research.command
+workspace:
+  type: research.git
+  isolation: git_worktree
+execution:
+  commands:
+    - mkdir -p research
+    - "printf '[{\"id\":\"s1\",\"title\":\"Source\",\"url\":\"https://example.test\"}]\\n' > research/sources.json"
+    - "printf '[{\"id\":\"c1\",\"text\":\"Claim\",\"citations\":[\"s1\"]}]\\n' > research/claims.json"
+    - "printf '{\"nodes\":[{\"id\":\"c1\",\"kind\":\"claim\"}],\"edges\":[]}\\n' > research/graph.json"
+    - printf 'Report cites [s1].\n' > research/report.md
+    - printf 'Critic reviewed c1.\n' > research/critic.md
+scope:
+  allow:
+    - research/**
+verify:
+  profile: research_report
+  commands:
+    - test -f research/report.md
+transaction:
+  commit_on_success: true
+  memory_promotion: on_success
+  diff_limits:
+    max_files_changed: 6
+    max_lines_added: 20
+    max_lines_deleted: 0
+"#
+}
+
 struct TestRepo {
     dir: TempDir,
     specs: TempDir,

@@ -1,0 +1,41 @@
+task:
+  id: research_brief
+  type: research.command
+  title: Create a cited research brief
+
+workspace:
+  type: research.git
+  isolation: git_worktree
+
+topology:
+  kind: swarm_research
+  swarm_size: 2
+
+execution:
+  commands:
+    - mkdir -p research
+    - "printf '[{\"id\":\"s1\",\"title\":\"Source\",\"url\":\"https://example.test\"}]\\n' > research/sources.json"
+    - "printf '[{\"id\":\"c1\",\"text\":\"Claim\",\"citations\":[\"s1\"]}]\\n' > research/claims.json"
+    - "printf '{\"nodes\":[{\"id\":\"c1\",\"kind\":\"claim\"}],\"edges\":[]}\\n' > research/graph.json"
+    - printf 'Report cites [s1].\n' > research/report.md
+    - printf 'Critic reviewed c1.\n' > research/critic.md
+
+scope:
+  allow:
+    - research/**
+  deny:
+    - .agent/**
+
+verify:
+  profile: research_report
+  commands:
+    - test -f research/report.md
+    - test -f research/critic.md
+
+transaction:
+  commit_on_success: true
+  memory_promotion: on_success
+  diff_limits:
+    max_files_changed: 6
+    max_lines_added: 20
+    max_lines_deleted: 0

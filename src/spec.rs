@@ -88,6 +88,7 @@ mod tests {
             "data.git",
             "infra.git",
             "media.git",
+            "research.git",
         ] {
             let workspace = WorkspaceSpec {
                 kind: kind.to_string(),

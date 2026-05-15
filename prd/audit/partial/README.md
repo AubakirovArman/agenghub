@@ -11,6 +11,6 @@ These PRD areas have an implemented foundation but are not complete compared wit
 - Agent orchestration: several topology kinds exist; manager/worker and tournament remain open.
 - LLM Gateway: traces, metadata, redaction, and cost estimates exist; not a full provider network gateway.
 - Security policy: RBAC and diff/scope controls exist; command allowlist enforcement and strong sandbox levels are not complete.
-- Domain profiles: Code, Infra, Data, Content, and Media are implemented; Research is partial.
+- Domain profiles: Code, Infra, Data, Content, Media, and Research are implemented.
 - Success metrics: artifacts expose data and the Web Dashboard shows project metrics; aggregated KPI dashboards are not implemented.
 - WAL connection: transaction journal exists, but a formal WAL subsystem is not complete.

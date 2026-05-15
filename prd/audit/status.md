@@ -6,7 +6,7 @@ Source: [`../../prd.md`](../../prd.md)
 
 The staged roadmap in section 21 is done: Phase 1 through Phase 14 are in [`../done`](../done), and [`../todo`](../todo) has no phase files.
 
-The full PRD is broader than those phases. Some long-term product points remain partial or open: full Research profile, Manager/Worker and Tournament topologies, specialized database/backend verifiers, full command policy enforcement, sandbox levels beyond local control, real remote runner execution, cryptographic package signing, metrics dashboards, and a formal WAL layer.
+The full PRD is broader than those phases. Some long-term product points remain partial or open: Manager/Worker and Tournament topologies, specialized database/backend verifiers, full command policy enforcement, sandbox levels beyond local control, real remote runner execution, cryptographic package signing, metrics dashboards, and a formal WAL layer.
 
 ## Top-Level Section Matrix
 
@@ -17,11 +17,11 @@ The full PRD is broader than those phases. Some long-term product points remain 
 | 2. Product Vision | Partial | Foundation implemented, but full "agent OS" vision is long-term. |
 | 3. Positioning | Done | Product is positioned as runtime/orchestrator, not a model replacement. |
 | 4. Problem Statement | Done | State drift, context bloat, transactionality, memory pollution, verification, observability, and cross-agent continuity are addressed by phases 1-14. |
-| 5. Target Users | Partial | Developers, agent builders, content/data/infra/media, and enterprise flows exist; research users are not fully covered. |
+| 5. Target Users | Mostly done | Developers, agent builders, content/data/infra/media/research, and enterprise flows exist. |
 | 6. Core Principles / Laws | Mostly done | All core transaction laws are implemented; domain breadth is partial. |
 | 7. High-Level Architecture | Mostly done | Runtime architecture and local visual surfaces exist; hosted/team surfaces remain future. |
 | 8. AgentHub Layers | Mostly done | CLI, TUI, Web Dashboard, VS Code, intent, AAL, AgentSpec, and AgentIR exist; hosted/team surfaces remain future. |
-| 9. VCM-OS Memory Layer | Mostly done | Staging, committed, failed attempts, compaction, and schemas exist; research memory is partial. |
+| 9. VCM-OS Memory Layer | Mostly done | Staging, committed, failed attempts, compaction, and domain schemas exist. |
 | 10. Context Pack System | Done | Context pack, trace, least-context policy, maps, and selected map context are implemented. |
 | 11. Agent Lock | Mostly done | `.agent/agent.lock` exists with project, policies, skills, plugins, enterprise, verifiers, and commands; deeper lock governance remains future. |
 | 12. Skill Registry | Done | Skill manifests, dependency loading, plugin packages, version locks, trust model, and scaffold exist. |
@@ -32,7 +32,7 @@ The full PRD is broader than those phases. Some long-term product points remain 
 | 17. LLM Gateway and Observability | Mostly done | Redaction, raw traces, token/cost estimates, metadata, reports exist; it is not a full provider network gateway yet. |
 | 18. `.agent/` Project Structure | Done | Runtime directories, locks, maps, policies, schemas, memory, tx artifacts, plugins, and enterprise files exist. |
 | 19. Security and Policy | Partial | RBAC, diff guard, secret checks, and enterprise policy exist; command allowlist enforcement and sandbox levels 1-3 are open. |
-| 20. Domain Profiles | Partial | Code, Infra, Data, Content, and Media exist; Research is partial. |
+| 20. Domain Profiles | Mostly done | Code, Infra, Data, Content, Media, and Research exist. |
 | 21. Development Roadmap | Done | Phases 1-14 are done with commit evidence in `prd/status.md`. |
 | 22. Technical Stack | Mostly done | Rust core and VS Code extension exist; research/ML plugins are future. |
 | 23. Success Metrics | Partial | Artifacts expose reliability/context/cost data, but metric aggregation and dashboards are open. |
@@ -58,7 +58,7 @@ The full PRD is broader than those phases. Some long-term product points remain 
 | Law 7 Scope Enforcement | Done | `scope.allow`, `scope.deny`, and diff limits are enforced. |
 | Law 8 Observability First | Done | Journal, report, traces, DAG, context pack, verifier logs, and metadata are written. |
 | Law 9 Least Context | Done | Context packs include selected map context and trace metadata. |
-| Law 10 Domain via Plugins | Mostly done | Plugin package format and domain workspaces exist; research domain depth remains partial. |
+| Law 10 Domain via Plugins | Mostly done | Plugin package format and domain workspaces exist. |
 
 ## Detailed Feature Matrix
 
@@ -67,7 +67,7 @@ The full PRD is broader than those phases. Some long-term product points remain 
 | Interfaces | CLI, TUI, Web Dashboard, VS Code extension | hosted/remote dashboard polish |
 | Intent | natural language `ask`, defaults, clarification, approval marking | deeper intent semantics |
 | Language | AAL parser/reference, AgentSpec YAML, AgentIR, DAG compiler | richer language-server semantics |
-| Memory | committed, staged, failed attempts, compaction | media/research schemas |
+| Memory | committed, staged, failed attempts, compaction, domain schemas | larger retrieval policy tuning |
 | Context | context pack, map context, trace, stale detection | larger context policy tuning |
 | Agent Lock | `.agent/agent.lock` and locks for plugins/skills | central lock governance |
 | Skills | skill manifests, dependency loading, plugin packages, scaffold | remote marketplace publishing workflow |
@@ -78,7 +78,7 @@ The full PRD is broader than those phases. Some long-term product points remain 
 | LLM Gateway | metadata, redaction, raw trace option, cost estimates, private model routing metadata | full provider proxy |
 | Enterprise | RBAC, policy source, audit, secrets check, runners inventory, compliance | real remote runner execution and network policy server |
 | Security | scope/diff guards, redaction, enterprise permissions | command allowlist enforcement and strong sandbox levels |
-| Domains | Code, Infra, Data, Content, Media | Research partial |
+| Domains | Code, Infra, Data, Content, Media, Research | deeper specialized profile tooling |
 | Metrics | artifacts include cost/tokens/status and Web Dashboard project metrics | aggregated KPI dashboards |
 
 ## Roadmap Phase Matrix

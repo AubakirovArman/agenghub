@@ -2,7 +2,6 @@
 
 These are explicit PRD items that are not fully implemented yet.
 
-- Full AgentHub Research domain profile beyond swarm research topology.
 - Manager / Worker topology.
 - Tournament topology.
 - Specialized `backend_tdd` verifier profile.

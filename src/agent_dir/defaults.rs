@@ -122,6 +122,12 @@ pub(super) const DEFAULT_VERIFIER_PROFILES: &str = r#"profiles:
       - command
       - asset_presence
       - manifest_validation
+  research_report:
+    checks:
+      - command
+      - source_collection
+      - citation_validation
+      - graph_validation
 "#;
 
 pub(super) const DEFAULT_CONTENT_SCHEMA: &str = r#"memory_schema:
@@ -174,5 +180,20 @@ pub(super) const DEFAULT_MEDIA_SCHEMA: &str = r#"memory_schema:
     video_style: { fields: [name, palette, motion] }
     platform_requirement: { fields: [platform, aspect_ratio, duration_limit] }
     media_change: { fields: [task_id, changed_files, summary] }
+    failed_attempt: { fields: [task_id, reason, fingerprint] }
+"#;
+
+pub(super) const DEFAULT_RESEARCH_SCHEMA: &str = r#"memory_schema:
+  domain: research
+  description: ResearchWorkspace memory tracks sources, citations, claims, research graph nodes, critic notes, and final reports.
+  types:
+    source: { fields: [id, title, url, retrieved_at] }
+    citation: { fields: [source_id, locator, quote] }
+    claim: { fields: [id, text, citations, confidence] }
+    research_graph_node: { fields: [id, label, kind] }
+    research_graph_edge: { fields: [from, to, relation] }
+    critic_note: { fields: [claim_id, concern, severity] }
+    research_report: { fields: [path, summary, cited_sources] }
+    research_change: { fields: [task_id, changed_files, summary] }
     failed_attempt: { fields: [task_id, reason, fingerprint] }
 "#;

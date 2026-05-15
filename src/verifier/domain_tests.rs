@@ -51,3 +51,37 @@ fn media_render_accepts_manifest_and_assets() -> Result<()> {
         .any(|check| check.name == "media_assets_present" && check.success));
     Ok(())
 }
+
+#[test]
+fn research_report_validates_cited_claims() -> Result<()> {
+    let dir = tempfile::tempdir()?;
+    fs::create_dir_all(dir.path().join("research"))?;
+    write_research_fixture(dir.path())?;
+
+    let result = domain::run(Some("research_report"), dir.path())?.expect("domain result");
+
+    assert!(result.passed);
+    assert!(result
+        .checks
+        .iter()
+        .any(|check| check.name == "research_claims_cited" && check.success));
+    Ok(())
+}
+
+fn write_research_fixture(root: &std::path::Path) -> Result<()> {
+    fs::write(
+        root.join("research/sources.json"),
+        r#"[{"id":"s1","title":"Source","url":"https://example.test"}]"#,
+    )?;
+    fs::write(
+        root.join("research/claims.json"),
+        r#"[{"id":"c1","text":"Claim","citations":["s1"]}]"#,
+    )?;
+    fs::write(
+        root.join("research/graph.json"),
+        r#"{"nodes":[{"id":"c1","kind":"claim"}],"edges":[]}"#,
+    )?;
+    fs::write(root.join("research/report.md"), "Report cites [s1].\n")?;
+    fs::write(root.join("research/critic.md"), "Critic reviewed c1.\n")?;
+    Ok(())
+}

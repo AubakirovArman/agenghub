@@ -16,4 +16,4 @@ ls prd/source
 ls prd/audit/open
 ```
 
-主要 open areas：完整 Research profile、manager/worker 和 tournament topologies、specialized backend/database verifiers、command policy enforcement、strong sandbox levels、real remote runner execution、cryptographic plugin signing、metrics dashboards、formal WAL。
+主要 open areas：manager/worker 和 tournament topologies、specialized backend/database verifiers、command policy enforcement、strong sandbox levels、real remote runner execution、cryptographic plugin signing、metrics dashboards、formal WAL。
