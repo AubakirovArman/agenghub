@@ -1,3 +1,4 @@
+pub mod aal;
 pub mod agent_adapter;
 pub mod agent_dir;
 pub mod code_maps;

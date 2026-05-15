@@ -1,17 +1,20 @@
 mod cli;
 mod handlers;
 
+use std::fs;
+
 use anyhow::Result;
 use clap::Parser;
 use serde_json::json;
 
 use agenthub::{
-    agent_adapter, agent_dir, code_maps, enterprise, intent, memory, skill_registry, transaction,
-    tui, web_dashboard, workspace,
+    aal, agent_adapter, agent_dir, code_maps, enterprise, intent, memory, skill_registry,
+    transaction, tui, web_dashboard, workspace,
 };
 
 use crate::cli::{
-    AgentCommands, Cli, Commands, MemoryCommands, SkillCommands, TxCommands, WorkspaceCommands,
+    AalCommands, AgentCommands, Cli, Commands, MemoryCommands, SkillCommands, TxCommands,
+    WorkspaceCommands,
 };
 
 fn main() {
@@ -101,6 +104,26 @@ fn run() -> Result<()> {
             let result = web_dashboard::write_dashboard(&project_root, &output_dir)?;
             println!("{}", result.index_path.display());
         }
+        Commands::Aal { command } => match command {
+            AalCommands::Parse { input, output } => {
+                let parsed = aal::parse_aal_file(&input)?;
+                for diagnostic in &parsed.diagnostics {
+                    eprintln!("{}", diagnostic.render());
+                }
+                let yaml = serde_yaml::to_string(&parsed.spec)?;
+                if let Some(output) = output {
+                    if let Some(parent) =
+                        output.parent().filter(|path| !path.as_os_str().is_empty())
+                    {
+                        fs::create_dir_all(parent)?;
+                    }
+                    fs::write(&output, yaml)?;
+                    println!("{}", output.display());
+                } else {
+                    print!("{yaml}");
+                }
+            }
+        },
         Commands::Tx { command } => match command {
             TxCommands::Status => {
                 enterprise::authorize(&project_root, "transaction.read")?;

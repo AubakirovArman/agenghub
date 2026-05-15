@@ -4,7 +4,7 @@ AgentHub is a transactional runtime foundation for AI-agent work. It turns a hum
 
 Languages: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
-Detailed docs: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.en.md), [PRD audit](docs/prd-audit.en.md), [TUI](docs/tui.en.md), [Web Dashboard](docs/web-dashboard.en.md), [Workspaces](docs/workspaces.en.md), [IDE](docs/ide.en.md), [Natural language](docs/natural-language.en.md), [Topologies](docs/topologies.en.md), [Agent adapters](docs/agent-adapters.en.md), [Runtime and repair](docs/runtime-repair.en.md), [Context maps](docs/context-maps.en.md), [LLM Gateway](docs/llm-gateway.en.md), [Plugin ecosystem](docs/plugin-ecosystem.en.md), [Enterprise](docs/enterprise.en.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
+Detailed docs: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.en.md), [PRD audit](docs/prd-audit.en.md), [TUI](docs/tui.en.md), [Web Dashboard](docs/web-dashboard.en.md), [AAL](docs/aal.en.md), [Workspaces](docs/workspaces.en.md), [IDE](docs/ide.en.md), [Natural language](docs/natural-language.en.md), [Topologies](docs/topologies.en.md), [Agent adapters](docs/agent-adapters.en.md), [Runtime and repair](docs/runtime-repair.en.md), [Context maps](docs/context-maps.en.md), [LLM Gateway](docs/llm-gateway.en.md), [Plugin ecosystem](docs/plugin-ecosystem.en.md), [Enterprise](docs/enterprise.en.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
 
 ## Current Status
 
@@ -24,6 +24,7 @@ The current implementation covers the early PRD foundation:
 - LLM Gateway metadata, redacted traces, optional raw traces, and token/cost accounting;
 - context maps for routes, components, exports, stale-hash detection, and map-based context selection;
 - `ask` command for AgentSpec preview with defaults, approval marking, and clarification questions;
+- standalone AAL parser with diagnostics and AgentSpec YAML output;
 - terminal TUI dashboard for transactions, DAG, verifier, cost, memory, and approvals;
 - static browser dashboard for transactions, timeline, agent trace, memory graph, skills, policies, costs, and reports;
 - VS Code extension for transaction, memory, AgentSpec, approval, and DAG inspection;
@@ -93,6 +94,15 @@ Run it:
 cargo run -- run examples/command-task.yaml
 ```
 
+## AAL Example
+
+```bash
+agenthub aal parse examples/add-courses.aal --output tmp/add-courses.yaml
+agenthub run tmp/add-courses.yaml
+```
+
+AAL supports `workspace`, `goal`, `use skill`, `allow`, `deny`, `rules`, `execute`, `verify`, runtime smoke routes, and transaction policy, then emits AgentSpec YAML. See [AAL](docs/aal.en.md).
+
 ## Main Commands
 
 ```bash
@@ -110,6 +120,7 @@ agenthub run examples/topology-swarm-task.yaml
 agenthub tui
 agenthub dashboard
 agenthub dashboard --output tmp/agenthub-dashboard
+agenthub aal parse examples/add-courses.aal --output tmp/add-courses.yaml
 agenthub tx status
 agenthub tx report tx-...
 agenthub workspace scan --write-maps

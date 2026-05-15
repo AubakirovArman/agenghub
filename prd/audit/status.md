@@ -6,7 +6,7 @@ Source: [`../../prd.md`](../../prd.md)
 
 The staged roadmap in section 21 is done: Phase 1 through Phase 14 are in [`../done`](../done), and [`../todo`](../todo) has no phase files.
 
-The full PRD is broader than those phases. Some long-term product points remain partial or open: full AAL grammar, MediaWorkspace, full Research profile, Manager/Worker and Tournament topologies, specialized database/backend verifiers, full command policy enforcement, sandbox levels beyond local control, real remote runner execution, cryptographic package signing, metrics dashboards, and a formal WAL layer.
+The full PRD is broader than those phases. Some long-term product points remain partial or open: MediaWorkspace, full Research profile, Manager/Worker and Tournament topologies, specialized database/backend verifiers, full command policy enforcement, sandbox levels beyond local control, real remote runner execution, cryptographic package signing, metrics dashboards, and a formal WAL layer.
 
 ## Top-Level Section Matrix
 
@@ -20,7 +20,7 @@ The full PRD is broader than those phases. Some long-term product points remain 
 | 5. Target Users | Partial | Developers, agent builders, content/data/infra, and enterprise flows exist; media/research users are not fully covered. |
 | 6. Core Principles / Laws | Mostly done | All core transaction laws are implemented; domain breadth is partial. |
 | 7. High-Level Architecture | Mostly done | Runtime architecture and local visual surfaces exist; hosted/team surfaces remain future. |
-| 8. AgentHub Layers | Partial | CLI, TUI, Web Dashboard, VS Code, intent, AgentSpec, and AgentIR exist; full AAL grammar is open. |
+| 8. AgentHub Layers | Mostly done | CLI, TUI, Web Dashboard, VS Code, intent, AAL, AgentSpec, and AgentIR exist; hosted/team surfaces remain future. |
 | 9. VCM-OS Memory Layer | Mostly done | Staging, committed, failed attempts, compaction, and schemas exist; media/research memory is partial. |
 | 10. Context Pack System | Done | Context pack, trace, least-context policy, maps, and selected map context are implemented. |
 | 11. Agent Lock | Mostly done | `.agent/agent.lock` exists with project, policies, skills, plugins, enterprise, verifiers, and commands; deeper lock governance remains future. |
@@ -66,7 +66,7 @@ The full PRD is broader than those phases. Some long-term product points remain 
 |---|---|---|
 | Interfaces | CLI, TUI, Web Dashboard, VS Code extension | hosted/remote dashboard polish |
 | Intent | natural language `ask`, defaults, clarification, approval marking | deeper intent semantics |
-| Language | AgentSpec YAML, AgentIR, DAG compiler | standalone AAL grammar/parser |
+| Language | AAL parser/reference, AgentSpec YAML, AgentIR, DAG compiler | richer language-server semantics |
 | Memory | committed, staged, failed attempts, compaction | media/research schemas |
 | Context | context pack, map context, trace, stale detection | larger context policy tuning |
 | Agent Lock | `.agent/agent.lock` and locks for plugins/skills | central lock governance |

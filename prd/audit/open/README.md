@@ -2,7 +2,6 @@
 
 These are explicit PRD items that are not fully implemented yet.
 
-- Full standalone AAL grammar/parser and language reference.
 - MediaWorkspace and AgentHub Media profile.
 - Full AgentHub Research domain profile beyond swarm research topology.
 - Manager / Worker topology.

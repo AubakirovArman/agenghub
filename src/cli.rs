@@ -39,6 +39,10 @@ pub enum Commands {
         #[arg(short, long, default_value = ".agent/reports/dashboard")]
         output: PathBuf,
     },
+    Aal {
+        #[command(subcommand)]
+        command: AalCommands,
+    },
     Tx {
         #[command(subcommand)]
         command: TxCommands,
@@ -73,6 +77,16 @@ pub enum Commands {
 pub enum TxCommands {
     Status,
     Report { tx_id: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum AalCommands {
+    Parse {
+        input: PathBuf,
+
+        #[arg(short, long)]
+        output: Option<PathBuf>,
+    },
 }
 
 #[derive(Debug, Subcommand)]

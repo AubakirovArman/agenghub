@@ -4,7 +4,7 @@ AgentHub — AI агенттерінің жұмысын транзакциялы
 
 Тілдер: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
-Толық құжаттама: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.kk.md), [PRD audit](docs/prd-audit.kk.md), [TUI](docs/tui.kk.md), [Web Dashboard](docs/web-dashboard.kk.md), [Workspaces](docs/workspaces.kk.md), [IDE](docs/ide.kk.md), [Natural language](docs/natural-language.kk.md), [Topologies](docs/topologies.kk.md), [Agent adapters](docs/agent-adapters.kk.md), [Runtime and repair](docs/runtime-repair.kk.md), [Context maps](docs/context-maps.kk.md), [LLM Gateway](docs/llm-gateway.kk.md), [Plugin ecosystem](docs/plugin-ecosystem.kk.md), [Enterprise](docs/enterprise.kk.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
+Толық құжаттама: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.kk.md), [PRD audit](docs/prd-audit.kk.md), [TUI](docs/tui.kk.md), [Web Dashboard](docs/web-dashboard.kk.md), [AAL](docs/aal.kk.md), [Workspaces](docs/workspaces.kk.md), [IDE](docs/ide.kk.md), [Natural language](docs/natural-language.kk.md), [Topologies](docs/topologies.kk.md), [Agent adapters](docs/agent-adapters.kk.md), [Runtime and repair](docs/runtime-repair.kk.md), [Context maps](docs/context-maps.kk.md), [LLM Gateway](docs/llm-gateway.kk.md), [Plugin ecosystem](docs/plugin-ecosystem.kk.md), [Enterprise](docs/enterprise.kk.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
 
 ## Қазіргі күйі
 
@@ -24,6 +24,7 @@ AgentHub — AI агенттерінің жұмысын транзакциялы
 - LLM Gateway metadata, redacted traces, optional raw traces және token/cost accounting;
 - routes, components, exports үшін context maps, stale-hash detection және map-based context selection;
 - defaults, approval marking және clarification questions бар AgentSpec preview жасайтын `ask` командасы;
+- diagnostics және AgentSpec YAML output беретін standalone AAL parser;
 - transactions, DAG, verifier, cost, memory және approvals көрсететін terminal TUI dashboard;
 - transactions, timeline, agent trace, memory graph, skills, policies, costs және reports көрсететін static browser dashboard;
 - transaction, memory, AgentSpec, approval және DAG көруге арналған VS Code extension;
@@ -93,6 +94,15 @@ transaction:
 cargo run -- run examples/command-task.yaml
 ```
 
+## AAL Example
+
+```bash
+agenthub aal parse examples/add-courses.aal --output tmp/add-courses.yaml
+agenthub run tmp/add-courses.yaml
+```
+
+AAL `workspace`, `goal`, `use skill`, `allow`, `deny`, `rules`, `execute`, `verify`, runtime smoke routes және transaction policy қолдайды, содан кейін AgentSpec YAML шығарады. Қара: [AAL](docs/aal.kk.md).
+
 ## Негізгі командалар
 
 ```bash
@@ -110,6 +120,7 @@ agenthub run examples/topology-swarm-task.yaml
 agenthub tui
 agenthub dashboard
 agenthub dashboard --output tmp/agenthub-dashboard
+agenthub aal parse examples/add-courses.aal --output tmp/add-courses.yaml
 agenthub tx status
 agenthub tx report tx-...
 agenthub workspace scan --write-maps
