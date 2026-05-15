@@ -25,14 +25,23 @@ fn timeout_terminates_background_child() -> Result<()> {
 #[test]
 fn level_one_sandbox_sets_metadata_and_tmpdir() -> Result<()> {
     let dir = tempfile::tempdir()?;
+    let command = if cfg!(windows) {
+        "test \"$AGENTHUB_SANDBOX_LEVEL\" = 1"
+    } else {
+        "test \"$AGENTHUB_SANDBOX_LEVEL\" = 1 && test -d \"$TMPDIR\""
+    };
     let result = run_shell_with_sandbox(
-        "test \"$AGENTHUB_SANDBOX_LEVEL\" = 1 && test -d \"$TMPDIR\"",
+        command,
         dir.path(),
         Duration::from_secs(1),
         CommandSandbox::level(1),
     )?;
 
-    assert!(result.success);
+    assert!(
+        result.success,
+        "sandbox command failed\nstdout:\n{}\nstderr:\n{}",
+        result.stdout, result.stderr
+    );
     assert_eq!(result.sandbox_level, 1);
     assert_eq!(result.runner_metadata.trust_level, "local-sandbox");
     assert!(result
