@@ -13,6 +13,26 @@ agenthub aal parse examples/add-courses.aal --output tmp/add-courses.yaml
 
 Команда diagnostics мәндерін stderr ішіне шығарады және AgentSpec YAML мәнін stdout немесе `--output` файлына жазады.
 
+## Check
+
+```bash
+agenthub aal check examples/add-courses.aal
+```
+
+`check` AAL parse жасайды, semantic validation орындайды, execution DAG compile етеді, AgentIR render етеді және input жанында `expected/` директориясы болса golden artifacts салыстырады. `examples/add-courses.aal` үшін golden files `examples/expected/` ішінде сақталады:
+
+```text
+examples/expected/add-courses.yaml
+examples/expected/add-courses.ir
+examples/expected/add-courses.dag.json
+```
+
+Golden artifacts әдейі жаңарту:
+
+```bash
+agenthub aal check examples/add-courses.aal --write-expected
+```
+
 ## Grammar
 
 ```text

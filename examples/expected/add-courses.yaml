@@ -1,0 +1,76 @@
+task:
+  id: add_courses_page
+  type: code.change
+  title: Add /courses page
+  target: /courses
+agent:
+  adapter: null
+  model: null
+  role: null
+  command_template: null
+  dry_run: false
+agents:
+  planner: null
+  executor: null
+  reviewer: null
+  repair: null
+  generator: null
+  critic: null
+  researcher: null
+  aggregator: null
+  manager: null
+  worker: null
+topology:
+  kind: single_executor
+  swarm_size: 2
+  routing:
+    cost_aware: false
+    max_estimated_cost_usd: null
+    adaptive: false
+workspace:
+  type: code.git
+  isolation: git_worktree
+  root: null
+skills:
+- code.nextjs.add_page
+- code.ui.reuse_existing_style
+execution:
+  commands: []
+  sandbox:
+    level: 0
+scope:
+  allow:
+  - src/app/courses/**
+  - src/components/courses/**
+  deny:
+  - src/auth/**
+  - prisma/schema.prisma
+rules:
+- R_MOD_200
+- R_REUSE_FIRST
+- R_SCOPE_ONLY
+verify:
+  profile: null
+  commands:
+  - npm run build
+  runtime:
+    start_command: npm run dev -- --host 127.0.0.1 --port 3000
+    base_url: http://127.0.0.1:3000
+    timeout_secs: 30
+  routes:
+  - path: /courses
+    expect: 200
+review:
+  commands: []
+repair:
+  commands: []
+transaction:
+  approval_required: false
+  max_repair_attempts: 3
+  rollback_on_failure: true
+  commit_on_success: true
+  memory_promotion: on_success
+  diff_limits:
+    max_files_changed: 12
+    max_lines_added: 600
+    max_lines_deleted: 300

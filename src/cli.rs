@@ -126,6 +126,15 @@ pub enum AalCommands {
         #[arg(short, long)]
         output: Option<PathBuf>,
     },
+    Check {
+        input: PathBuf,
+
+        #[arg(long)]
+        expected_dir: Option<PathBuf>,
+
+        #[arg(long)]
+        write_expected: bool,
+    },
 }
 
 #[derive(Debug, Subcommand)]

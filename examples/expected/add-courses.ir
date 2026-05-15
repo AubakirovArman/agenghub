@@ -1,0 +1,12 @@
+TX code.change
+TASK add_courses_page
+TOPOLOGY single_executor
+AGENT adapter=command role=executor model=<default> dry_run=false
+WS code.git iso=git_worktree
+ALLOW src/app/courses/** src/components/courses/**
+SKILL code.nextjs.add_page code.ui.reuse_existing_style
+DENY src/auth/** prisma/schema.prisma
+RULE R_MOD_200 R_REUSE_FIRST R_SCOPE_ONLY
+VERIFY npm run build
+REPAIR max=3
+MEM promote_on_success

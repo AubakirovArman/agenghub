@@ -64,6 +64,7 @@ jobs:
             export AGENTHUB_BIN="$PWD/target/debug/agenthub"
           fi
           "$AGENTHUB_BIN" aal parse examples/add-courses.aal --output target/agenthub-ci/add-courses.yaml
+          "$AGENTHUB_BIN" aal check examples/add-courses.aal
           scripts/smoke-test.sh
 
       - name: Packaging smoke

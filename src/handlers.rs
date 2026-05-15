@@ -7,12 +7,14 @@ use agenthub::{agent_dir, enterprise, tx_control, tx_explain, tx_watch};
 
 use crate::cli::{EnterpriseCommands, TxCommands};
 
+mod aal_commands;
 mod memory_commands;
 mod plugin_commands;
 mod product_commands;
 mod run_commands;
 mod run_summary;
 
+pub use aal_commands::handle_aal;
 pub use plugin_commands::handle_plugins;
 pub use product_commands::{
     handle_config, handle_doctor, handle_open, handle_providers, handle_version,

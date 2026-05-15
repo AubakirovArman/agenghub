@@ -13,6 +13,26 @@ agenthub aal parse examples/add-courses.aal --output tmp/add-courses.yaml
 
 命令会把 diagnostics 输出到 stderr，并把 AgentSpec YAML 输出到 stdout 或 `--output`。
 
+## Check
+
+```bash
+agenthub aal check examples/add-courses.aal
+```
+
+`check` 会解析 AAL、执行 semantic validation、编译 execution DAG、渲染 AgentIR，并在 input 旁边存在 `expected/` 目录时比较 golden artifacts。仓库为 `examples/add-courses.aal` 保存了以下 golden files：
+
+```text
+examples/expected/add-courses.yaml
+examples/expected/add-courses.ir
+examples/expected/add-courses.dag.json
+```
+
+有意刷新 golden artifacts：
+
+```bash
+agenthub aal check examples/add-courses.aal --write-expected
+```
+
 ## Grammar
 
 ```text

@@ -2,17 +2,15 @@ mod cli;
 mod handlers;
 mod project_path;
 
-use std::fs;
-
 use anyhow::Result;
 use clap::Parser;
 
 use agenthub::{
-    aal, agent_adapter, agent_dir, code_maps, enterprise, shell, skill_registry, team, tui,
-    tx_undo, web_dashboard, workspace,
+    agent_adapter, agent_dir, code_maps, enterprise, shell, skill_registry, team, tui, tx_undo,
+    web_dashboard, workspace,
 };
 
-use crate::cli::{AalCommands, AgentCommands, Cli, Commands, SkillCommands, WorkspaceCommands};
+use crate::cli::{AgentCommands, Cli, Commands, SkillCommands, WorkspaceCommands};
 
 fn main() {
     if let Err(error) = run() {
@@ -87,29 +85,7 @@ fn run() -> Result<()> {
             )?;
             println!("{}", result.index_path.display());
         }
-        Commands::Aal { command } => match command {
-            AalCommands::Parse { input, output } => {
-                let parsed = aal::parse_aal_file(&input)?;
-                for diagnostic in &parsed.diagnostics {
-                    eprintln!("{}", diagnostic.render());
-                }
-                if parsed.has_errors() {
-                    anyhow::bail!("AAL semantic validation failed");
-                }
-                let yaml = serde_yaml::to_string(&parsed.spec)?;
-                if let Some(output) = output {
-                    if let Some(parent) =
-                        output.parent().filter(|path| !path.as_os_str().is_empty())
-                    {
-                        fs::create_dir_all(parent)?;
-                    }
-                    fs::write(&output, yaml)?;
-                    println!("{}", output.display());
-                } else {
-                    print!("{yaml}");
-                }
-            }
-        },
+        Commands::Aal { command } => handlers::handle_aal(command)?,
         Commands::Tx { command } => handlers::handle_tx(&project_root, command)?,
         Commands::Workspace { command } => match command {
             WorkspaceCommands::Scan { write_maps } => {

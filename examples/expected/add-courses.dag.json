@@ -1,0 +1,93 @@
+{
+  "task_id": "add_courses_page",
+  "nodes": [
+    {
+      "id": "preflight",
+      "kind": "policy",
+      "label": "Validate AgentSpec and policy"
+    },
+    {
+      "id": "baseline",
+      "kind": "workspace",
+      "label": "Capture base revision"
+    },
+    {
+      "id": "workspace",
+      "kind": "workspace",
+      "label": "Prepare isolated worktree"
+    },
+    {
+      "id": "context_pack",
+      "kind": "context",
+      "label": "Build least-context pack"
+    },
+    {
+      "id": "executor",
+      "kind": "agent.executor",
+      "label": "Run executor"
+    },
+    {
+      "id": "diff_guard",
+      "kind": "policy",
+      "label": "Check scope and diff limits"
+    },
+    {
+      "id": "verify",
+      "kind": "verifier",
+      "label": "Run verifier profile"
+    },
+    {
+      "id": "sync_check",
+      "kind": "workspace",
+      "label": "Check base revision did not move"
+    },
+    {
+      "id": "commit",
+      "kind": "transaction",
+      "label": "Commit or rollback"
+    },
+    {
+      "id": "report",
+      "kind": "observability",
+      "label": "Write transaction report"
+    }
+  ],
+  "edges": [
+    {
+      "from": "preflight",
+      "to": "baseline"
+    },
+    {
+      "from": "baseline",
+      "to": "workspace"
+    },
+    {
+      "from": "workspace",
+      "to": "context_pack"
+    },
+    {
+      "from": "context_pack",
+      "to": "executor"
+    },
+    {
+      "from": "executor",
+      "to": "diff_guard"
+    },
+    {
+      "from": "diff_guard",
+      "to": "verify"
+    },
+    {
+      "from": "verify",
+      "to": "sync_check"
+    },
+    {
+      "from": "sync_check",
+      "to": "commit"
+    },
+    {
+      "from": "commit",
+      "to": "report"
+    }
+  ]
+}

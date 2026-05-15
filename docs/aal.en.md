@@ -13,6 +13,26 @@ agenthub aal parse examples/add-courses.aal --output tmp/add-courses.yaml
 
 The command prints diagnostics to stderr and writes AgentSpec YAML to stdout or `--output`.
 
+## Check
+
+```bash
+agenthub aal check examples/add-courses.aal
+```
+
+`check` parses AAL, runs semantic validation, compiles the execution DAG, renders AgentIR, and compares golden artifacts when an `expected/` directory exists next to the input. The repository keeps the golden files for `examples/add-courses.aal` in `examples/expected/`:
+
+```text
+examples/expected/add-courses.yaml
+examples/expected/add-courses.ir
+examples/expected/add-courses.dag.json
+```
+
+Refresh the golden artifacts intentionally:
+
+```bash
+agenthub aal check examples/add-courses.aal --write-expected
+```
+
 ## Grammar
 
 ```text
