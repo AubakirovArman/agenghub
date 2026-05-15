@@ -7,6 +7,7 @@ use crate::effects::EffectLedger;
 use crate::journal::Journal;
 use crate::memory;
 use crate::observability;
+use crate::rollback;
 use crate::spec::AgentSpec;
 use crate::workspace;
 
@@ -46,6 +47,7 @@ pub(super) fn handle_failure(
     if let Some(prepared) = &state.prepared {
         let _ = workspace::rollback(prepared);
     }
+    rollback::write_report(tx_dir, tx_id, &changed, "rolled_back")?;
     ledger.record_rolled_back_files("rollback", &changed)?;
     memory::record_failed_attempt(project_root, tx_id, &spec.task.id, &error.to_string())?;
     let fingerprint =

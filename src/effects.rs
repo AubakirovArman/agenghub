@@ -123,13 +123,14 @@ impl EffectLedger {
 
     fn record_files(&self, node: &str, files: &[String], status: &str) -> Result<()> {
         for path in files {
+            let handler = crate::rollback::handler_for_path(path);
             self.append(record(
                 &self.tx_id,
                 &format!("file:{path}"),
                 "file",
                 status,
                 node,
-                Some("git_worktree_rollback"),
+                Some(handler.name),
                 false,
                 None,
                 json!({ "path": path }),

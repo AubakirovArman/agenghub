@@ -17,6 +17,7 @@ pub mod observability;
 pub mod plugin_registry;
 pub mod report;
 pub mod reviewer;
+pub mod rollback;
 pub mod sandbox;
 pub mod skill_registry;
 pub mod spec;

@@ -217,6 +217,8 @@ transaction:
     let effects = fs::read_to_string(outcome.report_path.with_file_name("effects.jsonl"))?;
     assert!(effects.contains("\"status\":\"rolled_back\""));
     assert!(effects.contains("\"path\":\"forbidden.txt\""));
+    let rollback = fs::read_to_string(outcome.report_path.with_file_name("rollback.json"))?;
+    assert!(rollback.contains("\"handler\": \"file_restore\""));
 
     let committed_memory = fs::read_to_string(repo.path().join(".agent/memory/committed.jsonl"))?;
     let failed_memory =
