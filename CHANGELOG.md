@@ -12,6 +12,7 @@ All notable AgentHub changes are tracked here.
 - Add product fixture projects and smoke scripts for Rust, data, infra, content, reference web, rollback, smart sync, providers, and dashboard paths.
 - Add sandbox hardening reports, resource limit policy, and OS capability detection for cgroups, containers, Windows process control, and network policy.
 - Add V4 release preview readiness checks, known limitations, and dogfood automation.
+- Limit preview release assets to Linux x86_64, macOS Apple Silicon, and Windows x86_64.
 
 ## 0.1.0
 

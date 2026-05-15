@@ -22,7 +22,13 @@ detect_asset() {
     *) echo "agenthub installer: unsupported OS: $os" >&2; exit 1 ;;
   esac
   case "$arch" in
-    x86_64|amd64) arch_part="x86_64" ;;
+    x86_64|amd64)
+      if [ "$os" = "Darwin" ]; then
+        echo "agenthub installer: Intel macOS releases are not published; use Apple Silicon macOS, Linux x86_64, or Windows x86_64" >&2
+        exit 1
+      fi
+      arch_part="x86_64"
+      ;;
     arm64|aarch64) arch_part="aarch64" ;;
     *) echo "agenthub installer: unsupported architecture: $arch" >&2; exit 1 ;;
   esac

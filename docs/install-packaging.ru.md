@@ -83,7 +83,8 @@ AGENTHUB_PACKAGE_DIST=target/agenthub-package scripts/package.sh
 
 ```text
 agenthub-x86_64-unknown-linux-gnu.tar.gz
-agenthub-x86_64-apple-darwin.tar.gz
 agenthub-aarch64-apple-darwin.tar.gz
 agenthub-x86_64-pc-windows-msvc.zip
 ```
+
+Release assets для Intel macOS в local preview не публикуются.

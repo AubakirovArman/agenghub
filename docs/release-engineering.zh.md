@@ -35,7 +35,7 @@ AGENTHUB_BIN=target/debug/agenthub scripts/smoke-test.sh
 
 ## Releases
 
-`.github/workflows/release.yml` 在推送 `v*` tag 时为 Linux、macOS Intel、macOS Apple Silicon 和 Windows 构建 release binaries。资产命名示例：
+`.github/workflows/release.yml` 在推送 `v*` tag 时为 Linux x86_64、macOS Apple Silicon 和 Windows x86_64 构建 release binaries。资产命名示例：
 
 ```text
 agenthub-x86_64-unknown-linux-gnu.tar.gz

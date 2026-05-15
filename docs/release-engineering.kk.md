@@ -35,7 +35,7 @@ AGENTHUB_BIN=target/debug/agenthub scripts/smoke-test.sh
 
 ## Releases
 
-`.github/workflows/release.yml` `v*` tag push болғанда Linux, macOS Intel, macOS Apple Silicon және Windows үшін release binaries жинайды. Asset атаулары:
+`.github/workflows/release.yml` `v*` tag push болғанда Linux x86_64, macOS Apple Silicon және Windows x86_64 үшін release binaries жинайды. Asset атаулары:
 
 ```text
 agenthub-x86_64-unknown-linux-gnu.tar.gz

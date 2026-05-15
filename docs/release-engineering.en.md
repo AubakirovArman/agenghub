@@ -35,7 +35,7 @@ AGENTHUB_BIN=target/debug/agenthub scripts/smoke-test.sh
 
 ## Releases
 
-`.github/workflows/release.yml` builds release binaries for Linux, macOS Intel, macOS Apple Silicon, and Windows when a `v*` tag is pushed. Assets are archived under names like:
+`.github/workflows/release.yml` builds release binaries for Linux x86_64, macOS Apple Silicon, and Windows x86_64 when a `v*` tag is pushed. Assets are archived under names like:
 
 ```text
 agenthub-x86_64-unknown-linux-gnu.tar.gz

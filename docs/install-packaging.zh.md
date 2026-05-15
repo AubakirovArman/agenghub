@@ -83,7 +83,8 @@ release archive 命名：
 
 ```text
 agenthub-x86_64-unknown-linux-gnu.tar.gz
-agenthub-x86_64-apple-darwin.tar.gz
 agenthub-aarch64-apple-darwin.tar.gz
 agenthub-x86_64-pc-windows-msvc.zip
 ```
+
+local preview 不发布 Intel macOS release assets。
