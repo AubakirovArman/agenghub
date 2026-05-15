@@ -1,6 +1,7 @@
 use std::io::{Read, Write};
-use std::net::TcpListener;
+use std::net::{Shutdown, TcpListener};
 use std::thread;
+use std::time::Duration;
 
 use anyhow::Result;
 
@@ -85,6 +86,9 @@ fn stub_server() -> StubServer {
     let addr = listener.local_addr().expect("stub addr");
     thread::spawn(move || {
         let (mut stream, _) = listener.accept().expect("accept stub");
+        stream
+            .set_read_timeout(Some(Duration::from_millis(250)))
+            .expect("set read timeout");
         read_http_request(&mut stream).expect("read request");
         let body =
             r#"{"choices":[{"message":{"content":"stub ok"}}],"usage":{"completion_tokens":2}}"#;
@@ -94,9 +98,31 @@ fn stub_server() -> StubServer {
             body
         );
         stream.write_all(response.as_bytes()).expect("write stub");
+        stream.flush().expect("flush stub");
+        let _ = stream.shutdown(Shutdown::Write);
+        let _ = drain_client_close(&mut stream);
     });
     StubServer {
         endpoint: format!("http://{addr}"),
+    }
+}
+
+fn drain_client_close(stream: &mut impl Read) -> std::io::Result<()> {
+    let mut chunk = [0_u8; 128];
+    loop {
+        match stream.read(&mut chunk) {
+            Ok(0) => return Ok(()),
+            Ok(_) => {}
+            Err(error)
+                if matches!(
+                    error.kind(),
+                    std::io::ErrorKind::WouldBlock | std::io::ErrorKind::TimedOut
+                ) =>
+            {
+                return Ok(());
+            }
+            Err(error) => return Err(error),
+        }
     }
 }
 
