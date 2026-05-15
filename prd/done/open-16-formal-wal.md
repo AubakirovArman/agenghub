@@ -26,5 +26,5 @@ Formal write-ahead log subsystem beyond current journal.
 
 ## Evidence
 
-- Implementation commit: pending.
-- Checks: pending.
+- Implementation commit: `0b0918a`.
+- Checks: `cargo fmt -- --check`; `scripts/check-module-size.sh 200`; `git diff --check`; `cargo test wal`; `cargo test successful_transaction_commits_and_promotes_memory`; `cargo clippy -- -D warnings`; `cargo test`; `npm run check` in `editors/vscode`.
