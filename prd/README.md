@@ -23,7 +23,7 @@ git diff --check
 ## Current Queue
 
 - All tracked PRD phases are in `done/`.
-- Long-term open PRD tasks continue in [`todo/`](todo/). Current task: `todo/open-16-formal-wal.md`.
+- Long-term open PRD tasks continue in [`todo/`](todo/). Current task: `todo/open-17-reference-web-fixture.md`.
 
 ## Status Index
 

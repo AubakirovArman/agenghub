@@ -13,4 +13,3 @@ These PRD areas have an implemented foundation but are not complete compared wit
 - Security policy: RBAC, command policy, sandbox level gates, diff/scope controls, secret checks, and remote runner dispatch exist; hardened runner backends remain future work.
 - Domain profiles: Code, Infra, Data, Content, Media, and Research are implemented.
 - Success metrics: artifacts expose data and the Web Dashboard shows project metrics; aggregated KPI dashboards are not implemented.
-- WAL connection: transaction journal exists, but a formal WAL subsystem is not complete.

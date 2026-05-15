@@ -16,4 +16,4 @@ ls prd/source
 ls prd/audit/open
 ```
 
-Негізгі open areas: formal WAL және reference web fixture.
+Негізгі open area: reference web fixture.

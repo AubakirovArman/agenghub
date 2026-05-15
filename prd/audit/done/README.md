@@ -4,6 +4,7 @@ These PRD areas are implemented in the current repository and have tests, docs, 
 
 - Roadmap phases 1-14.
 - Transaction kernel with isolated worktrees, commit/rollback, reports, and journal.
+- Formal write-ahead log with sequence/checksum replay validation.
 - Memory staging, committed memory, failed attempts, compaction.
 - AgentSpec YAML, AgentIR, and execution DAG compiler.
 - CLI runtime commands and VS Code extension surface.

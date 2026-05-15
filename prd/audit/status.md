@@ -6,7 +6,7 @@ Source: [`../../prd.md`](../../prd.md)
 
 The staged roadmap in section 21 is done: Phase 1 through Phase 14 are in [`../done`](../done), and [`../todo`](../todo) has no phase files.
 
-The full PRD is broader than those phases. Some long-term product points remain partial or open: a formal WAL layer and reference web fixture.
+The full PRD is broader than those phases. Some long-term product points remain partial or open: a reference web fixture.
 
 ## Top-Level Section Matrix
 
@@ -39,7 +39,7 @@ The full PRD is broader than those phases. Some long-term product points remain 
 | 24. Major Risks | Mostly mitigated | Transaction, verifier, memory, security, cost, and skill risks have mitigations, but remain ongoing product risks. |
 | 25. Open Questions | Partial | Several decisions are answered; some long-term questions remain open. |
 | 26. Reference Scenario | Partial | Transaction examples exist; a full real web-app add-page scenario is not shipped as an end-to-end fixture. |
-| 27. WAL and VCM-OS Connection | Partial | Journal and VCM memory exist; formal WAL subsystem is not complete. |
+| 27. WAL and VCM-OS Connection | Done | Journal, formal WAL, replay validation, and VCM memory exist. |
 | 28. Final Product Thesis | Partial | Foundation is real, but full product thesis is broader than current implementation. |
 | 29. Immediate Next Documents | Partial | Many docs exist in 4 languages; full AAL spec, plugin author guide depth, and marketplace governance docs can expand. |
 | 30. Current Decision Snapshot | Mostly done | Rust, AgentSpec/YAML, worktrees, verifier profiles, plugin ecosystem, and enterprise policy are implemented. |

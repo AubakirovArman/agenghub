@@ -7,6 +7,8 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
+use crate::wal::{self, Wal};
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct JournalEvent {
     pub ts: DateTime<Utc>,
@@ -21,13 +23,18 @@ pub struct JournalEvent {
 pub struct Journal {
     tx_id: String,
     path: std::path::PathBuf,
+    wal: Wal,
 }
 
 impl Journal {
     pub fn new(tx_id: impl Into<String>, path: impl Into<std::path::PathBuf>) -> Self {
+        let tx_id = tx_id.into();
+        let path = path.into();
+        let wal_path = path.with_file_name("wal.jsonl");
         Self {
-            tx_id: tx_id.into(),
-            path: path.into(),
+            tx_id: tx_id.clone(),
+            path,
+            wal: Wal::new(tx_id, wal_path),
         }
     }
 
@@ -41,6 +48,9 @@ impl Journal {
         message: impl Into<String>,
         data: Value,
     ) -> Result<()> {
+        let state = state.into();
+        let message = message.into();
+        self.wal.append(&state, &message, &data)?;
         if let Some(parent) = self.path.parent() {
             fs::create_dir_all(parent).with_context(|| format!("create {}", parent.display()))?;
         }
@@ -48,8 +58,8 @@ impl Journal {
         let event = JournalEvent {
             ts: Utc::now(),
             tx_id: self.tx_id.clone(),
-            state: state.into(),
-            message: message.into(),
+            state: state.clone(),
+            message,
             data,
         };
         let line = serde_json::to_string(&event)?;
@@ -59,6 +69,10 @@ impl Journal {
             .open(&self.path)
             .with_context(|| format!("open {}", self.path.display()))?;
         writeln!(file, "{line}").with_context(|| format!("append {}", self.path.display()))?;
+        if state == "CLOSED" {
+            let output = self.wal.path().with_file_name("wal_replay.json");
+            wal::write_replay(self.wal.path(), &output)?;
+        }
         Ok(())
     }
 }

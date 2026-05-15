@@ -89,6 +89,9 @@ transaction:
         .report_path
         .with_file_name("memory_staging.jsonl")
         .exists());
+    assert!(outcome.report_path.with_file_name("wal.jsonl").exists());
+    let wal_replay = fs::read_to_string(outcome.report_path.with_file_name("wal_replay.json"))?;
+    assert!(wal_replay.contains("\"latest_state\": \"CLOSED\""));
     assert!(repo
         .path()
         .join(".agent/memory/compacted/project_state.json")
