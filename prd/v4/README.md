@@ -16,8 +16,8 @@ Success criteria:
 2. Known limitations are documented in English, Russian, Chinese, and Kazakh.
 3. Dogfood script covers safe transaction, rollback, smart sync, provider dry-run, and dashboard paths.
 4. Release-readiness script validates checks, packaging, local install, `version`, and `doctor`.
-5. GitHub Actions passes on Linux, macOS, and Windows before tagging.
-6. Tag `v0.2.0-local-preview` publishes release artifacts.
+5. GitHub Actions passes on Linux, macOS Apple Silicon, and Windows before tagging.
+6. Tag `v0.2.0-local-preview` publishes Linux x86_64, macOS Apple Silicon, and Windows x86_64 release artifacts.
 
 ## Rules
 
