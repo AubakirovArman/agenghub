@@ -10,6 +10,7 @@ use serde::{Deserialize, Serialize};
 use crate::adaptive::AdaptiveDecision;
 use crate::command_runner::RunnerMetadata;
 use crate::diff_guard::DiffGuardResult;
+use crate::domain_runtime::DomainRuntimeArtifact;
 use crate::observability::CostProfile;
 use crate::reviewer::ReviewResult;
 use crate::smart_sync::SmartSyncDecision;
@@ -32,6 +33,7 @@ pub struct TransactionReport {
     pub verifier_integration: Option<VerifierIntegrationArtifact>,
     pub sync: Option<SmartSyncDecision>,
     pub workspace_runtime: Option<WorkspaceRuntimeMetadata>,
+    pub domain_runtime: Option<DomainRuntimeArtifact>,
     pub runner: Option<RunnerMetadata>,
     pub cost_profile: Option<CostProfile>,
     pub adaptive: Option<AdaptiveDecision>,

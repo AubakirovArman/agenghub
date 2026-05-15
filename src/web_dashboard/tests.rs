@@ -25,6 +25,10 @@ fn writes_static_browser_dashboard() -> Result<()> {
         r#"{"total_usd":0.25,"estimated_tokens":1000}"#,
     )?;
     fs::write(tx.join("verifier.json"), r#"{"passed":true}"#)?;
+    fs::write(
+        tx.join("domain_runtime.json"),
+        r#"{"selected":{"id":"code.rust"}}"#,
+    )?;
     fs::write(tx.join("review.json"), r#"{"passed":true}"#)?;
     fs::write(tx.join("report.md"), "# report\n")?;
     memory::stage_code_change(
@@ -46,6 +50,7 @@ fn writes_static_browser_dashboard() -> Result<()> {
     assert!(data.contains("\"total_cost_usd\": 0.25"));
     assert!(data.contains("\"metrics\""));
     assert!(data.contains("\"history\""));
+    assert!(data.contains("\"domain_runtime\": \"code.rust\""));
     assert!(data.contains("\"gate_pass_rate\": 1.0"));
     assert!(data.contains("example.skill"));
     assert!(output.join("dashboard.js").exists());

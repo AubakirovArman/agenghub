@@ -52,6 +52,7 @@ pub struct WebTransaction {
     pub dag_nodes: usize,
     pub dag_edges: usize,
     pub dag_roles: Vec<String>,
+    pub domain_runtime: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]

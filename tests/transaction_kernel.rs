@@ -86,6 +86,7 @@ transaction:
     assert!(runtime.contains("commit"));
     let report = fs::read_to_string(&outcome.report_path)?;
     assert!(report.contains("## Workspace Runtime"));
+    assert!(report.contains("## Domain Runtime"));
     assert!(report.contains("## Runner"));
     assert!(outcome
         .report_path
@@ -118,6 +119,9 @@ transaction:
         .join(".agent/memory/views/project_state.json")
         .exists());
     assert!(repo.path().join(".agent/memory/audit.json").exists());
+    let domain_runtime =
+        fs::read_to_string(outcome.report_path.with_file_name("domain_runtime.json"))?;
+    assert!(domain_runtime.contains("code.rust"));
     assert!(repo
         .path()
         .join(".agent/metrics/analytics_history.jsonl")

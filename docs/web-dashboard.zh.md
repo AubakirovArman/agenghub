@@ -33,7 +33,7 @@ agenthub dashboard --output tmp/agenthub-dashboard
 - project 路径和生成时间；
 - transaction 数量、open/failed 数量、memory 数量、skill 数量和总 cost；
 - reliability、context、quality、trust 和 cost 的 aggregated KPI metrics；
-- recent transactions，包括 status、DAG 大小、cost 和 report links；
+- recent transactions，包括 status、DAG 大小、cost、domain runtime 和 report links；
 - 来自 `journal.jsonl` 的 transaction timeline；
 - 来自 DAG node roles 的 latest agent trace；
 - committed memory records 与 transactions 组成的 memory graph；

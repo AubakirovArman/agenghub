@@ -76,9 +76,22 @@ fn collect_transactions(
                 dag_nodes: array_len(&dag, "nodes"),
                 dag_edges: array_len(&dag, "edges"),
                 dag_roles: dag_roles(&dag),
+                domain_runtime: domain_runtime(&tx_dir),
             })
         })
         .collect()
+}
+
+fn domain_runtime(tx_dir: &Path) -> Option<String> {
+    read_json(&tx_dir.join("domain_runtime.json"))
+        .ok()
+        .and_then(|value| value.get("selected").cloned())
+        .and_then(|selected| {
+            selected
+                .get("id")
+                .and_then(Value::as_str)
+                .map(str::to_string)
+        })
 }
 
 fn collect_timeline(

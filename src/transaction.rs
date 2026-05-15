@@ -28,6 +28,7 @@ use crate::command_runner::RemoteRunner;
 use crate::command_runner::RunnerMetadata;
 use crate::compiler;
 use crate::diff_guard::DiffGuardResult;
+use crate::domain_runtime;
 use crate::journal::Journal;
 use crate::observability::CostProfile;
 use crate::report::TransactionReport;
@@ -81,6 +82,13 @@ pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<Tra
     let adaptive_data =
         orchestration::finish_decision(&tx_dir, &agent_routes, &mut adaptive_decision)?;
     let workspace_profile = spec.workspace.profile()?;
+    let domain_runtime_artifact = domain_runtime::write_artifact(
+        project_root,
+        &tx_dir,
+        workspace_profile,
+        spec.verify.profile.as_deref(),
+    )?
+    .artifact;
     let dag = compiler::compile(&spec)?;
     fs::write(tx_dir.join("agent_ir.txt"), spec.to_agent_ir())?;
     fs::write(tx_dir.join("dag.json"), serde_json::to_string_pretty(&dag)?)?;
@@ -174,6 +182,7 @@ pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<Tra
         verifier_integration: state.verifier_integration,
         sync: state.sync,
         workspace_runtime: state.workspace_runtime,
+        domain_runtime: Some(domain_runtime_artifact),
         runner: state.runner,
         cost_profile: state.cost_profile,
         adaptive: state.adaptive,

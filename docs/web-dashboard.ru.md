@@ -33,7 +33,7 @@ agenthub dashboard --output tmp/agenthub-dashboard
 - путь проекта и время генерации;
 - количество transactions, open/failed, memory records, skills и общий cost;
 - aggregated KPI metrics для reliability, context, quality, trust и cost;
-- последние transactions со status, размером DAG, cost и ссылками на reports;
+- последние transactions со status, размером DAG, cost, domain runtime и ссылками на reports;
 - timeline транзакций из `journal.jsonl`;
 - latest agent trace из DAG node roles;
 - memory graph из committed memory records и связанных transactions;

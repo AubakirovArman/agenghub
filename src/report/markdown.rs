@@ -20,6 +20,7 @@ pub(super) fn render(report: &TransactionReport) -> String {
     verifier_section::render(&mut md, report);
     sync(&mut md, report);
     workspace_runtime(&mut md, report);
+    domain_runtime(&mut md, report);
     runner(&mut md, report);
     observability(&mut md, report);
     failure(&mut md, report);
@@ -100,6 +101,32 @@ fn workspace_runtime(md: &mut String, report: &TransactionReport) {
         "- Capabilities: `{}`\n",
         runtime.capabilities.join(", ")
     ));
+}
+
+fn domain_runtime(md: &mut String, report: &TransactionReport) {
+    let Some(runtime) = &report.domain_runtime else {
+        return;
+    };
+    md.push_str("\n## Domain Runtime\n\n");
+    if let Some(pack) = &runtime.selected {
+        md.push_str(&format!("- Pack: `{}`\n", pack.id));
+        md.push_str(&format!("- Domain: `{}`\n", pack.domain));
+        md.push_str(&format!(
+            "- Verifiers: `{}`\n",
+            pack.verifier_profiles.join(", ")
+        ));
+        md.push_str(&format!("- Effects: `{}`\n", pack.effects.join(", ")));
+        md.push_str(&format!(
+            "- Memory schemas: `{}`\n",
+            pack.memory_schemas.join(", ")
+        ));
+    } else {
+        md.push_str("- Pack: `<none>`\n");
+    }
+    for warning in &runtime.warnings {
+        md.push_str(&format!("- Warning: {warning}\n"));
+    }
+    md.push_str("- Artifact: `domain_runtime.json`\n");
 }
 
 fn runner(md: &mut String, report: &TransactionReport) {
