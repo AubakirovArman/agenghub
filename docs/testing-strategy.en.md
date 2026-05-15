@@ -58,14 +58,21 @@ Fault injection must eventually cover:
 ```text
 WORKSPACE_READY
 EXECUTING
-DIFF_GUARD
+AFTER_DIFF_GUARD
 VERIFYING
 BEFORE_COMMIT
+COMMITTING
 MEMORY_PROMOTION
 CLEANUP
 ```
 
-For each point, main must stay clean, memory must stay truthful, the journal must explain the state, and the transaction must be inspectable.
+Use it only in tests:
+
+```bash
+AGENTHUB_FAULT_INJECTION=1 AGENTHUB_FAIL_AT=VERIFYING cargo test --test transaction_chaos
+```
+
+Pre-commit faults must roll back and leave main clean. Post-commit memory or cleanup faults must be reported without falsely marking the committed project change as rolled back.
 
 ## Current Coverage
 

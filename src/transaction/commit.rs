@@ -11,7 +11,7 @@ use crate::smart_sync::{self, SmartSyncDecision};
 use crate::spec::AgentSpec;
 use crate::workspace;
 
-use super::guards::check_diff_guard;
+use super::guards::{check_diff_guard, maybe_fail_at};
 use super::verify::{verify_transaction, VerifyContext};
 use super::{RunState, TransactionStatus};
 
@@ -31,6 +31,7 @@ pub(super) fn sync_and_commit(ctx: CommitContext<'_>, state: &mut RunState) -> R
         .as_ref()
         .expect("prepared workspace exists")
         .clone();
+    maybe_fail_at("BEFORE_COMMIT", ctx.tx_dir, ctx.journal)?;
     ctx.journal
         .append("SYNC_CHECK", "checking project HEAD and file overlap")?;
     let sync = evaluate_sync(ctx.project_root, &prepared, state)?;
@@ -61,6 +62,7 @@ pub(super) fn sync_and_commit(ctx: CommitContext<'_>, state: &mut RunState) -> R
         "COMMITTING",
         "committing and fast-forward merging transaction branch",
     )?;
+    maybe_fail_at("COMMITTING", ctx.tx_dir, ctx.journal)?;
     let runtime = workspace::runtime_for_prepared(&prepared);
     state.committed = runtime
         .commit(
@@ -69,11 +71,34 @@ pub(super) fn sync_and_commit(ctx: CommitContext<'_>, state: &mut RunState) -> R
         )?
         .committed;
     if ctx.spec.transaction.memory_promotion == "on_success" {
-        memory::promote_staging(ctx.project_root, ctx.tx_dir)?;
+        if let Err(error) = maybe_fail_at("MEMORY_PROMOTION", ctx.tx_dir, ctx.journal)
+            .and_then(|_| memory::promote_staging(ctx.project_root, ctx.tx_dir))
+        {
+            record_post_commit_warning(&ctx, state, "MEMORY_PROMOTION_FAILED", error)?;
+        }
     }
-    let _ = runtime.cleanup(&prepared);
+    if let Err(error) =
+        maybe_fail_at("CLEANUP", ctx.tx_dir, ctx.journal).and_then(|_| runtime.cleanup(&prepared))
+    {
+        record_post_commit_warning(&ctx, state, "CLEANUP_FAILED", error)?;
+    }
     state.status = Some(TransactionStatus::Committed);
     ctx.journal.append("COMMITTED", "transaction committed")
+}
+
+fn record_post_commit_warning(
+    ctx: &CommitContext<'_>,
+    state: &mut RunState,
+    event: &str,
+    error: anyhow::Error,
+) -> Result<()> {
+    let message = format!("{event}: {error}");
+    state.failure_reason = Some(message.clone());
+    ctx.journal.append_data(
+        event,
+        "post-commit operation failed",
+        json!({ "error": message }),
+    )
 }
 
 fn evaluate_sync(

@@ -12,6 +12,7 @@ use crate::spec::AgentSpec;
 use crate::verifier::{self, VerifierResult};
 
 use super::execution::run_repair_commands;
+use super::guards::maybe_fail_at;
 use super::{RunState, TransactionStatus};
 
 pub(super) struct VerifyContext<'a> {
@@ -27,6 +28,7 @@ pub(super) struct VerifyContext<'a> {
 pub(super) fn verify_transaction(ctx: VerifyContext<'_>, state: &mut RunState) -> Result<()> {
     ctx.journal
         .append("VERIFYING", "running verifier commands")?;
+    maybe_fail_at("VERIFYING", ctx.tx_dir, ctx.journal)?;
     let verifier = run_verifier_with_repair(
         ctx.spec,
         ctx.worktree,

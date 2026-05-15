@@ -58,14 +58,21 @@ Fault injection келесі points жабуы керек:
 ```text
 WORKSPACE_READY
 EXECUTING
-DIFF_GUARD
+AFTER_DIFF_GUARD
 VERIFYING
 BEFORE_COMMIT
+COMMITTING
 MEMORY_PROMOTION
 CLEANUP
 ```
 
-Әр point-та main clean болуы, memory truthful болуы, journal state түсіндіруі және transaction inspectable болуы керек.
+Мұны тек tests ішінде қолдану керек:
+
+```bash
+AGENTHUB_FAULT_INJECTION=1 AGENTHUB_FAIL_AT=VERIFYING cargo test --test transaction_chaos
+```
+
+Pre-commit faults rollback жасап, main clean қалдыруы керек. Post-commit memory немесе cleanup faults report ішінде көрінуі керек, бірақ committed project change жалған түрде rolled back деп белгіленбеуі тиіс.
 
 ## Current Coverage
 

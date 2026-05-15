@@ -16,7 +16,7 @@ use crate::spec::{AgentSpec, WorkspaceProfile};
 use super::commit::{sync_and_commit, CommitContext};
 use super::context::{build_context, ContextBuild};
 use super::execution::execute;
-use super::guards::check_diff_guard;
+use super::guards::{check_diff_guard, maybe_fail_at};
 use super::prepare::prepare_workspace;
 use super::review::run_review_with_repair;
 use super::verify::{verify_transaction, VerifyContext};
@@ -47,6 +47,7 @@ pub(super) fn run_inner(
     )?;
     state.prepared = Some(prepared.clone());
     state.workspace_runtime = Some(runtime_metadata);
+    maybe_fail_at("WORKSPACE_READY", tx_dir, journal)?;
     let runner_metadata = command_runner::metadata_for(
         spec.execution.sandbox.level,
         state.remote_runner.as_ref(),
@@ -83,6 +84,7 @@ pub(super) fn run_inner(
         state,
     )?;
     journal.append("EXECUTING", "running execution commands")?;
+    maybe_fail_at("EXECUTING", tx_dir, journal)?;
     execute(
         spec,
         tx_dir,
@@ -98,6 +100,7 @@ pub(super) fn run_inner(
         &prepared.worktree_path,
         state,
     )?;
+    maybe_fail_at("AFTER_DIFF_GUARD", tx_dir, journal)?;
     memory::stage_workspace_change(
         tx_dir,
         tx_id,
