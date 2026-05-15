@@ -136,7 +136,10 @@ fn logged_infinite_output_times_out_with_bounded_tail() -> Result<()> {
 
     assert!(result.timed_out);
     assert!(!result.success);
-    assert!(result.stdout_bytes > 0);
+    assert!(result
+        .stdout_path
+        .as_ref()
+        .is_some_and(|path| Path::new(path).exists()));
     assert!(result.stdout.len() <= super::output::TAIL_LIMIT);
     Ok(())
 }
