@@ -2,7 +2,7 @@
 
 Тілдер: [English](install-packaging.en.md), [Русский](install-packaging.ru.md), [中文](install-packaging.zh.md), [Қазақша](install-packaging.kk.md)
 
-AgentHub қазір source checkout арқылы орнатылады. Repository `agenthub` болып rename жасалып, бірінші tagged release жарияланғаннан кейін GitHub Release artifacts арқылы да орнатылады.
+AgentHub қазір source checkout арқылы орнатылады. Бірінші tagged release жарияланғаннан кейін GitHub Release artifacts арқылы да орнатылады.
 
 ## Source арқылы
 

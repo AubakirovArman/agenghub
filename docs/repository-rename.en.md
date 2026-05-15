@@ -1,10 +1,10 @@
-# Repository Rename
+# Repository Naming
 
 Languages: [English](repository-rename.en.md), [Русский](repository-rename.ru.md), [中文](repository-rename.zh.md), [Қазақша](repository-rename.kk.md)
 
-The product name is `AgentHub`. The repository, crate, binary, and local folder should use lowercase `agenthub`.
+The product name is `AgentHub`. The GitHub repository, crate, binary, and local folder use lowercase `agenthub`.
 
-Recommended names:
+Canonical names:
 
 - Product: `AgentHub`
 - GitHub repository: `AubakirovArman/agenthub`
@@ -12,18 +12,13 @@ Recommended names:
 - Binary: `agenthub`
 - Local folder: `agenthub`
 
-## GitHub Rename Step
+## Current State
 
-Rename the GitHub repository outside the codebase:
-
-```text
-AubakirovArman/agenghub -> AubakirovArman/agenthub
-```
-
-After GitHub rename, update local remotes:
+The canonical GitHub repository is `AubakirovArman/agenthub`.
+Local remotes should point to:
 
 ```bash
 git remote set-url origin https://github.com/AubakirovArman/agenthub.git
 ```
 
-This repository already uses `agenthub` for the Rust crate and binary.
+This repository uses `agenthub` for the Rust crate and binary.

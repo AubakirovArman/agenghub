@@ -2,7 +2,7 @@
 
 语言: [English](install-packaging.en.md), [Русский](install-packaging.ru.md), [中文](install-packaging.zh.md), [Қазақша](install-packaging.kk.md)
 
-AgentHub 现在可以从 source checkout 安装。等 repository 重命名为 `agenthub` 并发布第一个 tagged release 后，也可以从 GitHub Release artifacts 安装。
+AgentHub 现在可以从 source checkout 安装。发布第一个 tagged release 后，也可以从 GitHub Release artifacts 安装。
 
 ## 从 source 安装
 

@@ -61,4 +61,4 @@ AGENTHUB_ARTIFACT=target/agenthub-package/agenthub-x86_64-unknown-linux-gnu.tar.
 ## Notes
 
 - PowerShell was not available in the local Linux environment, so `scripts/install.ps1` was not executed locally.
-- GitHub release download URLs depend on the external repository rename to `AubakirovArman/agenthub` and a published tagged release.
+- GitHub release download URLs depend on a published tagged release in `AubakirovArman/agenthub`.

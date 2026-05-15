@@ -4,14 +4,14 @@ Status: Done
 
 ## Goal
 
-Verify that the product brand is consistently `AgentHub` and avoid mixing it with the local directory typo `agenghub`.
+Verify that the product brand is consistently `AgentHub` and avoid mixing it with legacy typo-name workspace paths.
 
 ## Completed
 
 - Confirmed the Rust crate is named `agenthub`.
 - Confirmed README files and VS Code extension display name use `AgentHub`.
 - Confirmed the CLI examples use `agenthub`.
-- Left the local folder name unchanged because it is an external workspace path, not a product string inside the repository.
+- Left the old local folder name unchanged at the time because it was an external workspace path, not a product string inside the repository.
 
 ## Evidence
 

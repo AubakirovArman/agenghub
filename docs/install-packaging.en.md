@@ -2,7 +2,7 @@
 
 Languages: [English](install-packaging.en.md), [Русский](install-packaging.ru.md), [中文](install-packaging.zh.md), [Қазақша](install-packaging.kk.md)
 
-AgentHub can be installed from source today and from GitHub Release artifacts after the `agenthub` repository rename and first tagged release are published.
+AgentHub can be installed from source today and from GitHub Release artifacts after the first tagged release is published.
 
 ## From Source
 

@@ -2,7 +2,7 @@
 
 Языки: [English](install-packaging.en.md), [Русский](install-packaging.ru.md), [中文](install-packaging.zh.md), [Қазақша](install-packaging.kk.md)
 
-AgentHub уже можно ставить из source checkout. Установка из GitHub Release artifacts будет работать после переименования repository в `agenthub` и публикации первого tag release.
+AgentHub уже можно ставить из source checkout. Установка из GitHub Release artifacts будет работать после публикации первого tag release.
 
 ## Из source
 
