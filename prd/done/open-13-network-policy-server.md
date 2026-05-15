@@ -26,5 +26,5 @@ Networked central policy server beyond file-backed AGENTHUB_POLICY_PATH.
 
 ## Evidence
 
-- Implementation commit: pending.
-- Checks: pending.
+- Implementation commit: `e827844`.
+- Checks: `cargo fmt -- --check`; `cargo test`; `cargo clippy -- -D warnings`; `scripts/check-module-size.sh 200`; `git diff --check`; `npm run check` in `editors/vscode`.
