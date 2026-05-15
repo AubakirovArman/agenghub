@@ -317,6 +317,118 @@ transaction:
 }
 
 #[test]
+fn smart_sync_rebases_independent_main_changes() -> Result<()> {
+    let repo = TestRepo::new()?;
+    agent_dir::init_project(repo.path(), false)?;
+    fs::create_dir_all(repo.path().join("generated"))?;
+    fs::write(repo.path().join("generated/existing.txt"), "baseline\n")?;
+    repo.commit_all("agenthub baseline")?;
+    let root = repo.path().display();
+    let spec = repo.write_spec(
+        "smart_sync_rebase.yaml",
+        &format!(
+            r#"
+task:
+  id: smart_sync_rebase
+  type: code.command
+workspace:
+  type: code.git
+  isolation: git_worktree
+execution:
+  commands:
+    - mkdir -p {root}/notes
+    - printf 'main\n' > {root}/notes/main.txt
+    - git -C {root} add notes/main.txt
+    - git -C {root} commit -m concurrent-main
+    - mkdir -p generated
+    - printf 'tx\n' > generated/tx.txt
+scope:
+  allow:
+    - generated/**
+verify:
+  commands:
+    - test -f generated/tx.txt
+transaction:
+  commit_on_success: true
+  memory_promotion: on_success
+  diff_limits:
+    max_files_changed: 1
+    max_lines_added: 1
+    max_lines_deleted: 0
+"#
+        ),
+    )?;
+
+    let outcome = transaction::run(repo.path(), &spec, false)?;
+
+    assert!(matches!(outcome.status, TransactionStatus::Committed));
+    assert!(repo.path().join("notes/main.txt").exists());
+    assert!(repo.path().join("generated/tx.txt").exists());
+    let sync = fs::read_to_string(outcome.report_path.with_file_name("sync.json"))?;
+    assert!(sync.contains("rebase_required"));
+    let baseline = fs::read_to_string(outcome.report_path.with_file_name("baseline.json"))?;
+    assert!(baseline.contains("\"scoped_files\""));
+    assert!(baseline.contains("generated/existing.txt"));
+    let report = fs::read_to_string(outcome.report_path)?;
+    assert!(report.contains("## Sync"));
+    Ok(())
+}
+
+#[test]
+fn smart_sync_blocks_overlapping_main_changes() -> Result<()> {
+    let repo = TestRepo::new()?;
+    agent_dir::init_project(repo.path(), false)?;
+    repo.commit_all("agenthub baseline")?;
+    let root = repo.path().display();
+    let spec = repo.write_spec(
+        "smart_sync_overlap.yaml",
+        &format!(
+            r#"
+task:
+  id: smart_sync_overlap
+  type: code.command
+workspace:
+  type: code.git
+  isolation: git_worktree
+execution:
+  commands:
+    - mkdir -p {root}/generated
+    - printf 'main\n' > {root}/generated/conflict.txt
+    - git -C {root} add generated/conflict.txt
+    - git -C {root} commit -m concurrent-overlap
+    - mkdir -p generated
+    - printf 'tx\n' > generated/conflict.txt
+scope:
+  allow:
+    - generated/**
+verify:
+  commands:
+    - test -f generated/conflict.txt
+transaction:
+  commit_on_success: true
+  memory_promotion: on_success
+  diff_limits:
+    max_files_changed: 1
+    max_lines_added: 1
+    max_lines_deleted: 0
+"#
+        ),
+    )?;
+
+    let outcome = transaction::run(repo.path(), &spec, false)?;
+
+    assert!(matches!(outcome.status, TransactionStatus::BlockedOnHuman));
+    assert_eq!(
+        fs::read_to_string(repo.path().join("generated/conflict.txt"))?,
+        "main\n"
+    );
+    let sync = fs::read_to_string(outcome.report_path.with_file_name("sync.json"))?;
+    assert!(sync.contains("blocked_overlap"));
+    assert!(sync.contains("generated/conflict.txt"));
+    Ok(())
+}
+
+#[test]
 fn command_policy_rejects_restricted_command() -> Result<()> {
     let repo = TestRepo::new()?;
     agent_dir::init_project(repo.path(), false)?;

@@ -6,21 +6,21 @@ use serde_json::json;
 
 use crate::agent_adapter::{self, AgentRoutes};
 use crate::agent_dir::AgentPaths;
+use crate::baseline;
 use crate::effects::EffectLedger;
 use crate::journal::Journal;
 use crate::memory;
 use crate::skill_registry::SkillManifest;
 use crate::spec::{AgentSpec, WorkspaceProfile};
-use crate::verifier;
 use crate::workspace;
 
-use super::commit::sync_and_commit;
+use super::commit::{sync_and_commit, CommitContext};
 use super::context::{build_context, ContextBuild};
 use super::execution::execute;
 use super::guards::check_diff_guard;
 use super::review::run_review_with_repair;
-use super::verify::run_verifier_with_repair;
-use super::{RunState, TransactionStatus};
+use super::verify::verify_transaction;
+use super::RunState;
 
 #[allow(clippy::too_many_arguments)]
 pub(super) fn run_inner(
@@ -36,7 +36,15 @@ pub(super) fn run_inner(
     no_commit: bool,
     state: &mut RunState,
 ) -> Result<()> {
-    let prepared = prepare(project_root, paths, spec, tx_id, journal, workspace_profile)?;
+    let prepared = prepare(
+        project_root,
+        paths,
+        spec,
+        tx_id,
+        tx_dir,
+        journal,
+        workspace_profile,
+    )?;
     state.prepared = Some(prepared.clone());
     agent_adapter::write_agent_trace(tx_dir, agent_routes)?;
     build_context(
@@ -73,7 +81,7 @@ pub(super) fn run_inner(
         workspace_profile,
         &diff_guard.summary.changed_files,
     )?;
-    verify(
+    verify_transaction(
         spec,
         tx_dir,
         journal,
@@ -81,7 +89,18 @@ pub(super) fn run_inner(
         &prepared.worktree_path,
         state,
     )?;
-    sync_and_commit(project_root, spec, tx_id, tx_dir, journal, no_commit, state)
+    sync_and_commit(
+        CommitContext {
+            project_root,
+            spec,
+            tx_id,
+            tx_dir,
+            journal,
+            agent_routes,
+            no_commit,
+        },
+        state,
+    )
 }
 
 fn prepare(
@@ -89,11 +108,22 @@ fn prepare(
     paths: &AgentPaths,
     spec: &AgentSpec,
     tx_id: &str,
+    tx_dir: &Path,
     journal: &Journal,
     profile: WorkspaceProfile,
 ) -> Result<crate::workspace::PreparedWorkspace> {
-    journal.append("BASELINE_CAPTURED", "capturing git baseline")?;
     let prepared = workspace::prepare_git_worktree(project_root, paths, tx_id)?;
+    let baseline = baseline::capture(project_root, spec, &prepared.base_head)?;
+    baseline::write(tx_dir, &baseline)?;
+    journal.append_data(
+        "BASELINE_CAPTURED",
+        "captured git and file-hash baseline",
+        json!({
+            "base_head": &baseline.base_head,
+            "scoped_files": baseline.scoped_files.len(),
+            "relevant_files": baseline.relevant_files.len(),
+        }),
+    )?;
     journal.append_data(
         "WORKSPACE_READY",
         "isolated worktree ready",
@@ -151,46 +181,4 @@ fn guard_and_review(
     }
     state.diff_guard = Some(diff_guard.clone());
     Ok(diff_guard)
-}
-
-fn verify(
-    spec: &AgentSpec,
-    tx_dir: &Path,
-    journal: &Journal,
-    agent_routes: &AgentRoutes,
-    worktree: &Path,
-    state: &mut RunState,
-) -> Result<()> {
-    journal.append("VERIFYING", "running verifier commands")?;
-    let verifier = run_verifier_with_repair(
-        spec,
-        worktree,
-        tx_dir,
-        journal,
-        agent_routes,
-        state.remote_runner.as_ref(),
-        &tx_dir.join("verifier.log"),
-    )?;
-    fs::write(
-        tx_dir.join("verifier.json"),
-        serde_json::to_string_pretty(&verifier)?,
-    )?;
-    if !verifier.passed {
-        if verifier::detects_missing_env(&verifier) {
-            state.status = Some(TransactionStatus::BlockedOnHuman);
-            state.verifier = Some(verifier);
-            return Err(anyhow!(
-                "verifier failed because required environment appears to be missing"
-            ));
-        }
-        state.verifier = Some(verifier);
-        state.failure_reason = Some("verifier failed".to_string());
-        return Err(anyhow!("verifier failed"));
-    }
-    if let Some(diff_guard) = &state.diff_guard {
-        EffectLedger::for_tx_dir(tx_dir)
-            .record_verified_files("verifier", &diff_guard.summary.changed_files)?;
-    }
-    state.verifier = Some(verifier);
-    Ok(())
 }

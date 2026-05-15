@@ -27,6 +27,7 @@ use crate::observability::CostProfile;
 use crate::report::TransactionReport;
 use crate::reviewer::ReviewResult;
 use crate::skill_registry;
+use crate::smart_sync::SmartSyncDecision;
 use crate::spec::AgentSpec;
 use crate::verifier::VerifierResult;
 use crate::workspace::PreparedWorkspace;
@@ -63,6 +64,7 @@ pub(super) struct RunState {
     diff_guard: Option<DiffGuardResult>,
     review: Option<ReviewResult>,
     verifier: Option<VerifierResult>,
+    sync: Option<SmartSyncDecision>,
     cost_profile: Option<CostProfile>,
     error_fingerprint: Option<String>,
     failure_reason: Option<String>,
@@ -146,6 +148,7 @@ pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<Tra
         diff_guard: state.diff_guard,
         review: state.review,
         verifier: state.verifier,
+        sync: state.sync,
         cost_profile: state.cost_profile,
         error_fingerprint: state.error_fingerprint,
         failure_reason: state.failure_reason,

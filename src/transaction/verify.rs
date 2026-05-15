@@ -1,16 +1,60 @@
 use std::fs;
 use std::path::Path;
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use serde_json::json;
 
 use crate::agent_adapter::{self, AgentRoutes};
 use crate::command_runner::RemoteRunner;
+use crate::effects::EffectLedger;
 use crate::journal::Journal;
 use crate::spec::AgentSpec;
 use crate::verifier::{self, VerifierResult};
 
 use super::execution::run_repair_commands;
+use super::{RunState, TransactionStatus};
+
+pub(super) fn verify_transaction(
+    spec: &AgentSpec,
+    tx_dir: &Path,
+    journal: &Journal,
+    agent_routes: &AgentRoutes,
+    worktree: &Path,
+    state: &mut RunState,
+) -> Result<()> {
+    journal.append("VERIFYING", "running verifier commands")?;
+    let verifier = run_verifier_with_repair(
+        spec,
+        worktree,
+        tx_dir,
+        journal,
+        agent_routes,
+        state.remote_runner.as_ref(),
+        &tx_dir.join("verifier.log"),
+    )?;
+    fs::write(
+        tx_dir.join("verifier.json"),
+        serde_json::to_string_pretty(&verifier)?,
+    )?;
+    if !verifier.passed {
+        if verifier::detects_missing_env(&verifier) {
+            state.status = Some(TransactionStatus::BlockedOnHuman);
+            state.verifier = Some(verifier);
+            return Err(anyhow!(
+                "verifier failed because required environment appears to be missing"
+            ));
+        }
+        state.verifier = Some(verifier);
+        state.failure_reason = Some("verifier failed".to_string());
+        return Err(anyhow!("verifier failed"));
+    }
+    if let Some(diff_guard) = &state.diff_guard {
+        EffectLedger::for_tx_dir(tx_dir)
+            .record_verified_files("verifier", &diff_guard.summary.changed_files)?;
+    }
+    state.verifier = Some(verifier);
+    Ok(())
+}
 
 pub(super) fn run_verifier_with_repair(
     spec: &AgentSpec,

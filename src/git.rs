@@ -75,12 +75,37 @@ pub fn merge_ff_only(root: &Path, branch: &str) -> Result<()> {
     run(root, &["merge", "--ff-only", branch]).map(|_| ())
 }
 
+pub fn rebase_onto(root: &Path, new_base: &str) -> Result<()> {
+    run(root, &["rebase", "--autostash", new_base]).map(|_| ())
+}
+
+pub fn changed_files_between(root: &Path, base: &str, head: &str) -> Result<Vec<String>> {
+    let output = run(root, &["diff", "--name-only", base, head])?;
+    Ok(sorted_lines(&output.stdout))
+}
+
+pub fn tracked_files(root: &Path) -> Result<Vec<String>> {
+    let output = run(root, &["ls-files"])?;
+    Ok(sorted_lines(&output.stdout))
+}
+
 pub fn diff_numstat(root: &Path) -> Result<String> {
     Ok(run(root, &["diff", "--numstat", "HEAD"])
         .unwrap_or_else(|_| GitOutput {
             stdout: String::new(),
         })
         .stdout)
+}
+
+fn sorted_lines(value: &str) -> Vec<String> {
+    let mut files = value
+        .lines()
+        .filter(|line| !line.trim().is_empty())
+        .map(str::to_string)
+        .collect::<Vec<_>>();
+    files.sort();
+    files.dedup();
+    files
 }
 
 pub fn changed_files(root: &Path) -> Result<Vec<String>> {

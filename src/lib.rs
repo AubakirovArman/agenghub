@@ -1,6 +1,7 @@
 pub mod aal;
 pub mod agent_adapter;
 pub mod agent_dir;
+pub mod baseline;
 pub mod code_maps;
 pub mod command_policy;
 pub mod command_runner;
@@ -20,6 +21,7 @@ pub mod reviewer;
 pub mod rollback;
 pub mod sandbox;
 pub mod skill_registry;
+pub mod smart_sync;
 pub mod spec;
 pub mod topology;
 pub mod transaction;

@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 use crate::diff_guard::DiffGuardResult;
 use crate::observability::CostProfile;
 use crate::reviewer::ReviewResult;
+use crate::smart_sync::SmartSyncDecision;
 use crate::verifier::VerifierResult;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -23,6 +24,7 @@ pub struct TransactionReport {
     pub diff_guard: Option<DiffGuardResult>,
     pub review: Option<ReviewResult>,
     pub verifier: Option<VerifierResult>,
+    pub sync: Option<SmartSyncDecision>,
     pub cost_profile: Option<CostProfile>,
     pub error_fingerprint: Option<String>,
     pub failure_reason: Option<String>,
@@ -118,6 +120,21 @@ impl TransactionReport {
                         "- `{}` expected `{}` actual `{:?}`\n",
                         check.path, check.expected, check.actual
                     ));
+                }
+            }
+        }
+
+        if let Some(sync) = &self.sync {
+            md.push_str("\n## Sync\n\n");
+            md.push_str(&format!("- Decision: `{}`\n", sync.decision));
+            md.push_str(&format!(
+                "- Verifier rerun required: `{}`\n",
+                sync.verifier_rerun_required
+            ));
+            if !sync.overlapping_files.is_empty() {
+                md.push_str("\nOverlapping files:\n\n");
+                for file in &sync.overlapping_files {
+                    md.push_str(&format!("- `{file}`\n"));
                 }
             }
         }
