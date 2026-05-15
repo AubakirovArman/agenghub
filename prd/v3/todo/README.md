@@ -2,7 +2,7 @@
 
 ## Current Queue
 
-- Current: `v3-06-security-hardening.md`
+- Current: none
 
 ## Done
 
@@ -12,7 +12,8 @@
 - `../done/v3-03-product-cli-ux.md` — `doctor`, `version`, providers, config, smoke coverage, and four-language docs.
 - `../done/v3-04-real-provider-gateway.md` — real CLI provider execution, OpenAI-compatible HTTP provider, retry/backoff, tests, and docs.
 - `../done/v3-05-product-quality-fixtures.md` — fixture projects, rollback/smart-sync/provider/dashboard smoke scripts, CI fixture smoke, and docs.
+- `../done/v3-06-security-hardening.md` — sandbox hardening report, OS capability detection, resource limits, warning degradation, tests, and docs.
 
 ## Remaining Tasks
 
-1. `v3-06-security-hardening.md` — concrete sandbox/resource controls and process isolation.
+None.
