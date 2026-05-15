@@ -32,6 +32,14 @@ Run repeated local transactions to test the SQLite transaction index and status/
 AGENTHUB_DOGFOOD_STRESS_COUNT=100 scripts/dogfood.sh
 ```
 
+Every run writes a machine-readable report:
+
+```text
+target/dogfood/dogfood-report.json
+```
+
+For stress runs the report includes requested count, completed count, `tx status` row count, elapsed seconds, and whether `.agent/cache/indexes/transactions.sqlite3` existed. Use `AGENTHUB_DOGFOOD_KEEP=1` to keep the temporary stress project path in the report for manual inspection.
+
 Use an installed binary instead of building from source:
 
 ```bash

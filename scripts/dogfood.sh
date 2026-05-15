@@ -2,6 +2,17 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+REPORT_PATH="${AGENTHUB_DOGFOOD_REPORT:-$ROOT/target/dogfood/dogfood-report.json}"
+DOGFOOD_STARTED_AT="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+STRESS_COUNT=0
+STRESS_STATUS_LINES=0
+STRESS_DURATION_SECS=0
+STRESS_INDEX_EXISTS=false
+STRESS_PROJECT_PATH=""
+
+json_escape() {
+  printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
+}
 
 if [[ -z "${AGENTHUB_BIN:-}" ]]; then
   cargo build --manifest-path "$ROOT/Cargo.toml" --locked
@@ -29,10 +40,11 @@ run_stress() {
     return
   fi
 
-  local tmp project spec status_lines
+  local tmp project spec status_lines started finished
   tmp="$(mktemp -d "${TMPDIR:-/tmp}/agenthub-dogfood-stress.XXXXXX")"
   project="$tmp/project"
   spec="$tmp/stress-task.yaml"
+  started="$(date +%s)"
 
   mkdir -p "$project"
   git -C "$project" init -q
@@ -75,7 +87,17 @@ YAML
   status_lines="$("$AGENTHUB_BIN" --project "$project" tx status | wc -l | tr -d ' ')"
   test "$status_lines" -ge "$count"
   test -f "$project/.agent/cache/indexes/transactions.sqlite3"
-  rm -rf "$tmp"
+  finished="$(date +%s)"
+
+  STRESS_COUNT="$count"
+  STRESS_STATUS_LINES="$status_lines"
+  STRESS_DURATION_SECS="$((finished - started))"
+  STRESS_INDEX_EXISTS=true
+  STRESS_PROJECT_PATH="$project"
+  if [[ "${AGENTHUB_DOGFOOD_KEEP:-0}" != "1" ]]; then
+    rm -rf "$tmp"
+    STRESS_PROJECT_PATH=""
+  fi
 }
 
 run_step "stress transactions" run_stress
@@ -86,4 +108,26 @@ else
   printf 'skip fixture smoke; set AGENTHUB_DOGFOOD_FULL=1 to include fixtures\n'
 fi
 
+write_report() {
+  mkdir -p "$(dirname "$REPORT_PATH")"
+  cat > "$REPORT_PATH" <<JSON
+{
+  "started_at": "$DOGFOOD_STARTED_AT",
+  "finished_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+  "binary": "$(json_escape "$AGENTHUB_BIN")",
+  "full_fixtures": ${AGENTHUB_DOGFOOD_FULL:-0},
+  "stress": {
+    "requested_count": ${AGENTHUB_DOGFOOD_STRESS_COUNT:-0},
+    "completed_count": $STRESS_COUNT,
+    "status_lines": $STRESS_STATUS_LINES,
+    "duration_secs": $STRESS_DURATION_SECS,
+    "sqlite_index_exists": $STRESS_INDEX_EXISTS,
+    "kept_project": "$(json_escape "$STRESS_PROJECT_PATH")"
+  }
+}
+JSON
+  printf 'dogfood report: %s\n' "$REPORT_PATH"
+}
+
+write_report
 printf 'agenthub dogfood suite passed\n'

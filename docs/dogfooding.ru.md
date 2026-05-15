@@ -32,6 +32,14 @@ AGENTHUB_DOGFOOD_FULL=1 scripts/dogfood.sh
 AGENTHUB_DOGFOOD_STRESS_COUNT=100 scripts/dogfood.sh
 ```
 
+Каждый прогон пишет machine-readable report:
+
+```text
+target/dogfood/dogfood-report.json
+```
+
+Для stress runs report содержит requested count, completed count, количество строк `tx status`, elapsed seconds и факт наличия `.agent/cache/indexes/transactions.sqlite3`. `AGENTHUB_DOGFOOD_KEEP=1` оставляет временный stress project и пишет его path в report для ручной проверки.
+
 Использовать установленный `agenthub` вместо сборки из исходников:
 
 ```bash

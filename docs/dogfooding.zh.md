@@ -32,6 +32,14 @@ AGENTHUB_DOGFOOD_FULL=1 scripts/dogfood.sh
 AGENTHUB_DOGFOOD_STRESS_COUNT=100 scripts/dogfood.sh
 ```
 
+每次运行都会写入 machine-readable report：
+
+```text
+target/dogfood/dogfood-report.json
+```
+
+对于 stress runs，report 包含 requested count、completed count、`tx status` 行数、elapsed seconds，以及 `.agent/cache/indexes/transactions.sqlite3` 是否存在。设置 `AGENTHUB_DOGFOOD_KEEP=1` 可以保留临时 stress project，并把 path 写入 report 供手动检查。
+
 使用已安装的 `agenthub`，而不是从源码构建：
 
 ```bash

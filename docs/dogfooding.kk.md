@@ -32,6 +32,14 @@ Repeated local transactions іске қосып, SQLite transaction index жән
 AGENTHUB_DOGFOOD_STRESS_COUNT=100 scripts/dogfood.sh
 ```
 
+Әр run machine-readable report жазады:
+
+```text
+target/dogfood/dogfood-report.json
+```
+
+Stress runs үшін report ішінде requested count, completed count, `tx status` жол саны, elapsed seconds және `.agent/cache/indexes/transactions.sqlite3` бар-жоғы болады. `AGENTHUB_DOGFOOD_KEEP=1` temporary stress project сақтап, оның path мәнін manual inspection үшін report ішіне жазады.
+
 Source build орнына орнатылған `agenthub` қолдану:
 
 ```bash
