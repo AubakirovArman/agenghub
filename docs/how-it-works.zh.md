@@ -223,6 +223,10 @@ agenthub workspace scan --write-maps
 
 execution 前，AgentHub 会检查 `.agent/policies/core.yaml` 并写入 `command_policy.json`。`needs_approval` commands 需要 `transaction.approval_required: true`；否则 transaction 变为 `BLOCKED_ON_HUMAN`。`restricted` commands 会在执行前被拒绝。参见 [Command Policy](command-policy.zh.md)。
 
+## Sandbox Levels
+
+`execution.sandbox.level` 控制 command isolation。Level 0 是 local controlled execution，Level 1 使用清理后的 local command environment，Levels 2-3 会被识别，但在 strong 或 enterprise runner 配置前会阻塞。每个 transaction 都会写入 `sandbox.json`。参见 [Sandbox Levels](sandbox-levels.zh.md)。
+
 ## VS Code Extension
 
 `editors/vscode` 中的 extension 提供：

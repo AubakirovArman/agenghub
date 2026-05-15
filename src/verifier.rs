@@ -13,8 +13,8 @@ use std::time::Duration;
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 
-use crate::command_runner::{run_shell, CommandResult};
-use crate::spec::VerifySpec;
+use crate::command_runner::{run_shell_with_sandbox, CommandResult, CommandSandbox};
+use crate::spec::{SandboxSpec, VerifySpec};
 
 pub use domain::{DomainCheckResult, DomainVerificationResult};
 use runtime::run_runtime_smoke;
@@ -29,14 +29,26 @@ pub struct VerifierResult {
     pub runtime_smoke: Option<RuntimeSmokeResult>,
 }
 
-pub fn run(verify: &VerifySpec, worktree: &Path, log_path: &Path) -> Result<VerifierResult> {
+pub fn run(
+    verify: &VerifySpec,
+    sandbox: &SandboxSpec,
+    worktree: &Path,
+    log_path: &Path,
+) -> Result<VerifierResult> {
     if let Some(parent) = log_path.parent() {
         fs::create_dir_all(parent).with_context(|| format!("create {}", parent.display()))?;
     }
 
     let mut results = Vec::new();
     for command in &verify.commands {
-        let result = run_shell(command, worktree, Duration::from_secs(300))?;
+        let result = run_shell_with_sandbox(
+            command,
+            worktree,
+            Duration::from_secs(300),
+            CommandSandbox {
+                level: sandbox.level,
+            },
+        )?;
         append_log(log_path, &result)?;
         let success = result.success;
         results.push(result);

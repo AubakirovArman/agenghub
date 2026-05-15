@@ -2,9 +2,11 @@ mod commit;
 mod context;
 mod execution;
 mod guards;
+mod id;
 mod policy;
 mod review;
 mod runner;
+mod sandbox;
 mod verify;
 
 use std::fs;
@@ -13,7 +15,6 @@ use std::path::{Path, PathBuf};
 use anyhow::{Context, Result};
 use chrono::Utc;
 use serde_json::json;
-use uuid::Uuid;
 
 use crate::agent_adapter;
 use crate::agent_dir::ensure_runtime_dirs;
@@ -72,7 +73,7 @@ pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<Tra
     let started_at = Utc::now();
     let paths = ensure_runtime_dirs(project_root)?;
     let spec = AgentSpec::load(spec_path)?;
-    let tx_id = new_tx_id();
+    let tx_id = id::new_tx_id();
     let tx_dir = paths.tx_dir(&tx_id);
     fs::create_dir_all(&tx_dir).with_context(|| format!("create {}", tx_dir.display()))?;
     fs::copy(spec_path, tx_dir.join("plan.yaml"))
@@ -96,6 +97,7 @@ pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<Tra
     let mut state = RunState::default();
     let result = (|| -> Result<()> {
         policy::enforce(project_root, &spec, &tx_dir, &journal, &mut state)?;
+        sandbox::enforce(&spec, &tx_dir, &journal, &mut state)?;
         runner::run_inner(
             project_root,
             &paths,
@@ -191,9 +193,4 @@ fn handle_failure(
     state.error_fingerprint = Some(fingerprint.fingerprint);
     state.status = Some(TransactionStatus::RolledBack);
     journal.append("ROLLED_BACK", "transaction rolled back")
-}
-
-fn new_tx_id() -> String {
-    let suffix = Uuid::new_v4().to_string();
-    format!("tx-{}-{}", Utc::now().format("%Y%m%d%H%M%S"), &suffix[..8])
 }

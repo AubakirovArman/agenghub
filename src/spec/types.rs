@@ -112,6 +112,14 @@ pub struct RoutingSpec {
 pub struct ExecutionSpec {
     #[serde(default)]
     pub commands: Vec<String>,
+    #[serde(default)]
+    pub sandbox: SandboxSpec,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct SandboxSpec {
+    #[serde(default)]
+    pub level: u8,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

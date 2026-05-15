@@ -223,6 +223,10 @@ Each transaction also writes `map_context`, a selected subset of maps based on `
 
 Before execution AgentHub evaluates `.agent/policies/core.yaml` and writes `command_policy.json`. `needs_approval` commands require `transaction.approval_required: true`; otherwise the transaction becomes `BLOCKED_ON_HUMAN`. `restricted` commands are rejected before execution. See [Command Policy](command-policy.en.md).
 
+## Sandbox Levels
+
+`execution.sandbox.level` controls command isolation. Level 0 is local controlled execution, Level 1 uses a sanitized local command environment, and Levels 2-3 are recognized but blocked until a strong or enterprise runner is configured. Each transaction writes `sandbox.json`. See [Sandbox Levels](sandbox-levels.en.md).
+
 ## VS Code Extension
 
 The extension in `editors/vscode` provides:

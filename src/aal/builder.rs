@@ -33,6 +33,7 @@ pub(crate) fn build_spec(draft: &Draft) -> AgentSpec {
         skills: draft.skills.clone(),
         execution: ExecutionSpec {
             commands: draft.execution_commands.clone(),
+            sandbox: Default::default(),
         },
         scope: ScopeSpec {
             allow: draft.allow.clone(),

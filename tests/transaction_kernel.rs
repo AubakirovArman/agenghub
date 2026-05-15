@@ -289,6 +289,78 @@ transaction:
 }
 
 #[test]
+fn sandbox_level_one_runs_with_sandbox_metadata() -> Result<()> {
+    let repo = TestRepo::new()?;
+    agent_dir::init_project(repo.path(), false)?;
+    repo.commit_all("agenthub baseline")?;
+
+    let spec = repo.write_spec(
+        "sandbox_level_1.yaml",
+        r#"
+task:
+  id: sandbox_level_one
+  type: code.command
+workspace:
+  type: code.git
+  isolation: git_worktree
+execution:
+  sandbox:
+    level: 1
+  commands:
+    - test "$AGENTHUB_SANDBOX_LEVEL" = 1
+scope:
+  allow:
+    - generated/**
+transaction:
+  commit_on_success: false
+"#,
+    )?;
+
+    let outcome = transaction::run(repo.path(), &spec, false)?;
+
+    assert!(matches!(outcome.status, TransactionStatus::Noop));
+    let sandbox = fs::read_to_string(outcome.report_path.with_file_name("sandbox.json"))?;
+    assert!(sandbox.contains("local_sandbox"));
+    Ok(())
+}
+
+#[test]
+fn sandbox_level_two_blocks_for_external_runner() -> Result<()> {
+    let repo = TestRepo::new()?;
+    agent_dir::init_project(repo.path(), false)?;
+    repo.commit_all("agenthub baseline")?;
+
+    let spec = repo.write_spec(
+        "sandbox_level_2.yaml",
+        r#"
+task:
+  id: sandbox_level_two
+  type: code.command
+workspace:
+  type: code.git
+  isolation: git_worktree
+execution:
+  sandbox:
+    level: 2
+  commands:
+    - true
+scope:
+  allow:
+    - generated/**
+transaction:
+  commit_on_success: true
+"#,
+    )?;
+
+    let outcome = transaction::run(repo.path(), &spec, false)?;
+
+    assert!(matches!(outcome.status, TransactionStatus::BlockedOnHuman));
+    let sandbox = fs::read_to_string(outcome.report_path.with_file_name("sandbox.json"))?;
+    assert!(sandbox.contains("strong_isolation_required"));
+    Ok(())
+}
+
+#[test]
 fn verifier_failure_can_be_repaired_before_commit() -> Result<()> {
     let repo = TestRepo::new()?;
     agent_dir::init_project(repo.path(), false)?;

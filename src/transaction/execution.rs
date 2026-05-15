@@ -5,7 +5,7 @@ use std::time::Duration;
 use anyhow::{anyhow, Result};
 
 use crate::agent_adapter::{self, AgentRoutes};
-use crate::command_runner::{run_shell, CommandResult};
+use crate::command_runner::{run_shell_with_sandbox, CommandResult, CommandSandbox};
 use crate::spec::AgentSpec;
 
 pub(super) fn execute(
@@ -35,17 +35,36 @@ pub(super) fn run_execution_commands(
     spec: &AgentSpec,
     worktree: &Path,
 ) -> Result<Vec<CommandResult>> {
-    run_commands(&spec.execution.commands, worktree)
+    run_commands(
+        &spec.execution.commands,
+        worktree,
+        spec.execution.sandbox.level,
+    )
 }
 
 pub(super) fn run_repair_commands(spec: &AgentSpec, worktree: &Path) -> Result<Vec<CommandResult>> {
-    run_commands(&spec.repair.commands, worktree)
+    run_commands(
+        &spec.repair.commands,
+        worktree,
+        spec.execution.sandbox.level,
+    )
 }
 
-fn run_commands(commands: &[String], worktree: &Path) -> Result<Vec<CommandResult>> {
+fn run_commands(
+    commands: &[String],
+    worktree: &Path,
+    sandbox_level: u8,
+) -> Result<Vec<CommandResult>> {
     let mut results = Vec::new();
     for command in commands {
-        let result = run_shell(command, worktree, Duration::from_secs(300))?;
+        let result = run_shell_with_sandbox(
+            command,
+            worktree,
+            Duration::from_secs(300),
+            CommandSandbox {
+                level: sandbox_level,
+            },
+        )?;
         let success = result.success;
         results.push(result);
         if !success {

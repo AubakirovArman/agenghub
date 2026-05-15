@@ -6,8 +6,8 @@ use std::time::Duration;
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 
-use crate::command_runner::{run_shell, CommandResult};
-use crate::spec::ReviewSpec;
+use crate::command_runner::{run_shell_with_sandbox, CommandResult, CommandSandbox};
+use crate::spec::{ReviewSpec, SandboxSpec};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ReviewResult {
@@ -15,14 +15,26 @@ pub struct ReviewResult {
     pub commands: Vec<CommandResult>,
 }
 
-pub fn run(review: &ReviewSpec, worktree: &Path, log_path: &Path) -> Result<ReviewResult> {
+pub fn run(
+    review: &ReviewSpec,
+    sandbox: &SandboxSpec,
+    worktree: &Path,
+    log_path: &Path,
+) -> Result<ReviewResult> {
     if let Some(parent) = log_path.parent() {
         fs::create_dir_all(parent).with_context(|| format!("create {}", parent.display()))?;
     }
 
     let mut results = Vec::new();
     for command in &review.commands {
-        let result = run_shell(command, worktree, Duration::from_secs(300))?;
+        let result = run_shell_with_sandbox(
+            command,
+            worktree,
+            Duration::from_secs(300),
+            CommandSandbox {
+                level: sandbox.level,
+            },
+        )?;
         append_log(log_path, &result)?;
         let success = result.success;
         results.push(result);

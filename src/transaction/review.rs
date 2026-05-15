@@ -67,7 +67,12 @@ fn run_review(
     if let Some(route) = agent_routes.reviewer.as_ref() {
         agent_adapter::invoke_adapter(spec, tx_dir, worktree, route)?;
     }
-    let review = reviewer::run(&spec.review, worktree, &tx_dir.join("reviewer.log"))?;
+    let review = reviewer::run(
+        &spec.review,
+        &spec.execution.sandbox,
+        worktree,
+        &tx_dir.join("reviewer.log"),
+    )?;
     if let Some(route) = agent_routes.reviewer.as_ref() {
         agent_adapter::write_transcript(tx_dir, route, &review.commands)?;
     }

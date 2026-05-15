@@ -4,6 +4,7 @@ use std::process::Command;
 
 use anyhow::Result;
 
+use crate::spec::SandboxSpec;
 use crate::spec::{RouteCheckSpec, RuntimeSmokeSpec, VerifySpec};
 use crate::verifier::run;
 
@@ -18,7 +19,12 @@ fn runtime_smoke_checks_http_route() -> Result<()> {
     let port = free_port()?;
     let verify = runtime_verify(dir.path(), port, "/", 200);
 
-    let result = run(&verify, dir.path(), &dir.path().join("verifier.log"))?;
+    let result = run(
+        &verify,
+        &SandboxSpec::default(),
+        dir.path(),
+        &dir.path().join("verifier.log"),
+    )?;
 
     assert!(result.passed);
     assert!(result
@@ -41,7 +47,12 @@ fn runtime_smoke_catches_route_failure_after_commands_pass() -> Result<()> {
     verify.commands = vec!["true".to_string()];
     verify.runtime.as_mut().expect("runtime").timeout_secs = 2;
 
-    let result = run(&verify, dir.path(), &dir.path().join("verifier.log"))?;
+    let result = run(
+        &verify,
+        &SandboxSpec::default(),
+        dir.path(),
+        &dir.path().join("verifier.log"),
+    )?;
 
     assert!(!result.passed);
     assert!(result

@@ -19,7 +19,7 @@ pub(super) fn run_verifier_with_repair(
     agent_routes: &AgentRoutes,
     log_path: &Path,
 ) -> Result<VerifierResult> {
-    let mut verifier = verifier::run(&spec.verify, worktree, log_path)?;
+    let mut verifier = verifier::run(&spec.verify, &spec.execution.sandbox, worktree, log_path)?;
     let mut repair_results = Vec::new();
 
     for attempt in 1..=spec.transaction.max_repair_attempts {
@@ -39,7 +39,7 @@ pub(super) fn run_verifier_with_repair(
             agent_adapter::write_transcript(tx_dir, route, &results)?;
         }
         repair_results.push(json!({ "attempt": attempt, "commands": results }));
-        verifier = verifier::run(&spec.verify, worktree, log_path)?;
+        verifier = verifier::run(&spec.verify, &spec.execution.sandbox, worktree, log_path)?;
     }
 
     if !repair_results.is_empty() {

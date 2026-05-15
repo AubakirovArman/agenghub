@@ -223,6 +223,10 @@ agenthub workspace scan --write-maps
 
 Execution алдында AgentHub `.agent/policies/core.yaml` тексереді және `command_policy.json` жазады. `needs_approval` commands үшін `transaction.approval_required: true` керек; әйтпесе transaction `BLOCKED_ON_HUMAN` болады. `restricted` commands орындауға дейін тоқтатылады. Қара: [Command Policy](command-policy.kk.md).
 
+## Sandbox Levels
+
+`execution.sandbox.level` command isolation басқарады. Level 0 — local controlled execution, Level 1 тазартылған local command environment қолданады, ал Levels 2-3 танылады, бірақ strong немесе enterprise runner бапталғанша блокталады. Әр transaction `sandbox.json` жазады. Қара: [Sandbox Levels](sandbox-levels.kk.md).
+
 ## VS Code Extension
 
 `editors/vscode` ішіндегі extension береді:

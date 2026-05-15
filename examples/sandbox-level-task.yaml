@@ -1,0 +1,27 @@
+task:
+  id: sandbox_level_demo
+  type: code.command
+  title: Run with Level 1 local sandbox metadata
+
+workspace:
+  type: code.git
+  isolation: git_worktree
+
+execution:
+  sandbox:
+    level: 1
+  commands:
+    - test "$AGENTHUB_SANDBOX_LEVEL" = 1
+
+scope:
+  allow:
+    - generated/**
+  deny:
+    - .agent/**
+
+verify:
+  commands:
+    - true
+
+transaction:
+  commit_on_success: false

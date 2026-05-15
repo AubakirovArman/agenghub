@@ -16,4 +16,4 @@ ls prd/source
 ls prd/audit/open
 ```
 
-主要 open areas：strong sandbox levels、real remote runner execution、cryptographic plugin signing、metrics dashboards、formal WAL。
+主要 open areas：real remote runner execution、cryptographic plugin signing、metrics dashboards、formal WAL。

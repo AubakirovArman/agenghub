@@ -1,0 +1,28 @@
+# Sandbox Levels
+
+Языки: [English](sandbox-levels.en.md), [Русский](sandbox-levels.ru.md), [中文](sandbox-levels.zh.md), [Қазақша](sandbox-levels.kk.md)
+
+AgentHub проверяет `execution.sandbox.level` перед command execution и пишет `sandbox.json`.
+
+## Levels
+
+- `0`: local controlled execution с worktree isolation, process groups, timeouts и command policy.
+- `1`: local sandbox mode с очищенным command environment, sandbox TMPDIR и `AGENTHUB_SANDBOX_LEVEL=1`.
+- `2`: требуется strong isolation; transaction блокируется до появления container, namespace, microVM или remote runner.
+- `3`: требуется enterprise runner; transaction блокируется до настройки enterprise isolated runner.
+
+## Example
+
+```yaml
+execution:
+  sandbox:
+    level: 1
+  commands:
+    - test "$AGENTHUB_SANDBOX_LEVEL" = 1
+```
+
+Запуск:
+
+```bash
+agenthub run examples/sandbox-level-task.yaml
+```

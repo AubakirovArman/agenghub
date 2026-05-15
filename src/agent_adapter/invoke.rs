@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::agent_adapter::transcript::write_adapter_run;
 use crate::agent_adapter::AgentRoute;
-use crate::command_runner::run_shell;
+use crate::command_runner::{run_shell_with_sandbox, CommandSandbox};
 use crate::observability::redact_text;
 use crate::spec::AgentSpec;
 
@@ -52,7 +52,14 @@ pub fn invoke_adapter(
             dry_run: true,
         }
     } else {
-        let result = run_shell(&command, worktree, Duration::from_secs(900))?;
+        let result = run_shell_with_sandbox(
+            &command,
+            worktree,
+            Duration::from_secs(900),
+            CommandSandbox {
+                level: spec.execution.sandbox.level,
+            },
+        )?;
         AdapterRun {
             adapter: route.selected_adapter.clone(),
             role: route.role.clone(),

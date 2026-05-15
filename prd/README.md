@@ -23,7 +23,7 @@ git diff --check
 ## Current Queue
 
 - All tracked PRD phases are in `done/`.
-- Long-term open PRD tasks continue in [`todo/`](todo/). Current task: `todo/open-11-sandbox-levels.md`.
+- Long-term open PRD tasks continue in [`todo/`](todo/). Current task: `todo/open-12-remote-runner-execution.md`.
 
 ## Status Index
 

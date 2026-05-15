@@ -1,9 +1,13 @@
+#[cfg(test)]
+mod tests;
+
+use std::fs;
 use std::path::Path;
 use std::process::{Child, Command, Stdio};
 use std::thread;
 use std::time::{Duration, Instant};
 
-use anyhow::{Context, Result};
+use anyhow::{anyhow, Context, Result};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -16,6 +20,7 @@ pub struct CommandResult {
     pub duration_ms: u128,
     pub stdout: String,
     pub stderr: String,
+    pub sandbox_level: u8,
 }
 
 #[derive(Debug)]
@@ -23,7 +28,21 @@ pub struct SupervisedChild {
     child: Child,
 }
 
+#[derive(Debug, Clone, Copy, Default)]
+pub struct CommandSandbox {
+    pub level: u8,
+}
+
 pub fn run_shell(command: &str, cwd: &Path, timeout: Duration) -> Result<CommandResult> {
+    run_shell_with_sandbox(command, cwd, timeout, CommandSandbox::default())
+}
+
+pub fn run_shell_with_sandbox(
+    command: &str,
+    cwd: &Path,
+    timeout: Duration,
+    sandbox: CommandSandbox,
+) -> Result<CommandResult> {
     let started = Instant::now();
     let mut process = Command::new("sh");
     process
@@ -32,6 +51,7 @@ pub fn run_shell(command: &str, cwd: &Path, timeout: Duration) -> Result<Command
         .current_dir(cwd)
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
+    configure_sandbox(&mut process, cwd, sandbox)?;
     configure_process_group(&mut process);
 
     let mut child = process
@@ -66,6 +86,7 @@ pub fn run_shell(command: &str, cwd: &Path, timeout: Duration) -> Result<Command
         duration_ms: started.elapsed().as_millis(),
         stdout: String::from_utf8_lossy(&output.stdout).to_string(),
         stderr: String::from_utf8_lossy(&output.stderr).to_string(),
+        sandbox_level: sandbox.level,
     })
 }
 
@@ -115,6 +136,30 @@ fn configure_process_group(command: &mut Command) {
 #[cfg(not(unix))]
 fn configure_process_group(_command: &mut Command) {}
 
+fn configure_sandbox(process: &mut Command, cwd: &Path, sandbox: CommandSandbox) -> Result<()> {
+    if sandbox.level == 0 {
+        return Ok(());
+    }
+    if sandbox.level > 1 {
+        return Err(anyhow!(
+            "sandbox level {} requires an external runner",
+            sandbox.level
+        ));
+    }
+    let tmp = cwd.join(".agent-sandbox/tmp");
+    fs::create_dir_all(&tmp).with_context(|| format!("create {}", tmp.display()))?;
+    let path = std::env::var_os("PATH");
+    process.env_clear();
+    if let Some(path) = path {
+        process.env("PATH", path);
+    }
+    process
+        .env("HOME", cwd)
+        .env("TMPDIR", &tmp)
+        .env("AGENTHUB_SANDBOX_LEVEL", sandbox.level.to_string());
+    Ok(())
+}
+
 #[cfg(unix)]
 fn terminate_process_tree(child: &mut Child) {
     let pgid = -(child.id() as i32);
@@ -138,31 +183,4 @@ fn terminate_process_tree(child: &mut Child) {
 #[cfg(not(unix))]
 fn terminate_process_tree(child: &mut Child) {
     let _ = child.kill();
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn marks_timed_out_command() -> Result<()> {
-        let result = run_shell("sleep 2", Path::new("."), Duration::from_millis(50))?;
-        assert!(result.timed_out);
-        assert!(!result.success);
-        Ok(())
-    }
-
-    #[test]
-    fn timeout_terminates_background_child() -> Result<()> {
-        let dir = tempfile::tempdir()?;
-        let marker = dir.path().join("late-marker");
-        let command = format!("(sleep 2; touch '{}') & wait", marker.display());
-
-        let result = run_shell(&command, dir.path(), Duration::from_millis(50))?;
-        thread::sleep(Duration::from_millis(300));
-
-        assert!(result.timed_out);
-        assert!(!marker.exists());
-        Ok(())
-    }
 }

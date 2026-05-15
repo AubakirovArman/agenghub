@@ -4,7 +4,7 @@ AgentHub is a transactional runtime foundation for AI-agent work. It turns a hum
 
 Languages: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
-Detailed docs: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.en.md), [PRD audit](docs/prd-audit.en.md), [TUI](docs/tui.en.md), [Web Dashboard](docs/web-dashboard.en.md), [AAL](docs/aal.en.md), [Workspaces](docs/workspaces.en.md), [MediaWorkspace](docs/media-workspace.en.md), [Research](docs/research-profile.en.md), [Backend TDD](docs/backend-tdd-verifier.en.md), [DB Migration](docs/db-migration-verifier.en.md), [Command Policy](docs/command-policy.en.md), [IDE](docs/ide.en.md), [Natural language](docs/natural-language.en.md), [Topologies](docs/topologies.en.md), [Agent adapters](docs/agent-adapters.en.md), [Runtime and repair](docs/runtime-repair.en.md), [Context maps](docs/context-maps.en.md), [LLM Gateway](docs/llm-gateway.en.md), [Plugin ecosystem](docs/plugin-ecosystem.en.md), [Enterprise](docs/enterprise.en.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
+Detailed docs: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.en.md), [PRD audit](docs/prd-audit.en.md), [TUI](docs/tui.en.md), [Web Dashboard](docs/web-dashboard.en.md), [AAL](docs/aal.en.md), [Workspaces](docs/workspaces.en.md), [MediaWorkspace](docs/media-workspace.en.md), [Research](docs/research-profile.en.md), [Backend TDD](docs/backend-tdd-verifier.en.md), [DB Migration](docs/db-migration-verifier.en.md), [Command Policy](docs/command-policy.en.md), [Sandbox Levels](docs/sandbox-levels.en.md), [IDE](docs/ide.en.md), [Natural language](docs/natural-language.en.md), [Topologies](docs/topologies.en.md), [Agent adapters](docs/agent-adapters.en.md), [Runtime and repair](docs/runtime-repair.en.md), [Context maps](docs/context-maps.en.md), [LLM Gateway](docs/llm-gateway.en.md), [Plugin ecosystem](docs/plugin-ecosystem.en.md), [Enterprise](docs/enterprise.en.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
 
 ## Current Status
 
@@ -13,7 +13,7 @@ The current implementation covers the early PRD foundation:
 - transactional execution kernel;
 - worktree-isolated `CodeWorkspace`, `ContentWorkspace`, `DataWorkspace`, `InfraWorkspace`, `MediaWorkspace`, and `ResearchWorkspace`;
 - transaction journal, report, DAG, AgentIR, context pack, and verifier logs;
-- command policy enforcement, diff guard, sync check, rollback, and commit-on-success;
+- command policy enforcement, sandbox level evaluation, diff guard, sync check, rollback, and commit-on-success;
 - verifier commands, runtime smoke checks, and domain verifiers for content/data/infra/media/research/backend TDD/DB migration;
 - bounded repair loop and reviewer gate;
 - VCM memory staging, promotion, failed attempts, and compacted project state;

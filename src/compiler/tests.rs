@@ -121,6 +121,7 @@ fn test_spec(allow: Vec<String>) -> AgentSpec {
         skills: Vec::new(),
         execution: ExecutionSpec {
             commands: vec!["true".to_string()],
+            sandbox: Default::default(),
         },
         scope: ScopeSpec {
             allow,

@@ -148,6 +148,7 @@ fn fixture_spec() -> AgentSpec {
         skills: Vec::new(),
         execution: ExecutionSpec {
             commands: vec!["true".to_string()],
+            sandbox: Default::default(),
         },
         scope: ScopeSpec {
             allow: vec!["generated/**".to_string()],
