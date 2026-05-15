@@ -221,11 +221,13 @@ agenthub workspace scan --write-maps
 
 - 来自 `.agent/tx` 的 transaction tree；
 - 来自 `.agent/memory` 的 memory tree；
+- AgentSpec drafts 和 examples；
+- pending specs 与 `BLOCKED_ON_HUMAN` transactions 的 approval queue；
 - 打开 latest report；
 - `dag.json` 的 DAG webview；
 - 通过 `agenthub ask` 生成 prompt-to-AgentSpec preview。
 
-Extension 代码拆分为 `editors/vscode/src/` 下的小型 zero-build JavaScript 模块。
+Extension 代码拆分为 `editors/vscode/src/` 下的小型 zero-build JavaScript 模块。参见 [IDE and visual layer](ide.zh.md)。
 
 ## 开发规则
 

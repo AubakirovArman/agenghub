@@ -22,8 +22,7 @@ git diff --check
 
 ## Current Queue
 
-- Current: `todo/phase-12-ide-and-visual-layer.md`
-- Then: `todo/phase-13-marketplace-plugin-ecosystem.md`
+- Current: `todo/phase-13-marketplace-plugin-ecosystem.md`
 - Then: `todo/phase-14-enterprise-layer.md`
 
 ## Status Index

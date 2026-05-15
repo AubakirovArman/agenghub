@@ -16,9 +16,15 @@
     "onCommand:agenthub.openLatestReport",
     "onCommand:agenthub.openMemory",
     "onCommand:agenthub.createSpecFromPrompt",
-    "onCommand:agenthub.openDag"
+    "onCommand:agenthub.openDag",
+    "onCommand:agenthub.openApprovals",
+    "onCommand:agenthub.approveSpec"
   ],
   "main": "./extension.js",
+  "scripts": {
+    "test": "node test/approvals.test.js",
+    "check": "node --check extension.js && node --check src/commands.js && node --check src/approvals.js && node --check src/approvalProvider.js && node --check src/specs.js && node --check src/specProvider.js && node --check src/cli.js && node --check src/dagView.js && node --check src/providers.js && node --check src/utils.js && npm test"
+  },
   "contributes": {
     "configuration": {
       "title": "AgentHub",
@@ -50,6 +56,14 @@
       {
         "command": "agenthub.openDag",
         "title": "AgentHub: Open Latest DAG"
+      },
+      {
+        "command": "agenthub.openApprovals",
+        "title": "AgentHub: Open Approvals"
+      },
+      {
+        "command": "agenthub.approveSpec",
+        "title": "AgentHub: Approve AgentSpec"
       }
     ],
     "viewsContainers": {
@@ -70,6 +84,30 @@
         {
           "id": "agenthub.memory",
           "name": "Memory"
+        },
+        {
+          "id": "agenthub.specs",
+          "name": "AgentSpecs"
+        },
+        {
+          "id": "agenthub.approvals",
+          "name": "Approvals"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "agenthub.refresh",
+          "when": "view =~ /agenthub\\./",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "agenthub.approveSpec",
+          "when": "view == agenthub.approvals && viewItem == agenthubApprovalSpec",
+          "group": "inline"
         }
       ]
     },
@@ -87,4 +125,3 @@
     ]
   }
 }
-

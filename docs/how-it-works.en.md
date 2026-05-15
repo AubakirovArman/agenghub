@@ -221,11 +221,13 @@ The extension in `editors/vscode` provides:
 
 - transaction tree from `.agent/tx`;
 - memory tree from `.agent/memory`;
+- AgentSpec drafts and examples;
+- approval queue for pending specs and `BLOCKED_ON_HUMAN` transactions;
 - latest report opener;
 - DAG webview for `dag.json`;
 - prompt-to-AgentSpec preview using `agenthub ask`.
 
-It is split into small zero-build JavaScript modules under `editors/vscode/src/`.
+It is split into small zero-build JavaScript modules under `editors/vscode/src/`. See [IDE and visual layer](ide.en.md).
 
 ## Development Rules
 

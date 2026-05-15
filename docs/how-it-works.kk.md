@@ -221,11 +221,13 @@ agenthub workspace scan --write-maps
 
 - `.agent/tx` бойынша transaction tree;
 - `.agent/memory` бойынша memory tree;
+- AgentSpec drafts және examples;
+- pending specs және `BLOCKED_ON_HUMAN` transactions үшін approval queue;
 - latest report ашу;
 - `dag.json` үшін DAG webview;
 - `agenthub ask` арқылы prompt-to-AgentSpec preview.
 
-Extension коды `editors/vscode/src/` ішінде кіші zero-build JavaScript модульдеріне бөлінген.
+Extension коды `editors/vscode/src/` ішінде кіші zero-build JavaScript модульдеріне бөлінген. Қара: [IDE and visual layer](ide.kk.md).
 
 ## Даму ережелері
 
