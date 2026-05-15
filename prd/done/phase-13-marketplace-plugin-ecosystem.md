@@ -4,7 +4,7 @@ Status: Done
 
 Existing evidence: `ddd84ca Add plugin package installation foundation`
 
-Closing evidence: Phase 13 implementation commit.
+Closing evidence: `ab46f97`.
 
 ## Deliverables
 
