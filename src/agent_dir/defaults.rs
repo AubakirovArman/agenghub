@@ -102,6 +102,15 @@ pub(super) const DEFAULT_DIFF_LIMITS: &str = r#"diff_limits:
   package_change_requires_skill: dependency_change
 "#;
 
+pub(super) const DEFAULT_RESOURCE_LIMITS: &str = r#"resources:
+  timeout_secs: 300
+  cpu_cores:
+  memory_mb:
+  disk_mb:
+  network: inherit
+  filesystem: workspace
+"#;
+
 pub(super) const DEFAULT_VERIFIER_PROFILES: &str = r#"profiles:
   content_quality:
     checks:

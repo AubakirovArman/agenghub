@@ -82,23 +82,35 @@ pub fn usage(duration_ms: u128, exit_code: Option<i32>, timed_out: bool) -> Reso
 
 fn resource_limits(sandbox_level: u8, timeout: Duration) -> ResourceLimitPolicy {
     ResourceLimitPolicy {
-        timeout_secs: timeout.as_secs(),
-        cpu_cores: None,
-        memory_mb: None,
-        disk_mb: None,
-        network: if sandbox_level == 0 {
-            "host"
-        } else {
-            "inherit"
-        }
-        .to_string(),
-        filesystem: if sandbox_level == 0 {
-            "workspace"
-        } else {
-            "sanitized_workspace"
-        }
-        .to_string(),
+        timeout_secs: env_u64("AGENTHUB_TIMEOUT_SECS").unwrap_or(timeout.as_secs()),
+        cpu_cores: env_f32("AGENTHUB_CPU_CORES"),
+        memory_mb: env_u64("AGENTHUB_MEMORY_MB"),
+        disk_mb: env_u64("AGENTHUB_DISK_MB"),
+        network: std::env::var("AGENTHUB_NETWORK_MODE").unwrap_or_else(|_| {
+            if sandbox_level == 0 {
+                "host"
+            } else {
+                "inherit"
+            }
+            .to_string()
+        }),
+        filesystem: std::env::var("AGENTHUB_FILESYSTEM_MODE").unwrap_or_else(|_| {
+            if sandbox_level == 0 {
+                "workspace"
+            } else {
+                "sanitized_workspace"
+            }
+            .to_string()
+        }),
     }
+}
+
+fn env_u64(name: &str) -> Option<u64> {
+    std::env::var(name).ok()?.parse().ok()
+}
+
+fn env_f32(name: &str) -> Option<f32> {
+    std::env::var(name).ok()?.parse().ok()
 }
 
 fn local_capabilities(sandbox_level: u8) -> Vec<String> {

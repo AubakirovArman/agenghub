@@ -10,6 +10,7 @@ All notable AgentHub changes are tracked here.
 - Add install scripts, local package archives, and product CLI commands for `doctor`, providers, version, and config.
 - Add real LLM Gateway execution paths for CLI providers, OpenAI-compatible HTTP endpoints, retry/backoff, and provider test integration.
 - Add product fixture projects and smoke scripts for Rust, data, infra, content, reference web, rollback, smart sync, providers, and dashboard paths.
+- Add sandbox hardening reports, resource limit policy, and OS capability detection for cgroups, containers, Windows process control, and network policy.
 
 ## 0.1.0
 

@@ -13,6 +13,7 @@ pub mod domain_runtime;
 pub mod effects;
 pub mod enterprise;
 pub mod git;
+pub mod hardening;
 pub mod intent;
 pub mod journal;
 pub mod llm_gateway;

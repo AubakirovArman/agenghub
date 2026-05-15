@@ -103,6 +103,11 @@ pub fn init_project(root: &Path, force: bool) -> Result<AgentPaths> {
         DEFAULT_DIFF_LIMITS,
         force,
     )?;
+    write_default(
+        &paths.policies.join("resources.yaml"),
+        DEFAULT_RESOURCE_LIMITS,
+        force,
+    )?;
     write_default(&paths.skills.join("installed.json"), "[]\n", force)?;
     write_default(&paths.plugins.join("installed.json"), "[]\n", force)?;
     write_default(

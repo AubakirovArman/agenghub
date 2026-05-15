@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::command_runner::RemoteRunner;
 use crate::enterprise;
+use crate::hardening::SandboxHardeningReport;
 use crate::spec::AgentSpec;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -17,6 +18,7 @@ pub struct SandboxReport {
     pub mode: String,
     pub reason: String,
     pub runner: Option<RemoteRunner>,
+    pub hardening: SandboxHardeningReport,
 }
 
 #[derive(Debug)]
@@ -27,6 +29,7 @@ pub struct SandboxError {
 
 pub fn evaluate(project_root: &Path, spec: &AgentSpec) -> Result<SandboxReport> {
     let level = spec.execution.sandbox.level;
+    let hardening = crate::hardening::inspect(project_root)?;
     let report = match level {
         0 => report(
             true,
@@ -35,6 +38,7 @@ pub fn evaluate(project_root: &Path, spec: &AgentSpec) -> Result<SandboxReport> 
             "local_controlled",
             "process groups and timeouts",
             None,
+            hardening.clone(),
         ),
         1 => report(
             true,
@@ -43,9 +47,18 @@ pub fn evaluate(project_root: &Path, spec: &AgentSpec) -> Result<SandboxReport> 
             "local_sandbox",
             "sanitized command environment",
             None,
+            hardening.clone(),
         ),
         2 => match select_runner(project_root, false)? {
-            Some(runner) => report(true, 2, 2, "remote_runner", "remote dispatch", Some(runner)),
+            Some(runner) => report(
+                true,
+                2,
+                2,
+                "remote_runner",
+                "remote dispatch",
+                Some(runner),
+                hardening.clone(),
+            ),
             None => report(
                 false,
                 2,
@@ -53,6 +66,7 @@ pub fn evaluate(project_root: &Path, spec: &AgentSpec) -> Result<SandboxReport> 
                 "remote_runner_required",
                 "no remote runner configured",
                 None,
+                hardening.clone(),
             ),
         },
         _ => match select_runner(project_root, true)? {
@@ -63,6 +77,7 @@ pub fn evaluate(project_root: &Path, spec: &AgentSpec) -> Result<SandboxReport> 
                 "enterprise_runner",
                 "enterprise remote dispatch",
                 Some(runner),
+                hardening.clone(),
             ),
             None => report(
                 false,
@@ -71,6 +86,7 @@ pub fn evaluate(project_root: &Path, spec: &AgentSpec) -> Result<SandboxReport> 
                 "enterprise_runner_required",
                 "no enterprise runner configured",
                 None,
+                hardening,
             ),
         },
     };
@@ -109,6 +125,7 @@ fn report(
     mode: &str,
     reason: &str,
     runner: Option<RemoteRunner>,
+    hardening: SandboxHardeningReport,
 ) -> SandboxReport {
     SandboxReport {
         passed,
@@ -117,6 +134,7 @@ fn report(
         mode: mode.to_string(),
         reason: reason.to_string(),
         runner,
+        hardening,
     }
 }
 
