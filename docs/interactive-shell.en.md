@@ -18,7 +18,7 @@ agenthub> add a /courses page in the dashboard style
 
 AgentHub then:
 
-1. adds explicit `@` context if present;
+1. adds explicit `@` context for files, folders, transactions, or memory if present;
 2. writes the message to the chat transcript;
 3. creates a draft AgentSpec;
 4. shows the plan, provider, verifier, scope, and commands;
@@ -33,7 +33,9 @@ plain text        plan, ask for approval, then execute
 /                 show commands with tab completion
 @README.md        attach a file to the next request
 @src              attach a folder summary to the next request
-@last             attach the latest transaction report
+@last / @tx       attach the latest transaction summary
+@tx:tx-123        attach a specific transaction summary
+@memory:auth      attach relevant memory facts and warnings
 !git status       run a policy-checked shell command and log it
 # use fetch only  save a typed memory note
 ```

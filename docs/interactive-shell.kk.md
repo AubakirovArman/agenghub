@@ -18,7 +18,7 @@ agenthub> add a /courses page in the dashboard style
 
 Содан кейін AgentHub:
 
-1. `@` context болса, request ішіне қосады;
+1. `@` context болса, file, folder, transaction немесе memory context ретінде қосады;
 2. message-ті chat transcript ішіне жазады;
 3. draft AgentSpec жасайды;
 4. plan, provider, verifier, scope және commands көрсетеді;
@@ -33,7 +33,9 @@ ordinary text      plan, approval, execution
 /                  commands және tab completion
 @README.md         next request үшін file context
 @src               next request үшін folder summary
-@last              latest transaction report қосу
+@last / @tx        latest transaction summary қосу
+@tx:tx-123         нақты transaction summary қосу
+@memory:auth       relevant memory facts және warnings қосу
 !git status        policy-checked shell command және log
 # use fetch only   typed memory note сақтау
 ```

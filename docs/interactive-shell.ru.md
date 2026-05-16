@@ -18,7 +18,7 @@ agenthub> add a /courses page in the dashboard style
 
 Дальше AgentHub:
 
-1. добавляет явный `@` context, если он указан;
+1. добавляет явный `@` context для files, folders, transactions или memory, если он указан;
 2. записывает сообщение в transcript;
 3. создаёт draft AgentSpec;
 4. показывает plan, provider, verifier, scope и commands;
@@ -33,7 +33,9 @@ agenthub> add a /courses page in the dashboard style
 /                   команды с tab completion
 @README.md          добавить file context к следующему запросу
 @src                добавить folder summary к следующему запросу
-@last               добавить latest transaction report
+@last / @tx         добавить latest transaction summary
+@tx:tx-123          добавить summary конкретной transaction
+@memory:auth        добавить релевантные memory facts и warnings
 !git status         policy-checked shell command с логом
 # use fetch only    сохранить typed memory note
 ```

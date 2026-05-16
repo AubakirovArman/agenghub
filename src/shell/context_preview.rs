@@ -14,7 +14,7 @@ pub(super) fn print(root: &Path, chat: &ChatSession, current_tx: Option<&str>) -
     print_chat(chat)?;
     print_transaction(root, current_tx)?;
     print_memory(root)?;
-    println!("mentions\t@file @folder @last");
+    println!("mentions\t@file @folder @last @tx @memory");
     Ok(())
 }
 

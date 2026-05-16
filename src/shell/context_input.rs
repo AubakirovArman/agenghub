@@ -3,7 +3,7 @@ use std::path::Path;
 
 use anyhow::Result;
 
-use super::actions;
+use super::mention_summary;
 
 #[derive(Debug, Clone)]
 pub(super) struct EnrichedRequest {
@@ -16,7 +16,7 @@ pub(super) fn enrich(root: &Path, request: &str) -> Result<EnrichedRequest> {
     let mut clean = Vec::new();
     for token in request.split_whitespace() {
         if let Some(raw) = token.strip_prefix('@') {
-            mentions.push(resolve_mention(root, raw)?);
+            mentions.push(mention_summary::resolve(root, raw, request)?);
         } else {
             clean.push(token);
         }
@@ -33,13 +33,7 @@ pub(super) fn enrich(root: &Path, request: &str) -> Result<EnrichedRequest> {
     Ok(EnrichedRequest { text, mentions })
 }
 
-fn resolve_mention(root: &Path, raw: &str) -> Result<String> {
-    let raw = raw.trim_end_matches([',', '.', ';']);
-    if matches!(raw, "last" | "latest") {
-        return actions::latest_tx(root)
-            .map(|tx| format!("- @last transaction {tx}"))
-            .or_else(|_| Ok("- @last transaction <none>".to_string()));
-    }
+pub(super) fn summarize_path(root: &Path, raw: &str) -> Result<String> {
     let path = root.join(raw);
     if path.is_file() {
         let lines = fs::read_to_string(&path)

@@ -18,7 +18,7 @@ agenthub> add a /courses page in the dashboard style
 
 随后 AgentHub 会：
 
-1. 如果有 `@` context，就把它加入请求；
+1. 如果有 `@` context，就加入 file、folder、transaction 或 memory context；
 2. 将消息写入 chat transcript；
 3. 创建 draft AgentSpec；
 4. 显示 plan、provider、verifier、scope 和 commands；
@@ -33,7 +33,9 @@ agenthub> add a /courses page in the dashboard style
 /                 显示命令，并支持 tab completion
 @README.md        给下一条请求附加 file context
 @src              给下一条请求附加 folder summary
-@last             附加 latest transaction report
+@last / @tx       附加 latest transaction summary
+@tx:tx-123        附加指定 transaction summary
+@memory:auth      附加相关 memory facts 和 warnings
 !git status       通过 policy 检查运行 shell command 并记录日志
 # use fetch only  保存 typed memory note
 ```

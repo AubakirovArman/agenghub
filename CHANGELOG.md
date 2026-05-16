@@ -15,6 +15,7 @@ All notable AgentHub changes are tracked here.
 - Add shell chat session management with auto titles, search, rename, pin, and unpin commands.
 - Add live transaction journal progress for interactive shell tasks and `agenthub run`, with `--no-watch` for quiet scripts.
 - Add `/context` in the shell to preview current chat, recent messages, memory, and selected transaction context.
+- Add `@tx`, `@tx:<id>`, `@memory`, and `@memory:<query>` shell mentions for transaction and project-memory context.
 - Verify release archive SHA-256 checksums in POSIX and Windows installers before extracting binaries.
 - Document checksum installation controls for downloaded and local package artifacts.
 - Add provider-specific CLI credential marker diagnostics for Codex, Gemini, and Kimi.
