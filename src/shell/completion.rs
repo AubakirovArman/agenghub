@@ -181,7 +181,7 @@ fn path_candidates(root: &Path, token: &str) -> Result<Vec<CompletionCandidate>>
         } else {
             PathBuf::from(&name)
         };
-        let mut value = relative.display().to_string();
+        let mut value = relative.to_string_lossy().replace('\\', "/");
         if entry.file_type()?.is_dir() {
             value.push('/');
         }
