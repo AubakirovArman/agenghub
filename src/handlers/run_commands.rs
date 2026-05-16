@@ -11,7 +11,10 @@ use super::run_summary;
 pub fn handle_ask(request: &str, output: Option<&Path>, approval_required: bool) -> Result<()> {
     let preview = intent::normalize_to_spec_with_options(
         request,
-        intent::IntentOptions { approval_required },
+        intent::IntentOptions {
+            approval_required,
+            ..Default::default()
+        },
     );
     if let Some(output) = output {
         println!("{}", intent::write_preview(&preview, output)?.display());
@@ -28,9 +31,13 @@ pub fn handle_plan(
     output: Option<&Path>,
     approval_required: bool,
 ) -> Result<()> {
-    let preview = intent::normalize_to_spec_with_options(
+    let preview = intent::normalize_to_spec_for_project(
+        root,
         request,
-        intent::IntentOptions { approval_required },
+        intent::IntentOptions {
+            approval_required,
+            ..Default::default()
+        },
     );
     let path = output
         .map(Path::to_path_buf)
@@ -103,7 +110,8 @@ fn resolve_run_spec(root: &Path, target: &str) -> Result<PathBuf> {
     if looks_like_path(target) {
         return Err(anyhow!("AgentSpec file does not exist: {target}"));
     }
-    let preview = intent::normalize_to_spec(target);
+    let preview =
+        intent::normalize_to_spec_for_project(root, target, intent::IntentOptions::default());
     let output = draft_path(root, "run");
     intent::write_preview(&preview, &output)?;
     print_questions(&preview);
@@ -130,10 +138,14 @@ fn draft_path(root: &Path, prefix: &str) -> PathBuf {
 }
 
 fn looks_like_path(target: &str) -> bool {
-    target.ends_with(".yaml")
-        || target.ends_with(".yml")
-        || target.contains('/')
-        || target.contains('\\')
+    let trimmed = target.trim();
+    trimmed.ends_with(".yaml")
+        || trimmed.ends_with(".yml")
+        || (!trimmed.chars().any(char::is_whitespace)
+            && (trimmed.contains('\\')
+                || trimmed.starts_with("./")
+                || trimmed.starts_with("../")
+                || (trimmed.contains('/') && !trimmed.starts_with('/'))))
 }
 
 #[cfg(test)]
@@ -143,6 +155,11 @@ mod tests {
     #[test]
     fn separates_paths_from_natural_requests() {
         assert!(looks_like_path("examples/task.yaml"));
+        assert!(looks_like_path("examples/task"));
+        assert!(looks_like_path("C:\\tasks\\task.yaml"));
         assert!(!looks_like_path("add a generated health file"));
+        assert!(!looks_like_path("add /courses page"));
+        assert!(!looks_like_path("/courses"));
+        assert!(!looks_like_path("создай страницу /courses"));
     }
 }

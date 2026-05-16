@@ -1,8 +1,8 @@
-# Interactive Shell
+# 交互式 Shell
 
-AgentHub shell 是本地 transactions 的 control shell。它让日常使用像一个完整产品界面，同时保证每个执行的请求都可审计。
+语言: [English](interactive-shell.en.md), [Русский](interactive-shell.ru.md), [中文](interactive-shell.zh.md), [Қазақша](interactive-shell.kk.md)
 
-## 启动
+AgentHub 的默认体验是本地 chat shell：
 
 ```bash
 agenthub
@@ -10,68 +10,59 @@ agenthub
 agenthub shell
 ```
 
-Shell 默认进入 `plan` mode。Plain text 会创建 draft AgentSpec。如果希望 plain text 立即执行，切换到 `run` mode：
+Shell 会恢复最近的 chat，在可能时准备项目，显示当前 provider，然后让你直接输入普通任务。你不需要先运行 `init`、`doctor`、`plan` 或 `run`。
 
 ```text
-agenthub:plan> mode run
-agenthub:run> add a generated health-check file
+agenthub> add a /courses page in the dashboard style
 ```
 
-## Session Model
+随后 AgentHub 会：
 
-Shell 现在会把轻量 chat transcripts 保存在 `.agent/shell/chats/`。使用 `chats`、`chat latest`、`chat new` 和 `messages` 浏览消息历史。
+1. 如果有 `@` context，就把它加入请求；
+2. 将消息写入 chat transcript；
+3. 创建 draft AgentSpec；
+4. 显示 plan、provider、verifier、scope 和 commands；
+5. 询问 inline approval；
+6. 确认后运行 transaction；
+7. 打印 diff、logs、report、explanation 和 undo 的 next actions。
 
-已执行的消息仍然是 transaction sessions，而不是 free-form provider chat rooms。消息被执行时，AgentHub 会创建 transaction，并包含：
-
-- journal 和 WAL；
-- effect ledger；
-- command logs 和 bounded tails；
-- verifier output；
-- report；
-- memory promotion 或 failed-attempt warning；
-- dashboard visibility。
-
-使用 `sessions`、`open latest`、`report`、`effects` 和 `explain` 浏览过去的 transaction work。
-
-## 核心命令
+## 输入模型
 
 ```text
-init                  initialize .agent
-doctor                检查本地环境
-providers status      查看 configured providers
-provider codex        设置 Codex 为 default provider
-ask <request>         写入 draft spec
-do <request>          创建 draft 并运行
-mode run              让后续 plain text 直接执行
-sessions              列出 previous transactions
-chats                 列出 shell chat transcripts
-chat latest           选择 latest chat transcript
-chat new              开始新的 chat transcript
-messages              打印当前 chat transcript
-open latest           选择 latest transaction
-watch latest          跟随 live journal
-approve <note>        为当前 transaction 记录 human resolution
-resume latest         approval 后继续 blocked transaction
-report latest         输出 report
-effects latest        输出 effect ledger
-explain latest        解释结果和 next action
-dashboard             写入/打开 static dashboard
-quit                  退出
+普通文本          计划、确认、然后执行
+/                 显示命令，并支持 tab completion
+@README.md        给下一条请求附加 file context
+@src              给下一条请求附加 folder summary
+@last             附加 latest transaction report
+!git status       通过 policy 检查运行 shell command 并记录日志
+# use fetch only  保存 typed memory note
 ```
 
-## 推荐的首次 Flow
+History 存在 `.agent/shell/history.txt`。Chat transcripts 存在 `.agent/shell/chats/`。
+
+## 核心 Slash Commands
 
 ```text
-agenthub> init
-agenthub> doctor
-agenthub> providers status
-agenthub> provider codex
-agenthub> ask add a small docs page
-agenthub> run .agent/drafts/<draft>.yaml
-agenthub> explain latest
-agenthub> dashboard
+/help             shell help
+/status           当前 project 和 transaction
+/providers        provider status 和 setup hints
+/memory           inspect memory
+/skills           inspect skills
+/transactions     recent transactions
+/new              新 chat
+/resume           resume selected/latest blocked transaction
+/diff             diff selected/latest transaction
+/logs             logs selected/latest transaction
+/report           report selected/latest transaction
+/explain          explain selected/latest transaction
+/dashboard        打开 dashboard
+/config           configuration
+/clear            清空 terminal
+/exit             退出
 ```
+
+`agenthub run`、`agenthub tx report`、`agenthub tx diff` 和 `agenthub tx logs` 等 expert commands 仍然可用于 scripts 和 CI。
 
 ## 边界
 
-Shell 不替代 provider。Codex、Kimi、Gemini、command providers 或 OpenAI-compatible endpoints 仍然执行 model work。Shell 为这些工作提供 transaction control、safety、history 和 inspection。
+Shell 不替代 Codex、Kimi、Gemini 或 OpenAI-compatible model。它在 provider work 外层提供 transaction control、approvals、logs、rollback、reports、memory 和 dashboard visibility。

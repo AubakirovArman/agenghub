@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct IntentOptions {
     pub approval_required: bool,
+    pub agent_adapter: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

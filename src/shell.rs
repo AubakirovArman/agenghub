@@ -1,14 +1,21 @@
 mod actions;
+mod approval;
 mod chat;
 mod chat_display;
 mod commands;
+mod context_input;
 mod control;
 mod flow;
 mod help;
+mod line_editor;
+mod memory_note;
+mod onboarding;
 mod product;
+mod prompt;
 mod run;
+mod status;
+mod system;
 
-use std::io::{self, BufRead, Write};
 use std::path::Path;
 
 use anyhow::Result;
@@ -17,22 +24,17 @@ use crate::agent_dir;
 use commands::{parse_line, ShellCommand, ShellMode};
 
 pub fn run(project_root: &Path) -> Result<()> {
-    let stdin = io::stdin();
-    let mut stdout = io::stdout();
+    onboarding::prepare(project_root)?;
     let mut current_tx: Option<String> = None;
-    let mut current_chat = chat::create(project_root)?;
-    let mut mode = ShellMode::Plan;
-    writeln!(
-        stdout,
-        "AgentHub local shell. Type `help` for commands. Use `mode run` to execute plain text."
-    )?;
-    writeln!(stdout, "chat {}", current_chat.id)?;
+    let mut current_chat = chat::latest(project_root).or_else(|_| chat::create(project_root))?;
+    let mut mode = ShellMode::Run;
+    let mut input = line_editor::ShellInput::new(project_root)?;
+    println!("chat {}", current_chat.id);
     loop {
-        prompt(&mut stdout, mode, current_tx.as_deref())?;
-        let mut line = String::new();
-        if stdin.lock().read_line(&mut line)? == 0 {
+        let prompt = prompt::render(project_root, &current_chat, current_tx.as_deref());
+        let Some(line) = input.read_line(&prompt)? else {
             break;
-        }
+        };
         if !handle(
             project_root,
             parse_line(&line),
@@ -57,6 +59,8 @@ fn handle(
         ShellCommand::Empty => {}
         ShellCommand::Exit => return Ok(false),
         ShellCommand::Help => help::print(*mode),
+        ShellCommand::Suggestions(prefix) => help::suggestions(prefix.as_deref()),
+        ShellCommand::UnknownSlash(command) => help::unknown_slash(&command),
         ShellCommand::Init => {
             agent_dir::init_project(root, false)?;
             println!("initialized {}", root.display());
@@ -65,6 +69,9 @@ fn handle(
         ShellCommand::Close => {
             *current_tx = None;
             println!("current session cleared");
+        }
+        ShellCommand::Clear => {
+            print!("\x1b[2J\x1b[H");
         }
         ShellCommand::Mode(next) => flow::update_mode(next, mode, current_chat)?,
         ShellCommand::Chats => chat_display::print_chats(root)?,
@@ -75,6 +82,8 @@ fn handle(
         ShellCommand::Providers(args) => product::handle_providers(root, args.as_deref())?,
         ShellCommand::Config(args) => product::handle_config(root, args.as_deref())?,
         ShellCommand::Dashboard => product::open_dashboard(root)?,
+        ShellCommand::Shell(command) => system::run(root, &command)?,
+        ShellCommand::MemoryAdd(note) => memory_note::add(root, &note)?,
         ShellCommand::Open(tx_id) => {
             let requested = (!tx_id.trim().is_empty()).then_some(tx_id.as_str());
             let opened = requested
@@ -114,6 +123,19 @@ fn handle(
             let tx = actions::resolve_tx(root, tx_id.as_deref(), current_tx.as_deref())?;
             actions::print_explain(root, &tx)?;
         }
+        ShellCommand::Diff(tx_id) => {
+            let tx = actions::resolve_tx(root, tx_id.as_deref(), current_tx.as_deref())?;
+            actions::print_diff(root, &tx)?;
+        }
+        ShellCommand::Logs(tx_id) => {
+            let raw = tx_id.as_deref();
+            let looks_like_tx = raw.is_some_and(|value| {
+                value.starts_with("tx-") || matches!(value, "latest" | "last")
+            });
+            let tx =
+                actions::resolve_tx(root, raw.filter(|_| looks_like_tx), current_tx.as_deref())?;
+            actions::print_logs(root, &tx, raw.filter(|_| !looks_like_tx))?;
+        }
         ShellCommand::Memory(mode) => actions::print_memory(root, mode.as_deref())?,
         ShellCommand::Skills(mode) => actions::print_skills(root, mode.as_deref())?,
         ShellCommand::Undo(tx_id) => {
@@ -136,6 +158,7 @@ fn handle(
                 &tx_id,
                 &flow::report_path(root, &tx_id),
             )?;
+            flow::print_next_actions(&tx_id);
             *current_tx = Some(tx_id);
         }
         ShellCommand::Run { target, no_commit } => {
@@ -147,6 +170,7 @@ fn handle(
                 &tx_id,
                 &flow::report_path(root, &tx_id),
             )?;
+            flow::print_next_actions(&tx_id);
             *current_tx = Some(tx_id);
         }
         ShellCommand::Message(request) => {
@@ -154,13 +178,4 @@ fn handle(
         }
     }
     Ok(true)
-}
-
-fn prompt(stdout: &mut io::Stdout, mode: ShellMode, current_tx: Option<&str>) -> Result<()> {
-    match current_tx {
-        Some(tx) => write!(stdout, "agenthub:{}[{tx}]> ", mode.as_str())?,
-        None => write!(stdout, "agenthub:{}> ", mode.as_str())?,
-    }
-    stdout.flush()?;
-    Ok(())
 }

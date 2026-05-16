@@ -1,8 +1,8 @@
 # Interactive Shell
 
-The AgentHub shell is a control shell for local transactions. It is designed to make daily use feel like one product surface while still keeping every executed request auditable.
+Languages: [English](interactive-shell.en.md), [Русский](interactive-shell.ru.md), [中文](interactive-shell.zh.md), [Қазақша](interactive-shell.kk.md)
 
-## Start
+The default AgentHub experience is a local chat shell:
 
 ```bash
 agenthub
@@ -10,68 +10,59 @@ agenthub
 agenthub shell
 ```
 
-The shell starts in `plan` mode. Plain text creates a draft AgentSpec. Switch to `run` mode when plain text should execute immediately:
+The shell restores the latest chat, prepares the project when possible, shows the active provider, and lets you type a normal task. You do not need to start with `init`, `doctor`, `plan`, or `run`.
 
 ```text
-agenthub:plan> mode run
-agenthub:run> add a generated health-check file
+agenthub> add a /courses page in the dashboard style
 ```
 
-## Session Model
+AgentHub then:
 
-The shell now keeps lightweight chat transcripts under `.agent/shell/chats/`. Use `chats`, `chat latest`, `chat new`, and `messages` to move through the transcript history.
+1. adds explicit `@` context if present;
+2. writes the message to the chat transcript;
+3. creates a draft AgentSpec;
+4. shows the plan, provider, verifier, scope, and commands;
+5. asks for inline approval;
+6. runs the transaction after approval;
+7. prints next actions for diff, logs, report, explanation, and undo.
 
-Executed messages are still transaction sessions, not free-form provider chat rooms. When a message is executed, AgentHub creates a transaction with:
-
-- journal and WAL;
-- effect ledger;
-- command logs and bounded tails;
-- verifier output;
-- report;
-- memory promotion or failed-attempt warning;
-- dashboard visibility.
-
-Use `sessions`, `open latest`, `report`, `effects`, and `explain` to move through past transaction work.
-
-## Core Commands
+## Input Model
 
 ```text
-init                  initialize .agent
-doctor                check local readiness
-providers status      inspect configured providers
-provider codex        set up Codex as the default provider
-ask <request>         write a draft spec
-do <request>          create a draft and run it
-mode run              execute future plain text directly
-sessions              list previous transactions
-chats                 list shell chat transcripts
-chat latest           select the latest chat transcript
-chat new              start a new chat transcript
-messages              print the selected chat transcript
-open latest           select the latest transaction
-watch latest          follow the live journal
-approve <note>        record a human resolution on the selected transaction
-resume latest         resume a blocked transaction after approval
-report latest         print the report
-effects latest        print the effect ledger
-explain latest        explain result and next action
-dashboard             write/open the static dashboard
-quit                  exit
+plain text        plan, ask for approval, then execute
+/                 show commands with tab completion
+@README.md        attach a file to the next request
+@src              attach a folder summary to the next request
+@last             attach the latest transaction report
+!git status       run a policy-checked shell command and log it
+# use fetch only  save a typed memory note
 ```
 
-## Recommended First Flow
+History is stored in `.agent/shell/history.txt`. Chat transcripts are stored under `.agent/shell/chats/`.
+
+## Core Slash Commands
 
 ```text
-agenthub> init
-agenthub> doctor
-agenthub> providers status
-agenthub> provider codex
-agenthub> ask add a small docs page
-agenthub> run .agent/drafts/<draft>.yaml
-agenthub> explain latest
-agenthub> dashboard
+/help             show shell help
+/status           show current project and transaction
+/providers        show provider status and setup hints
+/memory           inspect memory
+/skills           inspect skills
+/transactions     list recent transactions
+/new              start a new chat
+/resume           resume selected/latest blocked transaction
+/diff             show selected/latest transaction diff
+/logs             show selected/latest transaction logs
+/report           show selected/latest report
+/explain          explain selected/latest transaction
+/dashboard        open the dashboard
+/config           inspect configuration
+/clear            clear the terminal
+/exit             exit
 ```
+
+Expert commands such as `agenthub run`, `agenthub tx report`, `agenthub tx diff`, and `agenthub tx logs` remain available for scripts and CI.
 
 ## Boundary
 
-The shell does not replace the provider. Codex, Kimi, Gemini, command providers, or OpenAI-compatible endpoints still perform model work. The shell provides transaction control, safety, history, and inspection around that work.
+The shell does not replace Codex, Kimi, Gemini, or an OpenAI-compatible model. It provides transaction control, approvals, logs, rollback, reports, memory, and dashboard visibility around provider work.

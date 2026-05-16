@@ -1,113 +1,49 @@
-# Локальная оболочка
+# Локальный shell
 
-AgentHub можно запускать как интерактивную локальную оболочку:
+Языки: [English](local-shell.en.md), [Русский](local-shell.ru.md), [中文](local-shell.zh.md), [Қазақша](local-shell.kk.md)
+
+Запуск:
 
 ```bash
 agenthub
-# или
-agenthub shell
 ```
 
-Оболочка нужна для local-first работы. Внутри можно смотреть прошлые транзакции, открывать отчёты, создавать draft AgentSpec из обычного сообщения, запускать запросы без выхода из prompt и держать выбранную текущую транзакцию. Shell также хранит лёгкие chat transcripts в `.agent/shell/chats/`, чтобы к сообщениям можно было вернуться позже. Выполненные сообщения всё равно становятся отслеживаемыми transactions с report, journal, effects, verifier output и memory behavior.
-
-Shell стартует в режиме `plan`. В этом режиме обычный текст только создаёт draft. Если хочешь, чтобы обычный текст сразу выполнялся, включи `mode run`.
-
-## Команды
+Это рекомендованный ежедневный интерфейс. AgentHub открывает latest chat, по возможности готовит проект, показывает readiness hints и позволяет сразу писать задачу:
 
 ```text
-help                         показать команды
-init                         инициализировать .agent
-mode plan|run                выбрать поведение обычного текста
-current                      показать выбранную транзакцию
-close                        сбросить выбранную транзакцию
-chats                        список shell chat transcripts
-chat [new|latest|id]         показать, создать или выбрать chat
-messages                     показать выбранный chat transcript
-sessions or history          список последних транзакций
-session [tx-id|latest]       список сессий или открыть одну
-doctor                       проверить локальную готовность
-providers [status|...]       список, setup, test или diagnose providers
-provider <id>                настроить default provider
-config [show|set key value]  посмотреть или обновить config
-dashboard                    записать/открыть локальный web dashboard
-open <tx-id|latest>          открыть report и сделать tx текущей
-latest                       открыть последнюю транзакцию
-watch [tx-id|latest]         следить за live journal транзакции
-cancel [tx-id|latest]        запросить cancellation транзакции
-approve [tx-id] <note>       записать human approval/resolution
-resume [tx-id|latest]        продолжить blocked transaction
-report [tx-id]               показать report, по умолчанию текущей tx
-effects [tx-id]              показать effect ledger
-explain [tx-id]              объяснить результат, причину failure и next steps
-memory [summary|audit]       показать memory summary или audit
-skills [scorecard]           список skills или scorecard
-undo [tx-id|last]            git revert committed transaction
-ask <request>                записать draft AgentSpec
-do <request>                 записать draft и сразу выполнить
-run <spec|request> [--no-commit]
-quit                         выйти
-обычный текст                plan mode: draft; run mode: выполнить
-/sessions /open /report      slash-алиасы для интерактивной работы
+agenthub> fix the failing runtime smoke test and keep files under 200 lines
 ```
 
-## Примеры
+Shell создаёт draft plan, показывает что будет выполнено, спрашивает approval, запускает transaction engine и оставляет report, logs, diff, effects ledger, memory records и dashboard data.
 
-Создать draft из сообщения:
+## Полезный ввод
 
 ```text
-agenthub> добавь страницу /courses в стиле dashboard
-draft .agent/drafts/shell-20260515123000.yaml
+/help                 commands
+/status               current project, provider, transaction
+/providers            setup and provider health
+/transactions         recent transactions
+/diff [tx]            transaction diff
+/logs [tx|stage]      transaction logs
+/report [tx]          report
+/explain [tx]         result explanation
+/new                  new chat
+/exit                 exit
+@path                 attach file/folder context
+@last                 attach latest report
+!command              policy-checked shell command
+# note                save project memory
 ```
 
-Переключиться на немедленное выполнение:
+Обычный текст — главный путь. Expert commands `ask`, `run`, `mode`, `watch`, `approve`, `resume`, `effects`, `memory`, `skills` и `undo` остаются доступны, когда нужны.
 
-```text
-agenthub:plan> mode run
-mode run
-agenthub:run> добавь generated health-check файл
-tx-... COMMITTED (.agent/tx/tx-.../report.md)
-```
+## Storage
 
-Запустить spec:
+- Shell history: `.agent/shell/history.txt`
+- Chats: `.agent/shell/chats/`
+- Transactions: `.agent/tx/<tx-id>/`
+- Dashboard: `.agent/reports/dashboard/index.html`
 
-```text
-agenthub:plan> run .agent/drafts/shell-20260515123000.yaml
-tx-... COMMITTED (.agent/tx/tx-.../report.md)
-```
+## Safety
 
-Сразу выполнить естественный запрос:
-
-```text
-agenthub:plan> do добавь generated health-check файл
-```
-
-Открыть прошлые сессии:
-
-```text
-agenthub:plan> sessions
-agenthub:plan> session latest
-agenthub:plan> open latest
-agenthub:plan[tx-20260515123000-abcd1234]> watch
-agenthub:plan[tx-20260515123000-abcd1234]> approve Approved after checking env
-agenthub:plan[tx-20260515123000-abcd1234]> resume
-agenthub:plan[tx-20260515123000-abcd1234]> explain
-agenthub:plan[tx-20260515123000-abcd1234]> effects
-agenthub:plan[tx-20260515123000-abcd1234]> memory audit
-agenthub:plan[tx-20260515123000-abcd1234]> skills scorecard
-agenthub:plan[tx-20260515123000-abcd1234]> undo
-```
-
-Проверить окружение без выхода из shell:
-
-```text
-agenthub:plan> doctor
-agenthub:plan> providers status
-agenthub:plan> provider codex
-agenthub:plan> providers diagnose codex
-agenthub:plan> config show
-agenthub:plan> dashboard
-```
-
-## Безопасность
-
-Оболочка использует тот же transaction engine, что и `agenthub run`: isolated workspace, command policy, bounded logs, verifiers, diff guard, effect ledger, rollback, smart sync, правила promotion памяти и отчёты.
+Local shell использует тот же runtime, что и `agenthub run`: isolated workspace preparation, command policy, bounded logs, verifier checks, diff guard, effect ledger, rollback, smart sync, memory promotion rules и reports.

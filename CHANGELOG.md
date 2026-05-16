@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+- Make `agenthub` open a chat-first shell by default with first-run project setup, latest-chat restore, provider hints, persistent history, and slash completion.
+- Add chat input prefixes for `/` commands, `@` file/folder context, `!` policy-checked shell commands, and `#` typed memory notes.
+- Change plain shell text into the main flow: draft plan, inline approval, transaction run, then `/diff`, `/logs`, `/report`, `/explain`, and `/undo` next actions.
+- Add `agenthub tx diff` and `agenthub tx logs` plus matching `/diff` and `/logs` shell commands.
+- Make natural requests containing routes such as `/courses` parse as requests rather than filesystem paths.
+- Let natural-request planning use the configured project default provider when it is a file-editing adapter.
 - Verify release archive SHA-256 checksums in POSIX and Windows installers before extracting binaries.
 - Document checksum installation controls for downloaded and local package artifacts.
 - Add provider-specific CLI credential marker diagnostics for Codex, Gemini, and Kimi.

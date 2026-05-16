@@ -2,7 +2,17 @@
 
 Languages: [English](product-cli.en.md), [Русский](product-cli.ru.md), [中文](product-cli.zh.md), [Қазақша](product-cli.kk.md)
 
-AgentHub PRD v3 adds product-facing commands for local installation checks, provider readiness, and simple configuration.
+AgentHub PRD v3 adds product-facing commands for local installation checks, provider readiness, simple configuration, and chat-first local work.
+
+## Chat-First Shell
+
+```bash
+agenthub
+```
+
+Running `agenthub` without a subcommand is the recommended daily entry. It can prepare Git and `.agent`, restore the latest chat, show provider readiness, and let you type a normal task. The shell creates a draft plan, asks for inline approval, runs the transaction, and then suggests `/diff`, `/logs`, `/report`, `/explain`, and `/undo`.
+
+Use `/` for commands, `@path` for context, `!command` for policy-checked shell commands, and `# note` for project memory.
 
 ## Doctor
 
@@ -34,11 +44,15 @@ The first output line keeps the compact `tx-id STATUS (report)` format for scrip
 
 ```bash
 agenthub tx explain tx-20260515123000-abcd1234
+agenthub tx diff tx-20260515123000-abcd1234
+agenthub tx logs tx-20260515123000-abcd1234 --tail 80
 ```
 
 `tx explain` summarizes why a transaction failed or succeeded, what happened, what to do next, and which artifacts to inspect.
+`tx diff` shows the committed patch when available and falls back to diff-guard summaries for uncommitted transactions.
+`tx logs` prints bounded command logs, optionally filtered by stage and tail length.
 
-Transaction commands that target one transaction accept either an explicit id or `latest`/`last`. This applies to `tx report`, `tx effects`, `tx explain`, `tx watch`, `tx cancel`, `tx resolve`, `tx resume`, and `tx retry`.
+Transaction commands that target one transaction accept either an explicit id or `latest`/`last`. This applies to `tx report`, `tx effects`, `tx explain`, `tx diff`, `tx logs`, `tx watch`, `tx cancel`, `tx resolve`, `tx resume`, and `tx retry`.
 
 ## Undo
 

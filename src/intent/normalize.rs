@@ -9,7 +9,10 @@ pub(super) fn to_preview(request: &str, options: IntentOptions) -> IntentPreview
     let route = route.unwrap_or_else(|| "/todo".to_string());
     let questions = clarify::questions_for(route_was_inferred);
     let unknowns = clarify::unknowns_for(&questions);
-    let defaults = defaults::resolve();
+    let mut defaults = defaults::resolve();
+    if let Some(adapter) = options.agent_adapter.clone() {
+        defaults.agent_adapter = adapter;
+    }
     let agent_spec_yaml = render::agent_spec_yaml(&route, &defaults, options.approval_required);
 
     IntentPreview {

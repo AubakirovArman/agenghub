@@ -12,6 +12,18 @@ pub enum TxCommands {
     Explain {
         tx_id: String,
     },
+    Diff {
+        tx_id: String,
+    },
+    Logs {
+        tx_id: String,
+
+        #[arg(long)]
+        stage: Option<String>,
+
+        #[arg(long, default_value_t = 80)]
+        tail: usize,
+    },
     Watch {
         tx_id: String,
 

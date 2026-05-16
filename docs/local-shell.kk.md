@@ -1,113 +1,49 @@
-# Жергілікті Shell
+# Local shell
 
-AgentHub интерактивті жергілікті shell ретінде іске қосылады:
+Тілдер: [English](local-shell.en.md), [Русский](local-shell.ru.md), [中文](local-shell.zh.md), [Қазақша](local-shell.kk.md)
+
+Іске қосу:
 
 ```bash
 agenthub
-# немесе
-agenthub shell
 ```
 
-Бұл shell local-first жұмысқа арналған. Оның ішінде бұрынғы transaction сессияларын көруге, report ашуға, табиғи тілден draft AgentSpec жасауға, request-ті prompt ішінен іске қосуға және ағымдағы transaction таңдаулы күйде ұстауға болады. Shell `.agent/shell/chats/` ішінде lightweight chat transcripts сақтайды, сондықтан message history-ге кейін оралуға болады. Executed messages бәрібір tracked transactions болады және report, journal, effects, verifier output, memory behavior сақтайды.
-
-Shell әдепкіде `plan` режимінде ашылады. Бұл режимде жай мәтін тек draft жасайды. Жай мәтін бірден орындалсын десең, `mode run` қос.
-
-## Командалар
+Бұл daily work үшін recommended interface. AgentHub latest chat ашады, мүмкін болса project дайындайды, readiness hints көрсетеді және task-ты бірден жазуға мүмкіндік береді:
 
 ```text
-help                         командаларды көрсету
-init                         .agent инициализациялау
-mode plan|run                жай мәтін әрекетін таңдау
-current                      таңдалған transaction көрсету
-close                        таңдалған transaction тазалау
-chats                        shell chat transcripts тізімі
-chat [new|latest|id]         chat көрсету, жасау немесе таңдау
-messages                     таңдалған chat transcript шығару
-sessions or history          соңғы transaction тізімі
-session [tx-id|latest]       сессия тізімі немесе біреуін ашу
-doctor                       жергілікті readiness тексеру
-providers [status|...]       providers list/setup/test/diagnose
-provider <id>                default provider орнату
-config [show|set key value]  config көру немесе жаңарту
-dashboard                    жергілікті web dashboard жазу/ашу
-open <tx-id|latest>          report ашу және tx-ті ағымдағы ету
-latest                       соңғы transaction ашу
-watch [tx-id|latest]         transaction journal-ды live бақылау
-cancel [tx-id|latest]        transaction cancellation сұрау
-approve [tx-id] <note>       human approval/resolution жазу
-resume [tx-id|latest]        blocked transaction жалғастыру
-report [tx-id]               report шығару, әдепкісі ағымдағы tx
-effects [tx-id]              effect ledger шығару
-explain [tx-id]              нәтиже, failure себебі және next steps түсіндіру
-memory [summary|audit]       memory summary немесе audit көрсету
-skills [scorecard]           skills тізімі немесе scorecard көрсету
-undo [tx-id|last]            committed transaction үшін git revert жасау
-ask <request>                draft AgentSpec жазу
-do <request>                 draft жазып, бірден іске қосу
-run <spec|request> [--no-commit]
-quit                         шығу
-жай мәтін                    plan режимі: draft; run режимі: орындау
-/sessions /open /report      интерактив slash aliases
+agenthub> fix the failing runtime smoke test and keep files under 200 lines
 ```
 
-## Мысалдар
+Shell draft plan жасайды, не орындалатынын көрсетеді, approval сұрайды, transaction engine арқылы іске қосады және report, logs, diff, effects ledger, memory records және dashboard data қалдырады.
 
-Хабарламадан draft жасау:
+## Useful inputs
 
 ```text
-agenthub> dashboard стилінде /courses бет қос
-draft .agent/drafts/shell-20260515123000.yaml
+/help                 commands
+/status               current project, provider, transaction
+/providers            setup and provider health
+/transactions         recent transactions
+/diff [tx]            transaction diff
+/logs [tx|stage]      transaction logs
+/report [tx]          report
+/explain [tx]         result explanation
+/new                  new chat
+/exit                 exit
+@path                 attach file/folder context
+@last                 attach latest report
+!command              policy-checked shell command
+# note                save project memory
 ```
 
-Бірден орындау режиміне ауысу:
+Ordinary text — негізгі жол. `ask`, `run`, `mode`, `watch`, `approve`, `resume`, `effects`, `memory`, `skills` және `undo` сияқты expert commands қажет кезде қолжетімді.
 
-```text
-agenthub:plan> mode run
-mode run
-agenthub:run> generated health-check file қос
-tx-... COMMITTED (.agent/tx/tx-.../report.md)
-```
+## Storage
 
-Spec іске қосу:
+- Shell history: `.agent/shell/history.txt`
+- Chats: `.agent/shell/chats/`
+- Transactions: `.agent/tx/<tx-id>/`
+- Dashboard: `.agent/reports/dashboard/index.html`
 
-```text
-agenthub:plan> run .agent/drafts/shell-20260515123000.yaml
-tx-... COMMITTED (.agent/tx/tx-.../report.md)
-```
+## Safety
 
-Табиғи сұранысты бірден орындау:
-
-```text
-agenthub:plan> do generated health-check file қос
-```
-
-Бұрынғы сессияларды қарау:
-
-```text
-agenthub:plan> sessions
-agenthub:plan> session latest
-agenthub:plan> open latest
-agenthub:plan[tx-20260515123000-abcd1234]> watch
-agenthub:plan[tx-20260515123000-abcd1234]> approve Approved after checking env
-agenthub:plan[tx-20260515123000-abcd1234]> resume
-agenthub:plan[tx-20260515123000-abcd1234]> explain
-agenthub:plan[tx-20260515123000-abcd1234]> effects
-agenthub:plan[tx-20260515123000-abcd1234]> memory audit
-agenthub:plan[tx-20260515123000-abcd1234]> skills scorecard
-agenthub:plan[tx-20260515123000-abcd1234]> undo
-```
-
-Shell ішінен шықпай environment тексеру:
-
-```text
-agenthub:plan> doctor
-agenthub:plan> providers status
-agenthub:plan> provider codex
-agenthub:plan> providers diagnose codex
-agenthub:plan> config show
-agenthub:plan> dashboard
-```
-
-## Қауіпсіздік
-
-Shell `agenthub run` қолданатын transaction engine-ді пайдаланады: isolated workspace, command policy, bounded logs, verifier checks, diff guard, effect ledger, rollback, smart sync, memory promotion ережелері және reports.
+Local shell `agenthub run` сияқты runtime қолданады: isolated workspace preparation, command policy, bounded logs, verifier checks, diff guard, effect ledger, rollback, smart sync, memory promotion rules және reports.

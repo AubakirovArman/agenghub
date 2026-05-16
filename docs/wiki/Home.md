@@ -8,18 +8,21 @@ Languages: [English](Home) · [Русский](Home-ru) · [中文](Home-zh) · 
 
 ```bash
 cargo install --git https://github.com/AubakirovArman/agenthub
-agenthub init
-agenthub doctor
-agenthub providers setup command
-agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-commit
-agenthub tx report latest
+agenthub
+```
+
+Then type a normal task:
+
+```text
+agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 ```
 
 ## Daily Workflow
 
-- Run `agenthub` without a subcommand to open the local shell.
-- Use `agenthub providers setup codex` or another provider setup command.
-- Use `agenthub tx status`, `agenthub tx explain latest`, and `agenthub open dashboard` to inspect results.
+- Run `agenthub` without a subcommand to open the chat-first local shell.
+- Use `/providers`, `/status`, `/diff`, `/logs`, `/report`, `/explain`, and `/dashboard` from inside the shell.
+- Use `@path` for context, `!command` for policy-checked shell commands, and `# note` for project memory.
+- Scriptable commands such as `agenthub run`, `agenthub tx diff latest`, and `agenthub tx logs latest` remain available.
 - Run `scripts/dogfood.sh` and `scripts/dogfood-readiness.sh` before release work.
 
 ## Core Links

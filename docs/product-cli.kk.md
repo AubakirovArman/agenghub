@@ -2,7 +2,17 @@
 
 Тілдер: [English](product-cli.en.md), [Русский](product-cli.ru.md), [中文](product-cli.zh.md), [Қазақша](product-cli.kk.md)
 
-PRD v3 local install, provider readiness және simple configuration тексеретін user-facing commands қосады.
+PRD v3 local install, provider readiness, simple configuration және chat-first local work тексеретін user-facing commands қосады.
+
+## Chat-first shell
+
+```bash
+agenthub
+```
+
+`agenthub` subcommand жоқ іске қосу — recommended daily entry. Ол Git және `.agent` дайындай алады, latest chat қалпына келтіреді, provider readiness көрсетеді және ordinary task бірден жазуға мүмкіндік береді. Shell draft plan жасайды, inline approval сұрайды, transaction іске қосады және `/diff`, `/logs`, `/report`, `/explain`, `/undo` ұсынады.
+
+`/` commands үшін, `@path` context үшін, `!command` policy-checked shell command үшін, `# note` project memory үшін қолданылады.
 
 ## Doctor
 
@@ -34,11 +44,15 @@ agenthub run examples/command-task.yaml
 
 ```bash
 agenthub tx explain tx-20260515123000-abcd1234
+agenthub tx diff tx-20260515123000-abcd1234
+agenthub tx logs tx-20260515123000-abcd1234 --tail 80
 ```
 
 `tx explain` transaction неге failed немесе succeeded болғанын, не болғанын, келесі қадамды және қандай artifacts қарау керегін қысқаша түсіндіреді.
+`tx diff` available болса committed patch көрсетеді, uncommitted transactions үшін diff-guard summaries fallback қолданады.
+`tx logs` bounded command logs басып шығарады, stage және tail length бойынша filter қолдана алады.
 
-Бір transaction-ға бағытталған transaction commands explicit id немесе `latest`/`last` қабылдайды. Бұл `tx report`, `tx effects`, `tx explain`, `tx watch`, `tx cancel`, `tx resolve`, `tx resume` және `tx retry` үшін қолданылады.
+Бір transaction-ға бағытталған transaction commands explicit id немесе `latest`/`last` қабылдайды. Бұл `tx report`, `tx effects`, `tx explain`, `tx diff`, `tx logs`, `tx watch`, `tx cancel`, `tx resolve`, `tx resume` және `tx retry` үшін қолданылады.
 
 ## Undo
 

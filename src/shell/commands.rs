@@ -3,9 +3,12 @@ pub(super) enum ShellCommand {
     Empty,
     Exit,
     Help,
+    Suggestions(Option<String>),
+    UnknownSlash(String),
     Init,
     Current,
     Close,
+    Clear,
     Mode(Option<ShellMode>),
     Chats,
     Chat(Option<String>),
@@ -26,6 +29,10 @@ pub(super) enum ShellCommand {
     Memory(Option<String>),
     Skills(Option<String>),
     Undo(Option<String>),
+    Diff(Option<String>),
+    Logs(Option<String>),
+    Shell(String),
+    MemoryAdd(String),
     Ask(String),
     Do(String),
     Run { target: String, no_commit: bool },
@@ -52,19 +59,35 @@ pub(super) fn parse_line(line: &str) -> ShellCommand {
     if trimmed.is_empty() {
         return ShellCommand::Empty;
     }
+    if let Some(command) = trimmed.strip_prefix('!') {
+        return ShellCommand::Shell(command.trim().to_string());
+    }
+    if let Some(note) = trimmed.strip_prefix('#') {
+        return ShellCommand::MemoryAdd(note.trim().to_string());
+    }
+    if trimmed.starts_with('@') {
+        return ShellCommand::Message(trimmed.to_string());
+    }
+    if trimmed == "/" {
+        return ShellCommand::Suggestions(None);
+    }
     let command_line = trimmed.strip_prefix('/').unwrap_or(trimmed);
     let (cmd, rest) = command_line.split_once(' ').unwrap_or((command_line, ""));
     match cmd {
         "q" | "quit" | "exit" => ShellCommand::Exit,
         "?" | "help" => ShellCommand::Help,
+        "commands" => ShellCommand::Suggestions(optional(rest)),
         "init" => ShellCommand::Init,
         "current" | "status" => ShellCommand::Current,
-        "close" | "clear" => ShellCommand::Close,
+        "close" => ShellCommand::Close,
+        "clear" => ShellCommand::Clear,
         "mode" => ShellCommand::Mode(parse_mode(rest)),
         "chats" | "threads" => ShellCommand::Chats,
         "chat" | "thread" => ShellCommand::Chat(optional(rest)),
+        "new" => ShellCommand::Chat(Some("new".to_string())),
         "messages" | "transcript" => ShellCommand::Messages,
         "sessions" | "history" | "tx" | "list" => ShellCommand::Sessions,
+        "transactions" => ShellCommand::Sessions,
         "session" => parse_session(rest),
         "doctor" => ShellCommand::Doctor,
         "providers" => ShellCommand::Providers(optional(rest)),
@@ -83,12 +106,15 @@ pub(super) fn parse_line(line: &str) -> ShellCommand {
         "memory" => ShellCommand::Memory(optional(rest)),
         "skills" => ShellCommand::Skills(optional(rest)),
         "undo" => ShellCommand::Undo(optional(rest)),
+        "diff" => ShellCommand::Diff(optional(rest)),
+        "logs" => ShellCommand::Logs(optional(rest)),
         "ask" => ShellCommand::Ask(rest.trim().to_string()),
         "do" => ShellCommand::Do(rest.trim().to_string()),
         "run" => ShellCommand::Run {
             target: rest.replace(" --no-commit", "").trim().to_string(),
             no_commit: rest.contains("--no-commit"),
         },
+        _ if trimmed.starts_with('/') => ShellCommand::UnknownSlash(cmd.to_string()),
         _ => ShellCommand::Message(trimmed.to_string()),
     }
 }
@@ -114,81 +140,4 @@ fn parse_session(rest: &str) -> ShellCommand {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::{parse_line, ShellCommand, ShellMode};
-
-    #[test]
-    fn parses_shell_commands_and_plain_text() {
-        assert_eq!(parse_line("sessions"), ShellCommand::Sessions);
-        assert_eq!(parse_line("chats"), ShellCommand::Chats);
-        assert_eq!(parse_line("messages"), ShellCommand::Messages);
-        assert_eq!(
-            parse_line("chat latest"),
-            ShellCommand::Chat(Some("latest".into()))
-        );
-        assert_eq!(parse_line("session"), ShellCommand::Sessions);
-        assert_eq!(
-            parse_line("session latest"),
-            ShellCommand::Open("latest".into())
-        );
-        assert_eq!(parse_line("/sessions"), ShellCommand::Sessions);
-        assert_eq!(parse_line("doctor"), ShellCommand::Doctor);
-        assert_eq!(parse_line("dashboard"), ShellCommand::Dashboard);
-        assert_eq!(
-            parse_line("providers diagnose codex"),
-            ShellCommand::Providers(Some("diagnose codex".into()))
-        );
-        assert_eq!(
-            parse_line("provider codex"),
-            ShellCommand::Providers(Some("setup codex".into()))
-        );
-        assert_eq!(
-            parse_line("config set default_provider command"),
-            ShellCommand::Config(Some("set default_provider command".into()))
-        );
-        assert_eq!(
-            parse_line("mode run"),
-            ShellCommand::Mode(Some(ShellMode::Run))
-        );
-        assert_eq!(
-            parse_line("report tx-1"),
-            ShellCommand::Report(Some("tx-1".into()))
-        );
-        assert_eq!(
-            parse_line("/explain latest"),
-            ShellCommand::Explain(Some("latest".into()))
-        );
-        assert_eq!(
-            parse_line("approve latest package install approved"),
-            ShellCommand::Approve("latest package install approved".into())
-        );
-        assert_eq!(
-            parse_line("resume latest"),
-            ShellCommand::Resume(Some("latest".into()))
-        );
-        assert_eq!(parse_line("undo"), ShellCommand::Undo(None));
-        assert_eq!(
-            parse_line("/memory audit"),
-            ShellCommand::Memory(Some("audit".into()))
-        );
-        assert_eq!(
-            parse_line("/skills scorecard"),
-            ShellCommand::Skills(Some("scorecard".into()))
-        );
-        assert_eq!(
-            parse_line("сделай страницу"),
-            ShellCommand::Message("сделай страницу".into())
-        );
-        assert_eq!(
-            parse_line("/courses page"),
-            ShellCommand::Message("/courses page".into())
-        );
-        assert_eq!(
-            parse_line("run examples/task.yaml --no-commit"),
-            ShellCommand::Run {
-                target: "examples/task.yaml".into(),
-                no_commit: true
-            }
-        );
-    }
-}
+mod tests;

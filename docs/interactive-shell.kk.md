@@ -1,8 +1,8 @@
-# Interactive Shell
+# Интерактив shell
 
-AgentHub shell — local transactions үшін control shell. Ол күнделікті қолдануды бір product surface сияқты етеді, бірақ әр executed request audit-ready болып қалады.
+Тілдер: [English](interactive-shell.en.md), [Русский](interactive-shell.ru.md), [中文](interactive-shell.zh.md), [Қазақша](interactive-shell.kk.md)
 
-## Іске қосу
+AgentHub негізгі experience — local chat shell:
 
 ```bash
 agenthub
@@ -10,68 +10,59 @@ agenthub
 agenthub shell
 ```
 
-Shell `plan` mode режимінде басталады. Plain text draft AgentSpec жасайды. Plain text бірден орындалсын десең, `run` mode қос:
+Shell latest chat қалпына келтіреді, мүмкін болса project дайындайды, active provider көрсетеді және ordinary task жазуға мүмкіндік береді. `init`, `doctor`, `plan` немесе `run` бастапқы command ретінде міндетті емес.
 
 ```text
-agenthub:plan> mode run
-agenthub:run> add a generated health-check file
+agenthub> add a /courses page in the dashboard style
 ```
 
-## Session Model
+Содан кейін AgentHub:
 
-Shell енді lightweight chat transcripts файлдарын `.agent/shell/chats/` ішінде сақтайды. Message history көру үшін `chats`, `chat latest`, `chat new` және `messages` қолдан.
+1. `@` context болса, request ішіне қосады;
+2. message-ті chat transcript ішіне жазады;
+3. draft AgentSpec жасайды;
+4. plan, provider, verifier, scope және commands көрсетеді;
+5. inline approval сұрайды;
+6. approval кейін transaction іске қосады;
+7. diff, logs, report, explanation және undo үшін next actions басып шығарады.
 
-Executed messages бәрібір transaction sessions болады, free-form provider chat rooms емес. Message орындалғанда AgentHub transaction жасайды және мынаны сақтайды:
-
-- journal және WAL;
-- effect ledger;
-- command logs және bounded tails;
-- verifier output;
-- report;
-- memory promotion немесе failed-attempt warning;
-- dashboard visibility.
-
-Бұрынғы transaction work көру үшін `sessions`, `open latest`, `report`, `effects` және `explain` қолдан.
-
-## Негізгі Commands
+## Input model
 
 ```text
-init                  initialize .agent
-doctor                local readiness тексеру
-providers status      configured providers көру
-provider codex        Codex-ті default provider ету
-ask <request>         draft spec жазу
-do <request>          draft жасап, іске қосу
-mode run              келесі plain text бірден орындалады
-sessions              previous transactions тізімі
-chats                 shell chat transcripts тізімі
-chat latest           latest chat transcript таңдау
-chat new              жаңа chat transcript бастау
-messages              таңдалған chat transcript шығару
-open latest           latest transaction таңдау
-watch latest          live journal бақылау
-approve <note>        таңдалған transaction үшін human resolution жазу
-resume latest         approval кейін blocked transaction жалғастыру
-report latest         report шығару
-effects latest        effect ledger шығару
-explain latest        result және next action түсіндіру
-dashboard             static dashboard жазу/ашу
-quit                  шығу
+ordinary text      plan, approval, execution
+/                  commands және tab completion
+@README.md         next request үшін file context
+@src               next request үшін folder summary
+@last              latest transaction report қосу
+!git status        policy-checked shell command және log
+# use fetch only   typed memory note сақтау
 ```
 
-## Ұсынылатын алғашқы Flow
+History `.agent/shell/history.txt` ішінде сақталады. Chat transcripts `.agent/shell/chats/` ішінде сақталады.
+
+## Негізгі slash commands
 
 ```text
-agenthub> init
-agenthub> doctor
-agenthub> providers status
-agenthub> provider codex
-agenthub> ask add a small docs page
-agenthub> run .agent/drafts/<draft>.yaml
-agenthub> explain latest
-agenthub> dashboard
+/help             shell help
+/status           current project және transaction
+/providers        provider status және setup hints
+/memory           memory inspect
+/skills           skills inspect
+/transactions     recent transactions
+/new              new chat
+/resume           selected/latest blocked transaction resume
+/diff             selected/latest transaction diff
+/logs             selected/latest transaction logs
+/report           selected/latest transaction report
+/explain          selected/latest transaction explain
+/dashboard        dashboard ашу
+/config           configuration
+/clear            terminal тазалау
+/exit             exit
 ```
 
-## Шекара
+`agenthub run`, `agenthub tx report`, `agenthub tx diff` және `agenthub tx logs` сияқты expert commands scripts және CI үшін қала береді.
 
-Shell provider-ді алмастырмайды. Codex, Kimi, Gemini, command providers немесе OpenAI-compatible endpoints model work орындай береді. Shell сол work айналасында transaction control, safety, history және inspection береді.
+## Boundary
+
+Shell Codex, Kimi, Gemini немесе OpenAI-compatible model орнына жүрмейді. Ол provider work үстінен transaction control, approvals, logs, rollback, reports, memory және dashboard visibility береді.

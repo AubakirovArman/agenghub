@@ -2,7 +2,17 @@
 
 语言: [English](product-cli.en.md), [Русский](product-cli.ru.md), [中文](product-cli.zh.md), [Қазақша](product-cli.kk.md)
 
-PRD v3 增加了面向产品使用的命令，用于检查本地安装、provider 状态和简单配置。
+PRD v3 增加了面向产品使用的命令，用于检查本地安装、provider 状态、简单配置和 chat-first local work。
+
+## Chat-first shell
+
+```bash
+agenthub
+```
+
+不带 subcommand 运行 `agenthub` 是推荐的 daily entry。它可以准备 Git 和 `.agent`，恢复 latest chat，显示 provider readiness，然后让你直接输入普通任务。Shell 会创建 draft plan，询问 inline approval，运行 transaction，然后提示 `/diff`、`/logs`、`/report`、`/explain` 和 `/undo`。
+
+使用 `/` 输入 commands，`@path` 添加 context，`!command` 运行 policy-checked shell command，`# note` 写入 project memory。
 
 ## Doctor
 
@@ -34,11 +44,15 @@ agenthub run examples/command-task.yaml
 
 ```bash
 agenthub tx explain tx-20260515123000-abcd1234
+agenthub tx diff tx-20260515123000-abcd1234
+agenthub tx logs tx-20260515123000-abcd1234 --tail 80
 ```
 
 `tx explain` 会概括 transaction 为什么失败或成功、发生了什么、下一步做什么，以及应该查看哪些 artifacts。
+`tx diff` 在可用时显示 committed patch，对 uncommitted transactions fallback 到 diff-guard summaries。
+`tx logs` 打印 bounded command logs，可按 stage 和 tail length 过滤。
 
-面向单个 transaction 的 commands 可以接收显式 id，也可以接收 `latest`/`last`。这适用于 `tx report`、`tx effects`、`tx explain`、`tx watch`、`tx cancel`、`tx resolve`、`tx resume` 和 `tx retry`。
+面向单个 transaction 的 commands 可以接收显式 id，也可以接收 `latest`/`last`。这适用于 `tx report`、`tx effects`、`tx explain`、`tx diff`、`tx logs`、`tx watch`、`tx cancel`、`tx resolve`、`tx resume` 和 `tx retry`。
 
 ## Undo
 

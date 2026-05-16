@@ -47,17 +47,32 @@ Release installers және package details [Install And Packaging](docs/install
 ## 60 секундтық quickstart
 
 ```bash
-agenthub init
-agenthub doctor
-agenthub providers status
-agenthub providers setup command
-agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-commit
-agenthub tx status
-agenthub tx report latest
-agenthub open dashboard
+agenthub
 ```
 
-`agenthub` subcommand жоқ іске қосылса local shell ашылады. Shell ішінде `chats`, `chat latest`, `messages`, `sessions`, `open latest`, `approve`, `resume`, `doctor`, `providers status`, `provider codex`, `config show`, `dashboard` және plain text requests қолдануға болады. Plain text әдепкіде `plan` mode; `mode run` future requests бірден орындауға ауыстырады.
+Негізгі product surface енді chat-first. Бірінші іске қосқанда AgentHub Git repository жасай алады, `.agent` initialize етеді, available provider ұсынады, latest chat қалпына келтіреді және ordinary request күтеді:
+
+```text
+agenthub> create docs/agenthub-check.md with a one-line AgentHub check
+```
+
+AgentHub message-ті draft plan етеді, target files, provider, verifier profile, scope және commands көрсетеді, inline approval сұрайды, содан кейін transaction іске қосады. Execution біткен соң `/diff`, `/logs`, `/report`, `/explain` және `/undo` ұсынады.
+
+Shell ішінде:
+
+- `/` commands көрсетеді және persistent history бар tab completion қолдайды.
+- `@README.md` немесе `@src` келесі request үшін нақты file/folder context қосады.
+- `!git status --short` shell command-ты AgentHub policy арқылы іске қосып, log жазады.
+- `# use fetch only, no axios` future tasks үшін typed memory note жазады.
+
+Scriptable commands automation үшін қала береді:
+
+```bash
+agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-commit
+agenthub tx diff latest
+agenthub tx logs latest
+agenthub open dashboard
+```
 
 ## Codex, Gemini, Kimi бірге қолдану
 

@@ -2,7 +2,17 @@
 
 Языки: [English](product-cli.en.md), [Русский](product-cli.ru.md), [中文](product-cli.zh.md), [Қазақша](product-cli.kk.md)
 
-PRD v3 добавляет user-facing команды для проверки локальной установки, готовности providers и простой конфигурации.
+PRD v3 добавляет user-facing команды для проверки локальной установки, готовности providers, простой конфигурации и chat-first local work.
+
+## Chat-first shell
+
+```bash
+agenthub
+```
+
+Запуск `agenthub` без subcommand — рекомендованный daily entry. Он может подготовить Git и `.agent`, восстановить latest chat, показать provider readiness и дать сразу написать обычную задачу. Shell создаёт draft plan, спрашивает inline approval, запускает transaction и подсказывает `/diff`, `/logs`, `/report`, `/explain` и `/undo`.
+
+Используй `/` для commands, `@path` для context, `!command` для policy-checked shell commands и `# note` для project memory.
 
 ## Doctor
 
@@ -34,11 +44,15 @@ agenthub run examples/command-task.yaml
 
 ```bash
 agenthub tx explain tx-20260515123000-abcd1234
+agenthub tx diff tx-20260515123000-abcd1234
+agenthub tx logs tx-20260515123000-abcd1234 --tail 80
 ```
 
 `tx explain` кратко показывает, почему transaction failed или succeeded, что произошло, что делать дальше и какие artifacts смотреть.
+`tx diff` показывает committed patch, если он доступен, и fallback к diff-guard summaries для uncommitted transactions.
+`tx logs` печатает bounded command logs, optionally filtered by stage and tail length.
 
-Transaction commands, которые работают с одной transaction, принимают explicit id или `latest`/`last`. Это относится к `tx report`, `tx effects`, `tx explain`, `tx watch`, `tx cancel`, `tx resolve`, `tx resume` и `tx retry`.
+Transaction commands, которые работают с одной transaction, принимают explicit id или `latest`/`last`. Это относится к `tx report`, `tx effects`, `tx explain`, `tx diff`, `tx logs`, `tx watch`, `tx cancel`, `tx resolve`, `tx resume` и `tx retry`.
 
 ## Undo
 

@@ -17,6 +17,9 @@ pub(super) fn print_doctor(root: &Path) -> Result<()> {
 
 pub(super) fn handle_providers(root: &Path, args: Option<&str>) -> Result<()> {
     let args = split_args(args.unwrap_or("status"));
+    if args.first().copied().unwrap_or("status") == "status" && args.len() == 1 {
+        return provider_wizard(root);
+    }
     match args.first().copied().unwrap_or("status") {
         "list" => print!("{}", providers::render_list()),
         "status" => print!("{}", providers::render_status(root)?),
@@ -51,6 +54,18 @@ pub(super) fn handle_providers(root: &Path, args: Option<&str>) -> Result<()> {
         }
         other => return Err(anyhow!("unknown providers command `{other}`")),
     }
+    Ok(())
+}
+
+fn provider_wizard(root: &Path) -> Result<()> {
+    println!("Providers");
+    print!("{}", providers::render_status(root)?);
+    println!("Actions:");
+    println!("  /providers setup codex|kimi|gemini|command|openai-http");
+    println!("  /providers diagnose <provider>");
+    println!("  /providers test <provider>");
+    println!("  /providers set executor <provider>");
+    println!("  /providers fallback reviewer gemini kimi command");
     Ok(())
 }
 

@@ -8,18 +8,21 @@ AgentHub — локальный транзакционный runtime для AI c
 
 ```bash
 cargo install --git https://github.com/AubakirovArman/agenthub
-agenthub init
-agenthub doctor
-agenthub providers setup command
-agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-commit
-agenthub tx report latest
+agenthub
+```
+
+Потом напиши обычную задачу:
+
+```text
+agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 ```
 
 ## Ежедневная работа
 
-- `agenthub` без subcommand открывает local shell.
-- `agenthub providers setup codex` или другая setup-команда подключает provider.
-- `agenthub tx status`, `agenthub tx explain latest` и `agenthub open dashboard` помогают проверить результат.
+- `agenthub` без subcommand открывает chat-first local shell.
+- Внутри shell используй `/providers`, `/status`, `/diff`, `/logs`, `/report`, `/explain` и `/dashboard`.
+- `@path` добавляет context, `!command` запускает policy-checked shell command, `# note` сохраняет project memory.
+- Scriptable commands `agenthub run`, `agenthub tx diff latest` и `agenthub tx logs latest` остаются доступны.
 - Перед release work запускай `scripts/dogfood.sh` и `scripts/dogfood-readiness.sh`.
 
 ## Основные ссылки

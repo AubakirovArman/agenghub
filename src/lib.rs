@@ -36,6 +36,7 @@ pub mod tui;
 pub mod tx_control;
 pub mod tx_explain;
 pub mod tx_index;
+pub mod tx_inspect;
 pub mod tx_undo;
 pub mod tx_watch;
 pub mod verifier;

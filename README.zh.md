@@ -47,17 +47,32 @@ Release installers 和 package details 见 [Install And Packaging](docs/install-
 ## 60 秒快速开始
 
 ```bash
-agenthub init
-agenthub doctor
-agenthub providers status
-agenthub providers setup command
-agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-commit
-agenthub tx status
-agenthub tx report latest
-agenthub open dashboard
+agenthub
 ```
 
-不带 subcommand 运行 `agenthub` 会打开 local shell。Shell 内可以使用 `chats`、`chat latest`、`messages`、`sessions`、`open latest`、`approve`、`resume`、`doctor`、`providers status`、`provider codex`、`config show`、`dashboard` 和普通文本请求。普通文本默认是 `plan` 模式；使用 `mode run` 后，之后的请求会立即执行。
+默认产品入口现在是 chat-first。首次启动时，AgentHub 可以创建 Git repository，初始化 `.agent`，建议可用 provider，恢复最近的 chat，然后等待普通请求：
+
+```text
+agenthub> create docs/agenthub-check.md with a one-line AgentHub check
+```
+
+AgentHub 会把消息转换成 draft plan，显示 target files、provider、verifier profile、scope 和 commands，询问 inline approval，然后运行 transaction。执行后会提示 `/diff`、`/logs`、`/report`、`/explain` 和 `/undo`。
+
+Shell 内：
+
+- `/` 显示命令，并支持 tab completion 和 persistent history。
+- `@README.md` 或 `@src` 给下一条请求添加明确的 file/folder context。
+- `!git status --short` 通过 AgentHub policy 运行 shell command 并记录日志。
+- `# use fetch only, no axios` 写入 typed memory note，供后续任务使用。
+
+Scriptable commands 仍然保留给 automation：
+
+```bash
+agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-commit
+agenthub tx diff latest
+agenthub tx logs latest
+agenthub open dashboard
+```
 
 ## 与 Codex、Gemini、Kimi 一起使用
 

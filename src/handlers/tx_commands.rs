@@ -2,7 +2,7 @@ use std::path::Path;
 
 use anyhow::{anyhow, Result};
 
-use agenthub::{agent_dir, enterprise, tx_control, tx_explain, tx_watch};
+use agenthub::{agent_dir, enterprise, tx_control, tx_explain, tx_inspect, tx_watch};
 
 use crate::cli::TxCommands;
 
@@ -12,6 +12,10 @@ pub fn handle_tx(project_root: &Path, command: TxCommands) -> Result<()> {
         TxCommands::Report { tx_id } => report(project_root, &tx_id)?,
         TxCommands::Effects { tx_id } => effects(project_root, &tx_id)?,
         TxCommands::Explain { tx_id } => explain(project_root, &tx_id)?,
+        TxCommands::Diff { tx_id } => diff(project_root, &tx_id)?,
+        TxCommands::Logs { tx_id, stage, tail } => {
+            logs(project_root, &tx_id, stage.as_deref(), tail)?
+        }
         TxCommands::Watch {
             tx_id,
             interval_ms,
@@ -54,6 +58,20 @@ fn explain(project_root: &Path, tx_id: &str) -> Result<()> {
         "{}",
         tx_explain::explain(project_root, &tx_id)?.render_text()
     );
+    Ok(())
+}
+
+fn diff(project_root: &Path, tx_id: &str) -> Result<()> {
+    enterprise::authorize(project_root, "transaction.read")?;
+    let tx_id = resolve_tx_selector(project_root, tx_id)?;
+    print!("{}", tx_inspect::diff(project_root, &tx_id)?);
+    Ok(())
+}
+
+fn logs(project_root: &Path, tx_id: &str, stage: Option<&str>, tail: usize) -> Result<()> {
+    enterprise::authorize(project_root, "transaction.read")?;
+    let tx_id = resolve_tx_selector(project_root, tx_id)?;
+    print!("{}", tx_inspect::logs(project_root, &tx_id, stage, tail)?);
     Ok(())
 }
 

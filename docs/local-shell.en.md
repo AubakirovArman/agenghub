@@ -1,113 +1,49 @@
 # Local Shell
 
-AgentHub can run as an interactive local shell:
+Languages: [English](local-shell.en.md), [Русский](local-shell.ru.md), [中文](local-shell.zh.md), [Қазақша](local-shell.kk.md)
+
+Run:
 
 ```bash
 agenthub
-# or
-agenthub shell
 ```
 
-The shell is for local-first work. It lets you inspect transaction sessions, open reports, create draft specs from natural language, run requests without leaving the prompt, and keep a current transaction selected. It also stores lightweight chat transcripts in `.agent/shell/chats/`, so you can return to messages later. Executed messages still become tracked transactions with report, journal, effects, verifier output, and memory behavior.
-
-Shell starts in `plan` mode. In this mode, plain text creates a draft only. Use `mode run` when you want plain text to execute immediately.
-
-## Commands
+This is the recommended daily interface. AgentHub opens the latest chat, prepares the project when possible, shows readiness hints, and lets you type the task directly:
 
 ```text
-help                         show commands
-init                         initialize .agent
-mode plan|run                set plain-text behavior
-current                      show selected transaction
-close                        clear selected transaction
-chats                        list shell chat transcripts
-chat [new|latest|id]         show, create, or select a chat
-messages                     print selected chat transcript
-sessions or history          list recent transactions
-session [tx-id|latest]       list sessions or open one
-doctor                       check local readiness
-providers [status|...]       list, setup, test, or diagnose providers
-provider <id>                setup default provider
-config [show|set key value]  inspect or update config
-dashboard                    write/open the local web dashboard
-open <tx-id|latest>          open a transaction report and set it current
-latest                       open latest transaction
-watch [tx-id|latest]         follow the live transaction journal
-cancel [tx-id|latest]        request transaction cancellation
-approve [tx-id] <note>       record human approval/resolution
-resume [tx-id|latest]        resume a blocked transaction
-report [tx-id]               print a report, defaulting to current tx
-effects [tx-id]              print the effect ledger
-explain [tx-id]              explain result, failure cause, and next steps
-memory [summary|audit]       show memory summary or audit
-skills [scorecard]           list skills or show scorecard
-undo [tx-id|last]            git revert a committed transaction
-ask <request>                write a draft AgentSpec
-do <request>                 write a draft and run it
-run <spec|request> [--no-commit]
-quit                         exit
-plain text                   plan mode: draft; run mode: execute
-/sessions /open /report      slash aliases for interactive use
+agenthub> fix the failing runtime smoke test and keep files under 200 lines
 ```
 
-## Examples
+The shell creates a draft plan, shows what will run, asks for approval, executes through the transaction engine, and leaves a report, logs, diff, effects ledger, memory records, and dashboard data.
 
-Create a draft from a message:
+## Useful Inputs
 
 ```text
-agenthub> add /courses page in the dashboard style
-draft .agent/drafts/shell-20260515123000.yaml
+/help                 commands
+/status               current project, provider, transaction
+/providers            setup and provider health
+/transactions         recent transactions
+/diff [tx]            transaction diff
+/logs [tx|stage]      transaction logs
+/report [tx]          report
+/explain [tx]         result explanation
+/new                  new chat
+/exit                 exit
+@path                 attach file/folder context
+@last                 attach latest report
+!command              policy-checked shell command
+# note                save project memory
 ```
 
-Switch to immediate execution:
+Plain text is the main path. Expert commands like `ask`, `run`, `mode`, `watch`, `approve`, `resume`, `effects`, `memory`, `skills`, and `undo` are still available when needed.
 
-```text
-agenthub:plan> mode run
-mode run
-agenthub:run> add a generated health-check file
-tx-... COMMITTED (.agent/tx/tx-.../report.md)
-```
+## Storage
 
-Run a spec:
-
-```text
-agenthub:plan> run .agent/drafts/shell-20260515123000.yaml
-tx-... COMMITTED (.agent/tx/tx-.../report.md)
-```
-
-Run a natural request immediately:
-
-```text
-agenthub:plan> do add a generated health-check file
-```
-
-Browse prior sessions:
-
-```text
-agenthub:plan> sessions
-agenthub:plan> session latest
-agenthub:plan> open latest
-agenthub:plan[tx-20260515123000-abcd1234]> watch
-agenthub:plan[tx-20260515123000-abcd1234]> approve Approved after checking env
-agenthub:plan[tx-20260515123000-abcd1234]> resume
-agenthub:plan[tx-20260515123000-abcd1234]> explain
-agenthub:plan[tx-20260515123000-abcd1234]> effects
-agenthub:plan[tx-20260515123000-abcd1234]> memory audit
-agenthub:plan[tx-20260515123000-abcd1234]> skills scorecard
-agenthub:plan[tx-20260515123000-abcd1234]> undo
-```
-
-Check the environment without leaving the shell:
-
-```text
-agenthub:plan> doctor
-agenthub:plan> providers status
-agenthub:plan> provider codex
-agenthub:plan> providers diagnose codex
-agenthub:plan> config show
-agenthub:plan> dashboard
-```
+- Shell history: `.agent/shell/history.txt`
+- Chats: `.agent/shell/chats/`
+- Transactions: `.agent/tx/<tx-id>/`
+- Dashboard: `.agent/reports/dashboard/index.html`
 
 ## Safety
 
-The shell uses the same transaction engine as `agenthub run`: isolated workspace preparation, command policy, bounded logs, verifier checks, diff guard, effect ledger, rollback, smart sync, memory promotion rules, and reports.
+The local shell uses the same runtime as `agenthub run`: isolated workspace preparation, command policy, bounded logs, verifier checks, diff guard, effect ledger, rollback, smart sync, memory promotion rules, and reports.

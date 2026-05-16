@@ -29,6 +29,7 @@ fn approval_mode_marks_preview() {
         "Add page /pricing",
         IntentOptions {
             approval_required: true,
+            ..Default::default()
         },
     );
     assert!(preview.approval_required);

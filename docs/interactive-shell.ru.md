@@ -1,8 +1,8 @@
-# Interactive Shell
+# Интерактивный shell
 
-AgentHub shell — это control shell для локальных транзакций. Он нужен, чтобы ежедневная работа ощущалась как один продуктовый интерфейс, но каждый выполненный запрос оставался аудируемым.
+Языки: [English](interactive-shell.en.md), [Русский](interactive-shell.ru.md), [中文](interactive-shell.zh.md), [Қазақша](interactive-shell.kk.md)
 
-## Запуск
+Основной опыт AgentHub — локальный chat shell:
 
 ```bash
 agenthub
@@ -10,68 +10,59 @@ agenthub
 agenthub shell
 ```
 
-Shell стартует в режиме `plan`. Plain text создаёт draft AgentSpec. Переключись в `run`, если plain text должен выполняться сразу:
+Shell восстанавливает последний chat, по возможности подготавливает проект, показывает активный provider и позволяет писать обычную задачу. Начинать с `init`, `doctor`, `plan` или `run` не нужно.
 
 ```text
-agenthub:plan> mode run
-agenthub:run> add a generated health-check file
+agenthub> add a /courses page in the dashboard style
 ```
 
-## Модель сессий
+Дальше AgentHub:
 
-Shell теперь хранит лёгкие chat transcripts в `.agent/shell/chats/`. Используй `chats`, `chat latest`, `chat new` и `messages`, чтобы переходить по истории сообщений.
+1. добавляет явный `@` context, если он указан;
+2. записывает сообщение в transcript;
+3. создаёт draft AgentSpec;
+4. показывает plan, provider, verifier, scope и commands;
+5. спрашивает inline approval;
+6. после подтверждения запускает transaction;
+7. печатает next actions для diff, logs, report, explanation и undo.
 
-Выполненные сообщения всё равно становятся transaction sessions, а не free-form provider chat rooms. Когда сообщение выполняется, AgentHub создаёт transaction с:
-
-- journal и WAL;
-- effect ledger;
-- command logs и bounded tails;
-- verifier output;
-- report;
-- memory promotion или failed-attempt warning;
-- видимостью в dashboard.
-
-Используй `sessions`, `open latest`, `report`, `effects` и `explain`, чтобы переходить по прошлым transaction work.
-
-## Основные команды
+## Модель ввода
 
 ```text
-init                  initialize .agent
-doctor                проверить локальную готовность
-providers status      посмотреть configured providers
-provider codex        настроить Codex как default provider
-ask <request>         записать draft spec
-do <request>          создать draft и запустить
-mode run              выполнять будущий plain text сразу
-sessions              список прошлых transactions
-chats                 список shell chat transcripts
-chat latest           выбрать последний chat transcript
-chat new              начать новый chat transcript
-messages              показать выбранный chat transcript
-open latest           выбрать последнюю transaction
-watch latest          следить за live journal
-approve <note>        записать human resolution для выбранной transaction
-resume latest         продолжить blocked transaction после approval
-report latest         напечатать report
-effects latest        напечатать effect ledger
-explain latest        объяснить результат и next action
-dashboard             записать/открыть static dashboard
-quit                  выйти
+обычный текст       plan, approval, затем execution
+/                   команды с tab completion
+@README.md          добавить file context к следующему запросу
+@src                добавить folder summary к следующему запросу
+@last               добавить latest transaction report
+!git status         policy-checked shell command с логом
+# use fetch only    сохранить typed memory note
 ```
 
-## Рекомендуемый первый flow
+History хранится в `.agent/shell/history.txt`. Chat transcripts хранятся в `.agent/shell/chats/`.
+
+## Основные slash commands
 
 ```text
-agenthub> init
-agenthub> doctor
-agenthub> providers status
-agenthub> provider codex
-agenthub> ask add a small docs page
-agenthub> run .agent/drafts/<draft>.yaml
-agenthub> explain latest
-agenthub> dashboard
+/help             help по shell
+/status           текущий project и transaction
+/providers        provider status и setup hints
+/memory           memory inspect
+/skills           skills inspect
+/transactions     recent transactions
+/new              новый chat
+/resume           resume selected/latest blocked transaction
+/diff             diff selected/latest transaction
+/logs             logs selected/latest transaction
+/report           report selected/latest transaction
+/explain          explain selected/latest transaction
+/dashboard        открыть dashboard
+/config           configuration
+/clear            очистить terminal
+/exit             выйти
 ```
+
+Expert commands вроде `agenthub run`, `agenthub tx report`, `agenthub tx diff` и `agenthub tx logs` остаются для scripts и CI.
 
 ## Граница
 
-Shell не заменяет provider. Codex, Kimi, Gemini, command providers или OpenAI-compatible endpoints всё ещё выполняют model work. Shell даёт transaction control, safety, history и inspection вокруг этой работы.
+Shell не заменяет Codex, Kimi, Gemini или OpenAI-compatible model. Он даёт transaction control, approvals, logs, rollback, reports, memory и dashboard visibility вокруг provider work.

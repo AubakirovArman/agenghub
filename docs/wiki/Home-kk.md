@@ -8,18 +8,21 @@ AgentHub — AI coding agents үшін жергілікті transactional runtim
 
 ```bash
 cargo install --git https://github.com/AubakirovArman/agenthub
-agenthub init
-agenthub doctor
-agenthub providers setup command
-agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-commit
-agenthub tx report latest
+agenthub
+```
+
+Содан кейін ordinary task жаз:
+
+```text
+agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 ```
 
 ## Күнделікті workflow
 
-- `agenthub` subcommand жоқ іске қосылса local shell ашылады.
-- Provider қосу үшін `agenthub providers setup codex` немесе басқа setup command қолдан.
-- Нәтижені тексеру үшін `agenthub tx status`, `agenthub tx explain latest` және `agenthub open dashboard` қолдан.
+- `agenthub` subcommand жоқ іске қосылса chat-first local shell ашылады.
+- Shell ішінде `/providers`, `/status`, `/diff`, `/logs`, `/report`, `/explain` және `/dashboard` қолдан.
+- `@path` context қосады, `!command` policy-checked shell command іске қосады, `# note` project memory сақтайды.
+- `agenthub run`, `agenthub tx diff latest` және `agenthub tx logs latest` сияқты scriptable commands қолжетімді.
 - Release work алдында `scripts/dogfood.sh` және `scripts/dogfood-readiness.sh` іске қос.
 
 ## Негізгі сілтемелер

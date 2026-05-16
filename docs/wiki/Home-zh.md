@@ -8,18 +8,21 @@ AgentHub 是面向 AI coding agents 的本地事务型 runtime。它用 isolated
 
 ```bash
 cargo install --git https://github.com/AubakirovArman/agenthub
-agenthub init
-agenthub doctor
-agenthub providers setup command
-agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-commit
-agenthub tx report latest
+agenthub
+```
+
+然后输入普通任务：
+
+```text
+agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 ```
 
 ## 日常工作流
 
-- 不带 subcommand 运行 `agenthub` 会打开 local shell。
-- 使用 `agenthub providers setup codex` 或其他 setup command 连接 provider。
-- 使用 `agenthub tx status`、`agenthub tx explain latest` 和 `agenthub open dashboard` 检查结果。
+- 不带 subcommand 运行 `agenthub` 会打开 chat-first local shell。
+- 在 shell 内使用 `/providers`、`/status`、`/diff`、`/logs`、`/report`、`/explain` 和 `/dashboard`。
+- `@path` 添加 context，`!command` 运行 policy-checked shell command，`# note` 保存 project memory。
+- `agenthub run`、`agenthub tx diff latest` 和 `agenthub tx logs latest` 等 scriptable commands 仍然可用。
 - Release work 前运行 `scripts/dogfood.sh` 和 `scripts/dogfood-readiness.sh`。
 
 ## 主要链接

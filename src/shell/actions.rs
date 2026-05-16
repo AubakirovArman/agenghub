@@ -3,8 +3,11 @@ use std::path::Path;
 use anyhow::{anyhow, Result};
 
 use crate::{
-    agent_dir, enterprise, memory, skill_registry, tx_control, tx_explain, tx_undo, tx_watch,
+    agent_dir, enterprise, memory, skill_registry, tx_control, tx_explain, tx_inspect, tx_undo,
+    tx_watch,
 };
+
+use super::status;
 
 pub(super) fn list_sessions(root: &Path) -> Result<()> {
     enterprise::authorize(root, "transaction.read")?;
@@ -17,7 +20,10 @@ pub(super) fn list_sessions(root: &Path) -> Result<()> {
 }
 
 pub(super) fn print_current(root: &Path, current_tx: Option<&str>) -> Result<()> {
-    let tx_id = resolve_tx(root, None, current_tx)?;
+    let Some(current_tx) = current_tx else {
+        return status::print(root);
+    };
+    let tx_id = resolve_tx(root, None, Some(current_tx))?;
     let status = current_status(root, &tx_id)?;
     println!("current {tx_id} {status}");
     println!(
@@ -45,6 +51,18 @@ pub(super) fn print_effects(root: &Path, tx_id: &str) -> Result<()> {
 pub(super) fn print_explain(root: &Path, tx_id: &str) -> Result<()> {
     enterprise::authorize(root, "transaction.read")?;
     print!("{}", tx_explain::explain(root, tx_id)?.render_text());
+    Ok(())
+}
+
+pub(super) fn print_diff(root: &Path, tx_id: &str) -> Result<()> {
+    enterprise::authorize(root, "transaction.read")?;
+    print!("{}", tx_inspect::diff(root, tx_id)?);
+    Ok(())
+}
+
+pub(super) fn print_logs(root: &Path, tx_id: &str, filter: Option<&str>) -> Result<()> {
+    enterprise::authorize(root, "transaction.read")?;
+    print!("{}", tx_inspect::logs(root, tx_id, filter, 80)?);
     Ok(())
 }
 

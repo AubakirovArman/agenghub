@@ -47,17 +47,32 @@ Release installers and package details are documented in [Install And Packaging]
 ## 60-Second Quickstart
 
 ```bash
-agenthub init
-agenthub doctor
-agenthub providers status
-agenthub providers setup command
-agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-commit
-agenthub tx status
-agenthub tx report latest
-agenthub open dashboard
+agenthub
 ```
 
-Running `agenthub` without a subcommand opens the local shell. In shell mode you can use `chats`, `chat latest`, `messages`, `sessions`, `open latest`, `approve`, `resume`, `doctor`, `providers status`, `provider codex`, `config show`, `dashboard`, and plain text requests. Plain text starts in `plan` mode; use `mode run` to execute future requests immediately.
+The default product surface is now chat-first. On first launch AgentHub can create the Git repository, initialize `.agent`, suggest an available provider, restore the latest chat, and then wait for a normal request:
+
+```text
+agenthub> create docs/agenthub-check.md with a one-line AgentHub check
+```
+
+AgentHub turns the message into a draft plan, shows the target files, provider, verifier profile, scope, and commands, asks for inline approval, then runs the transaction. After execution it suggests `/diff`, `/logs`, `/report`, `/explain`, and `/undo`.
+
+Inside the shell:
+
+- `/` shows commands and supports tab completion with persistent history.
+- `@README.md` or `@src` adds explicit file/folder context to the next request.
+- `!git status --short` runs a shell command through AgentHub policy and logs it.
+- `# use fetch only, no axios` writes a typed memory note for future tasks.
+
+Scriptable commands still exist for automation:
+
+```bash
+agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-commit
+agenthub tx diff latest
+agenthub tx logs latest
+agenthub open dashboard
+```
 
 ## Use With Codex, Gemini, Kimi
 

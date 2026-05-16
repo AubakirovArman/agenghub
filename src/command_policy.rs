@@ -82,6 +82,17 @@ pub fn evaluate(project_root: &Path, spec: &AgentSpec) -> Result<CommandPolicyRe
     })
 }
 
+pub fn classify_shell_command(project_root: &Path, command: &str) -> Result<CommandPolicyCommand> {
+    let policy = load_policy(project_root)?;
+    let classified = classify(&policy.commands, command);
+    Ok(CommandPolicyCommand {
+        stage: "shell".to_string(),
+        command: command.to_string(),
+        classification: classified.name.to_string(),
+        matched_policy: classified.matched,
+    })
+}
+
 impl CommandPolicyReport {
     pub fn enforce(&self) -> Result<()> {
         if self.violations.is_empty() {
