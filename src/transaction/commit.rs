@@ -78,12 +78,53 @@ pub(super) fn sync_and_commit(ctx: CommitContext<'_>, state: &mut RunState) -> R
         }
     }
     if let Err(error) =
+        maybe_fail_at("AUTO_MEMORY_EXTRACTION", ctx.tx_dir, ctx.journal).and_then(|_| {
+            let receipt = extract_project_memory_candidate(&ctx, state)?;
+            ctx.journal.append_data(
+                "AUTO_MEMORY_EXTRACTED",
+                "auto memory candidates written to inbox",
+                json!(&receipt),
+            )
+        })
+    {
+        record_post_commit_warning(&ctx, state, "AUTO_MEMORY_EXTRACTION_FAILED", error)?;
+    }
+    if let Err(error) =
         maybe_fail_at("CLEANUP", ctx.tx_dir, ctx.journal).and_then(|_| runtime.cleanup(&prepared))
     {
         record_post_commit_warning(&ctx, state, "CLEANUP_FAILED", error)?;
     }
     state.status = Some(TransactionStatus::Committed);
     ctx.journal.append("COMMITTED", "transaction committed")
+}
+
+fn extract_project_memory_candidate(
+    ctx: &CommitContext<'_>,
+    state: &RunState,
+) -> Result<memory::AutoMemoryExtractionReceipt> {
+    let changed_files = state
+        .diff_guard
+        .as_ref()
+        .map(|guard| guard.summary.changed_files.clone())
+        .unwrap_or_default();
+    let profile = ctx.spec.workspace.profile()?;
+    let title = ctx.spec.task.title.as_deref().unwrap_or(&ctx.spec.task.id);
+    memory::extract_to_inbox(
+        ctx.project_root,
+        memory::AutoMemoryExtractionInput {
+            source: "project_transaction".to_string(),
+            mode: "project".to_string(),
+            domain: profile.domain().to_string(),
+            request: Some(format!("{}: {title}", ctx.spec.task.kind)),
+            response: Some(format!(
+                "Transaction {} committed with {} changed file(s).",
+                ctx.tx_id,
+                changed_files.len()
+            )),
+            task_id: Some(ctx.spec.task.id.clone()),
+            artifacts: changed_files,
+        },
+    )
 }
 
 fn record_post_commit_warning(

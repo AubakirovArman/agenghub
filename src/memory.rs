@@ -1,4 +1,5 @@
 mod audit;
+mod auto_extract;
 mod context;
 mod inbox;
 mod retrieval;
@@ -27,6 +28,7 @@ use crate::observability::redact_text;
 use crate::spec::WorkspaceProfile;
 
 pub use audit::{run_audit, MemoryAudit};
+pub use auto_extract::{extract_to_inbox, AutoMemoryExtractionInput, AutoMemoryExtractionReceipt};
 pub use context::{
     build_context, write_context_receipt, MemoryContext, MemoryContextBudget, MemoryContextReceipt,
 };

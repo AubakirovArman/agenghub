@@ -7,7 +7,7 @@ use serde_json::{json, Value};
 use uuid::Uuid;
 
 use crate::llm_gateway::estimate_cost;
-use crate::memory::MemoryContextReceipt;
+use crate::memory::{AutoMemoryExtractionReceipt, MemoryContextReceipt};
 use crate::observability::write_jsonl;
 use crate::tool_permissions::ToolPermissionDecision;
 use crate::{chat_index, home};
@@ -324,6 +324,30 @@ pub(super) fn append_provider_fallback(
             "fallback_provider": to_provider,
             "reason": reason,
             "text": format!("{from_provider} failed; falling back to {to_provider}")
+        }),
+    )
+}
+
+pub(super) fn append_memory_extraction(
+    session: &ChatSession,
+    receipt: &AutoMemoryExtractionReceipt,
+) -> Result<Value> {
+    append_event(
+        session,
+        "memory_extraction",
+        json!({
+            "source": receipt.source.clone(),
+            "mode": receipt.mode.clone(),
+            "domain": receipt.domain.clone(),
+            "candidates_considered": receipt.candidates_considered,
+            "candidates_added": receipt.candidates_added,
+            "inbox_ids": receipt.inbox_ids.clone(),
+            "skipped_reason": receipt.skipped_reason.clone(),
+            "candidates": receipt.candidates.clone(),
+            "text": format!(
+                "memory extraction added {} inbox candidate(s)",
+                receipt.candidates_added
+            )
         }),
     )
 }

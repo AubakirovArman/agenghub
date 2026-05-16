@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.25-local-preview - 2026-05-16
+
+- Add deterministic automatic memory extraction for completed Chat/Ops turns and successful Project transactions, writing review-only candidates to the existing memory inbox.
+- Record `memory_extraction` chat events and `auto_extract_receipts.jsonl` receipts with source, mode/scope, confidence, evidence excerpts, changed-file diff metadata, skipped reasons, and generated inbox ids.
+- Keep the memory safety boundary intact: auto-extracted candidates stay pending until explicit inbox approval, and prompt/context building still injects only committed memory.
+
 ## 0.4.24-local-preview - 2026-05-16
 
 - Harden the AgentHub builtin API tool registry with explicit policy receipts for path, output, network, approval threshold, and per-tool limits.

@@ -6,10 +6,10 @@ use std::sync::{Mutex, OnceLock};
 use crate::agent_dir;
 
 use super::{
-    add_inbox_candidate, build_context, build_summary, failed_attempt_warnings, inspect,
-    list_inbox, record_failed_attempt, retrieve_relevant, retrieve_relevant_scored, review_inbox,
-    run_audit, write_context_receipt, write_typed_fact, InboxDecision, MemoryContextBudget,
-    MemoryInboxInput, TypedMemoryInput,
+    add_inbox_candidate, build_context, build_summary, extract_to_inbox, failed_attempt_warnings,
+    inspect, list_inbox, record_failed_attempt, retrieve_relevant, retrieve_relevant_scored,
+    review_inbox, run_audit, write_context_receipt, write_typed_fact, AutoMemoryExtractionInput,
+    InboxDecision, MemoryContextBudget, MemoryInboxInput, TypedMemoryInput,
 };
 
 static ENV_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
@@ -146,6 +146,81 @@ fn memory_inbox_requires_review_before_promotion() -> Result<()> {
         assert_eq!(list_inbox(root.path(), true)?.len(), 1);
         assert_eq!(inspect(root.path())?.committed, 1);
         assert!(!root.path().join(".agent").exists());
+        Ok(())
+    })
+}
+
+#[test]
+fn auto_memory_extraction_adds_review_only_candidates() -> Result<()> {
+    let root = tempfile::tempdir()?;
+    let home = tempfile::tempdir()?;
+
+    with_agenthub_home(home.path(), || {
+        let receipt = extract_to_inbox(
+            root.path(),
+            AutoMemoryExtractionInput {
+                source: "chat_turn".to_string(),
+                mode: "ops".to_string(),
+                domain: "ops".to_string(),
+                request: Some(
+                    "Запомни: для этого сервера всегда проверяй nginx через systemctl status nginx"
+                        .to_string(),
+                ),
+                response: Some("Буду предлагать этот runbook-шаг только после review.".to_string()),
+                task_id: Some("chat-test".to_string()),
+                artifacts: Vec::new(),
+            },
+        )?;
+
+        assert_eq!(receipt.candidates_added, 2);
+        assert_eq!(inspect(root.path())?.committed, 0);
+        let pending = list_inbox(root.path(), false)?;
+        assert_eq!(pending.len(), 2);
+        assert!(pending.iter().any(|item| item.kind == "style_rule"));
+        assert!(pending.iter().any(|item| item.kind == "runbook_step"));
+        assert!(pending.iter().all(|item| item.status == "pending"));
+        assert!(pending.iter().all(|item| item.reason.as_deref()
+            == Some("auto extracted candidate; pending inbox review required")));
+        assert!(pending.iter().all(|item| {
+            item.content["confidence"].as_f64().unwrap_or_default() > 0.0
+                && item.content["scope"]["mode"].as_str().is_some()
+                && item.content["diff"]["type"].as_str().is_some()
+        }));
+        assert!(home
+            .path()
+            .join("memory/auto_extract_receipts.jsonl")
+            .exists());
+        assert!(!root.path().join(".agent").exists());
+        Ok(())
+    })
+}
+
+#[test]
+fn auto_memory_extraction_skips_generic_short_turns() -> Result<()> {
+    let root = tempfile::tempdir()?;
+    let home = tempfile::tempdir()?;
+
+    with_agenthub_home(home.path(), || {
+        let receipt = extract_to_inbox(
+            root.path(),
+            AutoMemoryExtractionInput {
+                source: "chat_turn".to_string(),
+                mode: "chat".to_string(),
+                domain: "core".to_string(),
+                request: Some("ping".to_string()),
+                response: Some("ok".to_string()),
+                task_id: Some("chat-test".to_string()),
+                artifacts: Vec::new(),
+            },
+        )?;
+
+        assert_eq!(receipt.candidates_added, 0);
+        assert_eq!(list_inbox(root.path(), false)?.len(), 0);
+        assert_eq!(
+            receipt.skipped_reason.as_deref(),
+            Some("no durable memory signal detected")
+        );
+        assert_eq!(inspect(root.path())?.committed, 0);
         Ok(())
     })
 }

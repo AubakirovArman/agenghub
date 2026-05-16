@@ -9,6 +9,7 @@ use crate::home;
 use crate::llm_gateway::{HttpProvider, LlmRequest};
 use crate::memory;
 use crate::product_cli::{config, providers};
+use crate::workspace::{self, WorkspaceMode};
 
 use super::chat::{self, ChatSession};
 
@@ -86,7 +87,16 @@ fn answer_with_providers(
             print_terminal,
             &mut emit_event,
         ) {
-            Ok(outcome) => return Ok(outcome),
+            Ok(outcome) => {
+                append_auto_memory_extraction(
+                    root,
+                    session,
+                    request,
+                    &outcome.content,
+                    &mut emit_event,
+                )?;
+                return Ok(outcome);
+            }
             Err(error) => {
                 let reason = error.to_string();
                 last_provider = Some(provider.info.id.clone());
@@ -117,6 +127,44 @@ fn answer_with_providers(
         "{}",
         last_error.unwrap_or_else(|| "provider call failed".to_string())
     ))
+}
+
+fn append_auto_memory_extraction(
+    root: &Path,
+    session: &ChatSession,
+    request: &str,
+    response: &str,
+    emit_event: &mut EventEmitter<'_>,
+) -> Result<()> {
+    let decision = workspace::classify_request(root, request);
+    let input = memory::AutoMemoryExtractionInput {
+        source: "chat_turn".to_string(),
+        mode: decision.mode.as_str().to_string(),
+        domain: memory_domain(root, decision.mode).to_string(),
+        request: Some(request.to_string()),
+        response: Some(response.to_string()),
+        task_id: Some(session.id.clone()),
+        artifacts: Vec::new(),
+    };
+    let receipt = memory::extract_to_inbox(root, input.clone()).unwrap_or_else(|error| {
+        memory::AutoMemoryExtractionReceipt::failed(&input, error.to_string())
+    });
+    let event = chat::append_memory_extraction(session, &receipt)?;
+    emit(emit_event, &event)
+}
+
+fn memory_domain(root: &Path, mode: WorkspaceMode) -> &'static str {
+    match mode {
+        WorkspaceMode::Chat => {
+            if home::project_has_runtime(root) {
+                "code"
+            } else {
+                "core"
+            }
+        }
+        WorkspaceMode::Ops => "ops",
+        WorkspaceMode::Project => "code",
+    }
 }
 
 fn request_provider(

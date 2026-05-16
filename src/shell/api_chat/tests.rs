@@ -42,6 +42,7 @@ fn silent_answer_emits_provider_lifecycle_events() -> Result<()> {
             "provider_finished",
             "assistant_message",
             "turn_finished",
+            "memory_extraction",
         ]
     );
     let events = chat::read_events(&session.path)?;
@@ -60,6 +61,11 @@ fn silent_answer_emits_provider_lifecycle_events() -> Result<()> {
             && event["status"].as_str() == Some("succeeded")
             && event["estimated_cost_usd"].as_f64().unwrap_or_default() > 0.0
             && event["pricing_source"].as_str() == Some("configured_estimate")
+    }));
+    assert!(events.iter().any(|event| {
+        event["kind"].as_str() == Some("memory_extraction")
+            && event["candidates_added"].as_u64() == Some(0)
+            && event["skipped_reason"].as_str() == Some("no durable memory signal detected")
     }));
     Ok(())
 }
@@ -101,6 +107,7 @@ fn silent_answer_falls_back_between_api_providers() -> Result<()> {
             "provider_finished",
             "assistant_message",
             "turn_finished",
+            "memory_extraction",
         ]
     );
     let events = chat::read_events(&session.path)?;
@@ -116,6 +123,38 @@ fn silent_answer_falls_back_between_api_providers() -> Result<()> {
     assert_eq!(turns.len(), 1);
     assert_eq!(turns[0]["provider"].as_str(), Some("kimi"));
     assert_eq!(turns[0]["status"].as_str(), Some("succeeded"));
+    Ok(())
+}
+
+#[test]
+fn successful_chat_turn_adds_auto_memory_to_inbox_only() -> Result<()> {
+    let dir = tempfile::tempdir()?;
+    agent_dir::init_project(dir.path(), false)?;
+    let session = chat::create(dir.path())?;
+    let request = "always run cargo test before release and keep the verification receipt";
+    chat::append_user(&session, "exec", request)?;
+
+    let outcome = answer_with_providers(
+        dir.path(),
+        &session,
+        request,
+        vec![test_provider("deepseek", stub_sse_server())],
+        false,
+        None,
+    )?;
+
+    assert_eq!(outcome.content, "ok");
+    let events = chat::read_events(&session.path)?;
+    let extraction = events
+        .iter()
+        .find(|event| event["kind"].as_str() == Some("memory_extraction"))
+        .expect("memory extraction event");
+    assert!(extraction["candidates_added"].as_u64().unwrap_or_default() >= 1);
+    assert!(extraction["inbox_ids"]
+        .as_array()
+        .is_some_and(|ids| !ids.is_empty()));
+    assert_eq!(memory::inspect(dir.path())?.committed, 0);
+    assert!(!memory::list_inbox(dir.path(), false)?.is_empty());
     Ok(())
 }
 
