@@ -2,6 +2,8 @@ use std::path::Path;
 
 use anyhow::Result;
 
+use crate::tool_permissions;
+
 use super::*;
 
 #[test]
@@ -20,6 +22,8 @@ fn persists_chat_messages_and_transactions() -> Result<()> {
     append_provider_requested(&session, "chat-1", "deepseek", Some("deepseek-chat"), 12)?;
     append_provider_finished(&session, "chat-1", "deepseek", "ok", 12, 7, None)?;
     append_turn_finished(&session, "deepseek", "succeeded", 12, 7)?;
+    let permission = tool_permissions::classify_shell_command("kubectl delete pod api-1");
+    append_tool_permission(&session, &permission)?;
     append_draft(&session, "add page", Path::new(".agent/drafts/demo.yaml"))?;
     append_tx(
         &session,
@@ -58,6 +62,12 @@ fn persists_chat_messages_and_transactions() -> Result<()> {
                 .as_f64()
                 .unwrap_or_default()
                 > 0.0
+    }));
+    assert!(events.iter().any(|event| {
+        event["kind"].as_str() == Some("tool_permission")
+            && event["profile"].as_str() == Some("ops-host")
+            && event["approval_required"].as_bool() == Some(true)
+            && event["risk"].as_str() == Some("high")
     }));
     Ok(())
 }

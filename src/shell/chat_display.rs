@@ -80,7 +80,13 @@ pub(super) fn print_messages(session: &ChatSession) -> Result<()> {
         let text = event["text"].as_str().unwrap_or("");
         let tx_id = event["tx_id"].as_str().unwrap_or("");
         let path = event["path"].as_str().unwrap_or("");
+        let profile = event["profile"].as_str().unwrap_or("");
+        let risk = event["risk"].as_str().unwrap_or("");
         println!("  {}\t{}\t{}", at, format::status_label(kind), text);
+        if !profile.is_empty() {
+            let approval = event["approval_required"].as_bool().unwrap_or(false);
+            println!("    profile {profile}\trisk {risk}\tapproval_required {approval}");
+        }
         if !tx_id.is_empty() {
             println!("    tx {tx_id}");
         }

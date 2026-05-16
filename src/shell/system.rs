@@ -13,6 +13,7 @@ use crate::command_policy;
 use crate::command_runner::{run_shell_with_sandbox_logged, CommandResult, CommandSandbox};
 use crate::home;
 use crate::observability::redact_text;
+use crate::tool_permissions::{self, ToolPermissionDecision};
 
 use super::format;
 
@@ -21,17 +22,27 @@ pub(super) fn run(root: &Path, command: &str) -> Result<()> {
         format::error("shell command is empty");
         return Ok(());
     }
+    let permission = permission_decision(command);
+    print_permission(&permission);
     let policy = command_policy::classify_shell_command(root, command)?;
-    match policy.classification.as_str() {
-        "restricted" => {
-            format::error(&format!("blocked restricted command: {command}"));
-            return Ok(());
-        }
-        "needs_approval" if !confirm(&format!("Approve command `{command}`?"), false)? => {
+    if policy.classification == "restricted" {
+        format::error(&format!("blocked restricted command: {command}"));
+        return Ok(());
+    }
+    let policy_needs_approval = policy.classification == "needs_approval";
+    if permission.approval_required || policy_needs_approval {
+        let reason = if permission.approval_required {
+            permission.reason.as_str()
+        } else {
+            policy
+                .matched_policy
+                .as_deref()
+                .unwrap_or("matched command policy")
+        };
+        if !confirm(&format!("Approve command `{command}` ({reason})?"), false)? {
             println!("command skipped");
             return Ok(());
         }
-        _ => {}
     }
     let logs = if home::project_has_shell_state(root) {
         root.join(".agent/shell/commands")
@@ -48,6 +59,21 @@ pub(super) fn run(root: &Path, command: &str) -> Result<()> {
     let result = run_with_live_tail(root, command, &logs, &prefix, &stdout_log, &stderr_log)?;
     print_result(result);
     Ok(())
+}
+
+pub(super) fn permission_decision(command: &str) -> ToolPermissionDecision {
+    tool_permissions::classify_shell_command(command)
+}
+
+fn print_permission(decision: &ToolPermissionDecision) {
+    println!(
+        "tool_permission tool={} profile={} risk={} approval_required={}",
+        decision.tool,
+        decision.profile.as_str(),
+        decision.risk.as_str(),
+        decision.approval_required
+    );
+    println!("reason {}", decision.reason);
 }
 
 fn run_with_live_tail(
@@ -186,7 +212,9 @@ mod tests {
 
     use anyhow::Result;
 
-    use super::{read_new, run_with_live_tail};
+    use crate::tool_permissions::{ToolPermissionProfile, ToolRisk};
+
+    use super::{permission_decision, read_new, run_with_live_tail};
 
     #[test]
     fn live_tail_reads_only_new_bytes() -> Result<()> {
@@ -224,5 +252,15 @@ mod tests {
         assert_eq!(result.stdout, "ops-ok");
         assert!(!dir.path().join(".agent").exists());
         Ok(())
+    }
+
+    #[test]
+    fn permission_decision_marks_risky_ops_commands() {
+        let decision = permission_decision("kubectl delete pod api-1");
+
+        assert_eq!(decision.profile, ToolPermissionProfile::OpsHost);
+        assert_eq!(decision.risk, ToolRisk::High);
+        assert!(decision.approval_required);
+        assert!(decision.reason.contains("mutate"));
     }
 }

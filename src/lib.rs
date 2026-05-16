@@ -36,6 +36,7 @@ pub mod skill_registry;
 pub mod smart_sync;
 pub mod spec;
 pub mod team;
+pub mod tool_permissions;
 pub mod topology;
 pub mod transaction;
 pub mod tui;

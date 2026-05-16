@@ -23,6 +23,11 @@ pub(super) fn read_events(path: &Path) -> Result<Vec<ChatEventView>> {
                 text: event["text"].as_str().unwrap_or("").to_string(),
                 intent: text_field(&event, "intent"),
                 mode: text_field(&event, "mode"),
+                tool: text_field(&event, "tool"),
+                action: text_field(&event, "action"),
+                profile: text_field(&event, "profile"),
+                approval_required: bool_field(&event, "approval_required"),
+                risk: text_field(&event, "risk"),
                 provider: text_field(&event, "provider"),
                 model: text_field(&event, "model"),
                 request_id: text_field(&event, "request_id"),
@@ -51,6 +56,10 @@ fn usize_field(event: &Value, key: &str) -> Option<usize> {
         .get(key)
         .and_then(Value::as_u64)
         .and_then(|value| usize::try_from(value).ok())
+}
+
+fn bool_field(event: &Value, key: &str) -> Option<bool> {
+    event.get(key).and_then(Value::as_bool)
 }
 
 fn f64_field(event: &Value, key: &str) -> Option<f64> {

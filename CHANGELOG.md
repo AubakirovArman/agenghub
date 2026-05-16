@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.14-local-preview - 2026-05-16
+
+- Add API-native tool permission profiles for shell actions: `chat`, `read-only`, `workspace-write`, and `ops-host`, with risk level, approval requirement, and human-readable reason.
+- Record `tool_permission` events in chat transcripts before explicit `!command` shell execution, expose profile/risk/approval fields through the chat index and shared UI event bus, and surface them in `/messages`.
+- Require interactive approval for high-risk shell actions such as destructive local commands, dependency/package changes, mutating HTTP requests, and mutating Ops host/container/cluster commands.
+
 ## 0.4.13-local-preview - 2026-05-16
 
 - Add a shared Chat/Ops/Project workspace mode classifier and use it for headless exec intent events, prompt mode chips, welcome/onboarding output, `/context`, and `/status`.

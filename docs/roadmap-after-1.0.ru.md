@@ -159,13 +159,13 @@ Acceptance:
 
 ## Near-Term Implementation Steps
 
-These are the next concrete engineering steps from the current `0.4.13-local-preview` bridge toward `1.0`. They are intentionally before MCP/A2A and marketplace work.
+These are the next concrete engineering steps from the current `0.4.14-local-preview` bridge toward `1.0`. They are intentionally before MCP/A2A and marketplace work.
 
 | Release | Focus | Acceptance |
 |---|---|---|
 | `0.4.12` | Provider hardening for DeepSeek/Kimi API, clearer 401/429/timeout diagnostics, usage/request receipts | Done: provider tests now print structured failure receipts and next diagnostics instead of raw HTTP errors |
 | `0.4.13` | Intent router and Chat/Ops/Project mode status | Done: shared mode classifier feeds exec intent events, prompt/status/context surfaces, and no-`.agent` Chat/Ops regressions |
-| `0.4.14` | Tool permission profiles: `chat`, `read-only`, `workspace-write`, `ops-host` | Risky shell/file/git/http calls produce explainable approval events |
+| `0.4.14` | Tool permission profiles: `chat`, `read-only`, `workspace-write`, `ops-host` | Done: explicit shell actions now emit `tool_permission` transcript events with profile, risk, approval flag, and reason; high-risk destructive/package/HTTP/Ops commands ask for approval |
 | `0.4.15` | Lazy project bootstrap | Git init, `.agent`, and baseline commit are offered only at first approved project edit |
 | `0.4.16` | Context budget, compaction receipts, memory TTL/conflict handling | Pending memory remains out of prompts and compressed context is visible to the user |
 | `0.4.17` | TUI foundation: transcript, composer, status line, event rail, slash palette, `@` context | Long streaming turns remain visibly alive and controllable |
@@ -185,4 +185,4 @@ The immediate bridge from 0.4.x to 1.0 is:
 - inject only committed/review-approved memory into API chat context;
 - keep project transaction safety inside `.agent` only after lazy bootstrap.
 
-This is why the `v0.4.8` through `v0.4.13` bridge releases focus on global Chat/Ops memory, a review-gated memory inbox, memory-aware chat context, provider diagnostics, and visible mode routing rather than starting MCP/A2A early.
+This is why the `v0.4.8` through `v0.4.14` bridge releases focus on global Chat/Ops memory, a review-gated memory inbox, memory-aware chat context, provider diagnostics, visible mode routing, and explainable tool permissions rather than starting MCP/A2A early.

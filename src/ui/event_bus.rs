@@ -50,6 +50,7 @@ impl UiEvent {
             .with_timezone(&Utc);
         let state = row.event.kind.clone();
         let failed_status = matches!(row.event.status.as_deref(), Some("error" | "failed"));
+        let approval_required = row.event.approval_required.unwrap_or(false);
         let ui_state = match state.as_str() {
             "assistant_delta" => "running",
             "assistant_message" => "succeeded",
@@ -57,6 +58,7 @@ impl UiEvent {
             "provider_requested" => "running",
             "provider_finished" | "turn_finished" if failed_status => "failed",
             "provider_finished" | "turn_finished" => "succeeded",
+            "tool_permission" if approval_required => "needs_human",
             "intent_classified" => "info",
             _ => "info",
         };
@@ -70,6 +72,7 @@ impl UiEvent {
             badge: match state.as_str() {
                 "assistant_delta" | "provider_requested" => "run".to_string(),
                 "provider_finished" | "turn_finished" if failed_status => "fail".to_string(),
+                "tool_permission" if approval_required => "wait".to_string(),
                 _ => "ok".to_string(),
             },
             message: row.event.text.clone(),
@@ -79,6 +82,11 @@ impl UiEvent {
                 "text": row.event.text,
                 "intent": row.event.intent,
                 "mode": row.event.mode,
+                "tool": row.event.tool,
+                "action": row.event.action,
+                "profile": row.event.profile,
+                "approval_required": row.event.approval_required,
+                "risk": row.event.risk,
                 "provider": row.event.provider,
                 "model": row.event.model,
                 "request_id": row.event.request_id,

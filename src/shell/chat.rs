@@ -8,6 +8,7 @@ use uuid::Uuid;
 
 use crate::llm_gateway::estimate_cost;
 use crate::observability::write_jsonl;
+use crate::tool_permissions::ToolPermissionDecision;
 use crate::{chat_index, home};
 
 #[derive(Debug, Clone)]
@@ -142,6 +143,25 @@ pub(super) fn append_tx(
 
 pub(super) fn append_command(session: &ChatSession, kind: &str, text: &str) -> Result<Value> {
     append_event(session, kind, json!({ "text": text }))
+}
+
+pub(super) fn append_tool_permission(
+    session: &ChatSession,
+    decision: &ToolPermissionDecision,
+) -> Result<Value> {
+    append_event(
+        session,
+        "tool_permission",
+        json!({
+            "tool": decision.tool.as_str(),
+            "action": decision.action.as_str(),
+            "profile": decision.profile.as_str(),
+            "approval_required": decision.approval_required,
+            "risk": decision.risk.as_str(),
+            "reason": decision.reason.as_str(),
+            "text": decision.text()
+        }),
+    )
 }
 
 pub(super) fn append_intent(

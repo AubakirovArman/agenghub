@@ -59,6 +59,7 @@ pub(super) fn handle(
         ShellCommand::Dashboard => product::open_dashboard(root)?,
         ShellCommand::Serve(args) => product::serve_dashboard(root, args.as_deref())?,
         ShellCommand::Shell(command) => {
+            let permission = system::permission_decision(&command);
             chat::append_intent(
                 current_chat,
                 "ops_command",
@@ -66,6 +67,7 @@ pub(super) fn handle(
                 &command,
                 "explicit ! shell command",
             )?;
+            chat::append_tool_permission(current_chat, &permission)?;
             chat::append_command(current_chat, "ops_command", &command)?;
             system::run(root, &command)?;
         }
