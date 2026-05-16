@@ -334,6 +334,8 @@ transaction:
         )?;
         assert!(receipt.contains("call-read"));
         assert!(receipt.contains("create api tool output"));
+        assert!(receipt.contains("\"policy_summary\""));
+        assert!(receipt.contains("\"max_tool_rounds\""));
         let first_request = stub.received_request()?;
         let second_request = stub.received_request()?;
         assert!(first_request.contains("read_file"), "{first_request}");

@@ -50,6 +50,7 @@ fn writes_static_browser_dashboard() -> Result<()> {
         r#"{
           "status":"ready",
           "blocked":false,
+          "policy_summary":{"max_tool_rounds":3,"rounds_used":1,"total_results":1,"approval_required_results":0,"truncated_results":0,"protected_path_results":0,"binary_skipped_results":0,"symlink_denied_results":0,"network_denied_results":0},
           "rounds":[{"round":1,"response_request_id":"req-1","tool_calls":[{"id":"call-read","name":"read_file","arguments":{"path":"README.md"},"raw_arguments":"{}"}],"results":[{"call_id":"call-read","name":"read_file","status":"ok","permission":{"tool":"read_file","action":"README.md","profile":"read-only","approval_required":false,"risk":"low","reason":"native tool call is read-only"},"content":{"path":"README.md","text":"ok"},"error":null}]}]
         }"#,
     )?;
@@ -102,6 +103,7 @@ fn writes_static_browser_dashboard() -> Result<()> {
     assert!(data.contains("\"context_receipt\""));
     assert!(data.contains("\"tool_loop_receipts\""));
     assert!(data.contains("\"tool_result_receipts\""));
+    assert!(data.contains("\"policy_summary\""));
     assert!(data.contains("\"tool_logs\""));
     assert!(data.contains("session_recovery"));
     assert!(data.contains("native_tool_call:call-1"));

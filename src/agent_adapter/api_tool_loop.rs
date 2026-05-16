@@ -10,7 +10,9 @@ use crate::agent_adapter::AgentRoute;
 use crate::llm_gateway::{classify_tool_call, ToolCall, ToolDefinition};
 use crate::observability::redact_value;
 use crate::tool_permissions::{classify_shell_command, ToolPermissionDecision};
-use crate::tool_registry::{builtin_tool_definitions, result_needs_approval, ToolExecutionResult};
+use crate::tool_registry::{
+    builtin_tool_definitions, result_needs_approval, ToolExecutionResult, MAX_TOOL_ROUNDS,
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(super) struct ApiExecutionPlan {
@@ -57,9 +59,23 @@ pub(super) struct ApiToolResultsReceipt {
     adapter: String,
     role: String,
     status: String,
+    policy_summary: ApiToolPolicySummary,
     rounds: Vec<ApiToolResultRound>,
     pub(super) blocked: bool,
     pub(super) blocked_reason: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct ApiToolPolicySummary {
+    max_tool_rounds: usize,
+    rounds_used: usize,
+    total_results: usize,
+    approval_required_results: usize,
+    truncated_results: usize,
+    protected_path_results: usize,
+    binary_skipped_results: usize,
+    symlink_denied_results: usize,
+    network_denied_results: usize,
 }
 
 pub(super) fn api_execution_plan_tool() -> ToolDefinition {
@@ -204,9 +220,67 @@ pub(super) fn build_api_tool_results_receipt(
         } else {
             "ready".to_string()
         },
+        policy_summary: summarize_tool_policies(rounds),
         rounds: rounds.to_vec(),
         blocked: blocked_reason.is_some(),
         blocked_reason,
+    }
+}
+
+fn summarize_tool_policies(rounds: &[ApiToolResultRound]) -> ApiToolPolicySummary {
+    let results = rounds
+        .iter()
+        .flat_map(|round| round.results.iter())
+        .collect::<Vec<_>>();
+    ApiToolPolicySummary {
+        max_tool_rounds: results
+            .first()
+            .map(|result| result.policy.limits.max_tool_rounds)
+            .unwrap_or(MAX_TOOL_ROUNDS),
+        rounds_used: rounds.len(),
+        total_results: results.len(),
+        approval_required_results: results
+            .iter()
+            .filter(|result| result_needs_approval(result))
+            .count(),
+        truncated_results: results
+            .iter()
+            .filter(|result| result.policy.output.truncated)
+            .count(),
+        protected_path_results: results
+            .iter()
+            .filter(|result| {
+                result
+                    .policy
+                    .path
+                    .as_ref()
+                    .is_some_and(|path| path.protected)
+            })
+            .count(),
+        binary_skipped_results: results
+            .iter()
+            .filter(|result| result.policy.output.skipped_binary)
+            .count(),
+        symlink_denied_results: results
+            .iter()
+            .filter(|result| {
+                result
+                    .policy
+                    .path
+                    .as_ref()
+                    .is_some_and(|path| path.symlink && !path.symlink_allowed)
+            })
+            .count(),
+        network_denied_results: results
+            .iter()
+            .filter(|result| {
+                result
+                    .policy
+                    .network
+                    .as_ref()
+                    .is_some_and(|network| !network.allowed)
+            })
+            .count(),
     }
 }
 

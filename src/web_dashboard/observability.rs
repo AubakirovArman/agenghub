@@ -72,6 +72,7 @@ pub struct ToolResultReceiptItem {
     pub blocked_reason: Option<String>,
     pub rounds: usize,
     pub results: usize,
+    pub policy_summary: Option<Value>,
     pub href: String,
 }
 
@@ -240,6 +241,7 @@ fn collect_tool_result_receipts(
                 blocked_reason: text_field(&value, "blocked_reason"),
                 rounds: rounds.len(),
                 results,
+                policy_summary: value.get("policy_summary").cloned(),
                 href: file_href(&path),
             });
         }

@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.24-local-preview - 2026-05-16
+
+- Harden the AgentHub builtin API tool registry with explicit policy receipts for path, output, network, approval threshold, and per-tool limits.
+- Block protected paths, symlink paths, network/remote shell commands, and secret-like shell path references from automatic tool execution, returning approval-required receipts instead.
+- Add binary/non-UTF-8 handling, dashboard policy summaries for `tool_results_<role>.json`, and regression coverage for protected paths, symlinks, binary files, network shell, and policy summaries.
+
 ## 0.4.23-local-preview - 2026-05-16
 
 - Add an AgentHub-owned builtin tool registry for API project execution with bounded `read_file`, `list_dir`, `search`, and read-only `shell` tools.

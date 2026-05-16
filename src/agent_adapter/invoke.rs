@@ -21,9 +21,7 @@ use crate::llm_gateway::{complete_with_retry, HttpProvider, LlmRequest, RetryPol
 use crate::observability::{redact_text, redact_value};
 use crate::product_cli::providers;
 use crate::spec::AgentSpec;
-use crate::tool_registry::{execute_tool_call, results_prompt};
-
-const MAX_API_TOOL_ROUNDS: usize = 3;
+use crate::tool_registry::{execute_tool_call, results_prompt, MAX_TOOL_ROUNDS};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AdapterRun {
@@ -180,7 +178,7 @@ fn invoke_api_provider(
     let mut final_plan = None;
     let mut final_plan_source = None;
     let mut final_content = None;
-    for round in 0..=MAX_API_TOOL_ROUNDS {
+    for round in 0..=MAX_TOOL_ROUNDS {
         let request = LlmRequest {
             id: format!(
                 "api-executor-{}-{}-{}",
@@ -231,10 +229,10 @@ fn invoke_api_provider(
                         .unwrap_or("API builtin tool call blocked")
                 ));
             }
-            if round == MAX_API_TOOL_ROUNDS {
+            if round == MAX_TOOL_ROUNDS {
                 return Err(anyhow!(
                     "API provider exceeded {} builtin tool result rounds without returning agenthub_command_plan",
-                    MAX_API_TOOL_ROUNDS
+                    MAX_TOOL_ROUNDS
                 ));
             }
             prompt.push_str(&results_prompt(round + 1, &results)?);

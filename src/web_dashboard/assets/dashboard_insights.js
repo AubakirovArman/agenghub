@@ -144,8 +144,23 @@ function renderToolResultReceipts(el, badge) {
     el("a", { href: receipt.href, text: `${receipt.tx_id} ${receipt.role}` }),
     el("div", {}, [badge(receipt.blocked ? "blocked" : receipt.status)]),
     el("small", { text: `${receipt.rounds} rounds | ${receipt.results} results` }),
-    receipt.blocked_reason ? el("p", { class: "bad-text", text: receipt.blocked_reason }) : el("p", { text: "redacted builtin tool results recorded" }),
+    receipt.blocked_reason ? el("p", { class: "bad-text", text: receipt.blocked_reason }) : el("p", { text: toolPolicySummary(receipt.policy_summary) }),
   ])));
+}
+
+function toolPolicySummary(summary) {
+  if (!summary) return "redacted builtin tool results recorded";
+  const pieces = [
+    `max rounds ${summary.max_tool_rounds}`,
+    `used ${summary.rounds_used}`,
+    `approval ${summary.approval_required_results}`,
+    `truncated ${summary.truncated_results}`,
+    `protected ${summary.protected_path_results}`,
+    `binary ${summary.binary_skipped_results}`,
+    `symlink ${summary.symlink_denied_results}`,
+    `network ${summary.network_denied_results}`,
+  ];
+  return pieces.join(" | ");
 }
 
 function toolPermissionSummary(items) {
