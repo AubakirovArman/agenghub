@@ -11,7 +11,8 @@ BRANCH="${AGENTHUB_WIKI_BRANCH:-master}"
 
 git_auth_args=()
 if [[ -n "${GH_TOKEN:-}" ]]; then
-  git_auth_args=(-c "http.https://github.com/.extraheader=AUTHORIZATION: bearer $GH_TOKEN")
+  auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 | tr -d '\n')"
+  git_auth_args=(-c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth")
 fi
 
 cleanup() {
