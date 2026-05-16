@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.22-local-preview - 2026-05-16
+
+- Add a dashboard observability panel that surfaces context receipts, recent live chat/provider events, session recovery events, tool permission entries, native tool-loop receipts, and recent tool log excerpts from the AgentHub-owned event store.
+- Add `/api/observability` so the browser dashboard and live server can refresh the same observability payload without manual log hunting.
+- Update dashboard regression coverage to include context compaction receipts, corrupt chat recovery state, tool-loop receipt visibility, and command log excerpts.
+
 ## 0.4.21-local-preview - 2026-05-16
 
 - Add normalized API-native tool call support to the DeepSeek/Kimi HTTP gateway: requests can carry OpenAI-compatible `tools` and `tool_choice`, and non-streaming responses now preserve parsed `tool_calls`.

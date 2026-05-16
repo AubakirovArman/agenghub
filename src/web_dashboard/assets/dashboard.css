@@ -200,6 +200,12 @@ a {
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
+.observability-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .metric-group {
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -212,6 +218,21 @@ a {
   display: flex;
   justify-content: space-between;
   padding-top: 8px;
+}
+
+.compact {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.event-list {
+  max-height: 430px;
+  overflow: auto;
+}
+
+.bad-text {
+  color: var(--red);
 }
 
 .chip {
@@ -303,11 +324,19 @@ pre {
     display: block;
   }
 
+  .observability-grid {
+    display: block;
+  }
+
   .viewer-grid > div {
     margin-bottom: 12px;
   }
 
   .provider-section {
+    margin-bottom: 12px;
+  }
+
+  .observability-grid > div {
     margin-bottom: 12px;
   }
 }

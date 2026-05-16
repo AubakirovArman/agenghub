@@ -92,7 +92,7 @@ agenthub open dashboard
 agenthub serve
 ```
 
-`agenthub serve` keeps a local dashboard updated with provider status, role/fallback setup, pending approvals, recent memory facts, transaction history, and report/diff/log viewer panes.
+`agenthub serve` keeps a local dashboard updated with provider status, role/fallback setup, pending approvals, recent memory facts, transaction history, context receipts, chat/provider events, session recovery events, tool-loop receipts, tool logs, and report/diff/log viewer panes.
 
 ## Use With DeepSeek And Kimi APIs
 

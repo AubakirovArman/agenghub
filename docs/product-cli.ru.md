@@ -170,7 +170,7 @@ agenthub serve
 agenthub serve --addr 127.0.0.1:4318 --refresh-ms 1000
 ```
 
-`serve` запускает browser dashboard как local auto-refresh UI на `http://127.0.0.1:4317` по умолчанию. Он регенерирует dashboard data на requests и удобен, пока transaction выполняется.
+`serve` запускает browser dashboard как local auto-refresh UI на `http://127.0.0.1:4317` по умолчанию. Он регенерирует dashboard data на requests и удобен, пока transaction выполняется. Dashboard включает observability payload из `/api/observability`: context receipts, recent chat/provider events, session recovery entries, tool-loop receipts и tool log excerpts.
 
 ## Memory
 

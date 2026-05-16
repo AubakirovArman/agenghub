@@ -35,7 +35,32 @@ fn writes_static_browser_dashboard() -> Result<()> {
         tx.join("agent_trace.json"),
         r#"{"routes":{"executor":{"selected_adapter":"command"}}}"#,
     )?;
+    fs::write(
+        tx.join("tool_loop_executor.json"),
+        r#"{
+          "status":"ready",
+          "plan_source":"native_tool_call:call-1",
+          "blocked":false,
+          "native_tool_calls":[{"id":"call-1","name":"agenthub_command_plan","arguments":{},"raw_arguments":"{}"}],
+          "command_permissions":[{"tool":"shell","action":"printf ok","profile":"workspace-write","approval_required":false,"risk":"medium","reason":"test"}]
+        }"#,
+    )?;
+    fs::create_dir_all(tx.join("logs"))?;
+    fs::write(tx.join("logs/api-executor-0.stdout"), "tool log output\n")?;
     fs::write(tx.join("report.md"), "# report\n\ntransaction viewer\n")?;
+    fs::create_dir_all(dir.path().join(".agent/memory/compacted"))?;
+    fs::write(
+        dir.path()
+            .join(".agent/memory/compacted/context_receipt.json"),
+        r#"{"budget":{"max_prompt_tokens":6000,"max_memory_tokens":800},"prompt_tokens":120,"memory_tokens":20,"memory_records_selected":1,"memory_records_available":2,"memory_records_budget_dropped":0,"recent_messages_dropped":0,"compressed":false}"#,
+    )?;
+    fs::create_dir_all(dir.path().join(".agent/shell/chats"))?;
+    fs::write(
+        dir.path().join(".agent/shell/chats/chat-dashboard.jsonl"),
+        "{\"at\":\"2026-01-01T00:00:00Z\",\"kind\":\"context_built\",\"text\":\"context built\",\"prompt_tokens\":120}\n\
+         not-json\n\
+         {\"at\":\"2026-01-01T00:00:01Z\",\"kind\":\"tool_permission\",\"text\":\"tool permission\",\"tool\":\"shell\",\"action\":\"kubectl get pods\",\"profile\":\"ops-host\",\"approval_required\":false,\"risk\":\"low\"}\n",
+    )?;
     write_blocked_tx(dir.path())?;
     memory::stage_code_change(
         &tx,
@@ -65,6 +90,13 @@ fn writes_static_browser_dashboard() -> Result<()> {
     assert!(data.contains("\"approvals\""));
     assert!(data.contains("\"memory_browser\""));
     assert!(data.contains("\"history\""));
+    assert!(data.contains("\"observability\""));
+    assert!(data.contains("\"context_receipt\""));
+    assert!(data.contains("\"tool_loop_receipts\""));
+    assert!(data.contains("\"tool_logs\""));
+    assert!(data.contains("session_recovery"));
+    assert!(data.contains("native_tool_call:call-1"));
+    assert!(data.contains("tool log output"));
     assert!(data.contains("deepseek"));
     assert!(data.contains("approval_required"));
     assert!(data.contains("BLOCKED_ON_HUMAN"));

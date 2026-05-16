@@ -35,6 +35,10 @@ pub fn handle(
             let dashboard = web_dashboard::collect_dashboard(root)?;
             json_response(dashboard.approvals)?
         }
+        ("GET", "/api/observability") => {
+            let dashboard = web_dashboard::collect_dashboard(root)?;
+            json_response(dashboard.observability)?
+        }
         ("GET", "/api/chats") => json_response(chat_index::list(root, 100)?)?,
         ("GET", "/api/memory/summary") => json_response(memory::build_summary(root)?)?,
         ("GET", "/api/events") => sse_response(ui::event_bus::read_recent_events(root, 100)?)?,
@@ -182,11 +186,14 @@ mod tests {
         let tx = handle(dir.path(), "GET", "/api/transactions", &BTreeMap::new())?.unwrap();
         let chats = handle(dir.path(), "GET", "/api/chats", &BTreeMap::new())?.unwrap();
         let events = handle(dir.path(), "GET", "/api/events", &BTreeMap::new())?.unwrap();
+        let observability =
+            handle(dir.path(), "GET", "/api/observability", &BTreeMap::new())?.unwrap();
 
         assert_eq!(tx.status, 200);
         assert!(String::from_utf8(tx.body)?.contains("tx-20260101000000-demo"));
         assert!(String::from_utf8(chats.body)?.contains("chat-demo"));
         assert!(String::from_utf8(events.body)?.starts_with("event: snapshot"));
+        assert!(String::from_utf8(observability.body)?.contains("chat_events"));
         Ok(())
     }
 }

@@ -84,7 +84,7 @@ agenthub open dashboard
 agenthub serve
 ```
 
-`agenthub serve` 会持续更新 local dashboard：provider status、role/fallback setup、pending approvals、recent memory facts、transaction history，以及 report/diff/log viewer panes。
+`agenthub serve` 会持续更新 local dashboard：provider status、role/fallback setup、pending approvals、recent memory facts、transaction history、context receipts、chat/provider events、session recovery events、tool-loop receipts、tool logs，以及 report/diff/log viewer panes。
 
 ## DeepSeek 与 Kimi API
 

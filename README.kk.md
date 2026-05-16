@@ -84,7 +84,7 @@ agenthub open dashboard
 agenthub serve
 ```
 
-`agenthub serve` local dashboard-ты жаңартып тұрады: provider status, role/fallback setup, pending approvals, recent memory facts, transaction history және report/diff/log viewer panes.
+`agenthub serve` local dashboard-ты жаңартып тұрады: provider status, role/fallback setup, pending approvals, recent memory facts, transaction history, context receipts, chat/provider events, session recovery events, tool-loop receipts, tool logs және report/diff/log viewer panes.
 
 ## DeepSeek және Kimi API
 

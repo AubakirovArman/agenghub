@@ -4,6 +4,7 @@ mod details;
 mod insight_panels;
 mod memory_graph;
 mod metrics;
+mod observability;
 mod provider_panel;
 mod read;
 mod reports;
@@ -18,6 +19,9 @@ use serde::Serialize;
 
 pub use collect::collect_dashboard;
 pub use insight_panels::{ApprovalInboxItem, HistoryItem, MemoryBrowserItem};
+pub use observability::{
+    ChatEventItem, ObservabilityPanel, ToolLogItem, ToolLoopReceiptItem, ToolPermissionItem,
+};
 pub use provider_panel::{DashboardProvider, ProviderPanel, ProviderRoleView};
 pub use write::write_dashboard;
 
@@ -39,6 +43,7 @@ pub struct WebDashboard {
     pub approvals: Vec<ApprovalInboxItem>,
     pub memory_browser: Vec<MemoryBrowserItem>,
     pub history: Vec<HistoryItem>,
+    pub observability: ObservabilityPanel,
 }
 
 #[derive(Debug, Clone, Serialize)]
