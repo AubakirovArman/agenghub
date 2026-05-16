@@ -12,6 +12,8 @@ Rust: `code.rust.fix_clippy`, `code.rust.add_test`, `code.rust.refactor_module`.
 
 Web: `web.add_page`, `web.runtime_smoke`, `web.reuse_component`.
 
+Next.js және helper skills: `code.nextjs.add_page`, `design.reuse_existing_style`, `verifier.web_runtime_smoke`.
+
 Domain: `python.data_artifact`, `infra.terraform_plan`, `content.article_outline`.
 
 ## Quality Gates
@@ -24,7 +26,7 @@ Domain: `python.data_artifact`, `infra.terraform_plan`, `content.article_outline
 - success және failure test descriptions;
 - `common_errors` ішіндегі known error names.
 
-Rust test suite осы gates тексереді, сондықтан жартылай бос standard skill қосылмайды.
+Rust test suite осы gates-ті әр shipped skill manifest үшін тексереді, сондықтан жартылай бос standard skill қосылмайды.
 
 ## Scorecard
 

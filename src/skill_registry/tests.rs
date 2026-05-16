@@ -39,11 +39,14 @@ fn standard_library_has_required_quality_gates() -> Result<()> {
     let root = Path::new(env!("CARGO_MANIFEST_DIR"));
     let skills = list_available(root)?;
     for id in REQUIRED_STANDARD_SKILLS {
-        let manifest = skills
+        skills
             .iter()
             .find(|skill| skill.skill.id == *id)
             .ok_or_else(|| anyhow!("missing standard skill {id}"))?;
+    }
+    for manifest in &skills {
         let path = manifest.source_path.as_ref().unwrap();
+        let id = &manifest.skill.id;
         assert!(path.with_file_name("README.md").exists(), "{id} README");
         assert!(!manifest.verifiers.is_empty(), "{id} verifier profile");
         assert!(!manifest.common_errors.is_empty(), "{id} known errors");

@@ -15,10 +15,23 @@ policies:
   allow_package_change: false
   prefer_existing_components: true
 
+verifiers:
+  - web_build
+  - component_reuse
+
 common_errors:
   - one_off_visual_language
   - duplicate_component_pattern
 
+examples:
+  agent_spec: README.md#example-agentspec
+
+fixtures:
+  project: fixture:reference-web-app
+
+tests:
+  success: page reuses existing components and tokens
+  failure: one-off component pattern is flagged
+
 prompt_fragments:
   - Prefer existing components, spacing, tokens, and layout patterns over creating a new visual system.
-

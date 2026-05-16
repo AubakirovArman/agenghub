@@ -12,6 +12,8 @@ Rust: `code.rust.fix_clippy`, `code.rust.add_test`, `code.rust.refactor_module`.
 
 Web: `web.add_page`, `web.runtime_smoke`, `web.reuse_component`.
 
+Next.js и helper skills: `code.nextjs.add_page`, `design.reuse_existing_style`, `verifier.web_runtime_smoke`.
+
 Domain: `python.data_artifact`, `infra.terraform_plan`, `content.article_outline`.
 
 ## Quality Gates
@@ -24,7 +26,7 @@ Domain: `python.data_artifact`, `infra.terraform_plan`, `content.article_outline
 - descriptions для success и failure test;
 - known error names в `common_errors`.
 
-Rust test suite проверяет эти gates, чтобы standard skill нельзя было добавить пустым.
+Rust test suite проверяет эти gates для каждого shipped skill manifest, чтобы standard skill нельзя было добавить пустым.
 
 ## Scorecard
 

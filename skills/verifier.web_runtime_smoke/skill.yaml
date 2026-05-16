@@ -16,11 +16,24 @@ policies:
   require_timeout: true
   kill_process_tree: true
 
+verifiers:
+  - web_build
+  - runtime_route_smoke
+
 common_errors:
   - build_pass_runtime_fail
   - port_not_ready
   - protected_route_wrong_expectation
 
+examples:
+  agent_spec: README.md#example-agentspec
+
+fixtures:
+  project: fixture:reference-web-app
+
+tests:
+  success: changed route returns expected status
+  failure: missing route fails after build passes
+
 prompt_fragments:
   - Runtime success requires checking the changed route, not only compiling the application.
-

@@ -36,7 +36,16 @@ common_errors:
   - wrong_app_router_path
   - component_import_not_exported
 
+examples:
+  agent_spec: README.md#example-agentspec
+
+fixtures:
+  project: fixture:reference-web-app
+
+tests:
+  success: app router page builds and route smoke passes
+  failure: wrong route path fails runtime smoke
+
 prompt_fragments:
   - Reuse the existing App Router structure and colocate route files under src/app when present.
   - Inspect existing page/layout conventions before adding new UI.
-

@@ -12,6 +12,8 @@ Rust: `code.rust.fix_clippy`, `code.rust.add_test`, `code.rust.refactor_module`.
 
 Web: `web.add_page`, `web.runtime_smoke`, `web.reuse_component`.
 
+Next.js and helper skills: `code.nextjs.add_page`, `design.reuse_existing_style`, `verifier.web_runtime_smoke`.
+
 Domain: `python.data_artifact`, `infra.terraform_plan`, `content.article_outline`.
 
 ## Quality Gates
@@ -24,7 +26,7 @@ Every standard skill has:
 - success and failure test descriptions;
 - known error names in `common_errors`.
 
-The Rust test suite validates these gates so a standard skill cannot be added half-empty.
+The Rust test suite validates these gates for every shipped skill manifest, so a standard skill cannot be added half-empty.
 
 ## Scorecard
 
