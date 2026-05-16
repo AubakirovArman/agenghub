@@ -8,7 +8,7 @@
 agenthub
 ```
 
-这是推荐的日常入口。AgentHub 会打开 latest chat，在可能时准备项目，显示紧凑的 working-folder/provider header，然后让你直接输入任务：
+这是推荐的日常入口。AgentHub 会打开 latest chat，显示紧凑的 working-folder/provider header，然后让你直接输入任务。在未初始化目录中，它会停留在 Chat Mode，并把 Git/`.agent` bootstrap 推迟到 file-changing project transaction 真正需要时：
 
 ```text
 agenthub> fix the failing runtime smoke test and keep files under 200 lines
@@ -41,8 +41,8 @@ Shell 会创建 draft plan，显示将要运行的内容，询问 approval，通
 
 ## Storage
 
-- Shell history: `.agent/shell/history.txt`
-- Chats: `.agent/shell/chats/`
+- Shell history: initialized projects 使用 `.agent/shell/history.txt`，Chat/Ops Mode 使用 AgentHub user data directory
+- Chats: initialized projects 使用 `.agent/shell/chats/`，Chat/Ops Mode 使用 AgentHub user data directory
 - Transactions: `.agent/tx/<tx-id>/`
 - Dashboard: `.agent/reports/dashboard/index.html`
 

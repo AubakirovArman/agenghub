@@ -105,7 +105,7 @@ pub(super) fn latest(root: &Path) -> Result<ChatSession> {
     })
 }
 
-pub(super) fn append_user(session: &ChatSession, mode: &str, message: &str) -> Result<()> {
+pub(super) fn append_user(session: &ChatSession, mode: &str, message: &str) -> Result<Value> {
     append_event(
         session,
         "user_message",
@@ -113,7 +113,7 @@ pub(super) fn append_user(session: &ChatSession, mode: &str, message: &str) -> R
     )
 }
 
-pub(super) fn append_draft(session: &ChatSession, request: &str, path: &Path) -> Result<()> {
+pub(super) fn append_draft(session: &ChatSession, request: &str, path: &Path) -> Result<Value> {
     append_event(
         session,
         "draft_created",
@@ -135,10 +135,11 @@ pub(super) fn append_tx(
             "tx_id": tx_id,
             "path": report_path.display().to_string()
         }),
-    )
+    )?;
+    Ok(())
 }
 
-pub(super) fn append_command(session: &ChatSession, kind: &str, text: &str) -> Result<()> {
+pub(super) fn append_command(session: &ChatSession, kind: &str, text: &str) -> Result<Value> {
     append_event(session, kind, json!({ "text": text }))
 }
 
@@ -148,7 +149,7 @@ pub(super) fn append_intent(
     mode: &str,
     text: &str,
     reason: &str,
-) -> Result<()> {
+) -> Result<Value> {
     append_event(
         session,
         "intent_classified",
@@ -161,7 +162,11 @@ pub(super) fn append_intent(
     )
 }
 
-pub(super) fn append_assistant(session: &ChatSession, provider: &str, message: &str) -> Result<()> {
+pub(super) fn append_assistant(
+    session: &ChatSession,
+    provider: &str,
+    message: &str,
+) -> Result<Value> {
     append_event(
         session,
         "assistant_message",
@@ -173,7 +178,7 @@ pub(super) fn append_assistant_delta(
     session: &ChatSession,
     provider: &str,
     delta: &str,
-) -> Result<()> {
+) -> Result<Value> {
     append_event(
         session,
         "assistant_delta",
@@ -187,7 +192,7 @@ pub(super) fn append_provider_requested(
     provider: &str,
     model: Option<&str>,
     prompt_tokens: usize,
-) -> Result<()> {
+) -> Result<Value> {
     append_event(
         session,
         "provider_requested",
@@ -209,7 +214,7 @@ pub(super) fn append_provider_finished(
     prompt_tokens: usize,
     completion_tokens: usize,
     reason: Option<&str>,
-) -> Result<()> {
+) -> Result<Value> {
     append_event(
         session,
         "provider_finished",
@@ -232,7 +237,7 @@ pub(super) fn append_turn_finished(
     status: &str,
     prompt_tokens: usize,
     completion_tokens: usize,
-) -> Result<()> {
+) -> Result<Value> {
     append_event(
         session,
         "turn_finished",
@@ -247,13 +252,14 @@ pub(super) fn append_turn_finished(
     )
 }
 
-fn append_event(session: &ChatSession, kind: &str, mut data: Value) -> Result<()> {
+fn append_event(session: &ChatSession, kind: &str, mut data: Value) -> Result<Value> {
     let object = data
         .as_object_mut()
         .ok_or_else(|| anyhow!("chat event data must be an object"))?;
     object.insert("at".to_string(), json!(Utc::now().to_rfc3339()));
     object.insert("kind".to_string(), json!(kind));
-    write_jsonl(&session.path, &data)
+    write_jsonl(&session.path, &data)?;
+    Ok(data)
 }
 
 pub(super) fn summarize(path: &Path) -> Result<ChatSummary> {

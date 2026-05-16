@@ -8,7 +8,7 @@
 agenthub
 ```
 
-Бұл daily work үшін recommended interface. AgentHub latest chat ашады, мүмкін болса project дайындайды, compact working-folder/provider header көрсетеді және task-ты бірден жазуға мүмкіндік береді:
+Бұл daily work үшін recommended interface. AgentHub latest chat ашады, compact working-folder/provider header көрсетеді және task-ты бірден жазуға мүмкіндік береді. Initialized емес folder ішінде ол Chat Mode ішінде қалады және Git/`.agent` bootstrap-ты file-changing project transaction керек болғанға дейін кейінге қалдырады:
 
 ```text
 agenthub> fix the failing runtime smoke test and keep files under 200 lines
@@ -41,8 +41,8 @@ Ordinary text — негізгі жол. `ask`, `run`, `mode`, `watch`, `approve
 
 ## Storage
 
-- Shell history: `.agent/shell/history.txt`
-- Chats: `.agent/shell/chats/`
+- Shell history: initialized projects үшін `.agent/shell/history.txt`, Chat/Ops Mode үшін AgentHub user data directory
+- Chats: initialized projects үшін `.agent/shell/chats/`, Chat/Ops Mode үшін AgentHub user data directory
 - Transactions: `.agent/tx/<tx-id>/`
 - Dashboard: `.agent/reports/dashboard/index.html`
 

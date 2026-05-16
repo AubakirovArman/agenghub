@@ -31,6 +31,7 @@ fn run() -> Result<()> {
         Commands::Doctor => handlers::handle_doctor(&project_root)?,
         Commands::Version => handlers::handle_version()?,
         Commands::Shell => shell::run(&project_root)?,
+        Commands::Exec { request, jsonl } => shell::exec(&project_root, &request, jsonl)?,
         Commands::Plan {
             request,
             output,

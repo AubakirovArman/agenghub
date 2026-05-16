@@ -30,6 +30,12 @@ pub enum Commands {
     Doctor,
     Version,
     Shell,
+    Exec {
+        request: String,
+
+        #[arg(long)]
+        jsonl: bool,
+    },
     Plan {
         request: String,
 

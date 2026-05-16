@@ -36,9 +36,34 @@ mod welcome;
 
 use std::path::{Path, PathBuf};
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 
 use commands::{parse_line, ShellMode};
+
+pub fn exec(project_root: &Path, request: &str, jsonl: bool) -> Result<()> {
+    std::fs::create_dir_all(project_root)
+        .with_context(|| format!("create {}", project_root.display()))?;
+    let session = chat::create(project_root)?;
+    chat::append_user(&session, "exec", request)?;
+    chat::append_intent(&session, "chat", "chat", request, "headless exec request")?;
+    if jsonl {
+        for event in chat::read_events(&session.path)? {
+            println!("{}", serde_json::to_string(&event)?);
+        }
+        let mut emit_jsonl = |event: &serde_json::Value| -> Result<()> {
+            println!("{}", serde_json::to_string(event)?);
+            Ok(())
+        };
+        api_chat::answer_silent_with_events(project_root, &session, request, Some(&mut emit_jsonl))
+            .map(|_| ())
+    } else {
+        let result = api_chat::answer_silent(project_root, &session, request);
+        if let Ok(outcome) = &result {
+            println!("{}", outcome.content);
+        }
+        result.map(|_| ())
+    }
+}
 
 pub fn run(project_root: &Path) -> Result<()> {
     let mut root = project_root.to_path_buf();

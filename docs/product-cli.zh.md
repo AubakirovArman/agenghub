@@ -10,13 +10,22 @@ AgentHub PRD v3 adds product-facing commands for local installation checks, prov
 agenthub
 ```
 
-Running `agenthub` without a subcommand is the recommended daily entry. It can prepare Git and `.agent`, restore the latest chat, show provider readiness, and let you type a normal task. The shell creates a draft plan, asks for inline approval, runs the transaction, and then suggests `/diff`, `/logs`, `/report`, `/explain`, and `/undo`.
+Running `agenthub` without a subcommand is the recommended daily entry. In an uninitialized folder it starts Chat Mode without creating Git or `.agent`; project bootstrap is deferred until a project transaction really needs it. The shell restores the latest chat, shows provider readiness, and lets you type a normal task. File-changing tasks still create a draft plan, ask for inline approval, run the transaction, and then suggest `/diff`, `/logs`, `/report`, `/explain`, and `/undo`.
 
 Use `/` for commands, `/cd <folder>` to switch projects without restarting, `@path` for context, `!command` for policy-checked shell commands, and `# note` for project memory.
 
 Chat sessions are restored automatically. Use `/chats` to list sessions with auto titles and pin state, `/search <text>` to search titles/messages, `/rename <title>` to name the current chat, and `/pin` or `/unpin` to keep important work at the top.
 
 Use `/context` before a task to preview the current chat title, recent messages, memory summary, selected transaction report, and supported mention forms.
+
+## Headless Exec
+
+```bash
+agenthub exec "answer with one word: ok"
+agenthub exec "answer with one word: ok" --jsonl
+```
+
+`exec` runs one API-native chat turn through the same DeepSeek/Kimi provider selection and AgentHub-owned chat event store. It does not initialize Git or `.agent` for a plain chat request. With `--jsonl`, it prints the live session event stream, including `intent_classified`, `provider_requested`, `assistant_delta`, `provider_finished`, and `turn_finished`.
 
 ## Doctor
 

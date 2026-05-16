@@ -10,7 +10,7 @@ agenthub
 agenthub shell
 ```
 
-Shell восстанавливает последний chat, по возможности подготавливает проект, создаёт первый baseline commit, если у repository ещё нет `HEAD`, показывает активный provider в компактном header и позволяет писать обычную задачу. Начинать с `init`, `doctor`, `plan` или `run` не нужно. Built-in standard skills встроены в binary, поэтому fresh project сразу может использовать core file/page/Django workflows.
+Shell восстанавливает последний chat, показывает активный provider в компактном header и позволяет писать обычную задачу. В папке без AgentHub project он остаётся в Chat Mode и хранит session state в user data directory AgentHub вместо создания Git или `.agent`. Project bootstrap происходит позже, когда он нужен file-changing transaction. Начинать с `init`, `doctor`, `plan` или `run` не нужно. Built-in standard skills встроены в binary, поэтому fresh project может использовать core file/page/Django workflows сразу после выбора project mode.
 
 ```text
 agenthub> add a /courses page in the dashboard style
@@ -41,7 +41,7 @@ agenthub> add a /courses page in the dashboard style
 # use fetch only    сохранить typed memory note
 ```
 
-History хранится в `.agent/shell/history.txt`. Chat transcripts хранятся в `.agent/shell/chats/`.
+В initialized projects history хранится в `.agent/shell/history.txt`, а chat transcripts — в `.agent/shell/chats/`. В Chat/Ops Mode без project bootstrap те же данные хранятся в user data directory AgentHub.
 
 ## Inline approval
 

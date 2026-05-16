@@ -10,12 +10,54 @@ use crate::product_cli::{config, providers};
 
 use super::chat::{self, ChatSession};
 
+type EventSink<'a> = &'a mut dyn FnMut(&Value) -> Result<()>;
+type EventEmitter<'a> = Option<EventSink<'a>>;
+
+#[derive(Debug, Clone)]
+pub(super) struct AnswerOutcome {
+    pub content: String,
+}
+
 pub(super) fn answer(root: &Path, session: &ChatSession, request: &str) -> Result<()> {
     let Some(provider) = select_provider(root)? else {
         println!("API provider is not configured.");
         println!("Set DEEPSEEK_API_KEY/KIMI_API_KEY or create .deepseek/.kimi, then run `/providers test deepseek` or `/providers test kimi`.");
         return Ok(());
     };
+    let _ = answer_with_provider(root, session, request, provider, true, None)?;
+    Ok(())
+}
+
+pub(super) fn answer_silent(
+    root: &Path,
+    session: &ChatSession,
+    request: &str,
+) -> Result<AnswerOutcome> {
+    answer_silent_with_events(root, session, request, None)
+}
+
+pub(super) fn answer_silent_with_events(
+    root: &Path,
+    session: &ChatSession,
+    request: &str,
+    emit_event: EventEmitter<'_>,
+) -> Result<AnswerOutcome> {
+    let provider = select_provider(root)?.ok_or_else(|| {
+        anyhow!(
+            "API provider is not configured; set DEEPSEEK_API_KEY/KIMI_API_KEY or create .deepseek/.kimi"
+        )
+    })?;
+    answer_with_provider(root, session, request, provider, false, emit_event)
+}
+
+fn answer_with_provider(
+    _root: &Path,
+    session: &ChatSession,
+    request: &str,
+    provider: providers::ProviderStatus,
+    print_terminal: bool,
+    mut emit_event: EventEmitter<'_>,
+) -> Result<AnswerOutcome> {
     let api = HttpProvider::new(
         provider
             .endpoint
@@ -27,13 +69,14 @@ pub(super) fn answer(root: &Path, session: &ChatSession, request: &str) -> Resul
     let prompt = prompt_for(session, request)?;
     let request_id = format!("chat-{}", Utc::now().timestamp_millis());
     let prompt_tokens = estimate_tokens(request);
-    chat::append_provider_requested(
+    let event = chat::append_provider_requested(
         session,
         &request_id,
         &provider.info.id,
         provider.model.as_deref(),
         prompt_tokens,
     )?;
+    emit(&mut emit_event, &event)?;
     let mut stream_event_error = None;
     let response = match api.complete_streaming(
         LlmRequest {
@@ -48,18 +91,26 @@ pub(super) fn answer(root: &Path, session: &ChatSession, request: &str) -> Resul
             response_format: None,
         },
         |delta| {
-            print!("{delta}");
-            let _ = io::stdout().flush();
+            if print_terminal {
+                print!("{delta}");
+                let _ = io::stdout().flush();
+            }
             if stream_event_error.is_none() {
-                if let Err(error) = chat::append_assistant_delta(session, &provider.info.id, delta)
-                {
-                    stream_event_error = Some(error);
+                match chat::append_assistant_delta(session, &provider.info.id, delta) {
+                    Ok(event) => {
+                        if let Err(error) = emit(&mut emit_event, &event) {
+                            stream_event_error = Some(error);
+                        }
+                    }
+                    Err(error) => {
+                        stream_event_error = Some(error);
+                    }
                 }
             }
         },
     ) {
         Ok(response) => {
-            chat::append_provider_finished(
+            let event = chat::append_provider_finished(
                 session,
                 &request_id,
                 &provider.info.id,
@@ -68,11 +119,12 @@ pub(super) fn answer(root: &Path, session: &ChatSession, request: &str) -> Resul
                 response.completion_tokens,
                 None,
             )?;
+            emit(&mut emit_event, &event)?;
             response
         }
         Err(error) => {
             let reason = error.to_string();
-            chat::append_provider_finished(
+            let event = chat::append_provider_finished(
                 session,
                 &request_id,
                 &provider.info.id,
@@ -81,33 +133,48 @@ pub(super) fn answer(root: &Path, session: &ChatSession, request: &str) -> Resul
                 0,
                 Some(&reason),
             )?;
-            chat::append_turn_finished(session, &provider.info.id, "failed", prompt_tokens, 0)?;
+            emit(&mut emit_event, &event)?;
+            let event =
+                chat::append_turn_finished(session, &provider.info.id, "failed", prompt_tokens, 0)?;
+            emit(&mut emit_event, &event)?;
             return Err(error);
         }
     };
     if let Some(error) = stream_event_error {
-        chat::append_turn_finished(
+        let event = chat::append_turn_finished(
             session,
             &provider.info.id,
             "failed",
             prompt_tokens,
             response.completion_tokens,
         )?;
+        emit(&mut emit_event, &event)?;
         return Err(error).context("write assistant stream event");
     }
     let content = response
         .content
         .filter(|value| !value.trim().is_empty())
         .unwrap_or_else(|| "<empty response>".to_string());
-    println!();
-    chat::append_assistant(session, &provider.info.id, &content)?;
-    chat::append_turn_finished(
+    if print_terminal {
+        println!();
+    }
+    let event = chat::append_assistant(session, &provider.info.id, &content)?;
+    emit(&mut emit_event, &event)?;
+    let event = chat::append_turn_finished(
         session,
         &provider.info.id,
         "succeeded",
         prompt_tokens,
         response.completion_tokens,
     )?;
+    emit(&mut emit_event, &event)?;
+    Ok(AnswerOutcome { content })
+}
+
+fn emit(emit_event: &mut EventEmitter<'_>, event: &Value) -> Result<()> {
+    if let Some(sink) = emit_event.as_deref_mut() {
+        sink(event)?;
+    }
     Ok(())
 }
 

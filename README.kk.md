@@ -50,7 +50,7 @@ Release installers және package details [Install And Packaging](docs/install
 agenthub
 ```
 
-Негізгі product surface енді chat-first. Бірінші іске қосқанда AgentHub Git repository жасай алады, `.agent` initialize етеді, алғашқы baseline commit жасайды, available provider ұсынады, latest chat қалпына келтіреді және ordinary request күтеді:
+Негізгі product surface енді chat-first. Initialized емес folder ішінде AgentHub Git немесе `.agent` жасамай Chat Mode бастайды, available API provider ұсынады, latest chat қалпына келтіреді және ordinary request күтеді:
 
 ```text
 agenthub> create docs/agenthub-check.md with a one-line AgentHub check
@@ -58,6 +58,8 @@ agenthub> create a Django web application
 ```
 
 AgentHub message-ті draft plan етеді, target files, provider, verifier profile, scope, commands және risk көрсетеді, `diff`, `details`, `edit` options бар inline approval сұрайды, содан кейін interactive terminal ішінде live journal progress бар transaction іске қосады. Standard skills binary ішіне bundled, сондықтан newly initialized project repository `skills/` directory көшірмей-ақ built-in file, page және Django scaffold workflows іске қоса алады. Execution біткен соң `/diff`, `/logs`, `/report`, `/explain` және `/undo` ұсынады.
+
+Project bootstrap lazy: Git, `.agent` және baseline setup тек request файлдарды өзгерте алатын project transaction болғанда керек.
 
 Shell ішінде:
 
@@ -72,6 +74,7 @@ Shell ішінде:
 Scriptable commands automation үшін қала береді:
 
 ```bash
+agenthub exec "answer with one word: ok" --jsonl
 agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-commit
 agenthub run "create a Django web application" --no-watch
 agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-watch

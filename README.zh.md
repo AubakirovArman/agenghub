@@ -50,7 +50,7 @@ Release installers 和 package details 见 [Install And Packaging](docs/install-
 agenthub
 ```
 
-默认产品入口现在是 chat-first。首次启动时，AgentHub 可以创建 Git repository，初始化 `.agent`，创建第一个 baseline commit，建议可用 provider，恢复最近的 chat，然后等待普通请求：
+默认产品入口现在是 chat-first。在未初始化的目录中，AgentHub 会启动 Chat Mode，不创建 Git 或 `.agent`，建议可用的 API provider，恢复最近的 chat，然后等待普通请求：
 
 ```text
 agenthub> create docs/agenthub-check.md with a one-line AgentHub check
@@ -58,6 +58,8 @@ agenthub> create a Django web application
 ```
 
 AgentHub 会把消息转换成 draft plan，显示 target files、provider、verifier profile、scope、commands 和 risk，询问带 `diff`、`details`、`edit` 选项的 inline approval，然后在 interactive terminal 中用 live journal progress 运行 transaction。Standard skills 已内置进 binary，因此 newly initialized project 不需要复制 repository `skills/` directory 就能运行 built-in file、page 和 Django scaffold workflows。执行后会提示 `/diff`、`/logs`、`/report`、`/explain` 和 `/undo`。
+
+Project bootstrap 是 lazy 的：只有请求变成可能修改文件的 project transaction 时，才需要 Git、`.agent` 和 baseline setup。
 
 Shell 内：
 
@@ -72,6 +74,7 @@ Shell 内：
 Scriptable commands 仍然保留给 automation：
 
 ```bash
+agenthub exec "answer with one word: ok" --jsonl
 agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-commit
 agenthub run "create a Django web application" --no-watch
 agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-watch

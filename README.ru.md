@@ -50,7 +50,7 @@ Release installers и packaging описаны в [Install And Packaging](docs/i
 agenthub
 ```
 
-Главная поверхность продукта теперь chat-first. При первом запуске AgentHub может создать Git repository, инициализировать `.agent`, сделать первый baseline commit, предложить доступный provider, восстановить последний chat и ждать обычный запрос:
+Главная поверхность продукта теперь chat-first. В неинициализированной папке AgentHub стартует Chat Mode без создания Git или `.agent`, предлагает доступный API provider, восстанавливает последний chat и ждёт обычный запрос:
 
 ```text
 agenthub> create docs/agenthub-check.md with a one-line AgentHub check
@@ -58,6 +58,8 @@ agenthub> создай Django веб приложение
 ```
 
 AgentHub превращает сообщение в draft plan, показывает target files, provider, verifier profile, scope, commands и risk, спрашивает inline approval с вариантами `diff`, `details` и `edit`, затем запускает transaction с live journal progress в interactive terminal. Standard skills встроены в binary, поэтому новый initialized project может запускать built-in file, page и Django scaffold workflows без копирования repository `skills/` directory. После выполнения он подсказывает `/diff`, `/logs`, `/report`, `/explain` и `/undo`.
+
+Project bootstrap ленивый: Git, `.agent` и baseline setup нужны только тогда, когда запрос становится project transaction, способной менять файлы.
 
 Внутри shell:
 
@@ -72,6 +74,7 @@ AgentHub превращает сообщение в draft plan, показыва
 Scriptable commands остаются для automation:
 
 ```bash
+agenthub exec "ответь одним словом: ok" --jsonl
 agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-commit
 agenthub run "создай Django веб приложение" --no-watch
 agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-watch

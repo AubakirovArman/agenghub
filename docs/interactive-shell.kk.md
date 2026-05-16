@@ -10,7 +10,7 @@ agenthub
 agenthub shell
 ```
 
-Shell latest chat қалпына келтіреді, мүмкін болса project дайындайды, repository ішінде `HEAD` жоқ болса алғашқы baseline commit жасайды, compact header ішінде active provider көрсетеді және ordinary task жазуға мүмкіндік береді. `init`, `doctor`, `plan` немесе `run` бастапқы command ретінде міндетті емес. Built-in standard skills binary ішіне bundled, сондықтан fresh project бірден core file/page/Django workflows қолдана алады.
+Shell latest chat қалпына келтіреді, compact header ішінде active provider көрсетеді және ordinary task жазуға мүмкіндік береді. AgentHub project жоқ folder ішінде ол Chat Mode ішінде қалады және session state-ті Git немесе `.agent` жасамай AgentHub user data directory ішіне сақтайды. Project bootstrap file-changing transaction шынымен керек болғанда кейін орындалады. `init`, `doctor`, `plan` немесе `run` бастапқы command ретінде міндетті емес. Built-in standard skills binary ішіне bundled, сондықтан fresh project project mode таңдалғаннан кейін core file/page/Django workflows қолдана алады.
 
 ```text
 agenthub> add a /courses page in the dashboard style
@@ -41,7 +41,7 @@ ordinary text      plan, approval, execution
 # use fetch only   typed memory note сақтау
 ```
 
-History `.agent/shell/history.txt` ішінде сақталады. Chat transcripts `.agent/shell/chats/` ішінде сақталады.
+Initialized projects үшін history `.agent/shell/history.txt` ішінде, chat transcripts `.agent/shell/chats/` ішінде сақталады. Project bootstrap жоқ Chat/Ops Mode ішінде сол data AgentHub user data directory ішіне сақталады.
 
 ## Inline approval
 

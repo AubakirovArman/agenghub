@@ -46,7 +46,7 @@ pub(super) fn rename(session: &ChatSession, title: &str) -> Result<()> {
     if title.is_empty() {
         return Err(anyhow!("chat title cannot be empty"));
     }
-    chat::append_command(session, "chat_renamed", title)
+    chat::append_command(session, "chat_renamed", title).map(|_| ())
 }
 
 pub(super) fn set_pin(

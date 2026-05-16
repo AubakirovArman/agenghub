@@ -10,7 +10,7 @@ agenthub
 agenthub shell
 ```
 
-The shell restores the latest chat, prepares the project when possible, creates the first baseline commit when the repository has no `HEAD`, shows the active provider in a compact header, and lets you type a normal task. You do not need to start with `init`, `doctor`, `plan`, or `run`. Built-in standard skills are bundled with the binary, so a fresh project can use core file/page/Django workflows immediately.
+The shell restores the latest chat, shows the active provider in a compact header, and lets you type a normal task. In a folder without an AgentHub project it stays in Chat Mode and stores session state under the AgentHub user data directory instead of creating Git or `.agent`. Project bootstrap happens later, when a file-changing transaction needs it. You do not need to start with `init`, `doctor`, `plan`, or `run`. Built-in standard skills are bundled with the binary, so a fresh project can use core file/page/Django workflows immediately after project mode is selected.
 
 ```text
 agenthub> add a /courses page in the dashboard style
@@ -41,7 +41,7 @@ plain text        plan, ask for approval, then execute
 # use fetch only  save a typed memory note
 ```
 
-History is stored in `.agent/shell/history.txt`. Chat transcripts are stored under `.agent/shell/chats/`.
+For initialized projects, history is stored in `.agent/shell/history.txt` and chat transcripts are stored under `.agent/shell/chats/`. In Chat/Ops Mode without project bootstrap, the same data is stored under the AgentHub user data directory.
 
 ## Inline Approval
 

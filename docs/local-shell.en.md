@@ -8,7 +8,7 @@ Run:
 agenthub
 ```
 
-This is the recommended daily interface. AgentHub opens the latest chat, prepares the project when possible, shows a compact working-folder/provider header, and lets you type the task directly:
+This is the recommended daily interface. AgentHub opens the latest chat, shows a compact working-folder/provider header, and lets you type the task directly. In an uninitialized folder it stays in Chat Mode and defers Git/`.agent` bootstrap until a file-changing project transaction needs it:
 
 ```text
 agenthub> fix the failing runtime smoke test and keep files under 200 lines
@@ -41,8 +41,8 @@ Plain text is the main path. Expert commands like `ask`, `run`, `mode`, `watch`,
 
 ## Storage
 
-- Shell history: `.agent/shell/history.txt`
-- Chats: `.agent/shell/chats/`
+- Shell history: `.agent/shell/history.txt` for initialized projects, or the AgentHub user data directory for Chat/Ops Mode
+- Chats: `.agent/shell/chats/` for initialized projects, or the AgentHub user data directory for Chat/Ops Mode
 - Transactions: `.agent/tx/<tx-id>/`
 - Dashboard: `.agent/reports/dashboard/index.html`
 

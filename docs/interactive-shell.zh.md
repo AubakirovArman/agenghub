@@ -10,7 +10,7 @@ agenthub
 agenthub shell
 ```
 
-Shell 会恢复最近的 chat，在可能时准备项目，当 repository 没有 `HEAD` 时创建第一个 baseline commit，在紧凑 header 中显示当前 provider，然后让你直接输入普通任务。你不需要先运行 `init`、`doctor`、`plan` 或 `run`。Built-in standard skills 已内置在 binary 中，因此 fresh project 可以立即使用 core file/page/Django workflows。
+Shell 会恢复最近的 chat，在紧凑 header 中显示当前 provider，然后让你直接输入普通任务。在没有 AgentHub project 的目录中，它会停留在 Chat Mode，并把 session state 存到 AgentHub user data directory，而不是创建 Git 或 `.agent`。Project bootstrap 会推迟到 file-changing transaction 真正需要时。你不需要先运行 `init`、`doctor`、`plan` 或 `run`。Built-in standard skills 已内置在 binary 中，因此 fresh project 进入 project mode 后可以立即使用 core file/page/Django workflows。
 
 ```text
 agenthub> add a /courses page in the dashboard style
@@ -41,7 +41,7 @@ agenthub> add a /courses page in the dashboard style
 # use fetch only  保存 typed memory note
 ```
 
-History 存在 `.agent/shell/history.txt`。Chat transcripts 存在 `.agent/shell/chats/`。
+在 initialized projects 中，history 存在 `.agent/shell/history.txt`，chat transcripts 存在 `.agent/shell/chats/`。在没有 project bootstrap 的 Chat/Ops Mode 中，相同数据存到 AgentHub user data directory。
 
 ## Inline Approval
 
