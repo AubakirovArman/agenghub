@@ -43,7 +43,7 @@ LLM Gateway 是 model work 的 provider control 与 observability boundary。它
 PRD v3 增加了第一批真实 execution paths，同时保持 planned metadata 兼容：
 
 - `CliProvider` 可以运行配置好的 CLI command template，写入 prompt file，捕获 stdout/stderr，并追加 provider transcript JSONL。
-- `HttpProvider` 可以调用 `/v1/chat/completions` 上的 OpenAI-compatible `http://` 或 `https://` endpoint，并支持 timeout、bearer token 和 structured error body handling。
+- `HttpProvider` 可以调用 `/v1/chat/completions` 上的 OpenAI-compatible `http://` 或 `https://` endpoint，并支持 timeout、bearer token 和 structured error body handling。它也可以 best-effort 探测 optional `/v1/models`；缺少 model-list support 会显示在 output 中，但不会让 completion test 失败。
 - `complete_with_retry` 为 provider calls 增加 retry/backoff 和 optional attempt transcript records。
 
 测试本地 OpenAI-compatible endpoint：
