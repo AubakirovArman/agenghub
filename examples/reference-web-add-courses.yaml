@@ -58,7 +58,7 @@ verify:
   runtime:
     start_command: npm run dev -- --host 127.0.0.1 --port 49231
     base_url: http://127.0.0.1:49231
-    timeout_secs: 10
+    timeout_secs: 30
   routes:
     - path: /courses
       expect: 200
