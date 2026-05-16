@@ -547,6 +547,47 @@ transaction:
 }
 
 #[test]
+fn resource_policy_timeout_is_enforced_for_execution_commands() -> Result<()> {
+    let repo = TestRepo::new()?;
+    agent_dir::init_project(repo.path(), false)?;
+    fs::write(
+        repo.path().join(".agent/policies/resources.yaml"),
+        "resources:\n  timeout_secs: 1\n  network: inherit\n  filesystem: workspace\n",
+    )?;
+    repo.commit_all("agenthub baseline")?;
+
+    let spec = repo.write_spec(
+        "resource_timeout.yaml",
+        r#"
+task:
+  id: resource_timeout
+  type: code.command
+workspace:
+  type: code.git
+  isolation: git_worktree
+execution:
+  commands:
+    - sleep 5
+scope:
+  allow:
+    - generated/**
+transaction:
+  commit_on_success: true
+  memory_promotion: on_success
+"#,
+    )?;
+
+    let outcome = transaction::run(repo.path(), &spec, false)?;
+
+    assert!(matches!(outcome.status, TransactionStatus::RolledBack));
+    let runner = fs::read_to_string(outcome.report_path.with_file_name("runner.json"))?;
+    assert!(runner.contains("\"timeout_secs\": 1"));
+    let execution = fs::read_to_string(outcome.report_path.with_file_name("execution.json"))?;
+    assert!(execution.contains("\"timed_out\": true"));
+    Ok(())
+}
+
+#[test]
 fn sandbox_level_two_blocks_for_external_runner() -> Result<()> {
     let repo = TestRepo::new()?;
     agent_dir::init_project(repo.path(), false)?;

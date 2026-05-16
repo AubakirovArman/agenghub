@@ -2,6 +2,7 @@ use std::fs;
 use std::net::TcpListener;
 use std::process::Command;
 use std::sync::Mutex;
+use std::time::Duration;
 
 use anyhow::Result;
 
@@ -32,6 +33,7 @@ fn runtime_smoke_checks_http_route() -> Result<()> {
         None,
         dir.path(),
         &log_path,
+        Duration::from_secs(300),
     )?;
 
     let log = fs::read_to_string(&log_path).unwrap_or_default();
@@ -65,6 +67,7 @@ fn runtime_smoke_catches_route_failure_after_commands_pass() -> Result<()> {
         None,
         dir.path(),
         &dir.path().join("verifier.log"),
+        Duration::from_secs(300),
     )?;
 
     assert!(!result.passed);

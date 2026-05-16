@@ -18,6 +18,7 @@ pub(super) fn enforce(
 ) -> Result<()> {
     let report = sandbox_policy::evaluate(project_root, spec)?;
     state.remote_runner = report.runner.clone();
+    state.command_timeout_secs = report.hardening.resource_limits.timeout_secs;
     fs::write(
         tx_dir.join("sandbox.json"),
         serde_json::to_string_pretty(&report)?,

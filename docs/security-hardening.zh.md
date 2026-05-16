@@ -64,3 +64,5 @@ AGENTHUB_NETWORK_MODE
 AGENTHUB_FILESYSTEM_MODE
 AGENTHUB_NETWORK_POLICY
 ```
+
+`timeout_secs` 会对 execution、review、repair 和 verifier commands 强制生效。CPU、memory、disk、network 和 filesystem limits 会写入 hardening reports，并传给支持这些能力的 runner backends；local process execution 会把 unsupported host controls 作为 warnings 处理。

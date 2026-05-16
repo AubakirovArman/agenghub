@@ -13,6 +13,7 @@ mod prepare;
 mod review;
 mod runner;
 mod sandbox;
+mod state;
 mod status;
 mod verify;
 
@@ -23,44 +24,17 @@ use anyhow::{Context, Result};
 use chrono::Utc;
 use serde_json::json;
 
-use crate::adaptive::AdaptiveDecision;
 use crate::agent_adapter;
 use crate::agent_dir::ensure_runtime_dirs;
-use crate::command_runner::RemoteRunner;
-use crate::command_runner::RunnerMetadata;
 use crate::compiler;
-use crate::diff_guard::DiffGuardResult;
 use crate::domain_runtime;
 use crate::journal::Journal;
-use crate::observability::CostProfile;
 use crate::report::TransactionReport;
-use crate::reviewer::ReviewResult;
 use crate::skill_registry;
-use crate::smart_sync::SmartSyncDecision;
 use crate::spec::AgentSpec;
-use crate::verifier::VerifierResult;
-use crate::workspace::{PreparedWorkspace, WorkspaceRuntimeMetadata};
 pub use outcome::TransactionOutcome;
+use state::RunState;
 pub use status::TransactionStatus;
-
-#[derive(Default)]
-pub(super) struct RunState {
-    prepared: Option<PreparedWorkspace>,
-    diff_guard: Option<DiffGuardResult>,
-    review: Option<ReviewResult>,
-    verifier: Option<VerifierResult>,
-    verifier_integration: Option<crate::verifier::VerifierIntegrationArtifact>,
-    sync: Option<SmartSyncDecision>,
-    workspace_runtime: Option<WorkspaceRuntimeMetadata>,
-    runner: Option<RunnerMetadata>,
-    cost_profile: Option<CostProfile>,
-    adaptive: Option<AdaptiveDecision>,
-    error_fingerprint: Option<String>,
-    failure_reason: Option<String>,
-    remote_runner: Option<RemoteRunner>,
-    committed: bool,
-    status: Option<TransactionStatus>,
-}
 
 pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<TransactionOutcome> {
     let started_at = Utc::now();

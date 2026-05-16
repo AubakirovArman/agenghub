@@ -1,5 +1,6 @@
 use std::fs;
 use std::path::Path;
+use std::time::Duration;
 
 use anyhow::Result;
 use serde_json::json;
@@ -14,46 +15,78 @@ use crate::spec::AgentSpec;
 use super::execution::run_repair_commands;
 use super::guards::check_diff_guard;
 
+pub(super) struct ReviewRepairContext<'a> {
+    pub(super) spec: &'a AgentSpec,
+    pub(super) worktree: &'a Path,
+    pub(super) tx_dir: &'a Path,
+    pub(super) journal: &'a Journal,
+    pub(super) agent_routes: &'a AgentRoutes,
+    pub(super) remote_runner: Option<&'a RemoteRunner>,
+    pub(super) command_timeout: Duration,
+    pub(super) diff_guard: DiffGuardResult,
+}
+
 pub(super) fn run_review_with_repair(
-    spec: &AgentSpec,
-    worktree: &Path,
-    tx_dir: &Path,
-    journal: &Journal,
-    agent_routes: &AgentRoutes,
-    remote_runner: Option<&RemoteRunner>,
-    mut diff_guard: DiffGuardResult,
+    ctx: ReviewRepairContext<'_>,
 ) -> Result<(ReviewResult, DiffGuardResult)> {
-    let mut review = run_review(spec, worktree, tx_dir, agent_routes, remote_runner)?;
+    let mut diff_guard = ctx.diff_guard;
+    let mut review = run_review(
+        ctx.spec,
+        ctx.worktree,
+        ctx.tx_dir,
+        ctx.agent_routes,
+        ctx.remote_runner,
+        ctx.command_timeout,
+    )?;
     let mut repair_results = Vec::new();
 
-    for attempt in 1..=spec.transaction.max_repair_attempts {
-        if review.passed || spec.repair.commands.is_empty() {
+    for attempt in 1..=ctx.spec.transaction.max_repair_attempts {
+        if review.passed || ctx.spec.repair.commands.is_empty() {
             break;
         }
-        journal.append_data(
+        ctx.journal.append_data(
             "REPAIRING",
             "running reviewer repair commands",
             json!({ "attempt": attempt, "phase": "review" }),
         )?;
-        if let Some(route) = agent_routes.repair.as_ref() {
-            agent_adapter::invoke_adapter(spec, tx_dir, worktree, route, remote_runner)?;
+        if let Some(route) = ctx.agent_routes.repair.as_ref() {
+            agent_adapter::invoke_adapter(
+                ctx.spec,
+                ctx.tx_dir,
+                ctx.worktree,
+                route,
+                ctx.remote_runner,
+            )?;
         }
-        let results = run_repair_commands(spec, tx_dir, worktree, remote_runner)?;
-        if let Some(route) = agent_routes.repair.as_ref() {
-            agent_adapter::write_transcript(tx_dir, route, &results)?;
+        let results = run_repair_commands(
+            ctx.spec,
+            ctx.tx_dir,
+            ctx.worktree,
+            ctx.remote_runner,
+            ctx.command_timeout,
+        )?;
+        if let Some(route) = ctx.agent_routes.repair.as_ref() {
+            agent_adapter::write_transcript(ctx.tx_dir, route, &results)?;
         }
         repair_results.push(json!({ "attempt": attempt, "phase": "review", "commands": results }));
 
-        diff_guard = check_diff_guard(spec, worktree, tx_dir)?;
+        diff_guard = check_diff_guard(ctx.spec, ctx.worktree, ctx.tx_dir)?;
         if !diff_guard.passed {
             break;
         }
-        review = run_review(spec, worktree, tx_dir, agent_routes, remote_runner)?;
+        review = run_review(
+            ctx.spec,
+            ctx.worktree,
+            ctx.tx_dir,
+            ctx.agent_routes,
+            ctx.remote_runner,
+            ctx.command_timeout,
+        )?;
     }
 
     if !repair_results.is_empty() {
         fs::write(
-            tx_dir.join("review_repair.json"),
+            ctx.tx_dir.join("review_repair.json"),
             serde_json::to_string_pretty(&repair_results)?,
         )?;
     }
@@ -66,6 +99,7 @@ fn run_review(
     tx_dir: &Path,
     agent_routes: &AgentRoutes,
     remote_runner: Option<&RemoteRunner>,
+    command_timeout: Duration,
 ) -> Result<ReviewResult> {
     if let Some(route) = agent_routes.reviewer.as_ref() {
         agent_adapter::invoke_adapter(spec, tx_dir, worktree, route, remote_runner)?;
@@ -76,6 +110,7 @@ fn run_review(
         remote_runner,
         worktree,
         &tx_dir.join("reviewer.log"),
+        command_timeout,
     )?;
     if let Some(route) = agent_routes.reviewer.as_ref() {
         agent_adapter::write_transcript(tx_dir, route, &review.commands)?;

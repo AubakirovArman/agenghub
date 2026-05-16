@@ -18,6 +18,7 @@ pub(super) fn execute(
     worktree: &Path,
     agent_routes: &AgentRoutes,
     remote_runner: Option<&RemoteRunner>,
+    command_timeout: Duration,
 ) -> Result<()> {
     agent_adapter::invoke_adapter(
         spec,
@@ -26,7 +27,7 @@ pub(super) fn execute(
         &agent_routes.executor,
         remote_runner,
     )?;
-    let results = run_execution_commands(spec, tx_dir, worktree, remote_runner)?;
+    let results = run_execution_commands(spec, tx_dir, worktree, remote_runner, command_timeout)?;
     fs::write(
         tx_dir.join("execution.json"),
         serde_json::to_string_pretty(&results)?,
@@ -65,6 +66,7 @@ pub(super) fn run_execution_commands(
     tx_dir: &Path,
     worktree: &Path,
     remote_runner: Option<&RemoteRunner>,
+    command_timeout: Duration,
 ) -> Result<Vec<CommandResult>> {
     run_commands(
         "execution",
@@ -73,6 +75,7 @@ pub(super) fn run_execution_commands(
         worktree,
         spec.execution.sandbox.level,
         remote_runner,
+        command_timeout,
     )
 }
 
@@ -81,6 +84,7 @@ pub(super) fn run_repair_commands(
     tx_dir: &Path,
     worktree: &Path,
     remote_runner: Option<&RemoteRunner>,
+    command_timeout: Duration,
 ) -> Result<Vec<CommandResult>> {
     run_commands(
         "repair",
@@ -89,6 +93,7 @@ pub(super) fn run_repair_commands(
         worktree,
         spec.execution.sandbox.level,
         remote_runner,
+        command_timeout,
     )
 }
 
@@ -99,6 +104,7 @@ fn run_commands(
     worktree: &Path,
     sandbox_level: u8,
     remote_runner: Option<&RemoteRunner>,
+    command_timeout: Duration,
 ) -> Result<Vec<CommandResult>> {
     let mut results = Vec::new();
     for (index, command) in commands.iter().enumerate() {
@@ -115,7 +121,7 @@ fn run_commands(
         let result = run_shell_with_sandbox_logged(
             command,
             worktree,
-            Duration::from_secs(300),
+            command_timeout,
             sandbox_for(sandbox_level, remote_runner),
             &tx_dir.join("logs"),
             &format!("{stage}-{index}"),

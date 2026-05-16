@@ -44,6 +44,7 @@ pub fn run(
     remote_runner: Option<&RemoteRunner>,
     worktree: &Path,
     log_path: &Path,
+    command_timeout: Duration,
 ) -> Result<VerifierResult> {
     if let Some(parent) = log_path.parent() {
         fs::create_dir_all(parent).with_context(|| format!("create {}", parent.display()))?;
@@ -58,7 +59,7 @@ pub fn run(
         let result = run_shell_with_sandbox_logged(
             command,
             worktree,
-            Duration::from_secs(300),
+            command_timeout,
             sandbox_for(sandbox.level, remote_runner),
             &log_dir,
             &format!("verifier-{index}"),

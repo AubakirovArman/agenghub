@@ -64,3 +64,5 @@ AGENTHUB_NETWORK_MODE
 AGENTHUB_FILESYSTEM_MODE
 AGENTHUB_NETWORK_POLICY
 ```
+
+`timeout_secs` execution, review, repair және verifier commands үшін enforced болады. CPU, memory, disk, network және filesystem limits hardening reports ішіне жазылады және capable runner backends-ке беріледі; local process execution unsupported host controls жағдайын warnings ретінде көрсетеді.

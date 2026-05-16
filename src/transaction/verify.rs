@@ -1,5 +1,6 @@
 use std::fs;
 use std::path::Path;
+use std::time::Duration;
 
 use anyhow::{anyhow, Result};
 use serde_json::json;
@@ -29,15 +30,17 @@ pub(super) fn verify_transaction(ctx: VerifyContext<'_>, state: &mut RunState) -
     ctx.journal
         .append("VERIFYING", "running verifier commands")?;
     maybe_fail_at("VERIFYING", ctx.tx_dir, ctx.journal)?;
-    let verifier = run_verifier_with_repair(
-        ctx.spec,
-        ctx.worktree,
-        ctx.tx_dir,
-        ctx.journal,
-        ctx.agent_routes,
-        state.remote_runner.as_ref(),
-        &ctx.tx_dir.join("verifier.log"),
-    )?;
+    let log_path = ctx.tx_dir.join("verifier.log");
+    let verifier = run_verifier_with_repair(VerifierRepairContext {
+        spec: ctx.spec,
+        worktree: ctx.worktree,
+        tx_dir: ctx.tx_dir,
+        journal: ctx.journal,
+        agent_routes: ctx.agent_routes,
+        remote_runner: state.remote_runner.as_ref(),
+        command_timeout: state.command_timeout(),
+        log_path: &log_path,
+    })?;
     fs::write(
         ctx.tx_dir.join("verifier.json"),
         serde_json::to_string_pretty(&verifier)?,
@@ -81,53 +84,70 @@ pub(super) fn verify_transaction(ctx: VerifyContext<'_>, state: &mut RunState) -
     Ok(())
 }
 
-pub(super) fn run_verifier_with_repair(
-    spec: &AgentSpec,
-    worktree: &Path,
-    tx_dir: &Path,
-    journal: &Journal,
-    agent_routes: &AgentRoutes,
-    remote_runner: Option<&RemoteRunner>,
-    log_path: &Path,
-) -> Result<VerifierResult> {
+struct VerifierRepairContext<'a> {
+    spec: &'a AgentSpec,
+    worktree: &'a Path,
+    tx_dir: &'a Path,
+    journal: &'a Journal,
+    agent_routes: &'a AgentRoutes,
+    remote_runner: Option<&'a RemoteRunner>,
+    command_timeout: Duration,
+    log_path: &'a Path,
+}
+
+fn run_verifier_with_repair(ctx: VerifierRepairContext<'_>) -> Result<VerifierResult> {
     let mut verifier = verifier::run(
-        &spec.verify,
-        &spec.execution.sandbox,
-        remote_runner,
-        worktree,
-        log_path,
+        &ctx.spec.verify,
+        &ctx.spec.execution.sandbox,
+        ctx.remote_runner,
+        ctx.worktree,
+        ctx.log_path,
+        ctx.command_timeout,
     )?;
     let mut repair_results = Vec::new();
 
-    for attempt in 1..=spec.transaction.max_repair_attempts {
-        if verifier.passed || spec.repair.commands.is_empty() {
+    for attempt in 1..=ctx.spec.transaction.max_repair_attempts {
+        if verifier.passed || ctx.spec.repair.commands.is_empty() {
             break;
         }
-        journal.append_data(
+        ctx.journal.append_data(
             "REPAIRING",
             "running repair commands",
             json!({ "attempt": attempt }),
         )?;
-        if let Some(route) = agent_routes.repair.as_ref() {
-            agent_adapter::invoke_adapter(spec, tx_dir, worktree, route, remote_runner)?;
+        if let Some(route) = ctx.agent_routes.repair.as_ref() {
+            agent_adapter::invoke_adapter(
+                ctx.spec,
+                ctx.tx_dir,
+                ctx.worktree,
+                route,
+                ctx.remote_runner,
+            )?;
         }
-        let results = run_repair_commands(spec, tx_dir, worktree, remote_runner)?;
-        if let Some(route) = agent_routes.repair.as_ref() {
-            agent_adapter::write_transcript(tx_dir, route, &results)?;
+        let results = run_repair_commands(
+            ctx.spec,
+            ctx.tx_dir,
+            ctx.worktree,
+            ctx.remote_runner,
+            ctx.command_timeout,
+        )?;
+        if let Some(route) = ctx.agent_routes.repair.as_ref() {
+            agent_adapter::write_transcript(ctx.tx_dir, route, &results)?;
         }
         repair_results.push(json!({ "attempt": attempt, "commands": results }));
         verifier = verifier::run(
-            &spec.verify,
-            &spec.execution.sandbox,
-            remote_runner,
-            worktree,
-            log_path,
+            &ctx.spec.verify,
+            &ctx.spec.execution.sandbox,
+            ctx.remote_runner,
+            ctx.worktree,
+            ctx.log_path,
+            ctx.command_timeout,
         )?;
     }
 
     if !repair_results.is_empty() {
         fs::write(
-            tx_dir.join("repair.json"),
+            ctx.tx_dir.join("repair.json"),
             serde_json::to_string_pretty(&repair_results)?,
         )?;
     }

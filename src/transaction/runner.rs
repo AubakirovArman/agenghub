@@ -1,6 +1,5 @@
 use std::fs;
 use std::path::Path;
-use std::time::Duration;
 
 use anyhow::{anyhow, Result};
 
@@ -18,7 +17,7 @@ use super::context::{build_context, ContextBuild};
 use super::execution::execute;
 use super::guards::{check_diff_guard, maybe_fail_at};
 use super::prepare::prepare_workspace;
-use super::review::run_review_with_repair;
+use super::review::{run_review_with_repair, ReviewRepairContext};
 use super::verify::{verify_transaction, VerifyContext};
 use super::RunState;
 
@@ -51,7 +50,7 @@ pub(super) fn run_inner(
     let runner_metadata = command_runner::metadata_for(
         spec.execution.sandbox.level,
         state.remote_runner.as_ref(),
-        Duration::from_secs(300),
+        state.command_timeout(),
     );
     fs::write(
         tx_dir.join("runner.json"),
@@ -91,6 +90,7 @@ pub(super) fn run_inner(
         &prepared.worktree_path,
         agent_routes,
         state.remote_runner.as_ref(),
+        state.command_timeout(),
     )?;
     let diff_guard = guard_and_review(
         spec,
@@ -153,15 +153,16 @@ fn guard_and_review(
     }
     if spec.topology.kind == "executor_reviewer_repair" {
         journal.append("REVIEWING", "running reviewer gate")?;
-        let (review, reviewed_diff_guard) = run_review_with_repair(
+        let (review, reviewed_diff_guard) = run_review_with_repair(ReviewRepairContext {
             spec,
             worktree,
             tx_dir,
             journal,
             agent_routes,
-            state.remote_runner.as_ref(),
+            remote_runner: state.remote_runner.as_ref(),
+            command_timeout: state.command_timeout(),
             diff_guard,
-        )?;
+        })?;
         diff_guard = reviewed_diff_guard;
         fs::write(
             tx_dir.join("review.json"),

@@ -64,3 +64,5 @@ AGENTHUB_NETWORK_MODE
 AGENTHUB_FILESYSTEM_MODE
 AGENTHUB_NETWORK_POLICY
 ```
+
+`timeout_secs` is enforced for execution, review, repair, and verifier commands. CPU, memory, disk, network, and filesystem limits are recorded in hardening reports and passed to capable runner backends; local process execution treats unsupported host controls as warnings.
