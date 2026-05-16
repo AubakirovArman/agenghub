@@ -2,7 +2,7 @@ use std::path::Path;
 
 use anyhow::Result;
 
-use crate::agent_dir;
+use crate::{agent_dir, chat_usage};
 
 use super::{
     actions,
@@ -53,6 +53,7 @@ pub(super) fn handle(
         ShellCommand::RestoreCheckpoint(name) => session_browser::restore_checkpoint(root, &name)?,
         ShellCommand::Approvals => actions::print_approvals(root)?,
         ShellCommand::Doctor => product::print_doctor(root)?,
+        ShellCommand::Stats => print!("{}", chat_usage::render(root)?),
         ShellCommand::Providers(args) => product::handle_providers(root, args.as_deref())?,
         ShellCommand::Config(args) => product::handle_config(root, args.as_deref())?,
         ShellCommand::Dashboard => product::open_dashboard(root)?,

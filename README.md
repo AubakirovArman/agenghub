@@ -69,12 +69,14 @@ Inside the shell:
 - `!git status --short` runs a shell command through AgentHub policy and logs it.
 - `# use fetch only, no axios` writes a typed memory note for future tasks.
 - `/chats`, `/search`, `/rename`, `/pin`, and `/unpin` manage chat sessions without leaving the shell; `/chats status:COMMITTED provider:deepseek date:today` filters sessions.
+- `/stats` shows chat turns, token totals, estimated cost, and provider-level usage from the AgentHub event store.
 - `/context` previews the current chat, recent messages, memory summary, selected transaction, and mention hints.
 
 Scriptable commands still exist for automation:
 
 ```bash
 agenthub exec "answer with one word: ok" --jsonl
+agenthub stats
 agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-commit
 agenthub run "create a Django web application" --no-watch
 agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-watch

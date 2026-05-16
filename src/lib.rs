@@ -5,6 +5,7 @@ pub mod agent_dir;
 pub mod analytics;
 pub mod baseline;
 pub mod chat_index;
+pub mod chat_usage;
 pub mod code_maps;
 pub mod command_policy;
 pub mod command_runner;

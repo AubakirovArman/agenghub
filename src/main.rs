@@ -6,8 +6,8 @@ use anyhow::Result;
 use clap::Parser;
 
 use agenthub::{
-    agent_adapter, agent_dir, code_maps, enterprise, local_server, shell, skill_registry, team,
-    tui, tx_undo, web_dashboard, workspace,
+    agent_adapter, agent_dir, chat_usage, code_maps, enterprise, local_server, shell,
+    skill_registry, team, tui, tx_undo, web_dashboard, workspace,
 };
 
 use crate::cli::{AgentCommands, Cli, Commands, SkillCommands, WorkspaceCommands};
@@ -30,6 +30,7 @@ fn run() -> Result<()> {
         }
         Commands::Doctor => handlers::handle_doctor(&project_root)?,
         Commands::Version => handlers::handle_version()?,
+        Commands::Stats => print!("{}", chat_usage::render(&project_root)?),
         Commands::Shell => shell::run(&project_root)?,
         Commands::Exec { request, jsonl } => shell::exec(&project_root, &request, jsonl)?,
         Commands::Plan {

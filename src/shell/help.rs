@@ -18,6 +18,7 @@ pub(super) fn print(mode: ShellMode) {
     println!("  /cd <folder>       switch working folder");
     println!("  /status            project, provider, selected transaction");
     println!("  /providers         provider status and setup actions");
+    println!("  /stats             chat token and cost usage");
     println!("  /memory            project memory summary");
     println!("  /skills            available skills");
     println!();

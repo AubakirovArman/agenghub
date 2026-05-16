@@ -53,6 +53,7 @@ fn parses_shell_commands_and_plain_text() {
     );
     assert_eq!(parse_line("/approvals"), ShellCommand::Approvals);
     assert_eq!(parse_line("doctor"), ShellCommand::Doctor);
+    assert_eq!(parse_line("/stats"), ShellCommand::Stats);
     assert_eq!(
         parse_line("/cd /tmp/demo"),
         ShellCommand::Cd("/tmp/demo".into())

@@ -27,6 +27,14 @@ agenthub exec "answer with one word: ok" --jsonl
 
 `exec` runs one API-native chat turn through the same DeepSeek/Kimi provider selection and AgentHub-owned chat event store. It does not initialize Git or `.agent` for a plain chat request. With `--jsonl`, it prints the live session event stream, including `intent_classified`, `provider_requested`, `assistant_delta`, `provider_finished`, and `turn_finished`; completed provider and turn events include token counts, estimated USD cost, and pricing source.
 
+## Chat Usage Stats
+
+```bash
+agenthub stats
+```
+
+`stats` summarizes stored chat `turn_finished` events for the current project scope, including turn count, prompt tokens, completion tokens, total tokens, estimated USD cost, and provider-level totals. Inside the interactive shell, use `/stats` for the same view.
+
 ## Doctor
 
 ```bash

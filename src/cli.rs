@@ -29,6 +29,7 @@ pub enum Commands {
     },
     Doctor,
     Version,
+    Stats,
     Shell,
     Exec {
         request: String,
