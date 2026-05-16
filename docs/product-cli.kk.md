@@ -89,7 +89,7 @@ next	agenthub ask "describe the change" --output .agent/drafts/task.yaml
 
 `providers set <role> <provider>` `.agent/config.yaml` ішіне `provider.role.<role>` сақтайды. `providers fallback <role> ...` comma-separated fallback chain мәнін `provider.fallback.<role>` ішіне жазады. Valid roles: planner, executor, reviewer, repair, generator, critic, researcher, aggregator, manager және worker.
 
-`providers test command` built-in runner тексереді. CLI providers binary discovery, version output available болса, және template readiness тексереді; live authentication provider CLI жағында қалады. `providers test openai-http` real OpenAI-compatible HTTP/HTTPS completion request орындайды.
+`providers test command` built-in runner тексереді. CLI providers binary discovery, version output available болса, және template readiness тексереді; live authentication provider CLI жағында қалады. `providers test openai-http` real OpenAI-compatible HTTP/HTTPS completion request орындайды, содан кейін optional `/v1/models` best-effort тексереді; models endpoint жоқ болса, бұл `models unavailable` болып шығады және provider test failed болмайды.
 
 ## Config
 

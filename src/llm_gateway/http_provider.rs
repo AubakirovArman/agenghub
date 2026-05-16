@@ -25,6 +25,24 @@ impl HttpProvider {
             model,
         }
     }
+
+    pub fn list_models(&self) -> Result<Vec<String>> {
+        let response = get_json(&models_url(&self.endpoint), self.api_key.as_deref())?;
+        let models = response
+            .pointer("/data")
+            .and_then(Value::as_array)
+            .or_else(|| response.pointer("/models").and_then(Value::as_array))
+            .map(|items| {
+                items
+                    .iter()
+                    .filter_map(|item| item.get("id").or(item.get("name")))
+                    .filter_map(Value::as_str)
+                    .map(str::to_string)
+                    .collect::<Vec<_>>()
+            })
+            .unwrap_or_default();
+        Ok(models)
+    }
 }
 
 impl LlmProvider for HttpProvider {
@@ -82,6 +100,17 @@ fn completion_url(endpoint: &str) -> String {
     }
 }
 
+fn models_url(endpoint: &str) -> String {
+    let endpoint = endpoint.trim_end_matches('/');
+    if let Some(base) = endpoint.strip_suffix("/v1/chat/completions") {
+        format!("{base}/v1/models")
+    } else if endpoint.ends_with("/v1") {
+        format!("{endpoint}/models")
+    } else {
+        format!("{endpoint}/v1/models")
+    }
+}
+
 fn post_json(url: &str, api_key: Option<&str>, body: &Value) -> Result<Value> {
     ensure_supported_scheme(url)?;
     let agent = ureq::AgentBuilder::new()
@@ -93,6 +122,23 @@ fn post_json(url: &str, api_key: Option<&str>, body: &Value) -> Result<Value> {
     }
     let response = request
         .send_json(body.clone())
+        .map_err(provider_error)?
+        .into_string()
+        .context("read OpenAI-compatible response body")?;
+    serde_json::from_str(response.trim()).context("parse OpenAI-compatible response JSON")
+}
+
+fn get_json(url: &str, api_key: Option<&str>) -> Result<Value> {
+    ensure_supported_scheme(url)?;
+    let agent = ureq::AgentBuilder::new()
+        .timeout(Duration::from_secs(5))
+        .build();
+    let mut request = agent.get(url);
+    if let Some(api_key) = api_key.filter(|key| !key.is_empty()) {
+        request = request.set("Authorization", &format!("Bearer {api_key}"));
+    }
+    let response = request
+        .call()
         .map_err(provider_error)?
         .into_string()
         .context("read OpenAI-compatible response body")?;

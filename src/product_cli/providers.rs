@@ -138,10 +138,31 @@ fn test_http_provider(status: ProviderStatus) -> Result<String> {
         backoff_ms: Vec::new(),
     };
     let response = complete_with_retry(&provider, request, &policy, None)?;
-    Ok(format!(
+    let mut out = format!(
         "ok\t{}\tcompletion_tokens:{}\n",
         status.info.id, response.completion_tokens
-    ))
+    );
+    append_optional_models(&mut out, &provider);
+    Ok(out)
+}
+
+fn append_optional_models(out: &mut String, provider: &HttpProvider) {
+    match provider.list_models() {
+        Ok(models) if models.is_empty() => out.push_str("models\tempty\n"),
+        Ok(models) => out.push_str(&format!("models\t{}\n", models.join(","))),
+        Err(error) => out.push_str(&format!(
+            "models\tunavailable\t{}\n",
+            trim_error(&error.to_string())
+        )),
+    }
+}
+
+fn trim_error(error: &str) -> String {
+    if error.chars().count() > 160 {
+        format!("{}...", error.chars().take(160).collect::<String>())
+    } else {
+        error.to_string()
+    }
 }
 
 pub(super) fn status_for(project_root: &Path, provider: &str) -> Result<ProviderStatus> {

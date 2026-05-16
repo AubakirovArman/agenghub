@@ -40,13 +40,22 @@ pub(super) fn with_openai_env_model<T>(
 pub(super) fn openai_stub_server(content: &str, tokens: usize) -> Result<OpenAiStub> {
     let listener = TcpListener::bind("127.0.0.1:0")?;
     let endpoint = format!("http://{}", listener.local_addr()?);
-    let body = format!(
+    let completion_body = format!(
         r#"{{"choices":[{{"message":{{"content":"{content}"}}}}],"usage":{{"completion_tokens":{tokens}}}}}"#
     );
+    let models_body = r#"{"data":[{"id":"stub-chat"},{"id":"stub-code"}]}"#.to_string();
     let (requests_tx, requests_rx) = mpsc::channel();
     thread::spawn(move || {
-        if let Ok((mut stream, _)) = listener.accept() {
+        for _ in 0..2 {
+            let Ok((mut stream, _)) = listener.accept() else {
+                return;
+            };
             let request = read_http_request(&mut stream).unwrap_or_default();
+            let body = if request.contains("GET /v1/models") {
+                &models_body
+            } else {
+                &completion_body
+            };
             let _ = requests_tx.send(request);
             let response = format!(
                 "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
@@ -73,6 +82,10 @@ pub(super) struct OpenAiStub {
 impl OpenAiStub {
     pub(super) fn received_request(&self) -> Result<String> {
         Ok(self.requests.recv_timeout(Duration::from_secs(2))?)
+    }
+
+    pub(super) fn received_requests(&self, count: usize) -> Result<Vec<String>> {
+        (0..count).map(|_| self.received_request()).collect()
     }
 }
 

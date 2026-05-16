@@ -100,13 +100,16 @@ fn providers_openai_http_test_calls_stub_server() -> Result<()> {
 
         let setup = providers::setup_provider(dir.path(), "openai-http")?;
         let test = providers::test_provider(dir.path(), "openai-http")?;
-        let request = stub.received_request()?;
-        let lower = request.to_ascii_lowercase();
+        let requests = stub.received_requests(2)?;
+        let joined = requests.join("\n---\n");
+        let lower = joined.to_ascii_lowercase();
 
         assert!(setup.contains("configured\topenai-http"));
         assert!(setup.contains("default_provider\topenai-http"));
         assert!(test.contains("ok\topenai-http\tcompletion_tokens:3"));
-        assert!(request.contains("POST /v1/chat/completions"));
+        assert!(test.contains("models\tstub-chat,stub-code"));
+        assert!(joined.contains("POST /v1/chat/completions"));
+        assert!(joined.contains("GET /v1/models"));
         assert!(lower.contains("authorization: bearer test-key"));
         Ok(())
     })
