@@ -2,6 +2,11 @@
 
 All notable AgentHub changes are tracked here.
 
+## Unreleased
+
+- Verify release archive SHA-256 checksums in POSIX and Windows installers before extracting binaries.
+- Document checksum installation controls for downloaded and local package artifacts.
+
 ## 0.2.0-local-preview - 2026-05-15
 
 - Start PRD v3 productization toward an installable local developer preview.

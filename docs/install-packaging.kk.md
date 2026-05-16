@@ -44,6 +44,9 @@ Optional environment variables:
 - `AGENTHUB_VERSION`: release tag немесе `latest`.
 - `AGENTHUB_INSTALL_DIR`: install directory, default `$HOME/.agenthub/bin`.
 - `AGENTHUB_REPO`: GitHub repository, default `AubakirovArman/agenthub`.
+- `AGENTHUB_CHECKSUM`: custom archive үшін күтілетін SHA-256.
+- `AGENTHUB_CHECKSUM_FILE`: custom archive үшін `.sha256` file path.
+- `AGENTHUB_SKIP_CHECKSUM=1`: emergency/debug кезінде checksum verification өшіру.
 
 ## Windows installer
 
@@ -63,6 +66,18 @@ Local artifact арқылы тексеру:
 
 ```powershell
 $env:AGENTHUB_ARTIFACT="dist\agenthub-x86_64-pc-windows-msvc.zip"; .\scripts\install.ps1
+```
+
+## Checksum verification
+
+Release archives `.sha256` files бірге жарияланады. POSIX және Windows installers binary extract жасамай тұрып SHA-256 тексереді. Remote install сәйкес `.sha256` asset автоматты түрде жүктейді; local artifact install көршілес `<archive>.sha256` file бар болса соны қолданады.
+
+Custom mirrors немесе қолмен жүктелген archives үшін checksum анық беруге болады:
+
+```bash
+AGENTHUB_ARTIFACT=dist/agenthub-x86_64-unknown-linux-gnu.tar.gz \
+AGENTHUB_CHECKSUM_FILE=dist/agenthub-x86_64-unknown-linux-gnu.tar.gz.sha256 \
+scripts/install.sh
 ```
 
 ## Local packages

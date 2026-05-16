@@ -2,9 +2,10 @@
 
 ## Current Queue
 
-- Current: post-preview distribution polish.
+- Current: continue hardening the local release path toward 1.0.
 
 ## Remaining Tasks
 
-- Migrate GitHub Actions JavaScript actions or explicitly opt into Node 24 before GitHub's 2026 runner changeover.
-- Add Homebrew/Scoop/winget packaging after the first preview release is verified.
+- Add Homebrew/Scoop/winget packaging after checksum-verified preview installers are stable.
+- Add deeper provider status/auth checks for Codex, Gemini, and Kimi CLI adapters.
+- Add real 1.0 dogfood evidence from long-running local usage with real providers.

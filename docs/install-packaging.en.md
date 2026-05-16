@@ -44,6 +44,9 @@ Optional environment:
 - `AGENTHUB_VERSION`: release tag, or `latest`.
 - `AGENTHUB_INSTALL_DIR`: destination directory, default `$HOME/.agenthub/bin`.
 - `AGENTHUB_REPO`: GitHub repository, default `AubakirovArman/agenthub`.
+- `AGENTHUB_CHECKSUM`: expected SHA-256 value when installing from a custom archive.
+- `AGENTHUB_CHECKSUM_FILE`: path to a `.sha256` file for a custom archive.
+- `AGENTHUB_SKIP_CHECKSUM=1`: emergency/debug bypass for checksum verification.
 
 ## Windows Installer
 
@@ -63,6 +66,18 @@ Use a local artifact for testing:
 
 ```powershell
 $env:AGENTHUB_ARTIFACT="dist\agenthub-x86_64-pc-windows-msvc.zip"; .\scripts\install.ps1
+```
+
+## Checksum Verification
+
+Release archives are accompanied by `.sha256` files. POSIX and Windows installers verify SHA-256 before extracting the binary. Remote installs download the matching `.sha256` asset automatically; local artifact installs use the adjacent `<archive>.sha256` file when present.
+
+For custom mirrors or manually downloaded archives, pass an explicit checksum:
+
+```bash
+AGENTHUB_ARTIFACT=dist/agenthub-x86_64-unknown-linux-gnu.tar.gz \
+AGENTHUB_CHECKSUM_FILE=dist/agenthub-x86_64-unknown-linux-gnu.tar.gz.sha256 \
+scripts/install.sh
 ```
 
 ## Local Packages

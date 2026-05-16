@@ -44,6 +44,9 @@ AGENTHUB_ARTIFACT=dist/agenthub-x86_64-unknown-linux-gnu.tar.gz scripts/install.
 - `AGENTHUB_VERSION`: release tag или `latest`.
 - `AGENTHUB_INSTALL_DIR`: папка установки, default `$HOME/.agenthub/bin`.
 - `AGENTHUB_REPO`: GitHub repository, default `AubakirovArman/agenthub`.
+- `AGENTHUB_CHECKSUM`: ожидаемый SHA-256 для custom archive.
+- `AGENTHUB_CHECKSUM_FILE`: путь к `.sha256` файлу для custom archive.
+- `AGENTHUB_SKIP_CHECKSUM=1`: аварийное/debug отключение checksum verification.
 
 ## Windows installer
 
@@ -63,6 +66,18 @@ $env:AGENTHUB_VERSION="v0.2.0-local-preview"; irm https://raw.githubusercontent.
 
 ```powershell
 $env:AGENTHUB_ARTIFACT="dist\agenthub-x86_64-pc-windows-msvc.zip"; .\scripts\install.ps1
+```
+
+## Checksum verification
+
+Release archives публикуются вместе с `.sha256` файлами. POSIX и Windows installers проверяют SHA-256 до распаковки binary. Remote install автоматически скачивает соответствующий `.sha256` asset; local artifact install использует соседний `<archive>.sha256`, если он есть.
+
+Для custom mirrors или вручную скачанных archives можно передать checksum явно:
+
+```bash
+AGENTHUB_ARTIFACT=dist/agenthub-x86_64-unknown-linux-gnu.tar.gz \
+AGENTHUB_CHECKSUM_FILE=dist/agenthub-x86_64-unknown-linux-gnu.tar.gz.sha256 \
+scripts/install.sh
 ```
 
 ## Local packages

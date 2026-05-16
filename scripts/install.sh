@@ -5,6 +5,9 @@ repo="${AGENTHUB_REPO:-AubakirovArman/agenthub}"
 version="${AGENTHUB_VERSION:-latest}"
 install_dir="${AGENTHUB_INSTALL_DIR:-$HOME/.agenthub/bin}"
 artifact="${AGENTHUB_ARTIFACT:-}"
+checksum="${AGENTHUB_CHECKSUM:-}"
+checksum_file="${AGENTHUB_CHECKSUM_FILE:-}"
+skip_checksum="${AGENTHUB_SKIP_CHECKSUM:-0}"
 
 need_cmd() {
   if ! command -v "$1" >/dev/null 2>&1; then
@@ -48,8 +51,51 @@ download() {
   fi
 }
 
+compute_sha256() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | awk '{print $1}'
+  elif command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 "$1" | awk '{print $1}'
+  else
+    echo "agenthub installer: install sha256sum or shasum, or set AGENTHUB_SKIP_CHECKSUM=1" >&2
+    exit 1
+  fi
+}
+
+read_checksum_file() {
+  awk 'NF {print $1; exit}' "$1"
+}
+
+verify_checksum() {
+  archive="$1"
+  expected="$checksum"
+  if [ "$skip_checksum" = "1" ]; then
+    echo "agenthub installer: checksum verification skipped"
+    return
+  fi
+  if [ -n "$checksum_file" ]; then
+    expected="$(read_checksum_file "$checksum_file")"
+  elif [ -z "$expected" ] && [ -f "$archive.sha256" ]; then
+    expected="$(read_checksum_file "$archive.sha256")"
+  fi
+  if [ -z "$expected" ]; then
+    echo "agenthub installer: missing checksum; set AGENTHUB_CHECKSUM, AGENTHUB_CHECKSUM_FILE, or AGENTHUB_SKIP_CHECKSUM=1" >&2
+    exit 1
+  fi
+
+  actual="$(compute_sha256 "$archive")"
+  if [ "$actual" != "$expected" ]; then
+    echo "agenthub installer: checksum mismatch for $archive" >&2
+    echo "  expected: $expected" >&2
+    echo "  actual:   $actual" >&2
+    exit 1
+  fi
+  echo "agenthub installer: checksum verified"
+}
+
 need_cmd tar
 need_cmd mktemp
+need_cmd awk
 
 asset="$(detect_asset)"
 tmp="$(mktemp -d "${TMPDIR:-/tmp}/agenthub-install.XXXXXX")"
@@ -65,8 +111,12 @@ else
     url="https://github.com/$repo/releases/download/$version/$asset"
   fi
   download "$url" "$archive"
+  if [ "$skip_checksum" != "1" ] && [ -z "$checksum" ] && [ -z "$checksum_file" ]; then
+    download "$url.sha256" "$archive.sha256"
+  fi
 fi
 
+verify_checksum "$archive"
 tar -xzf "$archive" -C "$tmp"
 binary="$(find "$tmp" -type f -name agenthub | head -n 1)"
 if [ -z "$binary" ]; then

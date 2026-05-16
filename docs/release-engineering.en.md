@@ -43,6 +43,8 @@ agenthub-aarch64-apple-darwin.tar.gz
 agenthub-x86_64-pc-windows-msvc.zip
 ```
 
+Each archive is published with a matching `.sha256` file. The release-readiness script verifies that local package artifacts can be installed through the same checksum path used by public installers.
+
 ## Project Metadata
 
 `CHANGELOG.md`, `LICENSE`, `NOTICE`, `SECURITY.md`, and `CONTRIBUTING.md` define the first public-facing maintenance surface. AgentHub is licensed under Apache-2.0 for open-source use, including commercial use.

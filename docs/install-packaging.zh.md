@@ -44,6 +44,9 @@ AGENTHUB_ARTIFACT=dist/agenthub-x86_64-unknown-linux-gnu.tar.gz scripts/install.
 - `AGENTHUB_VERSION`: release tag 或 `latest`。
 - `AGENTHUB_INSTALL_DIR`: 安装目录，默认 `$HOME/.agenthub/bin`。
 - `AGENTHUB_REPO`: GitHub repository，默认 `AubakirovArman/agenthub`。
+- `AGENTHUB_CHECKSUM`: custom archive 的预期 SHA-256。
+- `AGENTHUB_CHECKSUM_FILE`: custom archive 对应的 `.sha256` 文件路径。
+- `AGENTHUB_SKIP_CHECKSUM=1`: emergency/debug 场景下跳过 checksum verification。
 
 ## Windows installer
 
@@ -63,6 +66,18 @@ $env:AGENTHUB_VERSION="v0.2.0-local-preview"; irm https://raw.githubusercontent.
 
 ```powershell
 $env:AGENTHUB_ARTIFACT="dist\agenthub-x86_64-pc-windows-msvc.zip"; .\scripts\install.ps1
+```
+
+## Checksum verification
+
+Release archives 会同时发布 `.sha256` 文件。POSIX 和 Windows installers 会在解压 binary 前验证 SHA-256。Remote install 会自动下载对应的 `.sha256` asset；local artifact install 会优先使用相邻的 `<archive>.sha256` 文件。
+
+对于 custom mirrors 或手动下载的 archives，可以显式传入 checksum：
+
+```bash
+AGENTHUB_ARTIFACT=dist/agenthub-x86_64-unknown-linux-gnu.tar.gz \
+AGENTHUB_CHECKSUM_FILE=dist/agenthub-x86_64-unknown-linux-gnu.tar.gz.sha256 \
+scripts/install.sh
 ```
 
 ## Local packages
