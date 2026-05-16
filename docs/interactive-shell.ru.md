@@ -10,7 +10,7 @@ agenthub
 agenthub shell
 ```
 
-Shell восстанавливает последний chat, по возможности подготавливает проект, показывает активный provider и позволяет писать обычную задачу. Начинать с `init`, `doctor`, `plan` или `run` не нужно.
+Shell восстанавливает последний chat, по возможности подготавливает проект, создаёт первый baseline commit, если у repository ещё нет `HEAD`, показывает активный provider и позволяет писать обычную задачу. Начинать с `init`, `doctor`, `plan` или `run` не нужно. Built-in standard skills встроены в binary, поэтому fresh project сразу может использовать core file/page workflows.
 
 ```text
 agenthub> add a /courses page in the dashboard style

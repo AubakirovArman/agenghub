@@ -50,13 +50,13 @@ Release installers and package details are documented in [Install And Packaging]
 agenthub
 ```
 
-The default product surface is now chat-first. On first launch AgentHub can create the Git repository, initialize `.agent`, suggest an available provider, restore the latest chat, and then wait for a normal request:
+The default product surface is now chat-first. On first launch AgentHub can create the Git repository, initialize `.agent`, create the first baseline commit, suggest an available provider, restore the latest chat, and then wait for a normal request:
 
 ```text
 agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 ```
 
-AgentHub turns the message into a draft plan, shows the target files, provider, verifier profile, scope, commands, and risk, asks for inline approval with `diff`, `details`, and `edit` options, then runs the transaction with live journal progress in interactive terminals. After execution it suggests `/diff`, `/logs`, `/report`, `/explain`, and `/undo`.
+AgentHub turns the message into a draft plan, shows the target files, provider, verifier profile, scope, commands, and risk, asks for inline approval with `diff`, `details`, and `edit` options, then runs the transaction with live journal progress in interactive terminals. Standard skills are bundled into the binary, so a newly initialized project can run the built-in file/page workflows without copying the repository `skills/` directory. After execution it suggests `/diff`, `/logs`, `/report`, `/explain`, and `/undo`.
 
 Inside the shell:
 

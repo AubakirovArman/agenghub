@@ -50,13 +50,13 @@ Release installers және package details [Install And Packaging](docs/install
 agenthub
 ```
 
-Негізгі product surface енді chat-first. Бірінші іске қосқанда AgentHub Git repository жасай алады, `.agent` initialize етеді, available provider ұсынады, latest chat қалпына келтіреді және ordinary request күтеді:
+Негізгі product surface енді chat-first. Бірінші іске қосқанда AgentHub Git repository жасай алады, `.agent` initialize етеді, алғашқы baseline commit жасайды, available provider ұсынады, latest chat қалпына келтіреді және ordinary request күтеді:
 
 ```text
 agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 ```
 
-AgentHub message-ті draft plan етеді, target files, provider, verifier profile, scope, commands және risk көрсетеді, `diff`, `details`, `edit` options бар inline approval сұрайды, содан кейін interactive terminal ішінде live journal progress бар transaction іске қосады. Execution біткен соң `/diff`, `/logs`, `/report`, `/explain` және `/undo` ұсынады.
+AgentHub message-ті draft plan етеді, target files, provider, verifier profile, scope, commands және risk көрсетеді, `diff`, `details`, `edit` options бар inline approval сұрайды, содан кейін interactive terminal ішінде live journal progress бар transaction іске қосады. Standard skills binary ішіне bundled, сондықтан newly initialized project repository `skills/` directory көшірмей-ақ built-in file/page workflows іске қоса алады. Execution біткен соң `/diff`, `/logs`, `/report`, `/explain` және `/undo` ұсынады.
 
 Shell ішінде:
 

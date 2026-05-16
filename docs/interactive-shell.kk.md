@@ -10,7 +10,7 @@ agenthub
 agenthub shell
 ```
 
-Shell latest chat қалпына келтіреді, мүмкін болса project дайындайды, active provider көрсетеді және ordinary task жазуға мүмкіндік береді. `init`, `doctor`, `plan` немесе `run` бастапқы command ретінде міндетті емес.
+Shell latest chat қалпына келтіреді, мүмкін болса project дайындайды, repository ішінде `HEAD` жоқ болса алғашқы baseline commit жасайды, active provider көрсетеді және ordinary task жазуға мүмкіндік береді. `init`, `doctor`, `plan` немесе `run` бастапқы command ретінде міндетті емес. Built-in standard skills binary ішіне bundled, сондықтан fresh project бірден core file/page workflows қолдана алады.
 
 ```text
 agenthub> add a /courses page in the dashboard style

@@ -10,7 +10,7 @@ agenthub
 agenthub shell
 ```
 
-Shell 会恢复最近的 chat，在可能时准备项目，显示当前 provider，然后让你直接输入普通任务。你不需要先运行 `init`、`doctor`、`plan` 或 `run`。
+Shell 会恢复最近的 chat，在可能时准备项目，当 repository 没有 `HEAD` 时创建第一个 baseline commit，显示当前 provider，然后让你直接输入普通任务。你不需要先运行 `init`、`doctor`、`plan` 或 `run`。Built-in standard skills 已内置在 binary 中，因此 fresh project 可以立即使用 core file/page workflows。
 
 ```text
 agenthub> add a /courses page in the dashboard style

@@ -28,9 +28,26 @@ fn scorecard_uses_analytics_history() -> Result<()> {
     crate::analytics::record(dir.path(), &analytics_record("feature.skill"))?;
 
     let cards = scorecards(dir.path())?;
-    assert_eq!(cards[0].id, "feature.skill");
-    assert_eq!(cards[0].runs, 1);
-    assert_eq!(cards[0].success_rate, 1.0);
+    let card = cards
+        .iter()
+        .find(|card| card.id == "feature.skill")
+        .ok_or_else(|| anyhow!("missing feature.skill scorecard"))?;
+    assert_eq!(card.runs, 1);
+    assert_eq!(card.success_rate, 1.0);
+    Ok(())
+}
+
+#[test]
+fn bundled_skills_are_available_without_project_skills() -> Result<()> {
+    let dir = tempfile::tempdir()?;
+    let skills = list_available(dir.path())?;
+
+    assert!(skills
+        .iter()
+        .any(|manifest| manifest.skill.id == "code.nextjs.add_page"));
+    assert!(skills
+        .iter()
+        .any(|manifest| manifest.skill.id == "core.file.create"));
     Ok(())
 }
 

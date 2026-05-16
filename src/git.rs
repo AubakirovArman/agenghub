@@ -18,11 +18,29 @@ pub fn is_repo(root: &Path) -> bool {
         .unwrap_or(false)
 }
 
+pub fn init(root: &Path) -> Result<()> {
+    run(root, &["init"]).map(|_| ())
+}
+
 pub fn head(root: &Path) -> Result<Option<String>> {
     match run(root, &["rev-parse", "HEAD"]) {
         Ok(output) => Ok(Some(output.stdout.trim().to_string())),
         Err(_) => Ok(None),
     }
+}
+
+pub fn has_head(root: &Path) -> bool {
+    head(root).ok().flatten().is_some()
+}
+
+pub fn ensure_identity(root: &Path) -> Result<()> {
+    if run(root, &["config", "user.email"]).is_err() {
+        run(root, &["config", "user.email", "agenthub@example.invalid"])?;
+    }
+    if run(root, &["config", "user.name"]).is_err() {
+        run(root, &["config", "user.name", "AgentHub"])?;
+    }
+    Ok(())
 }
 
 pub fn current_branch(root: &Path) -> Result<String> {
@@ -142,6 +160,9 @@ fn is_runtime_agent_path(path: &str) -> bool {
     path.starts_with(".agent/tx/")
         || path.starts_with(".agent/workspaces/")
         || path.starts_with(".agent/cache/")
+        || path.starts_with(".agent/drafts/")
+        || path.starts_with(".agent/shell/")
+        || path.starts_with(".agent/reports/")
         || path.starts_with(".agent/metrics/")
         || path.starts_with(".agent/memory/compacted/")
         || path.starts_with(".agent/memory/views/")

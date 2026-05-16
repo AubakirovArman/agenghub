@@ -20,6 +20,7 @@ agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 ## Ежедневная работа
 
 - `agenthub` без subcommand открывает chat-first local shell.
+- Первый запуск может подготовить Git, `.agent`, baseline commit и bundled standard skills для fresh project.
 - Interactive `agenthub run` и shell task execution показывают live journal progress; для quiet scripts используй `--no-watch`.
 - Внутри shell используй `/providers` как provider wizard, затем `/status`, `/diff`, `/logs`, `/report`, `/explain` и `/dashboard`.
 - Для local auto-refresh dashboard используй `/serve` или `agenthub serve`.

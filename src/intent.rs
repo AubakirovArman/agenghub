@@ -1,5 +1,6 @@
 mod clarify;
 mod defaults;
+mod file_request;
 mod normalize;
 mod render;
 #[cfg(test)]

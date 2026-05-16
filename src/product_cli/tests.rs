@@ -4,6 +4,7 @@ use crate::agent_dir;
 
 use super::{config, doctor, providers};
 
+mod bootstrap_tests;
 mod open_tests;
 mod provider_profile_tests;
 mod support;

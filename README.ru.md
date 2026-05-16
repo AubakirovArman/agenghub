@@ -50,13 +50,13 @@ Release installers и packaging описаны в [Install And Packaging](docs/i
 agenthub
 ```
 
-Главная поверхность продукта теперь chat-first. При первом запуске AgentHub может создать Git repository, инициализировать `.agent`, предложить доступный provider, восстановить последний chat и ждать обычный запрос:
+Главная поверхность продукта теперь chat-first. При первом запуске AgentHub может создать Git repository, инициализировать `.agent`, сделать первый baseline commit, предложить доступный provider, восстановить последний chat и ждать обычный запрос:
 
 ```text
 agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 ```
 
-AgentHub превращает сообщение в draft plan, показывает target files, provider, verifier profile, scope, commands и risk, спрашивает inline approval с вариантами `diff`, `details` и `edit`, затем запускает transaction с live journal progress в interactive terminal. После выполнения он подсказывает `/diff`, `/logs`, `/report`, `/explain` и `/undo`.
+AgentHub превращает сообщение в draft plan, показывает target files, provider, verifier profile, scope, commands и risk, спрашивает inline approval с вариантами `diff`, `details` и `edit`, затем запускает transaction с live journal progress в interactive terminal. Standard skills встроены в binary, поэтому новый initialized project может запускать built-in file/page workflows без копирования repository `skills/` directory. После выполнения он подсказывает `/diff`, `/logs`, `/report`, `/explain` и `/undo`.
 
 Внутри shell:
 

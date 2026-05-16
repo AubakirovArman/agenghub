@@ -10,7 +10,7 @@ agenthub
 agenthub shell
 ```
 
-The shell restores the latest chat, prepares the project when possible, shows the active provider, and lets you type a normal task. You do not need to start with `init`, `doctor`, `plan`, or `run`.
+The shell restores the latest chat, prepares the project when possible, creates the first baseline commit when the repository has no `HEAD`, shows the active provider, and lets you type a normal task. You do not need to start with `init`, `doctor`, `plan`, or `run`. Built-in standard skills are bundled with the binary, so a fresh project can use core file/page workflows immediately.
 
 ```text
 agenthub> add a /courses page in the dashboard style

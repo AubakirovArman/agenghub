@@ -42,3 +42,19 @@ fn generated_preview_is_valid_agent_spec() {
     let spec: crate::spec::AgentSpec = serde_yaml::from_str(&preview.agent_spec_yaml).unwrap();
     assert!(spec.validate().is_ok());
 }
+
+#[test]
+fn file_create_request_generates_runnable_spec() {
+    let preview = normalize_to_spec("create docs/agenthub-check.md with AgentHub check");
+
+    assert_eq!(preview.inferred_intent, "code.file_create");
+    assert!(preview.unknowns.is_empty());
+    assert!(preview.agent_spec_yaml.contains("type: code.file_create"));
+    assert!(preview.agent_spec_yaml.contains("- core.file.create"));
+    assert!(preview
+        .agent_spec_yaml
+        .contains("target: docs/agenthub-check.md"));
+    assert!(preview.agent_spec_yaml.contains("mkdir -p"));
+    let spec: crate::spec::AgentSpec = serde_yaml::from_str(&preview.agent_spec_yaml).unwrap();
+    assert!(spec.validate().is_ok());
+}

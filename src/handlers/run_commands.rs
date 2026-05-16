@@ -4,7 +4,7 @@ use anyhow::{anyhow, Result};
 use chrono::Utc;
 use serde_json::json;
 
-use agenthub::{enterprise, intent, live_run, memory, spec::AgentSpec};
+use agenthub::{enterprise, intent, live_run, memory, product_cli::bootstrap, spec::AgentSpec};
 
 use super::run_summary;
 
@@ -48,6 +48,7 @@ pub fn handle_plan(
 }
 
 pub fn handle_run(root: &Path, target: &str, no_commit: bool, no_watch: bool) -> Result<()> {
+    print_bootstrap(bootstrap::ensure_transaction_ready(root)?);
     let spec = resolve_run_spec(root, target)?;
     print_failed_attempt_warnings(root, &spec)?;
     let actor = enterprise::authorize(root, "transaction.run")?;
@@ -83,6 +84,18 @@ pub fn handle_run(root: &Path, target: &str, no_commit: bool, no_watch: bool) ->
         json!({ "tx_id": outcome.tx_id }),
     )?;
     run_summary::print(root, &spec, &outcome)
+}
+
+fn print_bootstrap(report: bootstrap::BootstrapReport) {
+    if report.git_initialized {
+        eprintln!("bootstrap: initialized git repository");
+    }
+    if report.agent_initialized {
+        eprintln!("bootstrap: initialized .agent project");
+    }
+    if report.baseline_committed {
+        eprintln!("bootstrap: committed initial AgentHub baseline");
+    }
 }
 
 fn print_failed_attempt_warnings(root: &Path, spec_path: &Path) -> Result<()> {

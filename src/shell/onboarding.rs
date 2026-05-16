@@ -1,9 +1,9 @@
 use std::io::{self, IsTerminal, Write};
 use std::path::Path;
-use std::process::Command;
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result};
 
+use crate::product_cli::bootstrap;
 use crate::product_cli::{config, providers};
 use crate::{agent_dir, git};
 
@@ -12,6 +12,7 @@ pub(super) fn prepare(root: &Path) -> Result<()> {
     println!("Project: {}", root.display());
     ensure_git(root)?;
     ensure_agent(root)?;
+    ensure_baseline(root)?;
     suggest_provider(root)?;
     println!("Type what you want to build, fix, inspect, or change.");
     println!("Use / for commands, @ for files, ! for shell, # for memory.");
@@ -25,20 +26,27 @@ fn ensure_git(root: &Path) -> Result<()> {
         return Ok(());
     }
     if confirm("Git repo not found. Create git repo here?", true)? {
-        let output = Command::new("git")
-            .arg("init")
-            .current_dir(root)
-            .output()
-            .with_context(|| format!("run git init in {}", root.display()))?;
-        if !output.status.success() {
-            return Err(anyhow!(
-                "git init failed: {}",
-                String::from_utf8_lossy(&output.stderr)
-            ));
-        }
+        git::init(root)?;
         println!("Git: initialized");
     } else {
         println!("Git: skipped; transactions need a git repository");
+    }
+    Ok(())
+}
+
+fn ensure_baseline(root: &Path) -> Result<()> {
+    if git::has_head(root) {
+        return Ok(());
+    }
+    if confirm(
+        "Initial commit not found. Create AgentHub baseline commit?",
+        true,
+    )? {
+        if bootstrap::ensure_baseline(root)? {
+            println!("Git: baseline committed");
+        }
+    } else {
+        println!("Git: baseline skipped; transactions need an initial commit");
     }
     Ok(())
 }

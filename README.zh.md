@@ -50,13 +50,13 @@ Release installers 和 package details 见 [Install And Packaging](docs/install-
 agenthub
 ```
 
-默认产品入口现在是 chat-first。首次启动时，AgentHub 可以创建 Git repository，初始化 `.agent`，建议可用 provider，恢复最近的 chat，然后等待普通请求：
+默认产品入口现在是 chat-first。首次启动时，AgentHub 可以创建 Git repository，初始化 `.agent`，创建第一个 baseline commit，建议可用 provider，恢复最近的 chat，然后等待普通请求：
 
 ```text
 agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 ```
 
-AgentHub 会把消息转换成 draft plan，显示 target files、provider、verifier profile、scope、commands 和 risk，询问带 `diff`、`details`、`edit` 选项的 inline approval，然后在 interactive terminal 中用 live journal progress 运行 transaction。执行后会提示 `/diff`、`/logs`、`/report`、`/explain` 和 `/undo`。
+AgentHub 会把消息转换成 draft plan，显示 target files、provider、verifier profile、scope、commands 和 risk，询问带 `diff`、`details`、`edit` 选项的 inline approval，然后在 interactive terminal 中用 live journal progress 运行 transaction。Standard skills 已内置进 binary，因此 newly initialized project 不需要复制 repository `skills/` directory 就能运行 built-in file/page workflows。执行后会提示 `/diff`、`/logs`、`/report`、`/explain` 和 `/undo`。
 
 Shell 内：
 

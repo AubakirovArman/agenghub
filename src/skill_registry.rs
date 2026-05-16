@@ -6,6 +6,7 @@ use anyhow::{anyhow, Context, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
+mod bundled;
 mod scorecard;
 #[cfg(test)]
 mod tests;
@@ -42,17 +43,19 @@ pub struct SkillMeta {
 }
 
 pub fn list_available(project_root: &Path) -> Result<Vec<SkillManifest>> {
-    let mut manifests = Vec::new();
+    let mut by_id = bundled::manifests()?
+        .into_iter()
+        .map(|manifest| (manifest.skill.id.clone(), manifest))
+        .collect::<BTreeMap<_, _>>();
     let skills_root = project_root.join("skills");
-    if !skills_root.exists() {
-        return Ok(manifests);
+    if skills_root.exists() {
+        for path in find_skill_files(&skills_root)? {
+            let manifest = load_manifest(&path)?;
+            by_id.insert(manifest.skill.id.clone(), manifest);
+        }
     }
 
-    for path in find_skill_files(&skills_root)? {
-        manifests.push(load_manifest(&path)?);
-    }
-    manifests.sort_by(|a, b| a.skill.id.cmp(&b.skill.id));
-    Ok(manifests)
+    Ok(by_id.into_values().collect())
 }
 
 pub fn load_requested(project_root: &Path, requested: &[String]) -> Result<Vec<SkillManifest>> {
