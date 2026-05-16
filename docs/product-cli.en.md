@@ -16,6 +16,8 @@ Use `/` for commands, `@path` for context, `!command` for policy-checked shell c
 
 Chat sessions are restored automatically. Use `/chats` to list sessions with auto titles and pin state, `/search <text>` to search titles/messages, `/rename <title>` to name the current chat, and `/pin` or `/unpin` to keep important work at the top.
 
+Use `/context` before a task to preview the current chat title, recent messages, memory summary, selected transaction report, and supported mention forms.
+
 ## Doctor
 
 ```bash

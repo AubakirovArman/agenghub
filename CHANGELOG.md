@@ -14,6 +14,7 @@ All notable AgentHub changes are tracked here.
 - Add named OpenAI-compatible provider profiles via `agenthub providers add openai-http --name ...`.
 - Add shell chat session management with auto titles, search, rename, pin, and unpin commands.
 - Add live transaction journal progress for interactive shell tasks and `agenthub run`, with `--no-watch` for quiet scripts.
+- Add `/context` in the shell to preview current chat, recent messages, memory, and selected transaction context.
 - Verify release archive SHA-256 checksums in POSIX and Windows installers before extracting binaries.
 - Document checksum installation controls for downloaded and local package artifacts.
 - Add provider-specific CLI credential marker diagnostics for Codex, Gemini, and Kimi.

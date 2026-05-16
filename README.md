@@ -65,6 +65,7 @@ Inside the shell:
 - `!git status --short` runs a shell command through AgentHub policy and logs it.
 - `# use fetch only, no axios` writes a typed memory note for future tasks.
 - `/chats`, `/search`, `/rename`, `/pin`, and `/unpin` manage chat sessions without leaving the shell.
+- `/context` previews the current chat, recent messages, memory summary, selected transaction, and mention hints.
 - `/chats`, `/search`, `/rename`, `/pin`, and `/unpin` manage chat sessions without leaving the shell.
 
 Scriptable commands still exist for automation:

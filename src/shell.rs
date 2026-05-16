@@ -5,6 +5,7 @@ mod chat_display;
 mod chat_meta;
 mod commands;
 mod context_input;
+mod context_preview;
 mod control;
 mod flow;
 mod help;
@@ -91,6 +92,7 @@ fn handle(
             );
         }
         ShellCommand::Messages => chat_display::print_messages(current_chat)?,
+        ShellCommand::Context => context_preview::print(root, current_chat, current_tx.as_deref())?,
         ShellCommand::Sessions => actions::list_sessions(root)?,
         ShellCommand::Doctor => product::print_doctor(root)?,
         ShellCommand::Providers(args) => product::handle_providers(root, args.as_deref())?,

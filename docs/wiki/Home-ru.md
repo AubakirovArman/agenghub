@@ -25,6 +25,7 @@ agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 - Для local auto-refresh dashboard используй `/serve` или `agenthub serve`.
 - Reusable local model endpoints сохраняются через `agenthub providers add openai-http --name local-vllm --url ...`.
 - Через `/chats`, `/search`, `/rename`, `/pin` и `/unpin` можно управлять chat sessions с auto titles.
+- `/context` показывает current chat, recent messages, memory и selected transaction context.
 - `@path` добавляет context, `!command` запускает policy-checked shell command, `# note` сохраняет project memory.
 - Scriptable commands `agenthub run`, `agenthub tx diff latest` и `agenthub tx logs latest` остаются доступны.
 - Перед release work запускай `scripts/dogfood.sh` и `scripts/dogfood-readiness.sh`.

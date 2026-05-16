@@ -65,6 +65,7 @@ AgentHub превращает сообщение в draft plan, показыва
 - `!git status --short` запускает shell command через AgentHub policy и логирует результат.
 - `# use fetch only, no axios` записывает typed memory note для будущих задач.
 - `/chats`, `/search`, `/rename`, `/pin` и `/unpin` управляют chat sessions прямо внутри shell.
+- `/context` показывает preview текущего chat, recent messages, memory summary, selected transaction и mention hints.
 - `/chats`, `/search`, `/rename`, `/pin` и `/unpin` управляют chat sessions прямо внутри shell.
 
 Scriptable commands остаются для automation:

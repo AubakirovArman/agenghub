@@ -12,6 +12,7 @@ fn parses_shell_commands_and_plain_text() {
         parse_line("/rename auth refactor"),
         ShellCommand::Rename("auth refactor".into())
     );
+    assert_eq!(parse_line("/context"), ShellCommand::Context);
     assert_eq!(
         parse_line("/pin"),
         ShellCommand::Pin {

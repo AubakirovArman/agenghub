@@ -16,6 +16,8 @@ agenthub
 
 Chat sessions автоматты түрде қалпына келеді. `/chats` auto titles және pin state бар sessions көрсетеді, `/search <text>` titles/messages бойынша іздейді, `/rename <title>` current chat атын өзгертеді, ал `/pin` немесе `/unpin` маңызды жұмысты жоғарыда ұстайды немесе босатады.
 
+Task алдында `/context` current chat title, recent messages, memory summary, selected transaction report және supported mention forms preview көрсетеді.
+
 ## Doctor
 
 ```bash

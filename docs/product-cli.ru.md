@@ -16,6 +16,8 @@ agenthub
 
 Chat sessions восстанавливаются автоматически. Используй `/chats`, чтобы увидеть sessions с auto titles и pin state, `/search <text>` для поиска по titles/messages, `/rename <title>` для названия текущего chat и `/pin` или `/unpin`, чтобы держать важную работу сверху.
 
+Используй `/context` перед задачей, чтобы увидеть current chat title, recent messages, memory summary, selected transaction report и поддерживаемые mention forms.
+
 ## Doctor
 
 ```bash

@@ -16,6 +16,8 @@ agenthub
 
 Chat sessions 会自动恢复。使用 `/chats` 查看带 auto titles 和 pin state 的 sessions，`/search <text>` 搜索 titles/messages，`/rename <title>` 命名当前 chat，`/pin` 或 `/unpin` 把重要工作固定在顶部或取消固定。
 
+任务前可使用 `/context` 预览 current chat title、recent messages、memory summary、selected transaction report 和支持的 mention forms。
+
 ## Doctor
 
 ```bash

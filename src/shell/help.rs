@@ -28,6 +28,7 @@ pub(super) fn print(mode: ShellMode) {
     println!("Chats:");
     println!("  /chats             list recent chats with titles and pins");
     println!("  /search <text>     search chat titles and messages");
+    println!("  /context           preview current chat, memory, and tx context");
     println!("  /rename <title>    rename the current chat");
     println!("  /pin, /unpin       keep or release the current chat");
     println!();
