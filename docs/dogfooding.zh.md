@@ -48,6 +48,15 @@ target/dogfood/history/runs/<run-id>/
 
 Archive 会保存 suite report、存在时的 provider report，以及持久化 provider artifacts。使用 `AGENTHUB_DOGFOOD_ARCHIVE=0` 可跳过 suite archive，使用 `AGENTHUB_PROVIDER_DOGFOOD_ARCHIVE=0` 可跳过 direct provider archive。
 
+Release 前可以汇总本地 evidence：
+
+```bash
+scripts/dogfood-readiness.sh
+scripts/dogfood-readiness.sh --check
+```
+
+`--check` 使用 `AGENTHUB_DOGFOOD_MIN_SUITE_RUNS`、`AGENTHUB_DOGFOOD_MIN_PROVIDER_PASSED` 和 `AGENTHUB_DOGFOOD_MIN_DAYS` thresholds。默认要求 3 次 suite runs、1 次 passed provider run 和 2 个不同 dogfood days。
+
 对于 stress runs，report 包含 requested count、completed count、`tx status` 行数、elapsed seconds，以及 `.agent/cache/indexes/transactions.sqlite3` 是否存在。设置 `AGENTHUB_DOGFOOD_KEEP=1` 可以保留临时 stress project，并把 path 写入 report 供手动检查。
 
 使用已安装的 `agenthub`，而不是从源码构建：

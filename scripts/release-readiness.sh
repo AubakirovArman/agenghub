@@ -23,6 +23,7 @@ cargo clippy --manifest-path "$ROOT/Cargo.toml" --locked -- -D warnings
 cargo test --manifest-path "$ROOT/Cargo.toml" --locked
 "$ROOT/scripts/check-module-size.sh" 200
 "$ROOT/scripts/test-package-manifests.sh"
+"$ROOT/scripts/test-dogfood-readiness.sh"
 
 AGENTHUB_DOGFOOD_FULL="${AGENTHUB_DOGFOOD_FULL:-0}" "$ROOT/scripts/dogfood.sh"
 if [[ "${AGENTHUB_RELEASE_PERF:-0}" == "1" ]]; then

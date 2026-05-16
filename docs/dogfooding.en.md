@@ -48,6 +48,15 @@ target/dogfood/history/runs/<run-id>/
 
 The archive stores the suite report, provider report when present, and persisted provider artifacts. Use `AGENTHUB_DOGFOOD_ARCHIVE=0` to skip suite archival, or `AGENTHUB_PROVIDER_DOGFOOD_ARCHIVE=0` to skip direct provider archival.
 
+Summarize local evidence before release:
+
+```bash
+scripts/dogfood-readiness.sh
+scripts/dogfood-readiness.sh --check
+```
+
+`--check` uses `AGENTHUB_DOGFOOD_MIN_SUITE_RUNS`, `AGENTHUB_DOGFOOD_MIN_PROVIDER_PASSED`, and `AGENTHUB_DOGFOOD_MIN_DAYS` thresholds. The defaults require 3 suite runs, 1 passed provider run, and 2 distinct dogfood days.
+
 For stress runs the report includes requested count, completed count, `tx status` row count, elapsed seconds, and whether `.agent/cache/indexes/transactions.sqlite3` existed. Use `AGENTHUB_DOGFOOD_KEEP=1` to keep the temporary stress project path in the report for manual inspection.
 
 Use an installed binary instead of building from source:

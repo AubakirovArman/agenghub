@@ -109,6 +109,7 @@ Run product checks:
 
 ```bash
 scripts/dogfood.sh
+scripts/dogfood-readiness.sh
 AGENTHUB_DOGFOOD_FULL=1 scripts/dogfood.sh
 scripts/perf-profile.sh
 scripts/release-readiness.sh

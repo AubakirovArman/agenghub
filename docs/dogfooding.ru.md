@@ -48,6 +48,15 @@ target/dogfood/history/runs/<run-id>/
 
 Архив сохраняет suite report, provider report если он есть, и сохранённые provider artifacts. `AGENTHUB_DOGFOOD_ARCHIVE=0` отключает архивирование suite, а `AGENTHUB_PROVIDER_DOGFOOD_ARCHIVE=0` отключает архивирование прямого provider-прогона.
 
+Перед релизом можно собрать summary локальных evidence:
+
+```bash
+scripts/dogfood-readiness.sh
+scripts/dogfood-readiness.sh --check
+```
+
+`--check` использует thresholds `AGENTHUB_DOGFOOD_MIN_SUITE_RUNS`, `AGENTHUB_DOGFOOD_MIN_PROVIDER_PASSED` и `AGENTHUB_DOGFOOD_MIN_DAYS`. Defaults требуют 3 suite runs, 1 passed provider run и 2 разных dogfood дня.
+
 Для stress runs report содержит requested count, completed count, количество строк `tx status`, elapsed seconds и факт наличия `.agent/cache/indexes/transactions.sqlite3`. `AGENTHUB_DOGFOOD_KEEP=1` оставляет временный stress project и пишет его path в report для ручной проверки.
 
 Использовать установленный `agenthub` вместо сборки из исходников:

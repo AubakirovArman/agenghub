@@ -48,6 +48,15 @@ target/dogfood/history/runs/<run-id>/
 
 Archive suite report, бар болса provider report және persisted provider artifacts сақтайды. Suite archival өшіру үшін `AGENTHUB_DOGFOOD_ARCHIVE=0`, direct provider archival өшіру үшін `AGENTHUB_PROVIDER_DOGFOOD_ARCHIVE=0` қолдан.
 
+Release алдында local evidence summary қарау:
+
+```bash
+scripts/dogfood-readiness.sh
+scripts/dogfood-readiness.sh --check
+```
+
+`--check` `AGENTHUB_DOGFOOD_MIN_SUITE_RUNS`, `AGENTHUB_DOGFOOD_MIN_PROVIDER_PASSED` және `AGENTHUB_DOGFOOD_MIN_DAYS` thresholds қолданады. Defaults 3 suite runs, 1 passed provider run және 2 бөлек dogfood days талап етеді.
+
 Stress runs үшін report ішінде requested count, completed count, `tx status` жол саны, elapsed seconds және `.agent/cache/indexes/transactions.sqlite3` бар-жоғы болады. `AGENTHUB_DOGFOOD_KEEP=1` temporary stress project сақтап, оның path мәнін manual inspection үшін report ішіне жазады.
 
 Source build орнына орнатылған `agenthub` қолдану:
