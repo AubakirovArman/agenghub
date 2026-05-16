@@ -2,6 +2,8 @@ use crate::tui::{
     ApprovalPanel, Dashboard, DashboardSummary, LatestTransaction, MemoryPanel, TransactionSummary,
 };
 
+use super::provider_render;
+
 pub fn render_dashboard(dashboard: &Dashboard) -> String {
     let mut out = String::new();
     push_line(&mut out, "AgentHub TUI Dashboard");
@@ -10,6 +12,7 @@ pub fn render_dashboard(dashboard: &Dashboard) -> String {
     render_summary(&mut out, &dashboard.summary);
     render_transactions(&mut out, &dashboard.transactions);
     render_latest(&mut out, dashboard.latest.as_ref());
+    provider_render::render_providers(&mut out, &dashboard.providers);
     render_memory(&mut out, &dashboard.memory);
     render_approvals(&mut out, &dashboard.approvals);
     render_next_actions(&mut out, &dashboard.next_actions);

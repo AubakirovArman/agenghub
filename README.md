@@ -135,6 +135,8 @@ agenthub aal check examples/add-courses.aal
 agenthub tui --live
 ```
 
+`agenthub tui` includes a provider panel with default provider, ready/missing counts, named profiles, role assignments, and fallback chains.
+
 Run product checks:
 
 ```bash

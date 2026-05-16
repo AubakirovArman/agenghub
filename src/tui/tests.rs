@@ -4,6 +4,7 @@ use anyhow::Result;
 
 use super::dashboard_text;
 use crate::agent_dir::init_project;
+use crate::product_cli::{config, providers};
 
 #[test]
 fn renders_terminal_dashboard_panels() -> Result<()> {
@@ -50,6 +51,16 @@ fn renders_terminal_dashboard_panels() -> Result<()> {
         dir.path().join(".agent/specs/approval.yaml"),
         "transaction:\n  approval_required: true\n",
     )?;
+    providers::add_openai_http(
+        dir.path(),
+        "local-vllm",
+        "http://127.0.0.1:8000",
+        Some("qwen3"),
+        None,
+    )?;
+    config::set_value(dir.path(), "default_provider", "local-vllm")?;
+    providers::set_role_provider(dir.path(), "executor", "local-vllm")?;
+    providers::set_role_fallback(dir.path(), "reviewer", &["command".to_string()])?;
 
     let dashboard = dashboard_text(dir.path())?;
 
@@ -64,6 +75,10 @@ fn renders_terminal_dashboard_panels() -> Result<()> {
     assert!(dashboard.contains("- effects: 1"));
     assert!(dashboard.contains("- heartbeat: executor, last output 4s ago"));
     assert!(dashboard.contains("line two"));
+    assert!(dashboard.contains("[Providers]"));
+    assert!(dashboard.contains("- default: local-vllm"));
+    assert!(dashboard.contains("- executor -> local-vllm (ok)"));
+    assert!(dashboard.contains("- reviewer -> local-vllm (ok) fallback:command"));
     assert!(dashboard.contains("- DAG: 1 nodes, 0 edges"));
     assert!(dashboard.contains("- pending specs: 1"));
     assert!(dashboard.contains("[Next Actions]"));

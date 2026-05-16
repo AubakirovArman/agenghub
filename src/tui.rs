@@ -1,5 +1,7 @@
 mod collect;
 mod live;
+mod provider_render;
+mod providers;
 mod read;
 mod render;
 #[cfg(test)]
@@ -19,6 +21,7 @@ pub struct Dashboard {
     pub summary: DashboardSummary,
     pub transactions: Vec<TransactionSummary>,
     pub latest: Option<LatestTransaction>,
+    pub providers: ProviderPanel,
     pub memory: MemoryPanel,
     pub approvals: ApprovalPanel,
     pub next_actions: Vec<String>,
@@ -70,6 +73,33 @@ pub struct MemoryPanel {
 pub struct ApprovalPanel {
     pub specs: Vec<String>,
     pub blocked_transactions: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct ProviderPanel {
+    pub default_provider: String,
+    pub ready: usize,
+    pub missing: usize,
+    pub profiles: usize,
+    pub statuses: Vec<ProviderStatusLine>,
+    pub roles: Vec<ProviderRoleLine>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ProviderStatusLine {
+    pub id: String,
+    pub state: String,
+    pub is_default: bool,
+    pub detail: String,
+    pub model: Option<String>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ProviderRoleLine {
+    pub role: String,
+    pub provider: String,
+    pub available: Option<bool>,
+    pub fallback: Vec<String>,
 }
 
 pub fn dashboard_text(project_root: &Path) -> Result<String> {

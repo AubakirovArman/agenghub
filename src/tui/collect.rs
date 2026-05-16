@@ -15,6 +15,8 @@ use crate::tui::{
     ApprovalPanel, Dashboard, DashboardSummary, LatestTransaction, MemoryPanel, TransactionSummary,
 };
 
+use super::providers::collect_provider_panel;
+
 pub fn collect_dashboard(project_root: &Path) -> Result<Dashboard> {
     let rows = agent_dir::list_transactions(project_root)?;
     let memory = memory::inspect(project_root)?;
@@ -37,6 +39,7 @@ pub fn collect_dashboard(project_root: &Path) -> Result<Dashboard> {
             })
             .collect(),
         latest,
+        providers: collect_provider_panel(project_root)?,
         memory: MemoryPanel {
             committed: memory.committed,
             failed_attempts: memory.failed_attempts,

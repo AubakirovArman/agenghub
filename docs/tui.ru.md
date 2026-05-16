@@ -14,6 +14,7 @@ agenthub tui --live
 - `Summary`: общее число transactions и counts для committed, rolled back, blocked и running states.
 - `Transactions`: последние transaction ids и statuses из `.agent/tx`.
 - `Latest Transaction`: текущий stage, last event, DAG node/edge counts, DAG roles, verifier status, verifier log tail, cost, estimated tokens, provider, число effects, heartbeat и last output tail.
+- `Providers`: default provider, ready/missing counts, число named profiles, provider status lines, role assignments и fallback chains.
 - `Memory`: committed records, failed attempts и recent workspace changes.
 - `Approvals`: AgentSpec drafts с `approval_required: true` и transactions, ожидающие human input.
 - `Next Actions`: command suggestions для latest или blocked transaction.
@@ -39,6 +40,12 @@ Project: /repo
 - cost: 0.000000 USD
 - provider: codex
 - effects: 4
+
+[Providers]
+- default: codex
+- ready: 2 | missing: 3 | profiles: 1
+- executor -> codex (ok)
+- reviewer -> gemini (missing) fallback:kimi,command
 
 [Next Actions]
 - agenthub tx report tx-20260515030834-2aefeacd

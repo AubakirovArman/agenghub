@@ -14,6 +14,7 @@ agenthub tui --live
 - `Summary`: transactions 总数，以及 committed、rolled back、blocked、running 状态计数。
 - `Transactions`: 来自 `.agent/tx` 的最新 transaction ids 和 statuses。
 - `Latest Transaction`: 当前 stage、last event、DAG node/edge counts、DAG roles、verifier status、verifier log tail、cost、estimated tokens、provider、effects count、heartbeat 和 last output tail。
+- `Providers`: default provider、ready/missing counts、named profile count、provider status lines、role assignments 和 fallback chains。
 - `Memory`: committed records、failed attempts、recent workspace changes。
 - `Approvals`: 带 `approval_required: true` 的 AgentSpec drafts，以及等待 human input 的 transactions。
 - `Next Actions`: 针对 latest 或 blocked transaction 的 command suggestions。
@@ -39,6 +40,12 @@ Project: /repo
 - cost: 0.000000 USD
 - provider: codex
 - effects: 4
+
+[Providers]
+- default: codex
+- ready: 2 | missing: 3 | profiles: 1
+- executor -> codex (ok)
+- reviewer -> gemini (missing) fallback:kimi,command
 
 [Next Actions]
 - agenthub tx report tx-20260515030834-2aefeacd

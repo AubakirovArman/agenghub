@@ -14,6 +14,7 @@ agenthub tui --live
 - `Summary`: transactions жалпы саны және committed, rolled back, blocked, running state counts.
 - `Transactions`: `.agent/tx` ішіндегі соңғы transaction ids және statuses.
 - `Latest Transaction`: ағымдағы stage, last event, DAG node/edge counts, DAG roles, verifier status, verifier log tail, cost, estimated tokens, provider, effects саны, heartbeat және last output tail.
+- `Providers`: default provider, ready/missing counts, named profile count, provider status lines, role assignments және fallback chains.
 - `Memory`: committed records, failed attempts және recent workspace changes.
 - `Approvals`: `approval_required: true` бар AgentSpec drafts және human input күтіп тұрған transactions.
 - `Next Actions`: latest немесе blocked transaction үшін command suggestions.
@@ -39,6 +40,12 @@ Project: /repo
 - cost: 0.000000 USD
 - provider: codex
 - effects: 4
+
+[Providers]
+- default: codex
+- ready: 2 | missing: 3 | profiles: 1
+- executor -> codex (ok)
+- reviewer -> gemini (missing) fallback:kimi,command
 
 [Next Actions]
 - agenthub tx report tx-20260515030834-2aefeacd

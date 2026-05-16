@@ -14,6 +14,7 @@ Panels:
 - `Summary`: total transactions and counts for committed, rolled back, blocked, and running states.
 - `Transactions`: latest transaction ids and statuses from `.agent/tx`.
 - `Latest Transaction`: current stage, last event, DAG node/edge counts, DAG roles, verifier status, verifier log tail, cost, estimated tokens, provider, effect count, heartbeat, and last output tail.
+- `Providers`: default provider, ready/missing counts, named profile count, provider status lines, role assignments, and fallback chains.
 - `Memory`: committed records, failed attempts, and recent workspace changes.
 - `Approvals`: AgentSpec drafts with `approval_required: true` and transactions blocked on human input.
 - `Next Actions`: command suggestions for the latest or blocked transaction.
@@ -39,6 +40,12 @@ Project: /repo
 - cost: 0.000000 USD
 - provider: codex
 - effects: 4
+
+[Providers]
+- default: codex
+- ready: 2 | missing: 3 | profiles: 1
+- executor -> codex (ok)
+- reviewer -> gemini (missing) fallback:kimi,command
 
 [Next Actions]
 - agenthub tx report tx-20260515030834-2aefeacd
