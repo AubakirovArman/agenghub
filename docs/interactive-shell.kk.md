@@ -45,14 +45,16 @@ Initialized projects үшін history `.agent/shell/history.txt` ішінде, c
 
 ## Inline approval
 
-Execution алдында shell plan, scope, commands және risk level көрсетеді. Approval prompt мыналарды қабылдайды:
+Execution алдында shell plan, scope, commands, risk level, patch preview, verifier plan, rollback receipts және protected-path warnings көрсетеді. Approval prompt мыналарды қабылдайды:
 
 ```text
-Y          transaction іске қосу
-n          cancel және draft сақтау
-diff       execution алдында planned scope көрсету
-details    толық AgentSpec YAML шығару
-edit       draft-ты $VISUAL немесе $EDITOR ішінде ашып, қайта validate ету
+Enter/Y    approve once and run transaction
+n/q        reject және draft сақтау
+diff/x     execution алдында planned scope және diff preview көрсету
+r          rollback receipts көрсету
+v          verifier plan көрсету
+details/d  толық AgentSpec YAML шығару
+edit/e     draft-ты $VISUAL немесе $EDITOR ішінде ашып, қайта validate ету
 ```
 
 ## Негізгі slash commands

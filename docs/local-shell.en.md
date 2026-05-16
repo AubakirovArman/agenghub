@@ -14,7 +14,7 @@ This is the recommended daily interface. AgentHub opens the latest chat, shows a
 agenthub> fix the failing runtime smoke test and keep files under 200 lines
 ```
 
-The shell creates a draft plan, shows what will run, asks for approval, executes through the transaction engine, and leaves a report, logs, diff, effects ledger, memory records, and dashboard data.
+The shell creates a draft plan, shows scope, commands, patch preview, verifier plan, protected-path warnings, and rollback receipts, asks for approval, executes through the transaction engine, and leaves a report, logs, diff, effects ledger, memory records, and dashboard data.
 
 ## Useful Inputs
 

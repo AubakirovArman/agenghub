@@ -57,7 +57,7 @@ agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 agenthub> create a Django web application
 ```
 
-AgentHub turns the message into a draft plan, shows the target files, provider, verifier profile, scope, commands, and risk, asks for inline approval with `diff`, `details`, and `edit` options, then runs the transaction with live journal progress in interactive terminals. Standard skills are bundled into the binary, so a newly initialized project can run the built-in file, page, and Django scaffold workflows without copying the repository `skills/` directory. After execution it suggests `/diff`, `/logs`, `/report`, `/explain`, and `/undo`.
+AgentHub turns the message into a draft plan, shows the target files, provider, verifier profile, scope, commands, risk, patch preview, protected-path warnings, and rollback receipts, asks for inline approval with `scope`, `rollback`, `details`, and `edit` options, then runs the transaction with live journal progress in interactive terminals. Standard skills are bundled into the binary, so a newly initialized project can run the built-in file, page, and Django scaffold workflows without copying the repository `skills/` directory. After execution it suggests `/diff`, `/logs`, `/report`, `/explain`, and `/undo`.
 
 Project bootstrap is lazy: Git, `.agent`, and baseline setup are only needed when a request becomes a project transaction that can change files.
 

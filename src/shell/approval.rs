@@ -21,7 +21,7 @@ pub(super) fn confirm_plan(spec_path: &Path) -> Result<Decision> {
         return Ok(Decision::Run);
     }
     loop {
-        print!("Action [Enter=run/e=edit/d=draft/v=verify/x=effects/q=cancel] ");
+        print!("Action [Enter=run/e=edit/d=draft/v=verify/x=scope/r=rollback/q=reject] ");
         io::stdout().flush()?;
         let mut line = String::new();
         io::stdin().read_line(&mut line)?;
@@ -38,6 +38,7 @@ pub(super) fn confirm_plan(spec_path: &Path) -> Result<Decision> {
                 )
             }
             "v" | "verify" => print_verify_details(&spec),
+            "r" | "rollback" | "receipts" => print_rollback_receipts(&spec),
             "x" | "effects" | "diff" | "patch" | "патч" => print_diff_preview(spec_path, &spec),
             "edit" | "e" | "редактировать" => {
                 open_editor(spec_path)?;
@@ -78,7 +79,7 @@ fn render_plan_card(spec: &AgentSpec, spec_path: Option<&Path>) -> String {
 
 fn print_diff_preview(spec_path: &Path, spec: &AgentSpec) {
     println!("Effect preview");
-    println!("  no generated patch exists before execution");
+    println!("  planned scope only; generated patch is available after execution");
     println!("  draft: {}", spec_path.display());
     println!("  expected effects: {}", expected_effects(spec));
     println!("  allowed paths: {}", list_or_none(&spec.scope.allow));
@@ -91,7 +92,7 @@ fn print_diff_preview(spec_path: &Path, spec: &AgentSpec) {
 }
 
 fn print_verify_details(spec: &AgentSpec) {
-    println!("Verify details");
+    println!("Verifier plan");
     println!(
         "  profile: {}",
         spec.verify.profile.as_deref().unwrap_or("default")
@@ -112,6 +113,19 @@ fn print_verify_details(spec: &AgentSpec) {
             println!("  route: {} -> {}", route.path, route.expect);
         }
     }
+}
+
+fn print_rollback_receipts(spec: &AgentSpec) {
+    println!("Rollback receipts");
+    println!(
+        "  rollback_on_failure: {}",
+        spec.transaction.rollback_on_failure
+    );
+    println!("  report: .agent/tx/<tx-id>/report.md");
+    println!("  diff guard: .agent/tx/<tx-id>/diff_guard.json");
+    println!("  effects: .agent/tx/<tx-id>/effects.jsonl");
+    println!("  journal: .agent/tx/<tx-id>/journal.jsonl");
+    println!("  commands: /diff <tx-id>, /logs <tx-id>, /report <tx-id>, /explain <tx-id>");
 }
 
 fn open_editor(spec_path: &Path) -> Result<()> {
@@ -353,6 +367,9 @@ mod tests {
         assert!(output.contains("provider route: deepseek"));
         assert!(output.contains("target files: src/**"));
         assert!(output.contains("effects: file edits"));
-        assert!(output.contains("[Enter] run"));
+        assert!(output.contains("Patch Preview"));
+        assert!(output.contains("Protected Paths"));
+        assert!(output.contains("Rollback Receipts"));
+        assert!(output.contains("[Enter] approve once + run"));
     }
 }

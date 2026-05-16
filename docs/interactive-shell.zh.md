@@ -45,14 +45,16 @@ agenthub> add a /courses page in the dashboard style
 
 ## Inline Approval
 
-执行前，shell 会显示 plan、scope、commands 和 risk level。Approval prompt 支持：
+执行前，shell 会显示 plan、scope、commands、risk level、patch preview、verifier plan、rollback receipts 和 protected-path warnings。Approval prompt 支持：
 
 ```text
-Y          运行 transaction
-n          取消并保留 draft
-diff       在 execution 前显示 planned scope
-details    打印完整 AgentSpec YAML
-edit       用 $VISUAL 或 $EDITOR 打开 draft，然后重新验证
+Enter/Y    approve once and run transaction
+n/q        reject and keep draft
+diff/x     show planned scope and diff preview before execution
+r          show rollback receipts
+v          show verifier plan
+details/d  print full AgentSpec YAML
+edit/e     open draft in $VISUAL or $EDITOR, then revalidate it
 ```
 
 ## 核心 Slash Commands

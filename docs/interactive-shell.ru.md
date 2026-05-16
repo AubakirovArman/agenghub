@@ -45,14 +45,16 @@ agenthub> add a /courses page in the dashboard style
 
 ## Inline approval
 
-Перед execution shell показывает plan, scope, commands и risk level. Approval prompt принимает:
+Перед execution shell показывает plan, scope, commands, risk level, patch preview, verifier plan, rollback receipts и protected-path warnings. Approval prompt принимает:
 
 ```text
-Y          запустить transaction
-n          отменить и оставить draft
-diff       показать planned scope до execution
-details    вывести полный AgentSpec YAML
-edit       открыть draft в $VISUAL или $EDITOR и затем провалидировать
+Enter/Y    approve once and run transaction
+n/q        reject и оставить draft
+diff/x     показать planned scope и diff preview до execution
+r          показать rollback receipts
+v          показать verifier plan
+details/d  вывести полный AgentSpec YAML
+edit/e     открыть draft в $VISUAL или $EDITOR и затем провалидировать
 ```
 
 ## Основные slash commands

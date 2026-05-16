@@ -14,7 +14,7 @@ agenthub
 agenthub> fix the failing runtime smoke test and keep files under 200 lines
 ```
 
-Shell создаёт draft plan, показывает что будет выполнено, спрашивает approval, запускает transaction engine и оставляет report, logs, diff, effects ledger, memory records и dashboard data.
+Shell создаёт draft plan, показывает scope, commands, patch preview, verifier plan, protected-path warnings и rollback receipts, спрашивает approval, запускает transaction engine и оставляет report, logs, diff, effects ledger, memory records и dashboard data.
 
 ## Полезный ввод
 

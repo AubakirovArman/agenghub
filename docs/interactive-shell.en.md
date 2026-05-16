@@ -45,14 +45,16 @@ For initialized projects, history is stored in `.agent/shell/history.txt` and ch
 
 ## Inline Approval
 
-Before execution the shell prints the plan, scope, commands, and risk level. The approval prompt accepts:
+Before execution the shell prints the plan, scope, commands, risk level, patch preview, verifier plan, rollback receipts, and protected-path warnings. The approval prompt accepts:
 
 ```text
-Y          run the transaction
-n          cancel and keep the draft
-diff       show the planned scope before execution
-details    print the full AgentSpec YAML
-edit       open the draft in $VISUAL or $EDITOR, then revalidate it
+Enter/Y    approve once and run the transaction
+n/q        reject and keep the draft
+diff/x     show the planned scope and diff preview before execution
+r          show rollback receipts
+v          show the verifier plan
+details/d  print the full AgentSpec YAML
+edit/e     open the draft in $VISUAL or $EDITOR, then revalidate it
 ```
 
 ## Core Slash Commands

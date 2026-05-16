@@ -14,7 +14,7 @@ agenthub
 agenthub> fix the failing runtime smoke test and keep files under 200 lines
 ```
 
-Shell 会创建 draft plan，显示将要运行的内容，询问 approval，通过 transaction engine 执行，并留下 report、logs、diff、effects ledger、memory records 和 dashboard data。
+Shell 会创建 draft plan，显示 scope、commands、patch preview、verifier plan、protected-path warnings 和 rollback receipts，询问 approval，通过 transaction engine 执行，并留下 report、logs、diff、effects ledger、memory records 和 dashboard data。
 
 ## 常用输入
 

@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.18-local-preview - 2026-05-16
+
+- Expand inline approval cards for project transactions with scope, planned patch preview, verifier plan, rollback receipts, protected-path warnings, and clearer approve/edit/draft/scope/rollback/reject controls.
+- Add pre-run rollback receipt details to the approval prompt so users can see the report, diff guard, effects ledger, journal, and follow-up commands before approving execution.
+- Update approval tests and shell docs around the transaction flow so project edits are inspectable before run and still lead to `/diff`, `/logs`, `/report`, and `/explain` after execution.
+
 ## 0.4.17-local-preview - 2026-05-16
 
 - Add event-backed TUI foundation panels for shell work: status line, composer prompt, slash palette, context mention hints, chat transcript, and event rail are now rendered from the existing AgentHub chat/event store.

@@ -14,7 +14,7 @@ agenthub
 agenthub> fix the failing runtime smoke test and keep files under 200 lines
 ```
 
-Shell draft plan жасайды, не орындалатынын көрсетеді, approval сұрайды, transaction engine арқылы іске қосады және report, logs, diff, effects ledger, memory records және dashboard data қалдырады.
+Shell draft plan жасайды, scope, commands, patch preview, verifier plan, protected-path warnings және rollback receipts көрсетеді, approval сұрайды, transaction engine арқылы іске қосады және report, logs, diff, effects ledger, memory records және dashboard data қалдырады.
 
 ## Useful inputs
 
