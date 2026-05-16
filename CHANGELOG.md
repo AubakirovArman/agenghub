@@ -14,6 +14,7 @@ All notable AgentHub changes are tracked here.
 - Add dogfood evidence history archives for multi-run 1.0 readiness tracking.
 - Add dogfood readiness summary/check tooling for 1.0 evidence gates.
 - Add GitHub Pages site, wiki seed publishing, and 1.0 release preparation tooling.
+- Expand GitHub Pages with a docs hub and 1.0 readiness page while keeping Markdown docs canonical.
 
 ## 0.2.0-local-preview - 2026-05-15
 

@@ -4,6 +4,8 @@ AgentHub — локальный транзакционный runtime для AI c
 
 Языки: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
+Публичные поверхности: [GitHub Pages](https://aubakirovarman.github.io/agenthub/), [Docs Hub](https://aubakirovarman.github.io/agenthub/docs.html), [Wiki](https://github.com/AubakirovArman/agenthub/wiki)
+
 ## Что такое AgentHub?
 
 AgentHub превращает natural request или файл `AgentSpec` в аудируемую транзакцию:

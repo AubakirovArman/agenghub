@@ -13,7 +13,11 @@ Use it for:
 - short product positioning;
 - install and quick-start links;
 - links to docs, releases, and wiki;
+- a curated docs hub that points to canonical Markdown docs;
+- a 1.0 readiness page with the release gate commands;
 - a public landing page that is easier to scan than the full README.
+
+Do not copy the full documentation set into Pages manually. Pages should stay a small portal; repository Markdown and the Wiki remain the canonical editable documentation.
 
 The workflow publishes the `site/` directory with GitHub Pages Actions. If Pages is not enabled yet, enable it with GitHub Actions as the source in repository settings.
 

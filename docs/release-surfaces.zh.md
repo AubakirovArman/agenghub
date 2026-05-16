@@ -13,7 +13,11 @@ Static product site 位于 `site/`，由 `.github/workflows/pages.yml` 发布。
 - 简短 product positioning；
 - install 和 quick-start links；
 - docs、releases 和 wiki links；
+- 指向 canonical Markdown docs 的 curated docs hub；
+- 包含 release gate commands 的 1.0 readiness page；
 - 比完整 README 更容易浏览的 public landing page。
+
+不要把完整 documentation set 手动复制到 Pages。Pages 应保持为小型 portal；repository Markdown 和 Wiki 仍是 canonical editable documentation。
 
 Workflow 使用 GitHub Pages Actions 发布 `site/` 目录。如果 Pages 尚未启用，在 repository settings 中把 source 设置为 GitHub Actions。
 

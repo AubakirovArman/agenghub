@@ -13,7 +13,11 @@ Static product site `site/` ішінде, оны `.github/workflows/pages.yml` �
 - қысқа product positioning;
 - install және quick-start links;
 - docs, releases және wiki links;
+- canonical Markdown docs-қа апаратын curated docs hub;
+- release gate commands бар 1.0 readiness page;
 - толық README-ге қарағанда тезірек оқылатын public landing page.
+
+Барлық documentation set-ті Pages ішіне қолмен көшірме. Pages шағын portal болып қалуы керек; repository Markdown және Wiki canonical editable documentation болып қалады.
 
 Workflow `site/` директориясын GitHub Pages Actions арқылы publish етеді. Pages әлі қосылмаса, repository settings ішінде source ретінде GitHub Actions таңда.
 

@@ -4,6 +4,8 @@ AgentHub is a local transactional runtime for AI coding agents. It does not repl
 
 Languages: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
+Public surfaces: [GitHub Pages](https://aubakirovarman.github.io/agenthub/), [Docs Hub](https://aubakirovarman.github.io/agenthub/docs.html), [Wiki](https://github.com/AubakirovArman/agenthub/wiki)
+
 ## What Is AgentHub?
 
 AgentHub turns a natural request or an `AgentSpec` file into an auditable transaction:

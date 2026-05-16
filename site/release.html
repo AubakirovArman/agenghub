@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AgentHub 1.0 Readiness</title>
+    <meta name="description" content="AgentHub 1.0 release readiness gates.">
+    <link rel="stylesheet" href="assets/styles.css">
+  </head>
+  <body>
+    <header class="nav">
+      <div class="wrap">
+        <div class="brand"><a href="index.html">AgentHub</a></div>
+        <nav class="links" aria-label="Primary">
+          <a href="index.html">Home</a>
+          <a href="docs.html">Docs Hub</a>
+          <a href="https://github.com/AubakirovArman/agenthub/actions">Actions</a>
+          <a href="https://github.com/AubakirovArman/agenthub/releases">Releases</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="wrap">
+          <h1>1.0 Readiness</h1>
+          <p class="lead">
+            AgentHub should only be tagged as 1.0 after release checks,
+            dogfood evidence, package manifests, docs, Pages, and Wiki are
+            green and published.
+          </p>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="wrap">
+          <h2>Release Gate</h2>
+          <pre><code>scripts/release-readiness.sh
+scripts/dogfood-readiness.sh --check
+AGENTHUB_PREPARE_REQUIRE_DOGFOOD=1 scripts/prepare-1.0-release.sh</code></pre>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="wrap grid">
+          <article class="tile">
+            <h2>Required</h2>
+            <p>CI green on Linux, macOS Apple Silicon target, and Windows; release archives pass checksum validation.</p>
+          </article>
+          <article class="tile">
+            <h2>Evidence</h2>
+            <p>Dogfood history contains passing local transaction, provider dry-run, dashboard, rollback, and fixture runs.</p>
+          </article>
+          <article class="tile">
+            <h2>Docs</h2>
+            <p>README, release docs, Pages, and Wiki are updated in English, Russian, Chinese, and Kazakh entry points.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="wrap grid">
+          <article class="tile">
+            <h2>Where To Check</h2>
+            <p><a href="https://github.com/AubakirovArman/agenthub/actions">Actions</a> · <a href="https://github.com/AubakirovArman/agenthub/tree/main/target/dogfood">Dogfood output</a> · <a href="https://github.com/AubakirovArman/agenthub/blob/main/CHANGELOG.md">Changelog</a></p>
+          </article>
+          <article class="tile">
+            <h2>Release Notes</h2>
+            <p>Use <a href="https://github.com/AubakirovArman/agenthub/blob/main/scripts/prepare-1.0-release.sh">prepare-1.0-release.sh</a> for the final checklist and tag commands.</p>
+          </article>
+          <article class="tile">
+            <h2>Current Stage</h2>
+            <p>Local developer preview moving toward 1.0; hosted/team remains a later self-hosted or cloud layer.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="wrap">A 1.0 tag should reflect repeatable installation, execution, rollback, and documentation evidence.</div>
+    </footer>
+  </body>
+</html>

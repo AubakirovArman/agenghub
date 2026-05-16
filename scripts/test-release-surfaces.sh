@@ -5,6 +5,8 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 test -f "$ROOT/.github/workflows/pages.yml"
 test -f "$ROOT/site/index.html"
+test -f "$ROOT/site/docs.html"
+test -f "$ROOT/site/release.html"
 test -f "$ROOT/site/assets/styles.css"
 test -f "$ROOT/site/assets/terminal.svg"
 test -f "$ROOT/scripts/publish-wiki.sh"
@@ -12,6 +14,8 @@ test -f "$ROOT/scripts/prepare-1.0-release.sh"
 
 grep -q 'actions/deploy-pages' "$ROOT/.github/workflows/pages.yml"
 grep -q 'AgentHub' "$ROOT/site/index.html"
+grep -q 'Docs Hub' "$ROOT/site/docs.html"
+grep -q '1.0 Readiness' "$ROOT/site/release.html"
 grep -q 'GitHub Pages' "$ROOT/docs/release-surfaces.en.md"
 
 for lang in en ru zh kk; do

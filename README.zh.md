@@ -4,6 +4,8 @@ AgentHub 是面向 AI coding agents 的本地事务型 runtime。它不替代 Co
 
 语言: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
+公开入口: [GitHub Pages](https://aubakirovarman.github.io/agenthub/), [Docs Hub](https://aubakirovarman.github.io/agenthub/docs.html), [Wiki](https://github.com/AubakirovArman/agenthub/wiki)
+
 ## 什么是 AgentHub?
 
 AgentHub 将 natural request 或 `AgentSpec` 文件转换为可审计 transaction：

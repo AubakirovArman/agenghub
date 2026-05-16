@@ -4,6 +4,8 @@ AgentHub — AI coding agents үшін жергілікті transactional runtim
 
 Тілдер: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
+Public беттер: [GitHub Pages](https://aubakirovarman.github.io/agenthub/), [Docs Hub](https://aubakirovarman.github.io/agenthub/docs.html), [Wiki](https://github.com/AubakirovArman/agenthub/wiki)
+
 ## AgentHub деген не?
 
 AgentHub natural request немесе `AgentSpec` файлын audit-ready transaction етеді:
