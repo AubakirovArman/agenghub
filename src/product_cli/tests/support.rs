@@ -135,6 +135,33 @@ pub(super) fn openai_stub_server(content: &str, tokens: usize) -> Result<OpenAiS
     })
 }
 
+pub(super) fn openai_error_stub_server(status: u16, body: &str) -> Result<OpenAiStub> {
+    let listener = TcpListener::bind("127.0.0.1:0")?;
+    let endpoint = format!("http://{}", listener.local_addr()?);
+    let body = body.to_string();
+    let (requests_tx, requests_rx) = mpsc::channel();
+    thread::spawn(move || {
+        let Ok((mut stream, _)) = listener.accept() else {
+            return;
+        };
+        let request = read_http_request(&mut stream).unwrap_or_default();
+        let _ = requests_tx.send(request);
+        let response = format!(
+            "HTTP/1.1 {status} Error\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+            body.len(),
+            body
+        );
+        let _ = stream.write_all(response.as_bytes());
+        let _ = stream.flush();
+        let _ = stream.shutdown(Shutdown::Write);
+        drain_client_close(&mut stream);
+    });
+    Ok(OpenAiStub {
+        endpoint,
+        requests: requests_rx,
+    })
+}
+
 pub(super) struct OpenAiStub {
     pub endpoint: String,
     requests: mpsc::Receiver<String>,

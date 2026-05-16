@@ -8,7 +8,7 @@ mod bootstrap_tests;
 mod open_tests;
 mod provider_kimi_tests;
 mod support;
-use support::{openai_stub_server, with_deepseek_env};
+use support::{openai_error_stub_server, openai_stub_server, with_deepseek_env};
 
 #[test]
 fn config_set_and_show_round_trips() -> Result<()> {
@@ -152,6 +152,30 @@ fn providers_deepseek_test_calls_stub_server() -> Result<()> {
         assert!(joined.contains("POST /v1/chat/completions"));
         assert!(joined.contains("GET /v1/models"));
         assert!(lower.contains("authorization: bearer test-key"));
+        Ok(())
+    })
+}
+
+#[test]
+fn providers_deepseek_auth_failure_returns_diagnostic_receipt() -> Result<()> {
+    let stub = openai_error_stub_server(
+        401,
+        r#"{"error":{"message":"Invalid Authentication","type":"invalid_authentication_error"}}"#,
+    )?;
+    with_deepseek_env(Some(&stub.endpoint), Some("bad-key"), || {
+        let dir = tempfile::tempdir()?;
+
+        let test = providers::test_provider(dir.path(), "deepseek")?;
+        let request = stub.received_request()?;
+
+        assert!(test.contains("failed\tdeepseek\tauth"));
+        assert!(test.contains("request_id\tprovider-test"));
+        assert!(test.contains("endpoint\t"));
+        assert!(test.contains("model\tdeepseek-test"));
+        assert!(test.contains("prompt_tokens\t5"));
+        assert!(test.contains("auth_hint\tset DEEPSEEK_API_KEY"));
+        assert!(test.contains("next\tagenthub providers diagnose deepseek"));
+        assert!(request.contains("POST /v1/chat/completions"));
         Ok(())
     })
 }

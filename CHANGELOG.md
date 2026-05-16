@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.12-local-preview - 2026-05-16
+
+- Harden DeepSeek/Kimi provider tests: live API failures now return a structured diagnostic receipt with endpoint, model, request id, token estimate, failure class, auth hint, and next command instead of surfacing a raw HTTP error.
+- Add provider test coverage for DeepSeek authentication failures and Kimi rate-limit responses.
+
 ## 0.4.11-local-preview - 2026-05-16
 
 - Fix `context_built.memory_records` so it reports the number of committed memory records injected into the chat prompt instead of the rendered context string length.

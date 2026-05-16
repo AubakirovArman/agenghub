@@ -1,7 +1,9 @@
 use anyhow::Result;
 
 use super::providers;
-use super::support::{openai_stub_server, with_kimi_env, with_kimi_env_using_base};
+use super::support::{
+    openai_error_stub_server, openai_stub_server, with_kimi_env, with_kimi_env_using_base,
+};
 
 #[test]
 fn providers_kimi_uses_openai_compatible_endpoint() -> Result<()> {
@@ -63,4 +65,28 @@ fn providers_kimi_accepts_moonshot_base_url_alias() -> Result<()> {
             Ok(())
         },
     )
+}
+
+#[test]
+fn providers_kimi_rate_limit_failure_returns_diagnostic_receipt() -> Result<()> {
+    let stub = openai_error_stub_server(
+        429,
+        r#"{"error":{"message":"rate limit exceeded","type":"rate_limit_error"}}"#,
+    )?;
+    let endpoint = format!("{}/v1", stub.endpoint);
+    with_kimi_env(Some(&endpoint), Some("kimi-test-key"), || {
+        let dir = tempfile::tempdir()?;
+
+        let test = providers::test_provider(dir.path(), "kimi")?;
+        let request = stub.received_request()?;
+
+        assert!(test.contains("failed\tkimi\trate_limited"));
+        assert!(test.contains("request_id\tprovider-test"));
+        assert!(test.contains("model\tmoonshot-test"));
+        assert!(test.contains("prompt_tokens\t5"));
+        assert!(test.contains("auth_hint\tset KIMI_API_KEY"));
+        assert!(test.contains("next\tagenthub providers diagnose kimi"));
+        assert!(request.contains("POST /v1/chat/completions"));
+        Ok(())
+    })
 }
