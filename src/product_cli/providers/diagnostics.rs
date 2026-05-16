@@ -1,6 +1,7 @@
 use std::path::Path;
 use std::process::Command;
 
+use super::probes;
 use super::ProviderStatus;
 use crate::product_cli::version;
 
@@ -30,7 +31,7 @@ pub fn test_success(status: &ProviderStatus) -> String {
     append_version(&mut out, status);
     out.push_str(&format!("dry_run\t{}\n", dry_run_message(status.info.id)));
     if status.info.binary.is_some() {
-        out.push_str("auth\tunknown\tprovider CLI manages authentication\n");
+        append_auth_hint(&mut out, status);
     }
     out
 }
@@ -43,6 +44,7 @@ pub fn diagnose(status: &ProviderStatus) -> String {
     append_template_render(&mut out, status);
     append_version(&mut out, status);
     append_auth_hint(&mut out, status);
+    out.push_str(&format!("status_hint\t{}\n", status.info.status_hint));
     out.push_str(&format!("dry_run\t{}\n", dry_run_message(status.info.id)));
     out.push_str(&format!("install_hint\t{}\n", status.info.note));
     if status.info.id == "openai-http" {
@@ -95,19 +97,36 @@ fn append_auth_hint(out: &mut String, status: &ProviderStatus) {
     match status.info.id {
         "command" => out.push_str("auth\tnot_required\n"),
         "openai-http" => {
-            let present = std::env::var("AGENTHUB_OPENAI_COMPAT_API_KEY")
-                .ok()
-                .is_some_and(|value| !value.is_empty());
+            let probe = probes::credential_probe(&status.info);
             out.push_str(&format!(
-                "auth\t{}\tAGENTHUB_OPENAI_COMPAT_API_KEY\n",
-                if present {
-                    "set"
-                } else {
+                "auth\t{}\t{}\n",
+                if probe.markers.is_empty() {
                     "missing_or_optional"
-                }
+                } else {
+                    "set"
+                },
+                probes::credential_marker_list(&status.info)
             ));
+            out.push_str(&format!(
+                "auth_markers\t{}\n",
+                probes::credential_marker_list(&status.info)
+            ));
+            out.push_str(&format!("auth_hint\t{}\n", status.info.auth_hint));
         }
-        _ => out.push_str("auth\tunknown\tprovider CLI manages authentication\n"),
+        _ => {
+            let probe = probes::credential_probe(&status.info);
+            let markers = if probe.markers.is_empty() {
+                probes::credential_marker_list(&status.info)
+            } else {
+                probe.markers.join(",")
+            };
+            out.push_str(&format!("auth\t{}\t{}\n", probe.state, markers));
+            out.push_str(&format!(
+                "auth_markers\t{}\n",
+                probes::credential_marker_list(&status.info)
+            ));
+            out.push_str(&format!("auth_hint\t{}\n", status.info.auth_hint));
+        }
     }
 }
 

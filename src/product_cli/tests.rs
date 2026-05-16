@@ -93,6 +93,19 @@ fn provider_diagnose_reports_openai_http_endpoint_details() -> Result<()> {
 }
 
 #[test]
+fn provider_diagnose_reports_cli_auth_markers() -> Result<()> {
+    let dir = tempfile::tempdir()?;
+
+    let diagnose = providers::diagnose_provider(dir.path(), "codex")?;
+
+    assert!(diagnose.contains("provider\tcodex"));
+    assert!(diagnose.contains("auth_hint\tCodex CLI manages login"));
+    assert!(diagnose.contains("status_hint\tAgentHub checks binary"));
+    assert!(diagnose.contains("OPENAI_API_KEY"));
+    Ok(())
+}
+
+#[test]
 fn providers_openai_http_test_calls_stub_server() -> Result<()> {
     let stub = openai_stub_server("product cli ok", 3)?;
     with_openai_env(Some(&stub.endpoint), Some("test-key"), || {

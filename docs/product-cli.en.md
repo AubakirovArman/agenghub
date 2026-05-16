@@ -85,7 +85,7 @@ dry_run	built-in deterministic runner ready
 next	agenthub ask "describe the change" --output .agent/drafts/task.yaml
 ```
 
-`providers diagnose <id>` prints binary or endpoint location, version when available, rendered command template, auth hint, install hint, and provider-specific details. `openai-http` diagnosis reports scheme, model, API-key presence, and points to `providers test` for the live request.
+`providers diagnose <id>` prints binary or endpoint location, version when available, rendered command template, auth hint, status hint, install hint, and provider-specific details. For CLI providers it also checks known credential markers without printing secret values: Codex checks `OPENAI_API_KEY`, `$CODEX_HOME/auth.json`, and `$HOME/.codex/auth.json`; Gemini checks `GEMINI_API_KEY`, `GOOGLE_API_KEY`, and `$HOME/.gemini`; Kimi checks `KIMI_API_KEY`, `MOONSHOT_API_KEY`, `$HOME/.kimi`, and `$HOME/.config/kimi`. Missing markers are reported as `cli_managed_unknown` because the provider CLI may still be logged in through another mechanism. `openai-http` diagnosis reports scheme, model, API-key presence, and points to `providers test` for the live request.
 
 `providers set <role> <provider>` stores `provider.role.<role>` in `.agent/config.yaml`. `providers fallback <role> ...` stores a comma-separated fallback chain under `provider.fallback.<role>`. Valid roles are planner, executor, reviewer, repair, generator, critic, researcher, aggregator, manager, and worker.
 

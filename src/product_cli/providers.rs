@@ -9,6 +9,7 @@ use super::env::find_executable;
 
 mod catalog;
 mod diagnostics;
+mod probes;
 mod roles;
 
 pub use catalog::{ProviderInfo, ProviderStatus};

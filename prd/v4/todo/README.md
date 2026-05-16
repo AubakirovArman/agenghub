@@ -7,5 +7,4 @@
 ## Remaining Tasks
 
 - Add Homebrew/Scoop/winget packaging after checksum-verified preview installers are stable.
-- Add deeper provider status/auth checks for Codex, Gemini, and Kimi CLI adapters.
 - Add real 1.0 dogfood evidence from long-running local usage with real providers.

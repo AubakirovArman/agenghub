@@ -6,6 +6,7 @@ All notable AgentHub changes are tracked here.
 
 - Verify release archive SHA-256 checksums in POSIX and Windows installers before extracting binaries.
 - Document checksum installation controls for downloaded and local package artifacts.
+- Add provider-specific CLI credential marker diagnostics for Codex, Gemini, and Kimi.
 
 ## 0.2.0-local-preview - 2026-05-15
 

@@ -85,7 +85,7 @@ dry_run	built-in deterministic runner ready
 next	agenthub ask "describe the change" --output .agent/drafts/task.yaml
 ```
 
-`providers diagnose <id>` 输出 binary 或 endpoint location、可用时的 version、rendered command template、auth hint、install hint 和 provider-specific details。`openai-http` diagnose 会显示 scheme、model、API-key presence，并提示用 `providers test` 做 live request。
+`providers diagnose <id>` 输出 binary 或 endpoint location、可用时的 version、rendered command template、auth hint、status hint、install hint 和 provider-specific details。对 CLI providers，它还会检查已知 credential markers，但不会打印 secret values：Codex 检查 `OPENAI_API_KEY`、`$CODEX_HOME/auth.json` 和 `$HOME/.codex/auth.json`；Gemini 检查 `GEMINI_API_KEY`、`GOOGLE_API_KEY` 和 `$HOME/.gemini`；Kimi 检查 `KIMI_API_KEY`、`MOONSHOT_API_KEY`、`$HOME/.kimi` 和 `$HOME/.config/kimi`。如果没有找到 markers，会显示 `cli_managed_unknown`，因为 provider CLI 仍可能通过其他机制登录。`openai-http` diagnose 会显示 scheme、model、API-key presence，并提示用 `providers test` 做 live request。
 
 `providers set <role> <provider>` 会把 `provider.role.<role>` 保存到 `.agent/config.yaml`。`providers fallback <role> ...` 会把逗号分隔的 fallback chain 保存到 `provider.fallback.<role>`。Valid roles: planner、executor、reviewer、repair、generator、critic、researcher、aggregator、manager、worker。
 
