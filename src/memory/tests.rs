@@ -6,8 +6,9 @@ use std::sync::{Mutex, OnceLock};
 use crate::agent_dir;
 
 use super::{
-    build_summary, failed_attempt_warnings, inspect, record_failed_attempt, retrieve_relevant,
-    retrieve_relevant_scored, run_audit, write_typed_fact, TypedMemoryInput,
+    add_inbox_candidate, build_summary, failed_attempt_warnings, inspect, list_inbox,
+    record_failed_attempt, retrieve_relevant, retrieve_relevant_scored, review_inbox, run_audit,
+    write_typed_fact, InboxDecision, MemoryInboxInput, TypedMemoryInput,
 };
 
 static ENV_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
@@ -102,6 +103,38 @@ fn chat_memory_uses_global_home_without_project_runtime() -> Result<()> {
         let audit = run_audit(root.path())?;
         assert_eq!(audit.active, 1);
         assert!(global_memory.join("audit.json").exists());
+        assert!(!root.path().join(".agent").exists());
+        Ok(())
+    })
+}
+
+#[test]
+fn memory_inbox_requires_review_before_promotion() -> Result<()> {
+    let root = tempfile::tempdir()?;
+    let home = tempfile::tempdir()?;
+
+    with_agenthub_home(home.path(), || {
+        let item = add_inbox_candidate(
+            root.path(),
+            MemoryInboxInput {
+                kind: "architecture_decision".to_string(),
+                domain: "core".to_string(),
+                content: json!({ "note": "Prefer inbox review before durable facts" }),
+                source: "test".to_string(),
+                reason: Some("auto extracted candidate".to_string()),
+            },
+        )?;
+
+        assert!(!root.path().join(".agent").exists());
+        assert_eq!(inspect(root.path())?.committed, 0);
+        assert_eq!(list_inbox(root.path(), false)?.len(), 1);
+
+        let approved = review_inbox(root.path(), &item.id, InboxDecision::Approve)?;
+        assert_eq!(approved.status, "approved");
+        assert!(approved.memory_id.is_some());
+        assert_eq!(list_inbox(root.path(), false)?.len(), 0);
+        assert_eq!(list_inbox(root.path(), true)?.len(), 1);
+        assert_eq!(inspect(root.path())?.committed, 1);
         assert!(!root.path().join(".agent").exists());
         Ok(())
     })

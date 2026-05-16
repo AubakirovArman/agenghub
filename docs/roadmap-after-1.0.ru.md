@@ -165,6 +165,7 @@ The immediate bridge from 0.4.x to 1.0 is:
 - keep DeepSeek/Kimi API behavior observable through AgentHub events;
 - store Chat/Ops state under AgentHub home, not under random working folders;
 - make memory universal without requiring `.agent`;
+- keep auto-extracted memory behind an explicit inbox/review gate;
 - keep project transaction safety inside `.agent` only after lazy bootstrap.
 
-This is why `v0.4.8` focuses on global Chat/Ops memory rather than starting MCP/A2A early.
+This is why the `v0.4.8` and `v0.4.9` bridge releases focus on global Chat/Ops memory and a review-gated memory inbox rather than starting MCP/A2A early.

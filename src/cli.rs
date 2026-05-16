@@ -185,6 +185,33 @@ pub enum MemoryCommands {
     Inspect,
     Summary,
     Audit,
+    Inbox {
+        #[command(subcommand)]
+        command: Option<MemoryInboxCommands>,
+    },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum MemoryInboxCommands {
+    List {
+        #[arg(long)]
+        all: bool,
+    },
+    Add {
+        note: String,
+
+        #[arg(long, default_value = "core")]
+        domain: String,
+
+        #[arg(long, default_value = "architecture_decision")]
+        kind: String,
+    },
+    Approve {
+        id: String,
+    },
+    Reject {
+        id: String,
+    },
 }
 
 #[derive(Debug, Subcommand)]

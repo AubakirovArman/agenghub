@@ -166,9 +166,15 @@ agenthub serve --addr 127.0.0.1:4318 --refresh-ms 1000
 agenthub memory inspect
 agenthub memory summary
 agenthub memory audit
+agenthub memory inbox
+agenthub memory inbox add "Prefer reviewed memory facts"
+agenthub memory inbox approve mem-inbox-12345678
+agenthub memory inbox reject mem-inbox-12345678
 ```
 
 `inspect` prints raw committed and failed-attempt counts. `summary` is the user-facing view of stack, active decisions, and known failures. `audit` checks stale, conflicting, low-confidence, and unverified records. In Chat/Ops Mode these commands use `$AGENTHUB_HOME/memory` or the platform AgentHub data directory and do not create `.agent`; initialized projects continue to refresh `.agent/memory/audit.json`.
+
+`inbox` is the review-gated memory queue. `add` records a candidate without injecting it into active memory. `approve` promotes the candidate into committed memory; `reject` keeps the audit trail without promotion. Inside the shell, `/memory inbox`, `/memory inbox approve <id>`, and `/memory inbox reject <id>` use the same store.
 
 ## Skills
 

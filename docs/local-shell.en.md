@@ -29,6 +29,7 @@ The shell creates a draft plan, shows what will run, asks for approval, executes
 /report [tx]          report
 /explain [tx]         result explanation
 /serve [addr]         local live dashboard
+/memory inbox         review memory candidates
 /new                  new chat
 /exit                 exit
 @path                 attach file/folder context

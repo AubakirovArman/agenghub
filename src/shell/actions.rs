@@ -2,6 +2,7 @@ use std::fs;
 use std::path::Path;
 
 use anyhow::{anyhow, Context, Result};
+use serde_json::json;
 
 use crate::{
     agent_dir, enterprise, memory, skill_registry, tx_control, tx_explain, tx_inspect, tx_undo,
@@ -75,7 +76,11 @@ pub(super) fn print_logs(root: &Path, tx_id: &str, filter: Option<&str>) -> Resu
 
 pub(super) fn print_memory(root: &Path, mode: Option<&str>) -> Result<()> {
     enterprise::authorize(root, "memory.read")?;
-    match mode.unwrap_or("summary") {
+    let mode = mode.unwrap_or("summary").trim();
+    if let Some(args) = mode.strip_prefix("inbox") {
+        return handle_memory_inbox(root, args.trim());
+    }
+    match mode {
         "inspect" => {
             let stats = memory::inspect(root)?;
             println!("committed: {}", stats.committed);
@@ -97,6 +102,71 @@ pub(super) fn print_memory(root: &Path, mode: Option<&str>) -> Result<()> {
             print_section("Active decisions", &summary.active_decisions);
             print_section("Known failures", &summary.known_failures);
         }
+    }
+    Ok(())
+}
+
+fn handle_memory_inbox(root: &Path, args: &str) -> Result<()> {
+    let (command, rest) = args.split_once(' ').unwrap_or((args, ""));
+    match command {
+        "" | "list" => print_memory_inbox(root, rest.contains("--all")),
+        "add" => {
+            let note = rest.trim();
+            if note.is_empty() {
+                println!("memory inbox note is empty");
+                return Ok(());
+            }
+            let item = memory::add_inbox_candidate(
+                root,
+                memory::MemoryInboxInput {
+                    kind: "architecture_decision".to_string(),
+                    domain: "core".to_string(),
+                    content: json!({ "note": note, "source": "memory_inbox" }),
+                    source: "shell".to_string(),
+                    reason: Some("manual candidate".to_string()),
+                },
+            )?;
+            println!("candidate {}", item.id);
+            Ok(())
+        }
+        "approve" => {
+            let item = memory::review_inbox(root, rest.trim(), memory::InboxDecision::Approve)?;
+            println!(
+                "approved {} {}",
+                item.id,
+                item.memory_id.unwrap_or_else(|| "<none>".to_string())
+            );
+            Ok(())
+        }
+        "reject" => {
+            let item = memory::review_inbox(root, rest.trim(), memory::InboxDecision::Reject)?;
+            println!("rejected {}", item.id);
+            Ok(())
+        }
+        _ => {
+            println!("usage: /memory inbox [list|add <note>|approve <id>|reject <id>]");
+            Ok(())
+        }
+    }
+}
+
+fn print_memory_inbox(root: &Path, all: bool) -> Result<()> {
+    let items = memory::list_inbox(root, all)?;
+    println!("Memory inbox:");
+    for item in items.iter().take(25) {
+        println!(
+            "- {} {} {} {}",
+            item.id,
+            item.status,
+            item.kind,
+            item.content
+                .get("note")
+                .and_then(serde_json::Value::as_str)
+                .unwrap_or("")
+        );
+    }
+    if items.is_empty() {
+        println!("- No pending memory candidates.");
     }
     Ok(())
 }

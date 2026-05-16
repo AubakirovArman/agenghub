@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.9-local-preview - 2026-05-16
+
+- Add a review-gated memory inbox: `agenthub memory inbox`, `agenthub memory inbox add`, `approve`, and `reject` store candidates under the same global/project memory store and only promote approved items into committed memory.
+- Add `/memory inbox` shell support for listing, adding, approving, and rejecting memory candidates without leaving the interactive session.
+
 ## 0.4.8-local-preview - 2026-05-16
 
 - Add universal Chat/Ops memory storage: memory inspect/summary/audit, `@memory`, `/context`, and manual `# note` now use AgentHub home memory when a folder has no `.agent/project.yaml`, so plain chat and DevOps sessions do not create project runtime files.

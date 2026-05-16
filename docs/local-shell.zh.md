@@ -29,6 +29,7 @@ Shell 会创建 draft plan，显示将要运行的内容，询问 approval，通
 /report [tx]          report
 /explain [tx]         result explanation
 /serve [addr]         local live dashboard
+/memory inbox         review memory candidates
 /new                  new chat
 /exit                 exit
 @path                 attach file/folder context

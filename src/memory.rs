@@ -1,4 +1,5 @@
 mod audit;
+mod inbox;
 mod retrieval;
 mod storage;
 mod summary;
@@ -25,6 +26,9 @@ use crate::observability::redact_text;
 use crate::spec::WorkspaceProfile;
 
 pub use audit::{run_audit, MemoryAudit};
+pub use inbox::{
+    add_inbox_candidate, list_inbox, review_inbox, InboxDecision, MemoryInboxInput, MemoryInboxItem,
+};
 pub use retrieval::retrieve_relevant_scored;
 use storage::{append_jsonl, count_lines, read_records};
 pub use summary::{build_summary, MemorySummary};

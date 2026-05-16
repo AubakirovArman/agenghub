@@ -29,6 +29,7 @@ Shell создаёт draft plan, показывает что будет выпо
 /report [tx]          report
 /explain [tx]         result explanation
 /serve [addr]         local live dashboard
+/memory inbox         review memory candidates
 /new                  new chat
 /exit                 exit
 @path                 attach file/folder context
