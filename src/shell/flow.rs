@@ -2,6 +2,7 @@ use std::path::{Path, PathBuf};
 
 use anyhow::Result;
 
+use super::api_chat;
 use super::approval::{self, Decision};
 use super::chat::{self, ChatSession};
 use super::chat_display;
@@ -10,6 +11,7 @@ use super::commands::ShellMode;
 use super::context_input;
 use super::run;
 use super::suggestions;
+use crate::home;
 
 pub(super) fn handle_message(
     root: &Path,
@@ -26,6 +28,10 @@ pub(super) fn handle_message(
         }
     }
     chat::append_user(current_chat, mode.as_str(), request)?;
+    if matches!(mode, ShellMode::Run) && !home::project_has_runtime(root) {
+        api_chat::answer(root, current_chat, &enriched.text)?;
+        return Ok(());
+    }
     match mode {
         ShellMode::Plan => {
             let path = run::write_draft(root, &enriched.text)?;

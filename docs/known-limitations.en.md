@@ -14,9 +14,9 @@ AgentHub provides transactional isolation, Git worktrees, command policy checks,
 
 ## Providers
 
-CLI providers such as Codex, Gemini, and Kimi are discovered through local binaries and provider-managed authentication. AgentHub can check binary presence, version output, templates, and dry-run readiness, but it cannot fully prove that each provider account is logged in.
+DeepSeek and Kimi are API-native providers. AgentHub checks configured endpoints, model labels, and API-key environment markers without printing secret values.
 
-`openai-http` supports OpenAI-compatible HTTP and HTTPS endpoints with bearer-token auth, timeouts, and structured error bodies. Streaming API calls and provider-specific auth flows are planned later.
+`deepseek` and `kimi` support OpenAI-compatible HTTP and HTTPS endpoints with bearer-token auth, timeouts, and structured error bodies. Streaming chat and the project tool loop are still being wired in.
 
 ## Team And Enterprise
 

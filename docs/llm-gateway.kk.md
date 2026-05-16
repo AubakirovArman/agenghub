@@ -1,14 +1,14 @@
 # AgentHub LLM Gateway
 
-Тілдер: [English](llm-gateway.en.md), [Русский](llm-gateway.ru.md), [中文](llm-gateway.zh.md), [Қазақша](llm-gateway.kk.md)
+Languages: [English](llm-gateway.en.md), [Русский](llm-gateway.ru.md), [中文](llm-gateway.zh.md), [Қазақша](llm-gateway.kk.md)
 
-## Мақсаты
+## Purpose
 
-LLM Gateway — model work үшін provider control және observability boundary. Ол planned provider calls, prompt/context hashes, retry/failover metadata, budget decisions, redacted traces, optional raw traces, token estimates және cost estimates жазады.
+The LLM Gateway is the provider control and observability boundary for model work. It records planned provider calls, prompt/context hashes, retry/failover metadata, budget decisions, redacted traces, optional raw traces, token estimates, and cost estimates.
 
-## Транзакция artifacts
+## Transaction Artifacts
 
-Әр транзакция қазір жазады:
+Every transaction now writes:
 
 ```text
 .agent/tx/<tx-id>/context_pack.json
@@ -22,17 +22,17 @@ LLM Gateway — model work үшін provider control және observability boun
 .agent/tx/<tx-id>/cost.json
 ```
 
-`context_pack.json` және `redacted_api.jsonl` default бойынша redacted болады. `redaction_report.json` secret-like finding түрлері мен санын жазады, бірақ secret мәндерін сақтамайды.
+`context_pack.json` and `redacted_api.jsonl` are redacted by default. `redaction_report.json` records secret-like finding categories and counts without storing secret values.
 
 ## Provider Plan
 
-`llm_provider_plan.json` CLI wrappers және болашақ API providers үшін бір request model береді. Әр planned call ішінде provider metadata, token counts, retry backoff және requested adapter басқа provider-ге routed болса explicit failover records болады.
+`llm_provider_plan.json` normalizes AgentHub-owned API providers into one request model. Each planned call includes provider metadata, token counts, retry backoff, and explicit failover records when a requested adapter is routed to another provider.
 
-Мысал:
+Example:
 
 ```json
 {
-  "provider": { "id": "codex", "kind": "cli_wrapper", "supports_streaming": true },
+  "provider": { "id": "deepseek", "kind": "api_provider", "supports_streaming": true },
   "retry_policy": { "max_attempts": 3, "backoff_ms": [250, 1000, 3000] },
   "failover": []
 }
@@ -40,29 +40,30 @@ LLM Gateway — model work үшін provider control және observability boun
 
 ## Real Provider Execution
 
-PRD v3 алғашқы real execution paths қосады және planned metadata compatibility сақтайды:
+v0.4 keeps planned metadata compatibility while moving user-facing provider execution to DeepSeek/Kimi APIs:
 
-- `CliProvider` configured CLI command template іске қосады, prompt file жазады, stdout/stderr жинайды және provider transcript JSONL қосады.
-- `HttpProvider` `/v1/chat/completions` үшін OpenAI-compatible `http://` немесе `https://` endpoint шақыра алады, timeout, bearer token және structured error body handling қолдайды. Ол optional `/v1/models` best-effort probe жасай алады; model-list support жоқ болса, output ішінде көрсетіледі, бірақ completion test failed болмайды.
-- `complete_with_retry` provider calls үшін retry/backoff және optional attempt transcript records қосады.
+- `HttpProvider` can call DeepSeek/Kimi OpenAI-compatible `http://` or `https://` endpoints at `/v1/chat/completions`, with timeout, bearer token, and structured error body handling. It can also probe optional `/v1/models`; missing model-list support is reported without failing the completion test.
+- `complete_with_retry` wraps provider calls with retry/backoff and optional attempt transcript records.
 
-Local OpenAI-compatible endpoint тексеру:
+Provider tests:
 
 ```bash
-AGENTHUB_OPENAI_COMPAT_BASE_URL=http://127.0.0.1:8000 agenthub providers test openai-http
-AGENTHUB_OPENAI_COMPAT_BASE_URL=https://api.example.com agenthub providers diagnose openai-http
+DEEPSEEK_API_KEY=... agenthub providers test deepseek
+KIMI_API_KEY=... agenthub providers test kimi
 ```
 
 Optional variables:
 
 ```text
-AGENTHUB_OPENAI_COMPAT_API_KEY
-AGENTHUB_OPENAI_COMPAT_MODEL
+DEEPSEEK_API_BASE_URL
+DEEPSEEK_MODEL
+KIMI_API_BASE_URL
+KIMI_MODEL
 ```
 
 ## Budget Policy
 
-Transaction budget `topology.routing.max_estimated_cost_usd` арқылы беріледі:
+Set a transaction budget through `topology.routing.max_estimated_cost_usd`:
 
 ```yaml
 topology:
@@ -70,37 +71,37 @@ topology:
     max_estimated_cost_usd: 0.25
 ```
 
-Егер planned model cost limit мәнінен асса, AgentHub `llm_budget.json` жазады және execution басталғанға дейін block жасайды.
+If planned model cost exceeds the limit, AgentHub writes `llm_budget.json` and blocks before execution.
 
-## Raw debug mode
+## Raw Debug Mode
 
-Raw context және raw API traces тек нақты қосылғанда жазылады:
+Raw context and raw API traces are written only when explicitly enabled:
 
 ```bash
 AGENTHUB_RAW_TRACES=1 agenthub run examples/command-task.yaml
 ```
 
-Егер context scan secret-like values тапса, `AGENTHUB_RAW_TRACES=1` берілсе де raw context жазылмайды. Бақыланатын local debug үшін мұны нақты override жасауға болады:
+If the context scan finds secret-like values, raw context output is blocked even when `AGENTHUB_RAW_TRACES=1`. For a controlled local debug session you can override this with:
 
 ```bash
 AGENTHUB_RAW_TRACES=1 AGENTHUB_ALLOW_RAW_SECRET_TRACES=1 agenthub run examples/command-task.yaml
 ```
 
-Бұл override-ты shared projects немесе CI ішінде қолданба.
+Do not use that override in shared projects or CI.
 
-Ол мыналарды жасайды:
+That creates:
 
 ```text
 .agent/tx/<tx-id>/raw_context_pack.json
 .agent/tx/<tx-id>/raw_api.jsonl
 ```
 
-## Cost estimates
+## Cost Estimates
 
-Local `command` adapter default бойынша `0.0` тұрады. Уақытша estimate былай беріледі:
+Local `command` adapter calls cost `0.0` by default. To configure a temporary estimate:
 
 ```bash
 AGENTHUB_INPUT_USD_PER_1K=0.001 AGENTHUB_OUTPUT_USD_PER_1K=0.002 agenthub run examples/command-task.yaml
 ```
 
-Estimate `cost.json` ішіне жазылады және `report.md` ішінде көрсетіледі.
+The estimate is stored in `cost.json` and summarized in `report.md`.

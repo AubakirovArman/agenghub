@@ -316,7 +316,7 @@ mod tests {
                 target: Some("/courses".to_string()),
             },
             agent: AgentConfig {
-                adapter: Some("codex".to_string()),
+                adapter: Some("deepseek".to_string()),
                 ..AgentConfig::default()
             },
             agents: RoleAgents::default(),
@@ -350,7 +350,7 @@ mod tests {
         let output = render_plan_card(&spec, None);
 
         assert!(output.contains("AgentHub Plan"));
-        assert!(output.contains("provider route: codex"));
+        assert!(output.contains("provider route: deepseek"));
         assert!(output.contains("target files: src/**"));
         assert!(output.contains("effects: file edits"));
         assert!(output.contains("[Enter] run"));

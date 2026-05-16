@@ -1,14 +1,14 @@
 # AgentHub LLM Gateway
 
-语言: [English](llm-gateway.en.md), [Русский](llm-gateway.ru.md), [中文](llm-gateway.zh.md), [Қазақша](llm-gateway.kk.md)
+Languages: [English](llm-gateway.en.md), [Русский](llm-gateway.ru.md), [中文](llm-gateway.zh.md), [Қазақша](llm-gateway.kk.md)
 
-## 目的
+## Purpose
 
-LLM Gateway 是 model work 的 provider control 与 observability boundary。它记录 planned provider calls、prompt/context hashes、retry/failover metadata、budget decisions、redacted traces、optional raw traces、token estimates 和 cost estimates。
+The LLM Gateway is the provider control and observability boundary for model work. It records planned provider calls, prompt/context hashes, retry/failover metadata, budget decisions, redacted traces, optional raw traces, token estimates, and cost estimates.
 
-## 事务 Artifacts
+## Transaction Artifacts
 
-每个事务现在会写入：
+Every transaction now writes:
 
 ```text
 .agent/tx/<tx-id>/context_pack.json
@@ -22,17 +22,17 @@ LLM Gateway 是 model work 的 provider control 与 observability boundary。它
 .agent/tx/<tx-id>/cost.json
 ```
 
-`context_pack.json` 和 `redacted_api.jsonl` 默认会被 redacted。`redaction_report.json` 只记录 secret-like finding 的类别和数量，不保存 secret 值。
+`context_pack.json` and `redacted_api.jsonl` are redacted by default. `redaction_report.json` records secret-like finding categories and counts without storing secret values.
 
 ## Provider Plan
 
-`llm_provider_plan.json` 把 CLI wrappers 和未来的 API providers 统一为一个 request model。每个 planned call 包含 provider metadata、token counts、retry backoff，以及 requested adapter 被 routed 到其他 provider 时的 explicit failover records。
+`llm_provider_plan.json` normalizes AgentHub-owned API providers into one request model. Each planned call includes provider metadata, token counts, retry backoff, and explicit failover records when a requested adapter is routed to another provider.
 
-示例:
+Example:
 
 ```json
 {
-  "provider": { "id": "codex", "kind": "cli_wrapper", "supports_streaming": true },
+  "provider": { "id": "deepseek", "kind": "api_provider", "supports_streaming": true },
   "retry_policy": { "max_attempts": 3, "backoff_ms": [250, 1000, 3000] },
   "failover": []
 }
@@ -40,29 +40,30 @@ LLM Gateway 是 model work 的 provider control 与 observability boundary。它
 
 ## Real Provider Execution
 
-PRD v3 增加了第一批真实 execution paths，同时保持 planned metadata 兼容：
+v0.4 keeps planned metadata compatibility while moving user-facing provider execution to DeepSeek/Kimi APIs:
 
-- `CliProvider` 可以运行配置好的 CLI command template，写入 prompt file，捕获 stdout/stderr，并追加 provider transcript JSONL。
-- `HttpProvider` 可以调用 `/v1/chat/completions` 上的 OpenAI-compatible `http://` 或 `https://` endpoint，并支持 timeout、bearer token 和 structured error body handling。它也可以 best-effort 探测 optional `/v1/models`；缺少 model-list support 会显示在 output 中，但不会让 completion test 失败。
-- `complete_with_retry` 为 provider calls 增加 retry/backoff 和 optional attempt transcript records。
+- `HttpProvider` can call DeepSeek/Kimi OpenAI-compatible `http://` or `https://` endpoints at `/v1/chat/completions`, with timeout, bearer token, and structured error body handling. It can also probe optional `/v1/models`; missing model-list support is reported without failing the completion test.
+- `complete_with_retry` wraps provider calls with retry/backoff and optional attempt transcript records.
 
-测试本地 OpenAI-compatible endpoint：
+Provider tests:
 
 ```bash
-AGENTHUB_OPENAI_COMPAT_BASE_URL=http://127.0.0.1:8000 agenthub providers test openai-http
-AGENTHUB_OPENAI_COMPAT_BASE_URL=https://api.example.com agenthub providers diagnose openai-http
+DEEPSEEK_API_KEY=... agenthub providers test deepseek
+KIMI_API_KEY=... agenthub providers test kimi
 ```
 
-Optional variables：
+Optional variables:
 
 ```text
-AGENTHUB_OPENAI_COMPAT_API_KEY
-AGENTHUB_OPENAI_COMPAT_MODEL
+DEEPSEEK_API_BASE_URL
+DEEPSEEK_MODEL
+KIMI_API_BASE_URL
+KIMI_MODEL
 ```
 
 ## Budget Policy
 
-可通过 `topology.routing.max_estimated_cost_usd` 设置 transaction budget:
+Set a transaction budget through `topology.routing.max_estimated_cost_usd`:
 
 ```yaml
 topology:
@@ -70,25 +71,25 @@ topology:
     max_estimated_cost_usd: 0.25
 ```
 
-如果 planned model cost 超过限制，AgentHub 会写入 `llm_budget.json` 并在 execution 之前 block。
+If planned model cost exceeds the limit, AgentHub writes `llm_budget.json` and blocks before execution.
 
 ## Raw Debug Mode
 
-只有显式开启时才写入 raw context 和 raw API traces：
+Raw context and raw API traces are written only when explicitly enabled:
 
 ```bash
 AGENTHUB_RAW_TRACES=1 agenthub run examples/command-task.yaml
 ```
 
-如果 context scan 发现 secret-like values，即使设置了 `AGENTHUB_RAW_TRACES=1`，raw context 也不会写入。受控的本地调试可以显式覆盖：
+If the context scan finds secret-like values, raw context output is blocked even when `AGENTHUB_RAW_TRACES=1`. For a controlled local debug session you can override this with:
 
 ```bash
 AGENTHUB_RAW_TRACES=1 AGENTHUB_ALLOW_RAW_SECRET_TRACES=1 agenthub run examples/command-task.yaml
 ```
 
-不要在 shared projects 或 CI 中使用该 override。
+Do not use that override in shared projects or CI.
 
-它会创建：
+That creates:
 
 ```text
 .agent/tx/<tx-id>/raw_context_pack.json
@@ -97,10 +98,10 @@ AGENTHUB_RAW_TRACES=1 AGENTHUB_ALLOW_RAW_SECRET_TRACES=1 agenthub run examples/c
 
 ## Cost Estimates
 
-本地 `command` adapter 默认成本为 `0.0`。可以用环境变量设置临时估算：
+Local `command` adapter calls cost `0.0` by default. To configure a temporary estimate:
 
 ```bash
 AGENTHUB_INPUT_USD_PER_1K=0.001 AGENTHUB_OUTPUT_USD_PER_1K=0.002 agenthub run examples/command-task.yaml
 ```
 
-估算会写入 `cost.json`，并在 `report.md` 中汇总。
+The estimate is stored in `cost.json` and summarized in `report.md`.

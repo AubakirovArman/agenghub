@@ -85,7 +85,7 @@ fn empty_project_web_app_request_generates_static_app_spec() {
         dir.path(),
         "создай анимированное вэб приложение",
         IntentOptions {
-            agent_adapter: Some("codex".to_string()),
+            agent_adapter: Some("deepseek".to_string()),
             ..Default::default()
         },
     );
@@ -93,7 +93,7 @@ fn empty_project_web_app_request_generates_static_app_spec() {
     assert_eq!(preview.inferred_intent, "code.static_web_app");
     assert!(preview.questions.is_empty());
     assert!(preview.agent_spec_yaml.contains("target: index.html"));
-    assert!(preview.agent_spec_yaml.contains("adapter: codex"));
+    assert!(preview.agent_spec_yaml.contains("adapter: deepseek"));
     assert!(preview.agent_spec_yaml.contains("- test -f index.html"));
     assert!(!preview.agent_spec_yaml.contains("target: /todo"));
     let spec: crate::spec::AgentSpec = serde_yaml::from_str(&preview.agent_spec_yaml).unwrap();
@@ -103,7 +103,7 @@ fn empty_project_web_app_request_generates_static_app_spec() {
 #[test]
 fn empty_project_web_app_request_uses_command_when_provider_is_only_project_default() {
     let dir = tempfile::tempdir().unwrap();
-    crate::product_cli::config::set_value(dir.path(), "default_provider", "codex").unwrap();
+    crate::product_cli::config::set_value(dir.path(), "default_provider", "deepseek").unwrap();
 
     let preview = normalize_to_spec_for_project(
         dir.path(),

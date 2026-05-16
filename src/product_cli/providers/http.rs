@@ -5,7 +5,7 @@ use crate::llm_gateway::{complete_with_retry, HttpProvider, LlmRequest, RetryPol
 use super::ProviderStatus;
 
 pub(super) fn is_http_provider(status: &ProviderStatus) -> bool {
-    status.info.id == "openai-http" || status.profile_kind.as_deref() == Some("openai-http")
+    matches!(status.info.id.as_str(), "deepseek" | "kimi")
 }
 
 pub(super) fn test_provider(status: ProviderStatus) -> Result<String> {
@@ -47,18 +47,11 @@ fn one_attempt() -> RetryPolicy {
 }
 
 fn model(status: &ProviderStatus) -> Option<String> {
-    status
-        .model
-        .clone()
-        .or_else(|| std::env::var("AGENTHUB_OPENAI_COMPAT_MODEL").ok())
+    status.model.clone()
 }
 
 fn api_key(status: &ProviderStatus) -> Option<String> {
-    status
-        .api_key_env
-        .as_deref()
-        .and_then(|key| std::env::var(key).ok())
-        .or_else(|| std::env::var("AGENTHUB_OPENAI_COMPAT_API_KEY").ok())
+    super::api_key_for_status(status)
 }
 
 fn append_optional_models(out: &mut String, provider: &HttpProvider) {

@@ -1,27 +1,27 @@
 # Known Limitations
 
-语言: [English](known-limitations.en.md), [Русский](known-limitations.ru.md), [中文](known-limitations.zh.md), [Қазақша](known-limitations.kk.md)
+Languages: [English](known-limitations.en.md), [Русский](known-limitations.ru.md), [中文](known-limitations.zh.md), [Қазақша](known-limitations.kk.md)
 
-AgentHub `0.3.0-local-preview` 是可安装的 local developer preview，不是稳定的 public 或 enterprise product。
+AgentHub `0.3.0-local-preview` is an installable local developer preview, not a stable public or enterprise product.
 
-## 许可证
+## License
 
-AgentHub 以 Apache License 2.0 作为 open-source 发布。你可以按照许可证条款使用、复制、修改、分发，并用于商业用途。再分发项目或衍生作品时，需要保留许可证和 attribution notices。
+AgentHub is open source under the Apache License 2.0. You may use, copy, modify, distribute, and use it commercially under the license terms. Keep the license and attribution notices when redistributing the project or derivative works.
 
-## Sandbox 范围
+## Sandbox Scope
 
-AgentHub 提供 transactional isolation、Git worktrees、command policy checks、rollback、process supervision 和 hardening reports。Local sandbox levels 还不是针对 untrusted code 的完整 security boundary。高风险命令应使用 remote 或 isolated runners。
+AgentHub provides transactional isolation, Git worktrees, command policy checks, rollback, process supervision, and hardening reports. Local sandbox levels are not a full security boundary for untrusted code. Use remote or isolated runners for risky commands.
 
 ## Providers
 
-Codex、Gemini、Kimi 等 CLI providers 通过本地 binaries 发现，并由 provider 自己管理 authentication。AgentHub 可以检查 binary presence、version output、templates 和 dry-run readiness，但不能完全证明每个 provider account 已登录。
+DeepSeek and Kimi are API-native providers. AgentHub checks configured endpoints, model labels, and API-key environment markers without printing secret values.
 
-`openai-http` 支持 OpenAI-compatible HTTP 和 HTTPS endpoints，并带有 bearer-token auth、timeouts 和 structured error bodies。Streaming API calls 和 provider-specific auth flows 会在后续版本实现。
+`deepseek` and `kimi` support OpenAI-compatible HTTP and HTTPS endpoints with bearer-token auth, timeouts, and structured error bodies. Streaming chat and the project tool loop are still being wired in.
 
-## Team 和 Enterprise
+## Team And Enterprise
 
-Hosted/team surfaces 目前只写出 local export payloads，用于未来 self-hosted 或 hosted control plane。Running team server、user accounts、browser login 和 shared approval inbox 还没有实现。
+Hosted/team surfaces currently write local export payloads for future self-hosted or hosted control planes. They do not yet provide a running team server, user accounts, browser login, or shared approval inbox.
 
-## Release 稳定性
+## Release Stability
 
-Release preview 可以安装、运行 `doctor`、配置 provider、执行 safe transaction 并打开 dashboard。API、AAL、plugin 和 report formats 在 stable release 之前仍可能变化。
+The release preview can install, run `doctor`, configure a provider, execute a safe transaction, and open a dashboard. API, AAL, plugin, and report formats can still change before a stable release.

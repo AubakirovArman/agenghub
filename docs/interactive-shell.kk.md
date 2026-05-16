@@ -82,7 +82,7 @@ edit       draft-ты $VISUAL немесе $EDITOR ішінде ашып, қай
 
 ```text
 /chats status:COMMITTED
-/chats provider:codex
+/chats provider:deepseek
 /chats date:today
 /chats status:BLOCKED_ON_HUMAN provider:kimi
 ```
@@ -91,4 +91,4 @@ edit       draft-ты $VISUAL немесе $EDITOR ішінде ашып, қай
 
 ## Boundary
 
-Shell Codex, Kimi, Gemini немесе OpenAI-compatible model орнына жүрмейді. Ол provider work үстінен transaction control, approvals, logs, rollback, reports, memory және dashboard visibility береді.
+Shell DeepSeek, Kimi, Kimi немесе OpenAI-compatible model орнына жүрмейді. Ол provider work үстінен transaction control, approvals, logs, rollback, reports, memory және dashboard visibility береді.

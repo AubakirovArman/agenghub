@@ -48,7 +48,7 @@ pub fn diagnose(status: &ProviderStatus) -> String {
     out.push_str(&format!("status_hint\t{}\n", status.info.status_hint));
     out.push_str(&format!("dry_run\t{}\n", dry_run_message(&status.info.id)));
     out.push_str(&format!("install_hint\t{}\n", status.info.note));
-    if status.info.id == "openai-http" || status.profile_kind.as_deref() == Some("openai-http") {
+    if matches!(status.info.id.as_str(), "deepseek" | "kimi") {
         append_http_details(&mut out, status);
     }
     out
@@ -75,6 +75,9 @@ fn append_profile(out: &mut String, status: &ProviderStatus) {
     }
     if let Some(api_key_env) = &status.api_key_env {
         out.push_str(&format!("api_key_env\t{api_key_env}\n"));
+    }
+    if let Some(api_key_file) = &status.api_key_file {
+        out.push_str(&format!("api_key_file\t{}\n", api_key_file.display()));
     }
 }
 
@@ -109,32 +112,27 @@ fn append_template_render(out: &mut String, status: &ProviderStatus) {
 fn append_auth_hint(out: &mut String, status: &ProviderStatus) {
     match status.info.id.as_str() {
         "command" => out.push_str("auth\tnot_required\n"),
-        "openai-http" => {
+        "deepseek" | "kimi" => {
             let probe = probes::credential_probe(&status.info);
+            let file_marker = status
+                .api_key_file
+                .as_ref()
+                .map(|path| path.display().to_string());
             out.push_str(&format!(
                 "auth\t{}\t{}\n",
-                if probe.markers.is_empty() {
+                if probe.markers.is_empty() && file_marker.is_none() {
                     "missing_or_optional"
                 } else {
                     "set"
                 },
-                probes::credential_marker_list(&status.info)
+                file_marker
+                    .clone()
+                    .unwrap_or_else(|| probes::credential_marker_list(&status.info))
             ));
             out.push_str(&format!(
                 "auth_markers\t{}\n",
                 probes::credential_marker_list(&status.info)
             ));
-            out.push_str(&format!("auth_hint\t{}\n", status.info.auth_hint));
-        }
-        _ if status.profile_kind.as_deref() == Some("openai-http") => {
-            let auth = status
-                .api_key_env
-                .as_deref()
-                .and_then(|key| std::env::var(key).ok())
-                .map(|_| "set")
-                .unwrap_or("missing_or_optional");
-            let marker = status.api_key_env.as_deref().unwrap_or("<none>");
-            out.push_str(&format!("auth\t{auth}\t{marker}\n"));
             out.push_str(&format!("auth_hint\t{}\n", status.info.auth_hint));
         }
         _ => {
@@ -156,7 +154,7 @@ fn append_auth_hint(out: &mut String, status: &ProviderStatus) {
 
 fn append_http_details(out: &mut String, status: &ProviderStatus) {
     let Some(endpoint) = &status.endpoint else {
-        out.push_str("endpoint\tmissing\tAGENTHUB_OPENAI_COMPAT_BASE_URL\n");
+        out.push_str("endpoint\tmissing\n");
         return;
     };
     let scheme = endpoint
@@ -166,18 +164,20 @@ fn append_http_details(out: &mut String, status: &ProviderStatus) {
     let model = status
         .model
         .clone()
-        .or_else(|| std::env::var("AGENTHUB_OPENAI_COMPAT_MODEL").ok())
         .filter(|value| !value.is_empty())
         .unwrap_or_else(|| "default".to_string());
     out.push_str(&format!("scheme\t{scheme}\n"));
     out.push_str(&format!("model\t{model}\n"));
-    out.push_str("models_check\toptional\tuse `agenthub providers test openai-http`\n");
+    out.push_str(&format!(
+        "models_check\toptional\tuse `agenthub providers test {}`\n",
+        status.info.id
+    ));
 }
 
 fn dry_run_message(provider: &str) -> &'static str {
     match provider {
         "command" => "built-in deterministic runner ready",
-        "openai-http" | "kimi-api" => "HTTP request test is performed by providers test",
+        "deepseek" | "kimi" => "API request test is performed by providers test",
         _ => "command template ready; live auth is provider-managed",
     }
 }

@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::Path;
 
-use crate::{agent_dir, git, product_cli};
+use crate::{agent_dir, git, home, product_cli};
 
 use super::chat::ChatSession;
 use super::format;
@@ -11,16 +11,15 @@ pub(super) fn render(root: &Path, _chat: &ChatSession, tx: Option<&str>) -> Stri
         .file_name()
         .and_then(|value| value.to_str())
         .unwrap_or("project");
-    let provider = product_cli::config::default_provider(root).unwrap_or_else(|_| "command".into());
-    let provider_ready = product_cli::providers::statuses(root)
-        .map(|items| {
-            items
-                .into_iter()
-                .find(|status| status.info.id == provider)
-                .is_some_and(|status| status.available)
-        })
-        .unwrap_or(false);
-    let git_state = if git::is_repo(root) {
+    let mode = if home::project_has_runtime(root) {
+        "project"
+    } else {
+        "chat"
+    };
+    let (provider, provider_ready) = display_provider(root, mode);
+    let git_state = if !home::project_has_runtime(root) {
+        "git optional"
+    } else if git::is_repo(root) {
         if git::dirty(root) {
             "git ~"
         } else {
@@ -38,7 +37,7 @@ pub(super) fn render(root: &Path, _chat: &ChatSession, tx: Option<&str>) -> Stri
     } else {
         format::styled(&format!("{provider} warn"), format::Color::Yellow)
     };
-    let mut context = format!("{project} | {provider_label} | {git_state}");
+    let mut context = format!("{project} | {mode} | {provider_label} | {git_state}");
     if let Some(tx_label) = tx_label {
         context.push_str(" | ");
         context.push_str(&tx_label);
@@ -55,6 +54,30 @@ pub(super) fn render(root: &Path, _chat: &ChatSession, tx: Option<&str>) -> Stri
         context,
         format::reset()
     )
+}
+
+fn display_provider(root: &Path, mode: &str) -> (String, bool) {
+    let default = product_cli::config::default_provider(root).unwrap_or_else(|_| "command".into());
+    let statuses = product_cli::providers::statuses(root).unwrap_or_default();
+    if mode == "chat" {
+        if let Some(status) = statuses.iter().find(|status| {
+            status.info.id == default
+                && matches!(status.info.id.as_str(), "deepseek" | "kimi")
+                && status.available
+        }) {
+            return (status.info.id.clone(), true);
+        }
+        if let Some(status) = statuses.iter().find(|status| {
+            matches!(status.info.id.as_str(), "deepseek" | "kimi") && status.available
+        }) {
+            return (status.info.id.clone(), true);
+        }
+    }
+    let ready = statuses
+        .into_iter()
+        .find(|status| status.info.id == default)
+        .is_some_and(|status| status.available);
+    (default, ready)
 }
 
 fn short_tx(id: &str) -> String {

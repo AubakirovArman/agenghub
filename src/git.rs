@@ -208,7 +208,7 @@ mod tests {
         fs::create_dir_all(dir.path().join(".agent"))?;
         fs::write(
             dir.path().join(".agent/config.yaml"),
-            "default_provider: codex\n",
+            "default_provider: deepseek\n",
         )?;
 
         assert!(dirty_blockers(dir.path())?.is_empty());

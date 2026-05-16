@@ -1,22 +1,22 @@
 # Product CLI
 
-语言: [English](product-cli.en.md), [Русский](product-cli.ru.md), [中文](product-cli.zh.md), [Қазақша](product-cli.kk.md)
+Languages: [English](product-cli.en.md), [Русский](product-cli.ru.md), [中文](product-cli.zh.md), [Қазақша](product-cli.kk.md)
 
-PRD v3 增加了面向产品使用的命令，用于检查本地安装、provider 状态、简单配置和 chat-first local work。
+AgentHub PRD v3 adds product-facing commands for local installation checks, provider readiness, simple configuration, and chat-first local work.
 
-## Chat-first shell
+## Chat-First Shell
 
 ```bash
 agenthub
 ```
 
-不带 subcommand 运行 `agenthub` 是推荐的 daily entry。它可以准备 Git 和 `.agent`，恢复 latest chat，显示 provider readiness，然后让你直接输入普通任务。Shell 会创建 draft plan，询问 inline approval，运行 transaction，然后提示 `/diff`、`/logs`、`/report`、`/explain` 和 `/undo`。
+Running `agenthub` without a subcommand is the recommended daily entry. It can prepare Git and `.agent`, restore the latest chat, show provider readiness, and let you type a normal task. The shell creates a draft plan, asks for inline approval, runs the transaction, and then suggests `/diff`, `/logs`, `/report`, `/explain`, and `/undo`.
 
-使用 `/` 输入 commands，`/cd <folder>` 不重启切换 project，`@path` 添加 context，`!command` 运行 policy-checked shell command，`# note` 写入 project memory。
+Use `/` for commands, `/cd <folder>` to switch projects without restarting, `@path` for context, `!command` for policy-checked shell commands, and `# note` for project memory.
 
-Chat sessions 会自动恢复。使用 `/chats` 查看带 auto titles 和 pin state 的 sessions，`/search <text>` 搜索 titles/messages，`/rename <title>` 命名当前 chat，`/pin` 或 `/unpin` 把重要工作固定在顶部或取消固定。
+Chat sessions are restored automatically. Use `/chats` to list sessions with auto titles and pin state, `/search <text>` to search titles/messages, `/rename <title>` to name the current chat, and `/pin` or `/unpin` to keep important work at the top.
 
-任务前可使用 `/context` 预览 current chat title、recent messages、memory summary、selected transaction report 和支持的 mention forms。
+Use `/context` before a task to preview the current chat title, recent messages, memory summary, selected transaction report, and supported mention forms.
 
 ## Doctor
 
@@ -24,7 +24,7 @@ Chat sessions 会自动恢复。使用 `/chats` 查看带 auto titles 和 pin st
 agenthub doctor
 ```
 
-`doctor` 是安装后的第一个 readiness screen。它检查 AgentHub version、binary path、dev/release channel、OS/architecture、`sh` shell、Git version、Git repository status、`.agent` initialization、policy files、default provider readiness，以及 supported provider binaries/endpoints。缺少 optional Codex/Gemini/Kimi CLI 是 warning；缺少 Git 或 `sh` 是 blocking error。
+`doctor` is the first readiness screen after install. It checks the AgentHub version, binary path, dev/release channel, OS/architecture, `sh` shell availability, Git version, Git repository status, `.agent` initialization, policy files, default provider readiness, and supported provider binaries/endpoints. Missing optional DeepSeek/Kimi/Kimi APIs are warnings; missing Git or `sh` is blocking.
 
 ## Version
 
@@ -32,7 +32,7 @@ agenthub doctor
 agenthub version
 ```
 
-输出已安装的 AgentHub 版本。
+Prints the installed AgentHub version.
 
 ## Plan And Run
 
@@ -43,9 +43,9 @@ agenthub run "Add /courses page in the current dashboard style" --no-watch
 agenthub run examples/command-task.yaml
 ```
 
-如果没有提供 `--output`，`plan` 会把 draft AgentSpec 写入 `.agent/drafts/`。`run` 接受已有 AgentSpec path，也接受 natural request。Natural request 会先转换成 draft spec，然后通过正常 transaction engine 执行。
+`plan` writes a draft AgentSpec under `.agent/drafts/` unless `--output` is provided. `run` accepts either an existing AgentSpec path or a natural request. Natural requests are converted into a draft spec first, then executed through the normal transaction engine.
 
-在 interactive terminal 中，`run` 会在 transaction 执行期间打印 live journal progress。使用 `--no-watch` 可进行安静的 one-shot 运行。Non-TTY/scripted output 保留脚本友好的 `tx-id STATUS (report)` 行，然后显示 task、provider、topology、verifier、memory promotion、changed files 数量、report、`tx explain`、`tx watch` 和 dashboard path。
+In an interactive terminal, `run` prints live journal progress while the transaction executes. Use `--no-watch` for quiet one-shot runs. Non-TTY/scripted output keeps the compact `tx-id STATUS (report)` line, followed by task, provider, topology, verifier, memory promotion, changed file count, report, `tx explain`, `tx watch`, and dashboard path.
 
 ```bash
 agenthub tx explain tx-20260515123000-abcd1234
@@ -53,11 +53,11 @@ agenthub tx diff tx-20260515123000-abcd1234
 agenthub tx logs tx-20260515123000-abcd1234 --tail 80
 ```
 
-`tx explain` 会概括 transaction 为什么失败或成功、发生了什么、下一步做什么，以及应该查看哪些 artifacts。
-`tx diff` 在可用时显示 committed patch，对 uncommitted transactions fallback 到 diff-guard summaries。
-`tx logs` 打印 bounded command logs，可按 stage 和 tail length 过滤。
+`tx explain` summarizes why a transaction failed or succeeded, what happened, what to do next, and which artifacts to inspect.
+`tx diff` shows the committed patch when available and falls back to diff-guard summaries for uncommitted transactions.
+`tx logs` prints bounded command logs, optionally filtered by stage and tail length.
 
-面向单个 transaction 的 commands 可以接收显式 id，也可以接收 `latest`/`last`。这适用于 `tx report`、`tx effects`、`tx explain`、`tx diff`、`tx logs`、`tx watch`、`tx cancel`、`tx resolve`、`tx resume` 和 `tx retry`。
+Transaction commands that target one transaction accept either an explicit id or `latest`/`last`. This applies to `tx report`, `tx effects`, `tx explain`, `tx diff`, `tx logs`, `tx watch`, `tx cancel`, `tx resolve`, `tx resume`, and `tx retry`.
 
 ## Undo
 
@@ -66,7 +66,7 @@ agenthub undo last
 agenthub undo tx-20260515123000-abcd1234
 ```
 
-`undo` 会为 committed AgentHub transaction 创建普通 Git revert。Working tree 有 unrelated uncommitted changes 时它会拒绝运行，并写入 `.agent/tx/<tx-id>/undo.json`。
+`undo` creates a normal Git revert for a committed AgentHub transaction. It refuses to run when the working tree has unrelated uncommitted changes and records `.agent/tx/<tx-id>/undo.json`.
 
 ## Providers
 
@@ -74,36 +74,28 @@ agenthub undo tx-20260515123000-abcd1234
 agenthub providers list
 agenthub providers status
 agenthub providers setup command
-agenthub providers setup codex
-agenthub providers setup kimi-api
-agenthub providers add openai-http --name local-vllm --url http://127.0.0.1:8000 --model qwen3
-agenthub providers test codex
-KIMI_API_KEY=... agenthub providers test kimi-api
-agenthub providers diagnose codex
-agenthub providers set executor codex
-agenthub providers fallback reviewer gemini kimi openai-http
-AGENTHUB_OPENAI_COMPAT_BASE_URL=http://127.0.0.1:8000 agenthub providers test openai-http
-AGENTHUB_OPENAI_COMPAT_BASE_URL=https://api.example.com agenthub providers diagnose openai-http
+agenthub providers setup deepseek
+agenthub providers setup kimi
+DEEPSEEK_API_KEY=... agenthub providers test deepseek
+KIMI_API_KEY=... agenthub providers test kimi
+agenthub providers diagnose deepseek
+agenthub providers set executor deepseek
+agenthub providers fallback reviewer kimi command
 ```
 
-在 interactive shell 中，`/providers` 现在会打开 provider wizard，而不是只输出 raw status。它会分组显示 detected providers、default markers、role assignments、fallbacks、named profiles、local endpoint examples，以及下一步 setup/diagnose/test commands。Shell shorthand 也接受 CLI-style flags：
+Inside the interactive shell, `/providers` opens a provider wizard with API readiness, default markers, role assignments, fallbacks, and the next setup/diagnose/test commands.
 
-```text
-/providers add openai-http --name local-vllm --url http://127.0.0.1:8000 --model qwen3
-```
+Supported providers:
 
-支持的 providers：
+- `command`: built-in deterministic command runner.
+- `deepseek`: DeepSeek OpenAI-compatible API endpoint. Defaults to `https://api.deepseek.com/v1`; reads `DEEPSEEK_API_KEY`, with `ANTHROPIC_AUTH_TOKEN` accepted for DeepSeek-compatible deployments.
+- `kimi`: Kimi/Moonshot API endpoint. Defaults to `https://api.moonshot.cn/v1`; reads `KIMI_API_KEY` or `MOONSHOT_API_KEY`.
 
-- `command`: 内置 deterministic command runner。
-- `codex`: 外部 Codex CLI wrapper。
-- `gemini`: 外部 Gemini CLI wrapper。
-- `kimi`: 外部 Kimi CLI wrapper。
-- `kimi-api`: Kimi OpenAI-compatible API profile，默认 `https://api.moonshot.cn/v1`。
-- `openai-http`: OpenAI-compatible HTTP 或 HTTPS endpoint。
+AgentHub also reads key files named `.deepseek` and `.kimi` from the project directory, current shell directory, or their parent directories. `DEEPSEEK_API_KEY_FILE`, `ANTHROPIC_AUTH_TOKEN_FILE`, `KIMI_API_KEY_FILE`, and `MOONSHOT_API_KEY_FILE` can point at explicit key files.
 
-`setup` 只会在 provider 可用时配置它。成功后会写入 `default_provider`，为 CLI providers 保存 command template，打印 binary 或 endpoint，显示 dry-run mode，并给出下一条 `agenthub ask` command。
+`setup` configures a provider only when it is available. On success it records `default_provider`, prints the endpoint, reports the dry-run mode, and shows the next `agenthub ask` command.
 
-示例：
+Example:
 
 ```text
 configured	command
@@ -114,33 +106,24 @@ dry_run	built-in deterministic runner ready
 next	agenthub ask "describe the change" --output .agent/drafts/task.yaml
 ```
 
-`providers diagnose <id>` 输出 binary 或 endpoint location、可用时的 version、rendered command template、auth hint、status hint、install hint 和 provider-specific details。对 CLI providers，它还会检查已知 credential markers，但不会打印 secret values：Codex 检查 `OPENAI_API_KEY`、`$CODEX_HOME/auth.json` 和 `$HOME/.codex/auth.json`；Gemini 检查 `GEMINI_API_KEY`、`GOOGLE_API_KEY` 和 `$HOME/.gemini`；Kimi 检查 `KIMI_API_KEY`、`MOONSHOT_API_KEY`、`$HOME/.kimi` 和 `$HOME/.config/kimi`。如果没有找到 markers，会显示 `cli_managed_unknown`，因为 provider CLI 仍可能通过其他机制登录。`kimi-api` diagnose 会显示 endpoint、model，以及通过 `KIMI_API_KEY` 或 `MOONSHOT_API_KEY` 判断的 API-key env readiness。`openai-http` diagnose 会显示 scheme、model、API-key presence，并提示用 `providers test` 做 live request。
+`providers diagnose <id>` prints endpoint, model, API-key marker, auth hint, status hint, install hint, scheme, and provider-specific details. It checks only environment markers and never prints secret values.
 
-`providers set <role> <provider>` 会把 `provider.role.<role>` 保存到 `.agent/config.yaml`。`providers fallback <role> ...` 会把逗号分隔的 fallback chain 保存到 `provider.fallback.<role>`。Valid roles: planner、executor、reviewer、repair、generator、critic、researcher、aggregator、manager、worker。
+`providers set <role> <provider>` stores `provider.role.<role>` in `.agent/config.yaml`. `providers fallback <role> ...` stores a comma-separated fallback chain under `provider.fallback.<role>`. Valid roles are planner, executor, reviewer, repair, generator, critic, researcher, aggregator, manager, and worker.
 
-Named provider profiles 会把 reusable OpenAI-compatible endpoints 保存到 `.agent/config.yaml`：
+Named HTTP profiles are intentionally disabled in API-native mode. Provider logs, retries, memory, and future tool calls stay inside AgentHub for the two supported APIs.
 
-```bash
-agenthub providers add openai-http --name ollama --url http://127.0.0.1:11434 --model qwen3
-agenthub providers setup ollama
-agenthub providers test ollama
-agenthub providers set reviewer ollama
-```
-
-Profiles 适合 `local-vllm`、`ollama`、`lm-studio`、`openrouter` 和 company proxy endpoints。可选的 `--api-key-env NAME` 用来告诉 AgentHub bearer token 存在哪个 environment variable。
-
-`providers test command` 验证内置 runner。CLI providers 会验证 binary discovery、可用时的 version output、以及 template readiness；live authentication 仍由 provider CLI 管理。`providers test openai-http` 会执行真实的 OpenAI-compatible HTTP/HTTPS completion request，然后 best-effort 检查 optional `/v1/models`；如果 models endpoint 缺失，会显示 `models unavailable`，不会让 provider test 失败。
+`providers test command` validates the built-in runner. `providers test deepseek` and `providers test kimi` perform real OpenAI-compatible completion requests and then try optional `/v1/models`; a missing models endpoint is reported as `models unavailable`, not as a failed provider test.
 
 ## Config
 
 ```bash
 agenthub config show
-agenthub config set default_provider codex
+agenthub config set default_provider deepseek
 ```
 
-配置以简单 key/value settings 形式保存在 `.agent/config.yaml`。没有 config file 时，`default_provider` 默认为 `command`。
+Configuration is stored in `.agent/config.yaml` as simple key/value settings. `default_provider` falls back to `command` when no config file exists.
 
-`config set` 只接受产品支持的 keys：`default_provider`、`provider.<id>.template`、`provider.role.<role>` 和 `provider.fallback.<role>`。未知 key 会被拒绝，避免拼写错误静默改变 runtime behavior。
+`config set` accepts only product-supported keys: `default_provider`, `provider.<id>.template`, `provider.role.<role>`, and `provider.fallback.<role>`. Unknown keys are rejected so typos do not silently change runtime behavior.
 
 ## Open
 
@@ -149,7 +132,7 @@ agenthub open dashboard
 agenthub open report tx-20260515123000-abcd1234
 ```
 
-`open dashboard` 会刷新 static dashboard，并在 host 有 desktop opener 时打开 `.agent/reports/dashboard/index.html`。`open report` 会打开指定 transaction 的 `report.md`。在 CI 或设置 `AGENTHUB_OPEN_DRY_RUN=1` 时，AgentHub 只打印 path，不启动 external process。
+`open dashboard` refreshes the static dashboard and opens `.agent/reports/dashboard/index.html` when the host has a desktop opener. `open report` opens a transaction `report.md`. In CI or with `AGENTHUB_OPEN_DRY_RUN=1`, AgentHub prints the path without launching an external process.
 
 ## Serve
 
@@ -158,7 +141,7 @@ agenthub serve
 agenthub serve --addr 127.0.0.1:4318 --refresh-ms 1000
 ```
 
-`serve` 会把 browser dashboard 作为 local auto-refresh UI 运行，默认地址是 `http://127.0.0.1:4317`。它会在请求时重新生成 dashboard data，适合 transaction 运行期间保持打开。
+`serve` runs the browser dashboard as a local auto-refresh UI at `http://127.0.0.1:4317` by default. It regenerates dashboard data on requests and is useful while a transaction is running.
 
 ## Memory
 
@@ -168,7 +151,7 @@ agenthub memory summary
 agenthub memory audit
 ```
 
-`inspect` 输出 committed 和 failed attempts 的 raw counts。`summary` 是面向用户的 stack、active decisions 和 known failures 视图。`audit` 检查 stale、conflicting、low-confidence 和 unverified records，并刷新 `.agent/memory/audit.json`。
+`inspect` prints raw committed and failed-attempt counts. `summary` is the user-facing view of stack, active decisions, and known failures. `audit` checks stale, conflicting, low-confidence, and unverified records and refreshes `.agent/memory/audit.json`.
 
 ## Skills
 
@@ -177,4 +160,4 @@ agenthub skills list
 agenthub skills scorecard
 ```
 
-`scorecard` 显示每个本地 standard-library skill，并包含 analytics-backed runs、success rate、rollback rate、average duration、average cost 和 known failure count。
+`scorecard` reports each local standard-library skill with analytics-backed runs, success rate, rollback rate, average duration, average cost, and known failure count.

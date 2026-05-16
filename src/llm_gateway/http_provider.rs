@@ -77,7 +77,7 @@ impl LlmProvider for HttpProvider {
     }
 
     fn stream_capability(&self) -> ProviderMetadata {
-        metadata_for_adapter("openai-http")
+        metadata_for_adapter("deepseek")
     }
 
     fn count_tokens(&self, input: &str) -> Result<TokenCount> {

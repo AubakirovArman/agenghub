@@ -1,27 +1,27 @@
 # TUI Dashboard
 
-语言: [English](tui.en.md), [Русский](tui.ru.md), [中文](tui.zh.md), [Қазақша](tui.kk.md)
+Languages: [English](tui.en.md), [Русский](tui.ru.md), [中文](tui.zh.md), [Қазақша](tui.kk.md)
 
-`agenthub tui` 会渲染本地 AgentHub 状态的 terminal dashboard。它故意使用 plain text，因此可用于 shell、CI logs 和 remote terminals。
+`agenthub tui` renders a terminal dashboard for local AgentHub state. It is intentionally plain text, so it works in shells, CI logs, and remote terminals.
 
 ```bash
 agenthub tui
 agenthub tui --live
 ```
 
-面板：
+Panels:
 
-- `Summary`: transactions 总数，以及 committed、rolled back、blocked、running 状态计数。
-- `Transactions`: 来自 `.agent/tx` 的最新 transaction ids 和 statuses。
-- `Latest Transaction`: 当前 stage、last event、DAG node/edge counts、DAG roles、verifier status、verifier log tail、cost、estimated tokens、provider、effects count、heartbeat 和 last output tail。
-- `Providers`: default provider、ready/missing counts、named profile count、provider status lines、role assignments 和 fallback chains。
-- `Memory`: committed records、failed attempts、recent workspace changes。
-- `Approvals`: 带 `approval_required: true` 的 AgentSpec drafts，以及等待 human input 的 transactions。
-- `Next Actions`: 针对 latest 或 blocked transaction 的 command suggestions。
+- `Summary`: total transactions and counts for committed, rolled back, blocked, and running states.
+- `Transactions`: latest transaction ids and statuses from `.agent/tx`.
+- `Latest Transaction`: current stage, last event, DAG node/edge counts, DAG roles, verifier status, verifier log tail, cost, estimated tokens, provider, effect count, heartbeat, and last output tail.
+- `Providers`: default provider, ready/missing counts, named profile count, provider status lines, role assignments, and fallback chains.
+- `Memory`: committed records, failed attempts, and recent workspace changes.
+- `Approvals`: AgentSpec drafts with `approval_required: true` and transactions blocked on human input.
+- `Next Actions`: command suggestions for the latest or blocked transaction.
 
-`--live` 会持续刷新同一个 plain-text dashboard，直到用户中断。`--interval-ms <n>` 控制刷新频率；`--once` 为 scripts 和 tests 输出一个 live frame。
+`--live` refreshes the same plain-text dashboard until interrupted. Use `--interval-ms <n>` to control refresh speed; `--once` renders one live frame for scripts and tests.
 
-示例：
+Example:
 
 ```text
 AgentHub TUI Dashboard
@@ -38,14 +38,14 @@ Project: /repo
 - DAG: 5 nodes, 4 edges
 - verifier passed: true
 - cost: 0.000000 USD
-- provider: codex
+- provider: deepseek
 - effects: 4
 
 [Providers]
-- default: codex
-- ready: 2 | missing: 3 | profiles: 1
-- executor -> codex (ok)
-- reviewer -> gemini (missing) fallback:kimi,command
+- default: deepseek
+- ready: 1 | missing: 2 | profiles: 0
+- executor -> deepseek (ok)
+- reviewer -> kimi (missing) fallback:kimi,command
 
 [Next Actions]
 - agenthub tx report tx-20260515030834-2aefeacd

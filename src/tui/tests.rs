@@ -39,7 +39,7 @@ fn renders_terminal_dashboard_panels() -> Result<()> {
     )?;
     fs::write(
         tx.join("agent_trace.json"),
-        r#"{"routes":{"executor":{"selected_adapter":"codex"}}}"#,
+        r#"{"routes":{"executor":{"selected_adapter":"deepseek"}}}"#,
     )?;
     fs::create_dir_all(tx.join("logs"))?;
     fs::write(
@@ -51,16 +51,13 @@ fn renders_terminal_dashboard_panels() -> Result<()> {
         dir.path().join(".agent/specs/approval.yaml"),
         "transaction:\n  approval_required: true\n",
     )?;
-    providers::add_openai_http(
+    config::set_value(dir.path(), "default_provider", "command")?;
+    providers::set_role_provider(dir.path(), "executor", "command")?;
+    providers::set_role_fallback(
         dir.path(),
-        "local-vllm",
-        "http://127.0.0.1:8000",
-        Some("qwen3"),
-        None,
+        "reviewer",
+        &["deepseek".to_string(), "kimi".to_string()],
     )?;
-    config::set_value(dir.path(), "default_provider", "local-vllm")?;
-    providers::set_role_provider(dir.path(), "executor", "local-vllm")?;
-    providers::set_role_fallback(dir.path(), "reviewer", &["command".to_string()])?;
 
     let dashboard = dashboard_text(dir.path())?;
 
@@ -71,14 +68,14 @@ fn renders_terminal_dashboard_panels() -> Result<()> {
     assert!(dashboard.contains("[Transactions]"));
     assert!(dashboard.contains("tx-20260101000000-demo COMMITTED"));
     assert!(dashboard.contains("- stage: COMMITTED"));
-    assert!(dashboard.contains("- provider: codex"));
+    assert!(dashboard.contains("- provider: deepseek"));
     assert!(dashboard.contains("- effects: 1"));
     assert!(dashboard.contains("- heartbeat: executor, last output 4s ago"));
     assert!(dashboard.contains("line two"));
     assert!(dashboard.contains("[Providers]"));
-    assert!(dashboard.contains("- default: local-vllm"));
-    assert!(dashboard.contains("- executor -> local-vllm (ok)"));
-    assert!(dashboard.contains("- reviewer -> local-vllm (ok) fallback:command"));
+    assert!(dashboard.contains("- default: command"));
+    assert!(dashboard.contains("- executor -> command (ok)"));
+    assert!(dashboard.contains("- reviewer -> command (ok) fallback:deepseek,kimi"));
     assert!(dashboard.contains("- DAG: 1 nodes, 0 edges"));
     assert!(dashboard.contains("- pending specs: 1"));
     assert!(dashboard.contains("[Next Actions]"));

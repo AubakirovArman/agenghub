@@ -1,6 +1,6 @@
 # AgentHub
 
-AgentHub 是面向 AI coding agents 的本地事务型 runtime。它不替代 Codex、Gemini、Kimi 或 OpenAI-compatible tools，而是用 isolated worktrees、command policy、verifier checks、rollback、memory、reports 和 dashboards 包住这些工具。
+AgentHub 是面向 AI coding agents 的本地事务型 runtime。它不替代 DeepSeek、Kimi、Kimi 或 OpenAI-compatible tools，而是用 isolated worktrees、command policy、verifier checks、rollback、memory、reports 和 dashboards 包住这些工具。
 
 语言: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
@@ -66,7 +66,7 @@ Shell 内：
 - `@README.md`、`@src`、`@tx:latest` 或 `@memory:auth` 给下一条请求添加明确的 file、folder、transaction 或 memory context。
 - `!git status --short` 通过 AgentHub policy 运行 shell command 并记录日志。
 - `# use fetch only, no axios` 写入 typed memory note，供后续任务使用。
-- `/chats`、`/search`、`/rename`、`/pin` 和 `/unpin` 可在 shell 内管理 chat sessions；`/chats status:COMMITTED provider:codex date:today` 可过滤 sessions。
+- `/chats`、`/search`、`/rename`、`/pin` 和 `/unpin` 可在 shell 内管理 chat sessions；`/chats status:COMMITTED provider:deepseek date:today` 可过滤 sessions。
 - `/context` 预览当前 chat、recent messages、memory summary、selected transaction 和 mention hints。
 
 Scriptable commands 仍然保留给 automation：
@@ -83,25 +83,27 @@ agenthub serve
 
 `agenthub serve` 会持续更新 local dashboard：provider status、role/fallback setup、pending approvals、recent memory facts、transaction history，以及 report/diff/log viewer panes。
 
-## 与 Codex、Gemini、Kimi 一起使用
+## DeepSeek 与 Kimi API
 
-AgentHub 是 provider-neutral。配置 provider 后，通过同一个 transaction engine 运行任务：
+AgentHub v0.4 exposes only API-native DeepSeek and Kimi providers:
 
 ```bash
-agenthub providers setup codex
-agenthub providers diagnose codex
-agenthub providers set executor codex
+export DEEPSEEK_API_KEY=...
+agenthub providers setup deepseek
+agenthub providers diagnose deepseek
+agenthub providers test deepseek
 agenthub run "add a small health-check page" --no-commit
 ```
 
-`gemini`、`kimi`、`kimi-api`、`command` 和 `openai-http` 也有等价命令。`kimi-api` 默认使用 `https://api.moonshot.cn/v1`，并从 `KIMI_API_KEY` 或 `MOONSHOT_API_KEY` 读取密钥；generic OpenAI-compatible endpoints 使用 `AGENTHUB_OPENAI_COMPAT_BASE_URL` 和 optional bearer-token configuration。
-Reusable HTTP profiles 可以按名称保存：
+Kimi uses `KIMI_API_KEY` or `MOONSHOT_API_KEY`:
 
 ```bash
-agenthub providers add openai-http --name local-vllm --url http://127.0.0.1:8000 --model qwen3
-agenthub providers setup local-vllm
-KIMI_API_KEY=... agenthub providers test kimi-api
+export KIMI_API_KEY=...
+agenthub providers setup kimi
+agenthub providers test kimi
 ```
+
+Server installs can use `.deepseek` and `.kimi` key files in the project directory or parent directories. Key contents are not written to AgentHub config or git.
 
 Provider 文档：
 
@@ -157,8 +159,8 @@ AgentHub 目前是 installable local developer preview，还不是 hosted team p
 
 - Local sandboxing 是 process supervision 加 policy checks，不是面向 untrusted code 的完整 security boundary。
 - Hosted/team surfaces 目前生成 local export payloads；还没有 shared server、browser login 或 team accounts。
-- CLI providers 的 authentication 仍由 provider CLI 管理。
-- OpenAI-compatible HTTP/HTTPS calls 已支持，但 streaming 和 provider-specific auth flows 计划在后续版本中实现。
+- DeepSeek and Kimi use AgentHub-owned API requests and environment API keys.
+- Streaming chat and API-native project tool execution are still being wired in.
 
 见 [Known Limitations](docs/known-limitations.zh.md) 和 [Security Hardening](docs/security-hardening.zh.md)。
 

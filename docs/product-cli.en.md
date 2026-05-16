@@ -24,7 +24,7 @@ Use `/context` before a task to preview the current chat title, recent messages,
 agenthub doctor
 ```
 
-`doctor` is the first readiness screen after install. It checks the AgentHub version, binary path, dev/release channel, OS/architecture, `sh` shell availability, Git version, Git repository status, `.agent` initialization, policy files, default provider readiness, and supported provider binaries/endpoints. Missing optional Codex/Gemini/Kimi CLIs are warnings; missing Git or `sh` is blocking.
+`doctor` is the first readiness screen after install. It checks the AgentHub version, binary path, dev/release channel, OS/architecture, `sh` shell availability, Git version, Git repository status, `.agent` initialization, policy files, default provider readiness, and supported provider binaries/endpoints. Missing optional DeepSeek/Kimi/Kimi APIs are warnings; missing Git or `sh` is blocking.
 
 ## Version
 
@@ -74,34 +74,26 @@ agenthub undo tx-20260515123000-abcd1234
 agenthub providers list
 agenthub providers status
 agenthub providers setup command
-agenthub providers setup codex
-agenthub providers setup kimi-api
-agenthub providers add openai-http --name local-vllm --url http://127.0.0.1:8000 --model qwen3
-agenthub providers test codex
-KIMI_API_KEY=... agenthub providers test kimi-api
-agenthub providers diagnose codex
-agenthub providers set executor codex
-agenthub providers fallback reviewer gemini kimi openai-http
-AGENTHUB_OPENAI_COMPAT_BASE_URL=http://127.0.0.1:8000 agenthub providers test openai-http
-AGENTHUB_OPENAI_COMPAT_BASE_URL=https://api.example.com agenthub providers diagnose openai-http
+agenthub providers setup deepseek
+agenthub providers setup kimi
+DEEPSEEK_API_KEY=... agenthub providers test deepseek
+KIMI_API_KEY=... agenthub providers test kimi
+agenthub providers diagnose deepseek
+agenthub providers set executor deepseek
+agenthub providers fallback reviewer kimi command
 ```
 
-Inside the interactive shell, `/providers` now opens a provider wizard instead of only printing raw status. It groups detected providers, default markers, role assignments, fallbacks, named profiles, local endpoint examples, and the next setup/diagnose/test commands. Shell shorthand also accepts the CLI-style flags:
-
-```text
-/providers add openai-http --name local-vllm --url http://127.0.0.1:8000 --model qwen3
-```
+Inside the interactive shell, `/providers` opens a provider wizard with API readiness, default markers, role assignments, fallbacks, and the next setup/diagnose/test commands.
 
 Supported providers:
 
 - `command`: built-in deterministic command runner.
-- `codex`: external Codex CLI wrapper.
-- `gemini`: external Gemini CLI wrapper.
-- `kimi`: external Kimi CLI wrapper.
-- `kimi-api`: Kimi OpenAI-compatible API profile, defaulting to `https://api.moonshot.cn/v1`.
-- `openai-http`: OpenAI-compatible HTTP or HTTPS endpoint.
+- `deepseek`: DeepSeek OpenAI-compatible API endpoint. Defaults to `https://api.deepseek.com/v1`; reads `DEEPSEEK_API_KEY`, with `ANTHROPIC_AUTH_TOKEN` accepted for DeepSeek-compatible deployments.
+- `kimi`: Kimi/Moonshot API endpoint. Defaults to `https://api.moonshot.cn/v1`; reads `KIMI_API_KEY` or `MOONSHOT_API_KEY`.
 
-`setup` configures a provider only when it is available. On success it records `default_provider`, stores the command template for CLI providers, prints the binary or endpoint, reports the dry-run mode, and shows the next `agenthub ask` command.
+AgentHub also reads key files named `.deepseek` and `.kimi` from the project directory, current shell directory, or their parent directories. `DEEPSEEK_API_KEY_FILE`, `ANTHROPIC_AUTH_TOKEN_FILE`, `KIMI_API_KEY_FILE`, and `MOONSHOT_API_KEY_FILE` can point at explicit key files.
+
+`setup` configures a provider only when it is available. On success it records `default_provider`, prints the endpoint, reports the dry-run mode, and shows the next `agenthub ask` command.
 
 Example:
 
@@ -114,28 +106,19 @@ dry_run	built-in deterministic runner ready
 next	agenthub ask "describe the change" --output .agent/drafts/task.yaml
 ```
 
-`providers diagnose <id>` prints binary or endpoint location, version when available, rendered command template, auth hint, status hint, install hint, and provider-specific details. For CLI providers it also checks known credential markers without printing secret values: Codex checks `OPENAI_API_KEY`, `$CODEX_HOME/auth.json`, and `$HOME/.codex/auth.json`; Gemini checks `GEMINI_API_KEY`, `GOOGLE_API_KEY`, and `$HOME/.gemini`; Kimi checks `KIMI_API_KEY`, `MOONSHOT_API_KEY`, `$HOME/.kimi`, and `$HOME/.config/kimi`. Missing markers are reported as `cli_managed_unknown` because the provider CLI may still be logged in through another mechanism. `kimi-api` diagnosis reports endpoint, model, and API-key env readiness using `KIMI_API_KEY` or `MOONSHOT_API_KEY`. `openai-http` diagnosis reports scheme, model, API-key presence, and points to `providers test` for the live request.
+`providers diagnose <id>` prints endpoint, model, API-key marker, auth hint, status hint, install hint, scheme, and provider-specific details. It checks only environment markers and never prints secret values.
 
 `providers set <role> <provider>` stores `provider.role.<role>` in `.agent/config.yaml`. `providers fallback <role> ...` stores a comma-separated fallback chain under `provider.fallback.<role>`. Valid roles are planner, executor, reviewer, repair, generator, critic, researcher, aggregator, manager, and worker.
 
-Named provider profiles store reusable OpenAI-compatible endpoints in `.agent/config.yaml`:
+Named HTTP profiles are intentionally disabled in API-native mode. Provider logs, retries, memory, and future tool calls stay inside AgentHub for the two supported APIs.
 
-```bash
-agenthub providers add openai-http --name ollama --url http://127.0.0.1:11434 --model qwen3
-agenthub providers setup ollama
-agenthub providers test ollama
-agenthub providers set reviewer ollama
-```
-
-Profiles are useful for `local-vllm`, `ollama`, `lm-studio`, `openrouter`, and company proxy endpoints. Optional `--api-key-env NAME` tells AgentHub which environment variable contains the bearer token.
-
-`providers test command` validates the built-in runner. CLI providers validate binary discovery, version output when available, and template readiness; live authentication remains managed by the provider CLI. `providers test openai-http` performs a real OpenAI-compatible HTTP/HTTPS completion request and then tries optional `/v1/models`; a missing models endpoint is reported as `models unavailable`, not as a failed provider test.
+`providers test command` validates the built-in runner. `providers test deepseek` and `providers test kimi` perform real OpenAI-compatible completion requests and then try optional `/v1/models`; a missing models endpoint is reported as `models unavailable`, not as a failed provider test.
 
 ## Config
 
 ```bash
 agenthub config show
-agenthub config set default_provider codex
+agenthub config set default_provider deepseek
 ```
 
 Configuration is stored in `.agent/config.yaml` as simple key/value settings. `default_provider` falls back to `command` when no config file exists.

@@ -38,9 +38,7 @@ pub fn normalize_to_spec_for_project(
     if options.agent_adapter.is_none() {
         options.agent_adapter = crate::product_cli::config::default_provider(root)
             .ok()
-            .filter(|provider| {
-                matches!(provider.as_str(), "command" | "codex" | "kimi" | "gemini")
-            });
+            .filter(|provider| matches!(provider.as_str(), "command" | "deepseek" | "kimi"));
     }
     normalize::to_preview(request, options)
 }

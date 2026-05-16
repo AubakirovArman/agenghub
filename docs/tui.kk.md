@@ -1,27 +1,27 @@
 # TUI Dashboard
 
-Тілдер: [English](tui.en.md), [Русский](tui.ru.md), [中文](tui.zh.md), [Қазақша](tui.kk.md)
+Languages: [English](tui.en.md), [Русский](tui.ru.md), [中文](tui.zh.md), [Қазақша](tui.kk.md)
 
-`agenthub tui` жергілікті AgentHub күйін terminal dashboard ретінде көрсетеді. Формат plain text, сондықтан shell, CI logs және remote terminals ішінде жұмыс істейді.
+`agenthub tui` renders a terminal dashboard for local AgentHub state. It is intentionally plain text, so it works in shells, CI logs, and remote terminals.
 
 ```bash
 agenthub tui
 agenthub tui --live
 ```
 
-Панельдер:
+Panels:
 
-- `Summary`: transactions жалпы саны және committed, rolled back, blocked, running state counts.
-- `Transactions`: `.agent/tx` ішіндегі соңғы transaction ids және statuses.
-- `Latest Transaction`: ағымдағы stage, last event, DAG node/edge counts, DAG roles, verifier status, verifier log tail, cost, estimated tokens, provider, effects саны, heartbeat және last output tail.
-- `Providers`: default provider, ready/missing counts, named profile count, provider status lines, role assignments және fallback chains.
-- `Memory`: committed records, failed attempts және recent workspace changes.
-- `Approvals`: `approval_required: true` бар AgentSpec drafts және human input күтіп тұрған transactions.
-- `Next Actions`: latest немесе blocked transaction үшін command suggestions.
+- `Summary`: total transactions and counts for committed, rolled back, blocked, and running states.
+- `Transactions`: latest transaction ids and statuses from `.agent/tx`.
+- `Latest Transaction`: current stage, last event, DAG node/edge counts, DAG roles, verifier status, verifier log tail, cost, estimated tokens, provider, effect count, heartbeat, and last output tail.
+- `Providers`: default provider, ready/missing counts, named profile count, provider status lines, role assignments, and fallback chains.
+- `Memory`: committed records, failed attempts, and recent workspace changes.
+- `Approvals`: AgentSpec drafts with `approval_required: true` and transactions blocked on human input.
+- `Next Actions`: command suggestions for the latest or blocked transaction.
 
-`--live` сол plain-text dashboard мәнін тоқтатылғанға дейін жаңартып тұрады. `--interval-ms <n>` refresh жиілігін басқарады; `--once` scripts және tests үшін бір live frame шығарады.
+`--live` refreshes the same plain-text dashboard until interrupted. Use `--interval-ms <n>` to control refresh speed; `--once` renders one live frame for scripts and tests.
 
-Мысал:
+Example:
 
 ```text
 AgentHub TUI Dashboard
@@ -38,14 +38,14 @@ Project: /repo
 - DAG: 5 nodes, 4 edges
 - verifier passed: true
 - cost: 0.000000 USD
-- provider: codex
+- provider: deepseek
 - effects: 4
 
 [Providers]
-- default: codex
-- ready: 2 | missing: 3 | profiles: 1
-- executor -> codex (ok)
-- reviewer -> gemini (missing) fallback:kimi,command
+- default: deepseek
+- ready: 1 | missing: 2 | profiles: 0
+- executor -> deepseek (ok)
+- reviewer -> kimi (missing) fallback:kimi,command
 
 [Next Actions]
 - agenthub tx report tx-20260515030834-2aefeacd

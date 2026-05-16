@@ -1,6 +1,6 @@
 # AgentHub Wiki
 
-AgentHub — локальный транзакционный runtime для AI coding agents. Он оборачивает Codex, Gemini, Kimi, command adapters и OpenAI-compatible endpoints в isolated worktrees, verifier checks, rollback, memory, reports и dashboards.
+AgentHub — локальный транзакционный runtime для AI coding agents. Он оборачивает DeepSeek, Kimi, Kimi, command adapters и OpenAI-compatible endpoints в isolated worktrees, verifier checks, rollback, memory, reports и dashboards.
 
 Языки: [English](Home) · [Русский](Home-ru) · [中文](Home-zh) · [Қазақша](Home-kk)
 
@@ -30,9 +30,9 @@ agenthub> создай Django веб приложение
 - Dashboard содержит provider status, approval inbox, memory browser, history browser и transaction viewer panes для report, diff и logs.
 - Для structured language diagnostics, подсказок по supported workspace/topology и golden AgentIR/DAG checks используй `agenthub aal check <file.aal>`.
 - Natural language может создавать bounded files, Next.js pages и Django starter scaffold с verifier checks.
-- Reusable local model endpoints сохраняются через `agenthub providers add openai-http --name local-vllm --url ...`.
-- Kimi API можно проверить напрямую: `KIMI_API_KEY=... agenthub providers test kimi-api`.
-- Через `/chats`, `/search`, `/rename`, `/pin` и `/unpin` можно управлять chat sessions с auto titles; фильтр: `/chats status:COMMITTED provider:codex date:today`.
+- Configure DeepSeek with `DEEPSEEK_API_KEY=... agenthub providers test deepseek`.
+- Kimi API можно проверить напрямую: `KIMI_API_KEY=... agenthub providers test kimi`.
+- Use `/chats`, `/search`, `/rename`, `/pin`, and `/unpin` to manage chat sessions; filter with `/chats status:COMMITTED provider:deepseek date:today`.
 - `/context` показывает current chat, recent messages, memory и selected transaction context.
 - Approval prompts показывают risk и поддерживают `diff`, `details` и `edit`.
 - `@path`, `@tx:<id>` и `@memory:<query>` добавляют context, `!command` запускает policy-checked shell command, `# note` сохраняет project memory.

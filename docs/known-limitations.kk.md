@@ -1,27 +1,27 @@
 # Known Limitations
 
-Тілдер: [English](known-limitations.en.md), [Русский](known-limitations.ru.md), [中文](known-limitations.zh.md), [Қазақша](known-limitations.kk.md)
+Languages: [English](known-limitations.en.md), [Русский](known-limitations.ru.md), [中文](known-limitations.zh.md), [Қазақша](known-limitations.kk.md)
 
-AgentHub `0.3.0-local-preview` — installable local developer preview, stable public немесе enterprise product емес.
+AgentHub `0.3.0-local-preview` is an installable local developer preview, not a stable public or enterprise product.
 
 ## License
 
-AgentHub Apache License 2.0 бойынша open-source ретінде таратылады. Оны license шарттары бойынша use, copy, modify, distribute және commercial мақсатта қолдануға болады. Project немесе derivative works таратқанда license және attribution notices сақталуы керек.
+AgentHub is open source under the Apache License 2.0. You may use, copy, modify, distribute, and use it commercially under the license terms. Keep the license and attribution notices when redistributing the project or derivative works.
 
-## Sandbox шекарасы
+## Sandbox Scope
 
-AgentHub transactional isolation, Git worktrees, command policy checks, rollback, process supervision және hardening reports береді. Local sandbox levels untrusted code үшін толық security boundary емес. Risky commands үшін remote немесе isolated runners қолданыңыз.
+AgentHub provides transactional isolation, Git worktrees, command policy checks, rollback, process supervision, and hardening reports. Local sandbox levels are not a full security boundary for untrusted code. Use remote or isolated runners for risky commands.
 
 ## Providers
 
-Codex, Gemini және Kimi сияқты CLI providers local binaries арқылы табылады және authentication provider CLI жағында басқарылады. AgentHub binary presence, version output, templates және dry-run readiness тексере алады, бірақ әр provider account logged in екенін толық дәлелдей алмайды.
+DeepSeek and Kimi are API-native providers. AgentHub checks configured endpoints, model labels, and API-key environment markers without printing secret values.
 
-`openai-http` OpenAI-compatible HTTP және HTTPS endpoints қолдайды, bearer-token auth, timeouts және structured error bodies бар. Streaming API calls және provider-specific auth flows кейінгі нұсқаларға жоспарланған.
+`deepseek` and `kimi` support OpenAI-compatible HTTP and HTTPS endpoints with bearer-token auth, timeouts, and structured error bodies. Streaming chat and the project tool loop are still being wired in.
 
-## Team және Enterprise
+## Team And Enterprise
 
-Hosted/team surfaces қазір future self-hosted немесе hosted control plane үшін local export payloads жазады. Running team server, user accounts, browser login және shared approval inbox әлі жоқ.
+Hosted/team surfaces currently write local export payloads for future self-hosted or hosted control planes. They do not yet provide a running team server, user accounts, browser login, or shared approval inbox.
 
-## Release тұрақтылығы
+## Release Stability
 
-Release preview орнатылады, `doctor` іске қосады, provider конфигурациялайды, safe transaction орындайды және dashboard ашады. API, AAL, plugin және report formats stable release-ке дейін өзгеруі мүмкін.
+The release preview can install, run `doctor`, configure a provider, execute a safe transaction, and open a dashboard. API, AAL, plugin, and report formats can still change before a stable release.

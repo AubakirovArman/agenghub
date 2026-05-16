@@ -5,8 +5,8 @@ fn parses_shell_commands_and_plain_text() {
     assert_eq!(parse_line("sessions"), ShellCommand::Sessions);
     assert_eq!(parse_line("chats"), ShellCommand::Chats(None));
     assert_eq!(
-        parse_line("chats status:COMMITTED provider:codex"),
-        ShellCommand::Chats(Some("status:COMMITTED provider:codex".into()))
+        parse_line("chats status:COMMITTED provider:deepseek"),
+        ShellCommand::Chats(Some("status:COMMITTED provider:deepseek".into()))
     );
     assert_eq!(
         parse_line("/search dashboard"),
@@ -63,12 +63,12 @@ fn parses_shell_commands_and_plain_text() {
         ShellCommand::Serve(Some("127.0.0.1:0".into()))
     );
     assert_eq!(
-        parse_line("providers diagnose codex"),
-        ShellCommand::Providers(Some("diagnose codex".into()))
+        parse_line("providers diagnose deepseek"),
+        ShellCommand::Providers(Some("diagnose deepseek".into()))
     );
     assert_eq!(
-        parse_line("provider codex"),
-        ShellCommand::Providers(Some("setup codex".into()))
+        parse_line("provider deepseek"),
+        ShellCommand::Providers(Some("setup deepseek".into()))
     );
     assert_eq!(
         parse_line("config set default_provider command"),

@@ -1,6 +1,6 @@
 # AgentHub Wiki
 
-AgentHub — AI coding agents үшін жергілікті transactional runtime. Ол Codex, Gemini, Kimi, command adapters және OpenAI-compatible endpoints құралдарын isolated worktrees, verifier checks, rollback, memory, reports және dashboards арқылы басқарады.
+AgentHub — AI coding agents үшін жергілікті transactional runtime. Ол DeepSeek, Kimi, Kimi, command adapters және OpenAI-compatible endpoints құралдарын isolated worktrees, verifier checks, rollback, memory, reports және dashboards арқылы басқарады.
 
 Тілдер: [English](Home) · [Русский](Home-ru) · [中文](Home-zh) · [Қазақша](Home-kk)
 
@@ -30,9 +30,9 @@ agenthub> create a Django web application
 - Dashboard provider status, approval inbox, memory browser, history browser және report, diff, logs үшін transaction viewer panes береді.
 - Structured language diagnostics, supported workspace/topology hints және golden AgentIR/DAG checks үшін `agenthub aal check <file.aal>` қолдан.
 - Natural language bounded files, Next.js pages және verifier checks бар Django starter scaffold жасай алады.
-- Reusable local model endpoints сақтау үшін `agenthub providers add openai-http --name local-vllm --url ...` қолдан.
-- Kimi API тікелей тексеру: `KIMI_API_KEY=... agenthub providers test kimi-api`.
-- Auto titles бар chat sessions басқару үшін `/chats`, `/search`, `/rename`, `/pin` және `/unpin` қолдан; filter: `/chats status:COMMITTED provider:codex date:today`.
+- Configure DeepSeek with `DEEPSEEK_API_KEY=... agenthub providers test deepseek`.
+- Kimi API тікелей тексеру: `KIMI_API_KEY=... agenthub providers test kimi`.
+- Use `/chats`, `/search`, `/rename`, `/pin`, and `/unpin` to manage chat sessions; filter with `/chats status:COMMITTED provider:deepseek date:today`.
 - `/context` current chat, recent messages, memory және selected transaction context preview көрсетеді.
 - Approval prompts risk көрсетеді және `diff`, `details`, `edit` қолдайды.
 - `@path`, `@tx:<id>` және `@memory:<query>` context қосады, `!command` policy-checked shell command іске қосады, `# note` project memory сақтайды.

@@ -7,9 +7,8 @@ use super::{config, doctor, providers};
 mod bootstrap_tests;
 mod open_tests;
 mod provider_kimi_tests;
-mod provider_profile_tests;
 mod support;
-use support::{openai_stub_server, with_openai_env};
+use support::{openai_stub_server, with_deepseek_env};
 
 #[test]
 fn config_set_and_show_round_trips() -> Result<()> {
@@ -52,8 +51,10 @@ fn providers_list_and_command_test_are_user_facing() -> Result<()> {
     let test = providers::test_provider(dir.path(), "command")?;
     let diagnose = providers::diagnose_provider(dir.path(), "command")?;
 
-    assert!(list.contains("codex"));
-    assert!(list.contains("gemini"));
+    assert!(list.contains("deepseek"));
+    assert!(list.contains("kimi"));
+    assert!(!list.contains("codex"));
+    assert!(!list.contains("gemini"));
     assert!(setup.contains("default_provider\tcommand"));
     assert!(setup.contains("dry_run\tbuilt-in deterministic runner ready"));
     assert!(setup.contains("next\tagenthub ask"));
@@ -65,64 +66,88 @@ fn providers_list_and_command_test_are_user_facing() -> Result<()> {
 }
 
 #[test]
-fn providers_openai_http_reports_missing_without_endpoint() -> Result<()> {
-    with_openai_env(None, None, || {
+fn providers_deepseek_reports_missing_without_key() -> Result<()> {
+    with_deepseek_env(None, None, || {
         let dir = tempfile::tempdir()?;
 
-        let setup = providers::setup_provider(dir.path(), "openai-http")?;
-        let test = providers::test_provider(dir.path(), "openai-http")?;
+        let setup = providers::setup_provider(dir.path(), "deepseek")?;
+        let test = providers::test_provider(dir.path(), "deepseek")?;
         let status = providers::render_status(dir.path())?;
 
-        assert!(setup.contains("missing\topenai-http"));
-        assert!(test.contains("missing\topenai-http"));
-        assert!(status.contains("openai-http\tmissing"));
+        assert!(setup.contains("missing\tdeepseek"));
+        assert!(test.contains("missing\tdeepseek"));
+        assert!(status.contains("deepseek\tmissing"));
         assert!(!config::path(dir.path()).exists());
         Ok(())
     })
 }
 
 #[test]
-fn provider_diagnose_reports_openai_http_endpoint_details() -> Result<()> {
-    with_openai_env(Some("https://api.example.test"), Some("test-key"), || {
-        let dir = tempfile::tempdir()?;
+fn providers_deepseek_reads_project_tree_key_file() -> Result<()> {
+    let stub = openai_stub_server("file key ok", 2)?;
+    with_deepseek_env(Some(&stub.endpoint), None, || {
+        let parent = tempfile::tempdir()?;
+        std::fs::write(parent.path().join(".deepseek"), "file-test-key\n")?;
+        let project = parent.path().join("project");
+        std::fs::create_dir_all(&project)?;
 
-        let diagnose = providers::diagnose_provider(dir.path(), "openai-http")?;
+        let status = providers::render_status(&project)?;
+        let diagnose = providers::diagnose_provider(&project, "deepseek")?;
+        let test = providers::test_provider(&project, "deepseek")?;
+        let requests = stub.received_requests(2)?;
+        let lower = requests.join("\n---\n").to_ascii_lowercase();
 
-        assert!(diagnose.contains("provider\topenai-http"));
-        assert!(diagnose.contains("scheme\thttps"));
-        assert!(diagnose.contains("auth\tset"));
+        assert!(status.contains("deepseek\tok"));
+        assert!(diagnose.contains("api_key_file"));
+        assert!(test.contains("ok\tdeepseek\tcompletion_tokens:2"));
+        assert!(lower.contains("authorization: bearer file-test-key"));
         Ok(())
     })
 }
 
 #[test]
-fn provider_diagnose_reports_cli_auth_markers() -> Result<()> {
+fn provider_diagnose_reports_deepseek_endpoint_details() -> Result<()> {
+    with_deepseek_env(Some("https://api.example.test"), Some("test-key"), || {
+        let dir = tempfile::tempdir()?;
+
+        let diagnose = providers::diagnose_provider(dir.path(), "deepseek")?;
+
+        assert!(diagnose.contains("provider\tdeepseek"));
+        assert!(diagnose.contains("scheme\thttps"));
+        assert!(diagnose.contains("auth\tset"));
+        assert!(diagnose.contains("model\tdeepseek-test"));
+        Ok(())
+    })
+}
+
+#[test]
+fn provider_diagnose_reports_api_auth_markers() -> Result<()> {
     let dir = tempfile::tempdir()?;
 
-    let diagnose = providers::diagnose_provider(dir.path(), "codex")?;
+    let diagnose = providers::diagnose_provider(dir.path(), "deepseek")?;
 
-    assert!(diagnose.contains("provider\tcodex"));
-    assert!(diagnose.contains("auth_hint\tCodex CLI manages login"));
-    assert!(diagnose.contains("status_hint\tAgentHub checks binary"));
-    assert!(diagnose.contains("OPENAI_API_KEY"));
+    assert!(diagnose.contains("provider\tdeepseek"));
+    assert!(diagnose.contains("auth_hint\tset DEEPSEEK_API_KEY"));
+    assert!(diagnose.contains("status_hint\tproviders test performs"));
+    assert!(diagnose.contains("DEEPSEEK_API_KEY"));
     Ok(())
 }
 
 #[test]
-fn providers_openai_http_test_calls_stub_server() -> Result<()> {
+fn providers_deepseek_test_calls_stub_server() -> Result<()> {
     let stub = openai_stub_server("product cli ok", 3)?;
-    with_openai_env(Some(&stub.endpoint), Some("test-key"), || {
+    with_deepseek_env(Some(&stub.endpoint), Some("test-key"), || {
         let dir = tempfile::tempdir()?;
 
-        let setup = providers::setup_provider(dir.path(), "openai-http")?;
-        let test = providers::test_provider(dir.path(), "openai-http")?;
+        let setup = providers::setup_provider(dir.path(), "deepseek")?;
+        let test = providers::test_provider(dir.path(), "deepseek")?;
         let requests = stub.received_requests(2)?;
         let joined = requests.join("\n---\n");
         let lower = joined.to_ascii_lowercase();
 
-        assert!(setup.contains("configured\topenai-http"));
-        assert!(setup.contains("default_provider\topenai-http"));
-        assert!(test.contains("ok\topenai-http\tcompletion_tokens:3"));
+        assert!(setup.contains("configured\tdeepseek"));
+        assert!(setup.contains("default_provider\tdeepseek"));
+        assert!(test.contains("ok\tdeepseek\tcompletion_tokens:3"));
         assert!(test.contains("models\tstub-chat,stub-code"));
         assert!(joined.contains("POST /v1/chat/completions"));
         assert!(joined.contains("GET /v1/models"));
@@ -139,14 +164,14 @@ fn providers_set_role_and_fallback_config() -> Result<()> {
     let fallback = providers::set_role_fallback(
         dir.path(),
         "reviewer",
-        &["command".to_string(), "openai-http".to_string()],
+        &["deepseek".to_string(), "kimi".to_string()],
     )?;
     let config = config::render_show(dir.path())?;
 
     assert!(role.contains("role\texecutor\tcommand"));
-    assert!(fallback.contains("fallback\treviewer\tcommand,openai-http"));
+    assert!(fallback.contains("fallback\treviewer\tdeepseek,kimi"));
     assert!(config.contains("provider.role.executor\tcommand"));
-    assert!(config.contains("provider.fallback.reviewer\tcommand,openai-http"));
+    assert!(config.contains("provider.fallback.reviewer\tdeepseek,kimi"));
     Ok(())
 }
 
@@ -180,15 +205,15 @@ fn doctor_reports_initialized_project_and_policy_as_ok() -> Result<()> {
 
 #[test]
 fn doctor_warns_when_default_provider_is_configured_but_missing() -> Result<()> {
-    with_openai_env(None, None, || {
+    with_deepseek_env(None, None, || {
         let dir = tempfile::tempdir()?;
         agent_dir::init_project(dir.path(), false)?;
-        config::set_value(dir.path(), "default_provider", "openai-http")?;
+        config::set_value(dir.path(), "default_provider", "deepseek")?;
 
         let rendered = doctor::inspect(dir.path())?.render();
 
         assert!(rendered.contains("[warn] provider.default"));
-        assert!(rendered.contains("openai-http is configured but not ready"));
+        assert!(rendered.contains("deepseek is configured but not ready"));
         Ok(())
     })
 }

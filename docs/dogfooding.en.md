@@ -83,22 +83,21 @@ Provider dogfooding should be explicit. Before running a real model, check the p
 ```bash
 agenthub doctor
 agenthub providers status
-agenthub providers diagnose codex
+agenthub providers diagnose deepseek
 agenthub providers diagnose kimi
-agenthub providers diagnose gemini
 ```
 
 Run the scripted provider dogfood only when you intentionally want a live model call:
 
 ```bash
-AGENTHUB_DOGFOOD_PROVIDER=codex \
+AGENTHUB_DOGFOOD_PROVIDER=deepseek \
 AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 \
 scripts/dogfood.sh
 ```
 
-`scripts/provider-dogfood.sh` can also be run directly with `AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=codex|kimi|gemini`. It creates a temporary Git project, initializes AgentHub, runs `providers diagnose`, runs `providers test`, invokes the selected provider adapter once, writes a no-commit transaction, verifies that main stayed clean, and writes `target/dogfood/provider-dogfood-report.json`.
+`scripts/provider-dogfood.sh` can also be run directly with `AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=deepseek|kimi`. It creates a temporary Git project, initializes AgentHub, runs `providers diagnose`, runs `providers test`, invokes the selected provider adapter once, writes a no-commit transaction, verifies that main stayed clean, and writes `target/dogfood/provider-dogfood-report.json`.
 
-The provider report records the provider, transaction id, final status, persisted report path, artifact directory, and token-observation note. The artifact directory keeps `report.md`, provider diagnostics, provider test output, the AgentSpec, command stdout/stderr, and adapter invocation metadata after the temporary project is cleaned up. Set `AGENTHUB_PROVIDER_DOGFOOD_KEEP=1` only when you need to inspect the temporary project itself. AgentHub captures provider CLI transcripts, but authoritative token usage depends on whether the provider CLI exposes it.
+The provider report records the provider, transaction id, final status, persisted report path, artifact directory, and token-observation note. The artifact directory keeps `report.md`, provider diagnostics, provider test output, the AgentSpec, command stdout/stderr, and adapter prompt metadata after the temporary project is cleaned up. Set `AGENTHUB_PROVIDER_DOGFOOD_KEEP=1` only when you need to inspect the temporary project itself.
 
 ## Failure Rule
 

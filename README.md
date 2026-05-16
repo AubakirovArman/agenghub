@@ -1,6 +1,6 @@
 # AgentHub
 
-AgentHub is a local transactional runtime for AI coding agents. It does not replace Codex, Gemini, Kimi, or OpenAI-compatible tools. It wraps them with isolated worktrees, command policy, verifier checks, rollback, memory, reports, and dashboards.
+AgentHub is a local transactional runtime for AI coding agents. It does not replace DeepSeek, Kimi, Kimi, or OpenAI-compatible tools. It wraps them with isolated worktrees, command policy, verifier checks, rollback, memory, reports, and dashboards.
 
 Languages: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
@@ -66,7 +66,7 @@ Inside the shell:
 - `@README.md`, `@src`, `@tx:latest`, or `@memory:auth` adds explicit file, folder, transaction, or memory context to the next request.
 - `!git status --short` runs a shell command through AgentHub policy and logs it.
 - `# use fetch only, no axios` writes a typed memory note for future tasks.
-- `/chats`, `/search`, `/rename`, `/pin`, and `/unpin` manage chat sessions without leaving the shell; `/chats status:COMMITTED provider:codex date:today` filters sessions.
+- `/chats`, `/search`, `/rename`, `/pin`, and `/unpin` manage chat sessions without leaving the shell; `/chats status:COMMITTED provider:deepseek date:today` filters sessions.
 - `/context` previews the current chat, recent messages, memory summary, selected transaction, and mention hints.
 
 Scriptable commands still exist for automation:
@@ -83,32 +83,36 @@ agenthub serve
 
 `agenthub serve` keeps a local dashboard updated with provider status, role/fallback setup, pending approvals, recent memory facts, transaction history, and report/diff/log viewer panes.
 
-## Use With Codex, Gemini, Kimi
+## Use With DeepSeek And Kimi APIs
 
-AgentHub is provider-neutral. Configure a provider, then run tasks through the same transaction engine:
+AgentHub v0.4 is API-native. Configure DeepSeek or Kimi with environment variables, then run chat or project tasks through AgentHub-owned logging and memory:
 
 ```bash
-agenthub providers setup codex
-agenthub providers diagnose codex
-agenthub providers set executor codex
+export DEEPSEEK_API_KEY=...
+agenthub providers setup deepseek
+agenthub providers diagnose deepseek
+agenthub providers test deepseek
 agenthub run "add a small health-check page" --no-commit
 ```
 
-Equivalent setup commands exist for `gemini`, `kimi`, `kimi-api`, `command`, and `openai-http`. `kimi-api` defaults to `https://api.moonshot.cn/v1` and uses `KIMI_API_KEY` or `MOONSHOT_API_KEY`; generic OpenAI-compatible endpoints use `AGENTHUB_OPENAI_COMPAT_BASE_URL` and optional bearer-token configuration.
-Inside the chat shell, `/providers` opens a wizard with provider readiness, default markers, role/fallback setup, named profiles, and copy-ready next actions.
-Reusable HTTP profiles can be saved by name:
+Kimi uses the same flow:
 
 ```bash
-agenthub providers add openai-http --name local-vllm --url http://127.0.0.1:8000 --model qwen3
-agenthub providers setup local-vllm
-KIMI_API_KEY=... agenthub providers test kimi-api
+export KIMI_API_KEY=...
+agenthub providers setup kimi
+agenthub providers test kimi
 ```
+
+For server installs, AgentHub also discovers `.deepseek` and `.kimi` key files in the current project directory, current shell directory, or their parent directories. The key contents stay out of AgentHub config and git.
+
+Plain `agenthub` opens chat mode without requiring Git or `.agent`. Project transactions still use the existing transaction kernel; API-native project execution is being wired in behind the same DeepSeek/Kimi provider surface.
 
 Provider details:
 
 - [Product CLI](docs/product-cli.en.md)
 - [Agent adapters](docs/agent-adapters.en.md)
 - [LLM Gateway](docs/llm-gateway.en.md)
+- [API-native runtime plan](docs/api-native-runtime.ru.md)
 - [Competitive Positioning](docs/competitive-positioning.en.md)
 
 ## Why Transaction Safety Matters
@@ -160,8 +164,8 @@ AgentHub is an installable local developer preview, not a hosted team product ye
 
 - Local sandboxing is process supervision plus policy checks, not a full untrusted-code security boundary.
 - Hosted/team surfaces currently generate local export payloads; there is no shared server, browser login, or team account system yet.
-- CLI providers rely on the provider CLI for authentication.
-- OpenAI-compatible HTTP/HTTPS calls are supported, but streaming and provider-specific auth flows are planned later.
+- DeepSeek and Kimi use AgentHub-owned API requests and environment-based API keys.
+- Streaming chat and API-native project tool execution are still being wired in.
 
 See [Known Limitations](docs/known-limitations.en.md) and [Security Hardening](docs/security-hardening.en.md).
 

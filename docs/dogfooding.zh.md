@@ -1,16 +1,16 @@
 # Dogfooding
 
-Dogfooding 用来证明 AgentHub 可以作为日常 local runtime 使用，而不只是测试集合。一次 dogfood 运行应回答三个问题：AgentHub 是否保护了项目，report 是否解释了结果，用户是否可以继续工作而不需要手动清理。
+Dogfooding proves that AgentHub can be used as a daily local runtime, not only as a test suite. A dogfood run should answer three questions: did AgentHub keep the project safe, did the report explain the result, and can the user continue without manual cleanup?
 
-## 命令
+## Command
 
-在仓库根目录运行：
+Run the local dogfood suite from the repository root:
 
 ```bash
 scripts/dogfood.sh
 ```
 
-默认会构建本地 binary，并执行快速产品检查：
+By default it builds the local binary and runs fast product checks:
 
 ```text
 cli smoke
@@ -20,25 +20,25 @@ provider dry-run smoke
 dashboard smoke
 ```
 
-需要完整 fixture 覆盖时运行：
+Run the full fixture suite when you want broader coverage:
 
 ```bash
 AGENTHUB_DOGFOOD_FULL=1 scripts/dogfood.sh
 ```
 
-运行 repeated local transactions，测试 SQLite transaction index 和 status/dashboard scalability：
+Run repeated local transactions to test the SQLite transaction index and status/dashboard scalability:
 
 ```bash
 AGENTHUB_DOGFOOD_STRESS_COUNT=100 scripts/dogfood.sh
 ```
 
-每次运行都会写入 machine-readable report：
+Every run writes a machine-readable report:
 
 ```text
 target/dogfood/dogfood-report.json
 ```
 
-每次 dogfood run 默认也会归档 release evidence：
+Every dogfood run also archives release evidence by default:
 
 ```text
 target/dogfood/history/index.jsonl
@@ -46,71 +46,70 @@ target/dogfood/history/latest.json
 target/dogfood/history/runs/<run-id>/
 ```
 
-Archive 会保存 suite report、存在时的 provider report，以及持久化 provider artifacts。使用 `AGENTHUB_DOGFOOD_ARCHIVE=0` 可跳过 suite archive，使用 `AGENTHUB_PROVIDER_DOGFOOD_ARCHIVE=0` 可跳过 direct provider archive。
+The archive stores the suite report, provider report when present, and persisted provider artifacts. Use `AGENTHUB_DOGFOOD_ARCHIVE=0` to skip suite archival, or `AGENTHUB_PROVIDER_DOGFOOD_ARCHIVE=0` to skip direct provider archival.
 
-Release 前可以汇总本地 evidence：
+Summarize local evidence before release:
 
 ```bash
 scripts/dogfood-readiness.sh
 scripts/dogfood-readiness.sh --check
 ```
 
-`--check` 使用 `AGENTHUB_DOGFOOD_MIN_SUITE_RUNS`、`AGENTHUB_DOGFOOD_MIN_PROVIDER_PASSED` 和 `AGENTHUB_DOGFOOD_MIN_DAYS` thresholds。默认要求 3 次 suite runs、1 次 passed provider run 和 2 个不同 dogfood days。
+`--check` uses `AGENTHUB_DOGFOOD_MIN_SUITE_RUNS`, `AGENTHUB_DOGFOOD_MIN_PROVIDER_PASSED`, and `AGENTHUB_DOGFOOD_MIN_DAYS` thresholds. The defaults require 3 suite runs, 1 passed provider run, and 2 distinct dogfood days.
 
-对于 stress runs，report 包含 requested count、completed count、`tx status` 行数、elapsed seconds，以及 `.agent/cache/indexes/transactions.sqlite3` 是否存在。设置 `AGENTHUB_DOGFOOD_KEEP=1` 可以保留临时 stress project，并把 path 写入 report 供手动检查。
+For stress runs the report includes requested count, completed count, `tx status` row count, elapsed seconds, and whether `.agent/cache/indexes/transactions.sqlite3` existed. Use `AGENTHUB_DOGFOOD_KEEP=1` to keep the temporary stress project path in the report for manual inspection.
 
-使用已安装的 `agenthub`，而不是从源码构建：
+Use an installed binary instead of building from source:
 
 ```bash
 AGENTHUB_BIN="$(command -v agenthub)" scripts/dogfood.sh
 ```
 
-## 需要检查的证据
+## Evidence To Check
 
-有效的 dogfood 运行应留下可检查的 artifacts：
+A useful dogfood run should leave inspectable artifacts:
 
-- `.agent/tx/<tx-id>/report.md` 解释 transaction result。
-- `.agent/tx/<tx-id>/effects.jsonl` 展示 planned、applied、verified、rollback 和 non-rollbackable effects。
-- `.agent/tx/<tx-id>/journal.jsonl` 展示状态流转和 heartbeat events。
-- `.agent/cache/indexes/transactions.sqlite3` 在 repeated runs 后存在，并支撑快速 `tx status` reads。
-- `.agent/reports/dashboard/index.html` 可以打开 local dashboard。
-- committed memory 只在 committed transactions 之后变化。
+- `.agent/tx/<tx-id>/report.md` explains the transaction result.
+- `.agent/tx/<tx-id>/effects.jsonl` shows planned, applied, verified, rollback, and non-rollbackable effects.
+- `.agent/tx/<tx-id>/journal.jsonl` shows state transitions and heartbeat events.
+- `.agent/cache/indexes/transactions.sqlite3` exists after repeated runs and backs fast `tx status` reads.
+- `.agent/reports/dashboard/index.html` opens a local dashboard.
+- committed memory changes appear only after committed transactions.
 
-## 真实 Provider 运行
+## Real Provider Runs
 
-真实模型的 dogfooding 必须显式执行。运行前先检查 provider：
+Provider dogfooding should be explicit. Before running a real model, check the provider:
 
 ```bash
 agenthub doctor
 agenthub providers status
-agenthub providers diagnose codex
+agenthub providers diagnose deepseek
 agenthub providers diagnose kimi
-agenthub providers diagnose gemini
 ```
 
-只有在明确要执行 live model call 时才运行 scripted provider dogfood：
+Run the scripted provider dogfood only when you intentionally want a live model call:
 
 ```bash
-AGENTHUB_DOGFOOD_PROVIDER=codex \
+AGENTHUB_DOGFOOD_PROVIDER=deepseek \
 AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 \
 scripts/dogfood.sh
 ```
 
-也可以直接运行 `scripts/provider-dogfood.sh`，并设置 `AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=codex|kimi|gemini`。它会创建临时 Git project、初始化 AgentHub、运行 `providers diagnose`、运行 `providers test`、调用一次选定 provider adapter、写入 no-commit transaction、验证 main 保持 clean，并写入 `target/dogfood/provider-dogfood-report.json`。
+`scripts/provider-dogfood.sh` can also be run directly with `AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=deepseek|kimi`. It creates a temporary Git project, initializes AgentHub, runs `providers diagnose`, runs `providers test`, invokes the selected provider adapter once, writes a no-commit transaction, verifies that main stayed clean, and writes `target/dogfood/provider-dogfood-report.json`.
 
-Provider report 会记录 provider、transaction id、final status、持久化的 report path、artifact directory 和 token-observation note。Artifact directory 会在临时项目清理后保留 `report.md`、provider diagnostics、provider test output、AgentSpec、命令 stdout/stderr 和 adapter invocation metadata。只有需要手动检查临时项目时才设置 `AGENTHUB_PROVIDER_DOGFOOD_KEEP=1`。AgentHub 会捕获 provider CLI transcripts，但权威 token usage 取决于 provider CLI 是否输出该信息。
+The provider report records the provider, transaction id, final status, persisted report path, artifact directory, and token-observation note. The artifact directory keeps `report.md`, provider diagnostics, provider test output, the AgentSpec, command stdout/stderr, and adapter prompt metadata after the temporary project is cleaned up. Set `AGENTHUB_PROVIDER_DOGFOOD_KEEP=1` only when you need to inspect the temporary project itself.
 
-## Failure 规则
+## Failure Rule
 
-失败只有在可解释时才有价值。每次 failure 都要记录：
+A failed dogfood run is useful only if it is understandable. For every failure, capture:
 
-- 使用的命令；
-- transaction id；
-- 如果用了真实 provider，记录 provider 和 model；
-- final status；
-- report path；
-- main 是否变化；
-- memory 是否 promoted；
-- `agenthub tx explain latest` 给出的 next action。
+- command used;
+- transaction id;
+- provider and model if a real provider was used;
+- final status;
+- report path;
+- whether main changed;
+- whether memory was promoted;
+- next action from `agenthub tx explain latest`.
 
-在 AgentHub 未能干净 rollback、用明确 human action 阻塞，或提交 verified result 之前，不要把 failure 当作可接受结果。
+Do not treat a dogfood failure as acceptable until AgentHub either rolls back cleanly, blocks with a clear human action, or commits a verified result.

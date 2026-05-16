@@ -106,7 +106,7 @@ run_step "stress transactions" run_stress
 
 run_provider_dogfood() {
   if [[ -z "${AGENTHUB_DOGFOOD_PROVIDER:-}" ]]; then
-    printf 'skip provider dogfood; set AGENTHUB_DOGFOOD_PROVIDER=codex|kimi|gemini and AGENTHUB_PROVIDER_DOGFOOD_LIVE=1\n'
+    printf 'skip provider dogfood; set AGENTHUB_DOGFOOD_PROVIDER=deepseek|kimi and AGENTHUB_PROVIDER_DOGFOOD_LIVE=1\n'
     return
   fi
   PROVIDER_DOGFOOD_REPORT="${AGENTHUB_PROVIDER_DOGFOOD_REPORT:-$ROOT/target/dogfood/provider-dogfood-report.json}"

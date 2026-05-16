@@ -16,25 +16,30 @@ fn defaults_to_command_adapter() -> Result<()> {
 }
 
 #[test]
-fn dry_run_external_adapter_keeps_requested_route() -> Result<()> {
+fn api_adapter_falls_back_to_command_until_project_executor_is_ready() -> Result<()> {
     let route = route(&AgentConfig {
-        adapter: Some("codex".to_string()),
+        adapter: Some("deepseek".to_string()),
         dry_run: true,
         ..AgentConfig::default()
     })?;
 
-    assert_eq!(route.requested_adapter, "codex");
-    assert_eq!(route.selected_adapter, "codex");
+    assert_eq!(route.requested_adapter, "deepseek");
+    assert_eq!(route.selected_adapter, "command");
+    assert!(route
+        .fallback_reason
+        .as_deref()
+        .unwrap_or_default()
+        .contains("API-native project executor"));
     assert!(route.dry_run);
     Ok(())
 }
 
 #[test]
-fn dry_run_invocation_writes_prompt_and_transcript() -> Result<()> {
+fn api_adapter_invocation_writes_prompt_without_external_cli() -> Result<()> {
     let dir = tempfile::tempdir()?;
     let spec = AgentSpec {
         agent: AgentConfig {
-            adapter: Some("codex".to_string()),
+            adapter: Some("deepseek".to_string()),
             dry_run: true,
             ..AgentConfig::default()
         },
@@ -44,10 +49,10 @@ fn dry_run_invocation_writes_prompt_and_transcript() -> Result<()> {
 
     let run = invoke_adapter(&spec, dir.path(), dir.path(), &route, None)?;
 
-    assert!(run.is_some());
+    assert!(run.is_none());
     assert!(dir.path().join("agent_prompt_executor.md").exists());
-    assert!(dir.path().join("adapter_invocation_executor.json").exists());
-    assert!(dir.path().join("agent_transcript.jsonl").exists());
+    assert!(!dir.path().join("adapter_invocation_executor.json").exists());
+    assert!(!dir.path().join("agent_transcript.jsonl").exists());
     Ok(())
 }
 
@@ -57,7 +62,7 @@ fn external_adapter_uses_remote_runner() -> Result<()> {
     let mut spec = fixture_spec();
     spec.execution.sandbox.level = 2;
     let route = AgentRoute::external(
-        "codex".to_string(),
+        "external-test".to_string(),
         "executor".to_string(),
         None,
         Some("printf \"$AGENTHUB_REMOTE_RUNNER\" > adapter-remote.txt".to_string()),
@@ -136,25 +141,26 @@ fn repair_agent_can_differ_from_executor() -> Result<()> {
     spec.repair.commands = vec!["true".to_string()];
     spec.transaction.max_repair_attempts = 1;
     spec.agents.executor = Some(AgentConfig {
-        adapter: Some("codex".to_string()),
+        adapter: Some("deepseek".to_string()),
         dry_run: true,
         ..AgentConfig::default()
     });
     spec.agents.repair = Some(AgentConfig {
-        adapter: Some("gemini".to_string()),
+        adapter: Some("kimi".to_string()),
         dry_run: true,
         ..AgentConfig::default()
     });
 
     let routes = routes_for_spec(&spec)?;
 
-    assert_eq!(routes.executor.selected_adapter, "codex");
+    assert_eq!(routes.executor.requested_adapter, "deepseek");
+    assert_eq!(routes.executor.selected_adapter, "command");
     assert_eq!(
         routes
             .repair
             .as_ref()
-            .map(|route| route.selected_adapter.as_str()),
-        Some("gemini")
+            .map(|route| route.requested_adapter.as_str()),
+        Some("kimi")
     );
     Ok(())
 }

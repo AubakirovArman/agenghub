@@ -7,6 +7,7 @@ use super::*;
 #[test]
 fn persists_chat_messages_and_transactions() -> Result<()> {
     let dir = tempfile::tempdir()?;
+    std::fs::create_dir_all(dir.path().join(".agent/shell"))?;
     let session = create(dir.path())?;
     append_user(&session, "plan", "add page")?;
     append_draft(&session, "add page", Path::new(".agent/drafts/demo.yaml"))?;

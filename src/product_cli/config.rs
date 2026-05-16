@@ -4,12 +4,16 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{anyhow, Context, Result};
 
-use crate::agent_dir;
+use crate::{agent_dir, home};
 
 pub type ProductConfig = BTreeMap<String, String>;
 
 pub fn path(project_root: &Path) -> PathBuf {
-    project_root.join(".agent/config.yaml")
+    if cfg!(test) || home::project_has_runtime(project_root) {
+        project_root.join(".agent/config.yaml")
+    } else {
+        home::global_config_path()
+    }
 }
 
 pub fn load(project_root: &Path) -> Result<ProductConfig> {
@@ -24,10 +28,14 @@ pub fn load(project_root: &Path) -> Result<ProductConfig> {
 
 pub fn set_value(project_root: &Path, key: &str, value: &str) -> Result<PathBuf> {
     validate_key(key)?;
-    let paths = agent_dir::ensure_runtime_dirs(project_root)?;
+    let path = path(project_root);
+    if home::project_has_runtime(project_root) || cfg!(test) {
+        agent_dir::ensure_runtime_dirs(project_root)?;
+    } else if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent).with_context(|| format!("create {}", parent.display()))?;
+    }
     let mut config = load(project_root)?;
     config.insert(key.to_string(), value.to_string());
-    let path = paths.agent.join("config.yaml");
     fs::write(&path, serde_yaml::to_string(&config)?)
         .with_context(|| format!("write {}", path.display()))?;
     Ok(path)

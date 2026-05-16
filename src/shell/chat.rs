@@ -6,8 +6,8 @@ use chrono::Utc;
 use serde_json::{json, Value};
 use uuid::Uuid;
 
-use crate::chat_index;
 use crate::observability::write_jsonl;
+use crate::{chat_index, home};
 
 #[derive(Debug, Clone)]
 pub(super) struct ChatSession {
@@ -142,6 +142,14 @@ pub(super) fn append_command(session: &ChatSession, kind: &str, text: &str) -> R
     append_event(session, kind, json!({ "text": text }))
 }
 
+pub(super) fn append_assistant(session: &ChatSession, provider: &str, message: &str) -> Result<()> {
+    append_event(
+        session,
+        "assistant_message",
+        json!({ "provider": provider, "text": message }),
+    )
+}
+
 fn append_event(session: &ChatSession, kind: &str, mut data: Value) -> Result<()> {
     let object = data
         .as_object_mut()
@@ -190,7 +198,11 @@ pub(super) fn read_events(path: &Path) -> Result<Vec<Value>> {
 }
 
 fn chats_dir(root: &Path) -> PathBuf {
-    root.join(".agent").join("shell").join("chats")
+    if home::project_has_shell_state(root) {
+        root.join(".agent").join("shell").join("chats")
+    } else {
+        home::global_chats_dir(root)
+    }
 }
 
 #[cfg(test)]

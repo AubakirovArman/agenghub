@@ -4,6 +4,14 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.0-local-preview - 2026-05-16
+
+- Start the API-native provider runtime: DeepSeek and Kimi are now first-class HTTP providers, and Codex/Gemini/Kimi CLI wrappers plus generic `openai-http` profiles are removed from the user-facing provider catalog.
+- Make the interactive shell chat-first: plain `agenthub` no longer forces Git or `.agent` initialization, and non-project conversations use global AgentHub home storage for chats, history, indexes, and command logs.
+- Add direct API chat mode for non-project sessions, with DeepSeek/Kimi provider selection, request logging through AgentHub-owned chat history, and a clear provider setup error when no API key is configured.
+- Keep project transactions on the existing deterministic kernel while API-native project execution is being wired in; `deepseek` and `kimi` adapter routes record an explicit fallback reason instead of invoking external CLIs.
+- Update provider diagnostics, tests, dogfood scripts, dashboards, and examples around the DeepSeek/Kimi-only provider model.
+
 ## 0.3.2-local-preview - 2026-05-16
 
 - Avoid routing generic static web app requests through the configured external provider when no explicit adapter was requested; the built-in command fallback now creates `index.html` immediately.

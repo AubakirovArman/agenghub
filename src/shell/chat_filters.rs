@@ -169,11 +169,11 @@ mod tests {
             "tx-1",
             &dir.path().join(".agent/tx/tx-1/report.md"),
         )?;
-        write_tx(dir.path(), "tx-1", "COMMITTED", "codex")?;
+        write_tx(dir.path(), "tx-1", "COMMITTED", "deepseek")?;
 
         let row = chat::summarize(&chat.path)?;
         assert!(ChatFilter::parse(Some("status:COMMITTED")).matches(dir.path(), &row)?);
-        assert!(ChatFilter::parse(Some("provider:codex")).matches(dir.path(), &row)?);
+        assert!(ChatFilter::parse(Some("provider:deepseek")).matches(dir.path(), &row)?);
         assert!(ChatFilter::parse(Some("date:today")).matches(dir.path(), &row)?);
         assert!(!ChatFilter::parse(Some("provider:kimi")).matches(dir.path(), &row)?);
         Ok(())

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PROVIDER="${AGENTHUB_PROVIDER_DOGFOOD_PROVIDER:-${AGENTHUB_DOGFOOD_PROVIDER:-codex}}"
+PROVIDER="${AGENTHUB_PROVIDER_DOGFOOD_PROVIDER:-${AGENTHUB_DOGFOOD_PROVIDER:-deepseek}}"
 LIVE="${AGENTHUB_PROVIDER_DOGFOOD_LIVE:-0}"
 KEEP="${AGENTHUB_PROVIDER_DOGFOOD_KEEP:-0}"
 REPORT_PATH="${AGENTHUB_PROVIDER_DOGFOOD_REPORT:-$ROOT/target/dogfood/provider-dogfood-report.json}"
@@ -11,15 +11,6 @@ STARTED_AT="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 
 json_escape() {
   printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
-}
-
-template_for_provider() {
-  case "$1" in
-    codex) printf 'codex exec --sandbox workspace-write - < {prompt}\n' ;;
-    gemini) printf 'gemini --prompt-file {prompt}\n' ;;
-    kimi) printf 'kimi --print --afk --input-format text < {prompt}\n' ;;
-    *) printf 'unsupported provider: %s\n' "$1" >&2; return 1 ;;
-  esac
 }
 
 write_report() {
@@ -37,7 +28,7 @@ write_report() {
   "project": "$(json_escape "$project")",
   "tx_report": "$(json_escape "$report")",
   "artifact_dir": "$(json_escape "$ARTIFACT_DIR")",
-  "token_observation": "provider CLI transcript captured; authoritative token usage depends on provider CLI output"
+  "token_observation": "API provider test captured HTTP usage; project transaction currently falls back to deterministic command execution"
 }
 JSON
 }
@@ -54,7 +45,10 @@ if [[ -z "${AGENTHUB_BIN:-}" ]]; then
   AGENTHUB_BIN="$ROOT/target/debug/agenthub"
 fi
 
-template="$(template_for_provider "$PROVIDER")"
+case "$PROVIDER" in
+  deepseek|kimi) ;;
+  *) printf 'unsupported provider: %s\n' "$PROVIDER" >&2; exit 1 ;;
+esac
 tmp="$(mktemp -d "${TMPDIR:-/tmp}/agenthub-provider-dogfood.XXXXXX")"
 project="$tmp/project"
 spec="$tmp/provider-dogfood.yaml"
@@ -90,7 +84,6 @@ task:
 agent:
   adapter: $PROVIDER
   dry_run: false
-  command_template: "$template"
 workspace:
   type: code.git
 execution:
@@ -129,11 +122,11 @@ tx_report="$tx_dir/report.md"
 persisted_report="$ARTIFACT_DIR/report.md"
 persisted_project=""
 cp "$spec" "$ARTIFACT_DIR/spec.yaml"
-test -f "$tx_dir/adapter_invocation_executor.json"
+test -f "$tx_dir/agent_prompt_executor.md"
 test -f "$tx_report"
 test -z "$(git -C "$project" status --short -- docs/provider-dogfood.md)"
 cp "$tx_report" "$persisted_report"
-cp "$tx_dir/adapter_invocation_executor.json" "$ARTIFACT_DIR/adapter_invocation_executor.json"
+cp "$tx_dir/agent_prompt_executor.md" "$ARTIFACT_DIR/agent_prompt_executor.md"
 for artifact in effects.jsonl journal.jsonl agent_trace.json llm_provider_plan.json llm_budget.json; do
   if [[ -f "$tx_dir/$artifact" ]]; then
     cp "$tx_dir/$artifact" "$ARTIFACT_DIR/$artifact"

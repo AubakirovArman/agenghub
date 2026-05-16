@@ -3,18 +3,13 @@ use std::path::Path;
 
 use anyhow::Result;
 
-use crate::{agent_dir, git, memory, product_cli, skill_registry};
+use crate::{agent_dir, git, home, memory, product_cli, skill_registry};
 
 use super::format;
 
 pub(super) fn print(root: &Path) -> Result<()> {
     let project = project_name(root);
     let project_type = project_type(root);
-    let default_provider = crate::product_cli::config::default_provider(root)?;
-    let provider_ready = crate::product_cli::providers::statuses(root)?
-        .into_iter()
-        .find(|status| status.info.id == default_provider)
-        .is_some_and(|status| status.available);
     let skills = skill_registry::list_available(root)
         .map(|items| items.len())
         .unwrap_or(0);
@@ -28,22 +23,31 @@ pub(super) fn print(root: &Path) -> Result<()> {
         product_cli::version(),
         format::reset()
     );
-    println!("  Project: {project} ({project_type})");
+    let mode = if home::project_has_runtime(root) {
+        "project"
+    } else {
+        "chat"
+    };
+    let (provider, provider_ready) = display_provider(root, mode)?;
+    println!("  Mode: {mode}  Folder: {project} ({project_type})");
     println!(
         "  Provider: {}  Git: {}  .agent: {}",
         if provider_ready {
-            format::styled(&format!("{default_provider} ready"), format::Color::Green)
+            format::styled(&format!("{provider} ready"), format::Color::Green)
         } else {
-            format::styled(
-                &format!("{default_provider} limited"),
-                format::Color::Yellow,
-            )
+            format::styled(&format!("{provider} limited"), format::Color::Yellow)
         },
-        if git::is_repo(root) { "ok" } else { "missing" },
-        if root.join(".agent/project.yaml").exists() {
+        if mode == "chat" {
+            "not required"
+        } else if git::is_repo(root) {
             "ok"
         } else {
             "missing"
+        },
+        if root.join(".agent/project.yaml").exists() {
+            "ok"
+        } else {
+            "not required"
         }
     );
     println!(
@@ -53,7 +57,8 @@ pub(super) fn print(root: &Path) -> Result<()> {
     );
     println!();
     println!("  Quick start:");
-    println!("  - Type a request: \"add a health check\"");
+    println!("  - Type a message to chat through DeepSeek/Kimi API");
+    println!("  - Use /init or `agenthub run ...` when you want project transactions");
     println!("  - /help for commands  @file.rs for context  !command for shell");
     if !rows.is_empty() {
         println!();
@@ -75,6 +80,30 @@ pub(super) fn print(root: &Path) -> Result<()> {
     }
     println!();
     Ok(())
+}
+
+fn display_provider(root: &Path, mode: &str) -> Result<(String, bool)> {
+    let default_provider = crate::product_cli::config::default_provider(root)?;
+    let statuses = crate::product_cli::providers::statuses(root)?;
+    if mode == "chat" {
+        if let Some(status) = statuses.iter().find(|status| {
+            status.info.id == default_provider
+                && matches!(status.info.id.as_str(), "deepseek" | "kimi")
+                && status.available
+        }) {
+            return Ok((status.info.id.clone(), true));
+        }
+        if let Some(status) = statuses.iter().find(|status| {
+            matches!(status.info.id.as_str(), "deepseek" | "kimi") && status.available
+        }) {
+            return Ok((status.info.id.clone(), true));
+        }
+    }
+    let provider_ready = statuses
+        .into_iter()
+        .find(|status| status.info.id == default_provider)
+        .is_some_and(|status| status.available);
+    Ok((default_provider, provider_ready))
 }
 
 fn project_name(root: &Path) -> String {

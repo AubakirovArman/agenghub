@@ -1,16 +1,16 @@
 # Dogfooding
 
-Dogfooding AgentHub-ты тек тест жинағы емес, күнделікті local runtime ретінде қолдануға болатынын дәлелдейді. Бір dogfood run үш сұраққа жауап беруі керек: AgentHub жобаны қауіпсіз сақтады ма, report нәтижені түсіндірді ме, және қолданушы қолмен тазаламай жұмысты жалғастыра ала ма.
+Dogfooding proves that AgentHub can be used as a daily local runtime, not only as a test suite. A dogfood run should answer three questions: did AgentHub keep the project safe, did the report explain the result, and can the user continue without manual cleanup?
 
-## Команда
+## Command
 
-Репозиторий түбірінен іске қосу:
+Run the local dogfood suite from the repository root:
 
 ```bash
 scripts/dogfood.sh
 ```
 
-Әдепкі режимде скрипт local binary құрып, жылдам product checks орындайды:
+By default it builds the local binary and runs fast product checks:
 
 ```text
 cli smoke
@@ -20,25 +20,25 @@ provider dry-run smoke
 dashboard smoke
 ```
 
-Толық fixture suite үшін:
+Run the full fixture suite when you want broader coverage:
 
 ```bash
 AGENTHUB_DOGFOOD_FULL=1 scripts/dogfood.sh
 ```
 
-Repeated local transactions іске қосып, SQLite transaction index және status/dashboard scalability тексеру:
+Run repeated local transactions to test the SQLite transaction index and status/dashboard scalability:
 
 ```bash
 AGENTHUB_DOGFOOD_STRESS_COUNT=100 scripts/dogfood.sh
 ```
 
-Әр run machine-readable report жазады:
+Every run writes a machine-readable report:
 
 ```text
 target/dogfood/dogfood-report.json
 ```
 
-Әр dogfood run әдепкі түрде release evidence archive жасайды:
+Every dogfood run also archives release evidence by default:
 
 ```text
 target/dogfood/history/index.jsonl
@@ -46,71 +46,70 @@ target/dogfood/history/latest.json
 target/dogfood/history/runs/<run-id>/
 ```
 
-Archive suite report, бар болса provider report және persisted provider artifacts сақтайды. Suite archival өшіру үшін `AGENTHUB_DOGFOOD_ARCHIVE=0`, direct provider archival өшіру үшін `AGENTHUB_PROVIDER_DOGFOOD_ARCHIVE=0` қолдан.
+The archive stores the suite report, provider report when present, and persisted provider artifacts. Use `AGENTHUB_DOGFOOD_ARCHIVE=0` to skip suite archival, or `AGENTHUB_PROVIDER_DOGFOOD_ARCHIVE=0` to skip direct provider archival.
 
-Release алдында local evidence summary қарау:
+Summarize local evidence before release:
 
 ```bash
 scripts/dogfood-readiness.sh
 scripts/dogfood-readiness.sh --check
 ```
 
-`--check` `AGENTHUB_DOGFOOD_MIN_SUITE_RUNS`, `AGENTHUB_DOGFOOD_MIN_PROVIDER_PASSED` және `AGENTHUB_DOGFOOD_MIN_DAYS` thresholds қолданады. Defaults 3 suite runs, 1 passed provider run және 2 бөлек dogfood days талап етеді.
+`--check` uses `AGENTHUB_DOGFOOD_MIN_SUITE_RUNS`, `AGENTHUB_DOGFOOD_MIN_PROVIDER_PASSED`, and `AGENTHUB_DOGFOOD_MIN_DAYS` thresholds. The defaults require 3 suite runs, 1 passed provider run, and 2 distinct dogfood days.
 
-Stress runs үшін report ішінде requested count, completed count, `tx status` жол саны, elapsed seconds және `.agent/cache/indexes/transactions.sqlite3` бар-жоғы болады. `AGENTHUB_DOGFOOD_KEEP=1` temporary stress project сақтап, оның path мәнін manual inspection үшін report ішіне жазады.
+For stress runs the report includes requested count, completed count, `tx status` row count, elapsed seconds, and whether `.agent/cache/indexes/transactions.sqlite3` existed. Use `AGENTHUB_DOGFOOD_KEEP=1` to keep the temporary stress project path in the report for manual inspection.
 
-Source build орнына орнатылған `agenthub` қолдану:
+Use an installed binary instead of building from source:
 
 ```bash
 AGENTHUB_BIN="$(command -v agenthub)" scripts/dogfood.sh
 ```
 
-## Тексерілетін дәлелдер
+## Evidence To Check
 
-Пайдалы dogfood run тексерілетін artifacts қалдыруы керек:
+A useful dogfood run should leave inspectable artifacts:
 
-- `.agent/tx/<tx-id>/report.md` transaction result түсіндіреді.
-- `.agent/tx/<tx-id>/effects.jsonl` planned, applied, verified, rollback және non-rollbackable effects көрсетеді.
-- `.agent/tx/<tx-id>/journal.jsonl` state transitions және heartbeat events көрсетеді.
-- `.agent/cache/indexes/transactions.sqlite3` repeated runs кейін бар болады және fast `tx status` reads үшін қолданылады.
-- `.agent/reports/dashboard/index.html` local dashboard ашады.
-- committed memory тек committed transactions кейін өзгереді.
+- `.agent/tx/<tx-id>/report.md` explains the transaction result.
+- `.agent/tx/<tx-id>/effects.jsonl` shows planned, applied, verified, rollback, and non-rollbackable effects.
+- `.agent/tx/<tx-id>/journal.jsonl` shows state transitions and heartbeat events.
+- `.agent/cache/indexes/transactions.sqlite3` exists after repeated runs and backs fast `tx status` reads.
+- `.agent/reports/dashboard/index.html` opens a local dashboard.
+- committed memory changes appear only after committed transactions.
 
-## Нақты Provider Runs
+## Real Provider Runs
 
-Нақты model қолданылатын dogfooding айқын болуы керек. Алдымен provider тексер:
+Provider dogfooding should be explicit. Before running a real model, check the provider:
 
 ```bash
 agenthub doctor
 agenthub providers status
-agenthub providers diagnose codex
+agenthub providers diagnose deepseek
 agenthub providers diagnose kimi
-agenthub providers diagnose gemini
 ```
 
-Scripted provider dogfood тек live model call әдейі керек болғанда іске қос:
+Run the scripted provider dogfood only when you intentionally want a live model call:
 
 ```bash
-AGENTHUB_DOGFOOD_PROVIDER=codex \
+AGENTHUB_DOGFOOD_PROVIDER=deepseek \
 AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 \
 scripts/dogfood.sh
 ```
 
-`scripts/provider-dogfood.sh` тікелей `AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=codex|kimi|gemini` арқылы да іске қосылады. Ол temporary Git project жасайды, AgentHub init орындайды, `providers diagnose` іске қосады, `providers test` іске қосады, selected provider adapter бір рет шақырады, no-commit transaction жазады, main clean қалғанын тексереді және `target/dogfood/provider-dogfood-report.json` жазады.
+`scripts/provider-dogfood.sh` can also be run directly with `AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=deepseek|kimi`. It creates a temporary Git project, initializes AgentHub, runs `providers diagnose`, runs `providers test`, invokes the selected provider adapter once, writes a no-commit transaction, verifies that main stayed clean, and writes `target/dogfood/provider-dogfood-report.json`.
 
-Provider report ішінде provider, transaction id, final status, сақталған report path, artifact directory және token-observation note болады. Artifact directory temporary project тазаланғаннан кейін де `report.md`, provider diagnostics, provider test output, AgentSpec, command stdout/stderr және adapter invocation metadata сақтайды. Temporary project-тің өзін қолмен тексеру керек болса ғана `AGENTHUB_PROVIDER_DOGFOOD_KEEP=1` қой. AgentHub provider CLI transcripts сақтайды, бірақ authoritative token usage provider CLI оны шығара ма, соған байланысты.
+The provider report records the provider, transaction id, final status, persisted report path, artifact directory, and token-observation note. The artifact directory keeps `report.md`, provider diagnostics, provider test output, the AgentSpec, command stdout/stderr, and adapter prompt metadata after the temporary project is cleaned up. Set `AGENTHUB_PROVIDER_DOGFOOD_KEEP=1` only when you need to inspect the temporary project itself.
 
-## Failure Ережесі
+## Failure Rule
 
-Failure тек түсінікті болса ғана пайдалы. Әр failure үшін мынаны жаз:
+A failed dogfood run is useful only if it is understandable. For every failure, capture:
 
-- қолданылған command;
+- command used;
 - transaction id;
-- нақты provider қолданылса, provider және model;
+- provider and model if a real provider was used;
 - final status;
 - report path;
-- main өзгерді ме;
-- memory promoted болды ма;
-- `agenthub tx explain latest` көрсеткен next action.
+- whether main changed;
+- whether memory was promoted;
+- next action from `agenthub tx explain latest`.
 
-AgentHub таза rollback жасамайынша, нақты human action арқылы block етпейінше немесе verified result commit етпейінше, failure қабылданған нәтиже деп саналмайды.
+Do not treat a dogfood failure as acceptable until AgentHub either rolls back cleanly, blocks with a clear human action, or commits a verified result.

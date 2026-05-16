@@ -12,7 +12,7 @@ fn writes_model_call_metadata_for_routes() -> Result<()> {
         "agent_spec": { "task": { "id": "demo" } },
         "agent_routes": {
             "executor": {
-                "requested_adapter": "codex",
+                "requested_adapter": "deepseek",
                 "selected_adapter": "command",
                 "role": "executor",
                 "model": "demo-model"
@@ -48,8 +48,8 @@ fn writes_model_metadata_for_topology_roles() -> Result<()> {
         "agent_spec": { "task": { "id": "demo" } },
         "agent_routes": {
             "roles": [
-                { "requested_adapter": "codex", "selected_adapter": "command", "role": "planner" },
-                { "requested_adapter": "gemini", "selected_adapter": "command", "role": "critic" },
+                { "requested_adapter": "deepseek", "selected_adapter": "command", "role": "planner" },
+                { "requested_adapter": "kimi", "selected_adapter": "command", "role": "critic" },
                 { "requested_adapter": "command", "selected_adapter": "command", "role": "executor" }
             ]
         },
@@ -74,7 +74,7 @@ fn marks_private_model_routes() -> Result<()> {
         "agent_spec": { "task": { "id": "demo" } },
         "agent_routes": {
             "executor": {
-                "requested_adapter": "codex",
+                "requested_adapter": "deepseek",
                 "selected_adapter": "command",
                 "role": "executor",
                 "model": "internal-model"
@@ -108,10 +108,10 @@ fn budget_blocks_provider_plan_when_estimate_exceeds_limit() -> Result<()> {
         },
         "agent_routes": {
             "executor": {
-                "requested_adapter": "gemini",
-                "selected_adapter": "gemini",
+                "requested_adapter": "kimi",
+                "selected_adapter": "kimi",
                 "role": "executor",
-                "model": "gemini-test"
+                "model": "kimi-test"
             }
         },
         "skills": [],

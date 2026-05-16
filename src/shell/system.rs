@@ -11,6 +11,7 @@ use chrono::Utc;
 
 use crate::command_policy;
 use crate::command_runner::{run_shell_with_sandbox_logged, CommandResult, CommandSandbox};
+use crate::home;
 use crate::observability::redact_text;
 
 use super::format;
@@ -32,7 +33,11 @@ pub(super) fn run(root: &Path, command: &str) -> Result<()> {
         }
         _ => {}
     }
-    let logs = root.join(".agent/shell/commands");
+    let logs = if home::project_has_shell_state(root) {
+        root.join(".agent/shell/commands")
+    } else {
+        home::global_shell_commands_dir(root)
+    };
     let prefix = format!("shell-{}", Utc::now().format("%Y%m%d%H%M%S"));
     let stdout_log = logs.join(format!("{prefix}.stdout.log"));
     let stderr_log = logs.join(format!("{prefix}.stderr.log"));

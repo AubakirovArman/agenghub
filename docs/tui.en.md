@@ -38,14 +38,14 @@ Project: /repo
 - DAG: 5 nodes, 4 edges
 - verifier passed: true
 - cost: 0.000000 USD
-- provider: codex
+- provider: deepseek
 - effects: 4
 
 [Providers]
-- default: codex
-- ready: 2 | missing: 3 | profiles: 1
-- executor -> codex (ok)
-- reviewer -> gemini (missing) fallback:kimi,command
+- default: deepseek
+- ready: 1 | missing: 2 | profiles: 0
+- executor -> deepseek (ok)
+- reviewer -> kimi (missing) fallback:kimi,command
 
 [Next Actions]
 - agenthub tx report tx-20260515030834-2aefeacd

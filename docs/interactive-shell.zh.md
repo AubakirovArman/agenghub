@@ -82,7 +82,7 @@ edit       用 $VISUAL 或 $EDITOR 打开 draft，然后重新验证
 
 ```text
 /chats status:COMMITTED
-/chats provider:codex
+/chats provider:deepseek
 /chats date:today
 /chats status:BLOCKED_ON_HUMAN provider:kimi
 ```
@@ -91,4 +91,4 @@ edit       用 $VISUAL 或 $EDITOR 打开 draft，然后重新验证
 
 ## 边界
 
-Shell 不替代 Codex、Kimi、Gemini 或 OpenAI-compatible model。它在 provider work 外层提供 transaction control、approvals、logs、rollback、reports、memory 和 dashboard visibility。
+Shell 不替代 DeepSeek、Kimi、Kimi 或 OpenAI-compatible model。它在 provider work 外层提供 transaction control、approvals、logs、rollback、reports、memory 和 dashboard visibility。

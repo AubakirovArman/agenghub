@@ -1,27 +1,27 @@
 # Known Limitations
 
-Языки: [English](known-limitations.en.md), [Русский](known-limitations.ru.md), [中文](known-limitations.zh.md), [Қазақша](known-limitations.kk.md)
+Languages: [English](known-limitations.en.md), [Русский](known-limitations.ru.md), [中文](known-limitations.zh.md), [Қазақша](known-limitations.kk.md)
 
-AgentHub `0.3.0-local-preview` — устанавливаемый local developer preview, а не стабильный публичный или enterprise product.
+AgentHub `0.3.0-local-preview` is an installable local developer preview, not a stable public or enterprise product.
 
-## Лицензия
+## License
 
-AgentHub распространяется как open-source под Apache License 2.0. Его можно использовать, копировать, изменять, распространять и применять коммерчески по условиям лицензии. При распространении проекта или производных работ нужно сохранять текст лицензии и attribution notices.
+AgentHub is open source under the Apache License 2.0. You may use, copy, modify, distribute, and use it commercially under the license terms. Keep the license and attribution notices when redistributing the project or derivative works.
 
-## Границы sandbox
+## Sandbox Scope
 
-AgentHub даёт transactional isolation, Git worktrees, command policy checks, rollback, process supervision и hardening reports. Локальные sandbox levels не являются полноценной security boundary для untrusted code. Для рискованных команд используйте remote или isolated runners.
+AgentHub provides transactional isolation, Git worktrees, command policy checks, rollback, process supervision, and hardening reports. Local sandbox levels are not a full security boundary for untrusted code. Use remote or isolated runners for risky commands.
 
 ## Providers
 
-CLI providers вроде Codex, Gemini и Kimi находятся через локальные binaries и используют authentication на стороне самого provider. AgentHub может проверить binary presence, version output, templates и dry-run readiness, но не может полностью доказать, что каждый provider account залогинен.
+DeepSeek and Kimi are API-native providers. AgentHub checks configured endpoints, model labels, and API-key environment markers without printing secret values.
 
-`openai-http` поддерживает OpenAI-compatible HTTP и HTTPS endpoints с bearer-token auth, timeouts и structured error bodies. Streaming API calls и provider-specific auth flows запланированы позже.
+`deepseek` and `kimi` support OpenAI-compatible HTTP and HTTPS endpoints with bearer-token auth, timeouts, and structured error bodies. Streaming chat and the project tool loop are still being wired in.
 
-## Team и Enterprise
+## Team And Enterprise
 
-Hosted/team surfaces сейчас пишут local export payloads для будущего self-hosted или hosted control plane. Running team server, user accounts, browser login и shared approval inbox пока не реализованы.
+Hosted/team surfaces currently write local export payloads for future self-hosted or hosted control planes. They do not yet provide a running team server, user accounts, browser login, or shared approval inbox.
 
-## Стабильность release
+## Release Stability
 
-Release preview может устанавливаться, запускать `doctor`, настраивать provider, выполнять safe transaction и открывать dashboard. API, AAL, plugin и report formats ещё могут измениться до stable release.
+The release preview can install, run `doctor`, configure a provider, execute a safe transaction, and open a dashboard. API, AAL, plugin, and report formats can still change before a stable release.

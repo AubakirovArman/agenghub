@@ -1,6 +1,6 @@
 # Competitive Positioning
 
-AgentHub is not another coding agent. It is a local transactional runtime around agents such as Codex, Gemini, Kimi, command-line tools, and OpenAI-compatible endpoints.
+AgentHub is not another coding agent. It is a local transactional runtime around agents such as DeepSeek, Kimi, Kimi, command-line tools, and OpenAI-compatible endpoints.
 
 ## Position
 

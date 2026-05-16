@@ -1,6 +1,6 @@
 # Competitive Positioning
 
-AgentHub — не ещё один coding agent. Это локальный транзакционный runtime вокруг агентов: Codex, Gemini, Kimi, command-line tools и OpenAI-compatible endpoints.
+AgentHub — не ещё один coding agent. Это локальный транзакционный runtime вокруг агентов: DeepSeek, Kimi, Kimi, command-line tools и OpenAI-compatible endpoints.
 
 ## Позиционирование
 

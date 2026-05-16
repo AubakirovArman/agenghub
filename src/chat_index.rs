@@ -8,6 +8,8 @@ use rusqlite::{params, Connection, OptionalExtension};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
+use crate::home;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChatIndexRow {
     pub id: String,
@@ -441,11 +443,19 @@ fn chat_id(path: &Path) -> String {
 }
 
 fn chats_dir(root: &Path) -> PathBuf {
-    root.join(".agent").join("shell").join("chats")
+    if home::project_has_shell_state(root) {
+        root.join(".agent").join("shell").join("chats")
+    } else {
+        home::global_chats_dir(root)
+    }
 }
 
 fn db_path(root: &Path) -> PathBuf {
-    root.join(".agent/cache/indexes/chats.sqlite3")
+    if home::project_has_shell_state(root) {
+        root.join(".agent/cache/indexes/chats.sqlite3")
+    } else {
+        home::base_dir().join("indexes").join("chats.sqlite3")
+    }
 }
 
 #[cfg(test)]

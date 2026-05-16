@@ -1,13 +1,12 @@
 task:
   id: adapter_dry_run_example
   type: code.command
-  title: Run a CLI agent adapter in dry-run mode
+  title: Route an API-native agent adapter in dry-run mode
 
 agent:
-  adapter: codex
+  adapter: deepseek
   model: test-model
   dry_run: true
-  command_template: "codex exec --sandbox workspace-write - < {prompt}"
 
 workspace:
   type: code.git

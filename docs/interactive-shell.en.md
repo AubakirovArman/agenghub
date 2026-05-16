@@ -82,7 +82,7 @@ edit       open the draft in $VISUAL or $EDITOR, then revalidate it
 
 ```text
 /chats status:COMMITTED
-/chats provider:codex
+/chats provider:deepseek
 /chats date:today
 /chats status:BLOCKED_ON_HUMAN provider:kimi
 ```
@@ -91,4 +91,4 @@ Expert commands such as `agenthub run`, `agenthub tx report`, `agenthub tx diff`
 
 ## Boundary
 
-The shell does not replace Codex, Kimi, Gemini, or an OpenAI-compatible model. It provides transaction control, approvals, logs, rollback, reports, memory, and dashboard visibility around provider work.
+The shell does not replace DeepSeek, Kimi, Kimi, or an OpenAI-compatible model. It provides transaction control, approvals, logs, rollback, reports, memory, and dashboard visibility around provider work.

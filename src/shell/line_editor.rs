@@ -11,6 +11,8 @@ use rustyline::history::DefaultHistory;
 use rustyline::validate::Validator;
 use rustyline::{Config, Context, Editor, Helper};
 
+use crate::home;
+
 use super::completion;
 
 pub(super) struct ShellInput {
@@ -20,8 +22,15 @@ pub(super) struct ShellInput {
 
 impl ShellInput {
     pub(super) fn new(root: &Path) -> Result<Self> {
-        let history_path = root.join(".agent/shell/history.txt");
+        let history_path = if home::project_has_shell_state(root) {
+            root.join(".agent/shell/history.txt")
+        } else {
+            home::global_history_path(root)
+        };
         let editor = if io::stdin().is_terminal() && io::stdout().is_terminal() {
+            if let Some(parent) = history_path.parent() {
+                let _ = std::fs::create_dir_all(parent);
+            }
             let config = Config::builder().history_ignore_space(true).build();
             let mut editor = Editor::<SlashHelper, DefaultHistory>::with_config(config)?;
             editor.set_helper(Some(SlashHelper {

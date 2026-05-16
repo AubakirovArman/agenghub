@@ -26,13 +26,13 @@ Every transaction now writes:
 
 ## Provider Plan
 
-`llm_provider_plan.json` normalizes CLI wrappers and future API providers into one request model. Each planned call includes provider metadata, token counts, retry backoff, and explicit failover records when a requested adapter is routed to another provider.
+`llm_provider_plan.json` normalizes AgentHub-owned API providers into one request model. Each planned call includes provider metadata, token counts, retry backoff, and explicit failover records when a requested adapter is routed to another provider.
 
 Example:
 
 ```json
 {
-  "provider": { "id": "codex", "kind": "cli_wrapper", "supports_streaming": true },
+  "provider": { "id": "deepseek", "kind": "api_provider", "supports_streaming": true },
   "retry_policy": { "max_attempts": 3, "backoff_ms": [250, 1000, 3000] },
   "failover": []
 }
@@ -40,24 +40,25 @@ Example:
 
 ## Real Provider Execution
 
-PRD v3 adds first real execution paths while keeping planned metadata compatibility:
+v0.4 keeps planned metadata compatibility while moving user-facing provider execution to DeepSeek/Kimi APIs:
 
-- `CliProvider` can run a configured CLI command template, write a prompt file, capture stdout/stderr, and append provider transcript JSONL.
-- `HttpProvider` can call an OpenAI-compatible `http://` or `https://` endpoint at `/v1/chat/completions`, with timeout, bearer token, and structured error body handling. It can also probe optional `/v1/models`; missing model-list support is reported without failing the completion test.
+- `HttpProvider` can call DeepSeek/Kimi OpenAI-compatible `http://` or `https://` endpoints at `/v1/chat/completions`, with timeout, bearer token, and structured error body handling. It can also probe optional `/v1/models`; missing model-list support is reported without failing the completion test.
 - `complete_with_retry` wraps provider calls with retry/backoff and optional attempt transcript records.
 
-Local OpenAI-compatible endpoint test:
+Provider tests:
 
 ```bash
-AGENTHUB_OPENAI_COMPAT_BASE_URL=http://127.0.0.1:8000 agenthub providers test openai-http
-AGENTHUB_OPENAI_COMPAT_BASE_URL=https://api.example.com agenthub providers diagnose openai-http
+DEEPSEEK_API_KEY=... agenthub providers test deepseek
+KIMI_API_KEY=... agenthub providers test kimi
 ```
 
 Optional variables:
 
 ```text
-AGENTHUB_OPENAI_COMPAT_API_KEY
-AGENTHUB_OPENAI_COMPAT_MODEL
+DEEPSEEK_API_BASE_URL
+DEEPSEEK_MODEL
+KIMI_API_BASE_URL
+KIMI_MODEL
 ```
 
 ## Budget Policy

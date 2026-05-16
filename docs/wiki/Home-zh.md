@@ -1,6 +1,6 @@
 # AgentHub Wiki
 
-AgentHub 是面向 AI coding agents 的本地事务型 runtime。它用 isolated worktrees、verifier checks、rollback、memory、reports 和 dashboards 包装 Codex、Gemini、Kimi、command adapters 以及 OpenAI-compatible endpoints。
+AgentHub 是面向 AI coding agents 的本地事务型 runtime。它用 isolated worktrees、verifier checks、rollback、memory、reports 和 dashboards 包装 DeepSeek、Kimi、Kimi、command adapters 以及 OpenAI-compatible endpoints。
 
 语言: [English](Home) · [Русский](Home-ru) · [中文](Home-zh) · [Қазақша](Home-kk)
 
@@ -30,9 +30,9 @@ agenthub> create a Django web application
 - Dashboard 包含 provider status、approval inbox、memory browser、history browser，以及用于 report、diff 和 logs 的 transaction viewer panes。
 - 使用 `agenthub aal check <file.aal>` 获取 structured language diagnostics、supported workspace/topology hints，以及 golden AgentIR/DAG checks。
 - Natural language 可以创建 bounded files、Next.js pages，以及带 verifier checks 的 Django starter scaffold。
-- 使用 `agenthub providers add openai-http --name local-vllm --url ...` 保存 reusable local model endpoints。
-- 可直接检查 Kimi API：`KIMI_API_KEY=... agenthub providers test kimi-api`。
-- 使用 `/chats`、`/search`、`/rename`、`/pin` 和 `/unpin` 管理带 auto titles 的 chat sessions；可用 `/chats status:COMMITTED provider:codex date:today` 过滤。
+- Configure DeepSeek with `DEEPSEEK_API_KEY=... agenthub providers test deepseek`.
+- 可直接检查 Kimi API：`KIMI_API_KEY=... agenthub providers test kimi`。
+- Use `/chats`, `/search`, `/rename`, `/pin`, and `/unpin` to manage chat sessions; filter with `/chats status:COMMITTED provider:deepseek date:today`.
 - `/context` 可预览 current chat、recent messages、memory 和 selected transaction context。
 - Approval prompts 会显示 risk，并支持 `diff`、`details` 和 `edit`。
 - `@path`、`@tx:<id>` 和 `@memory:<query>` 添加 context，`!command` 运行 policy-checked shell command，`# note` 保存 project memory。

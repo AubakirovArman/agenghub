@@ -59,8 +59,7 @@ fn append_profiles(out: &mut String, statuses: &[ProviderStatus]) {
         .collect::<Vec<_>>();
     if profiles.is_empty() {
         out.push_str("  none yet\n");
-        out.push_str("  /providers add openai-http --name local-vllm --url http://127.0.0.1:8000 --model qwen3\n");
-        out.push_str("  /providers add openai-http --name kimi-api --url https://api.example.com/v1 --model kimi\n");
+        out.push_str("  API-native mode uses first-class `deepseek` and `kimi` providers.\n");
         return;
     }
     for profile in profiles {
@@ -81,13 +80,13 @@ fn append_next_actions(out: &mut String, statuses: &[ProviderStatus]) {
     out.push_str(&format!("  /providers diagnose {provider}\n"));
     out.push_str(&format!("  /providers test {provider}\n"));
     out.push_str(&format!("  /providers set executor {provider}\n"));
-    out.push_str("  /providers fallback reviewer gemini kimi command\n");
+    out.push_str("  /providers fallback reviewer deepseek kimi command\n");
 }
 
 fn recommended_provider(statuses: &[ProviderStatus]) -> String {
     statuses
         .iter()
-        .find(|status| status.available && status.info.id != "command")
+        .find(|status| status.available && matches!(status.info.id.as_str(), "deepseek" | "kimi"))
         .or_else(|| statuses.iter().find(|status| status.info.id == "command"))
         .map(|status| status.info.id.clone())
         .unwrap_or_else(|| "command".to_string())

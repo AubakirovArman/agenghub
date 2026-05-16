@@ -34,7 +34,7 @@ topology:
 
 agents:
   planner:
-    adapter: codex
+    adapter: deepseek
     dry_run: true
   executor:
     adapter: command
@@ -96,10 +96,10 @@ topology:
 
 agents:
   executor:
-    adapter: codex
+    adapter: deepseek
     dry_run: true
   repair:
-    adapter: gemini
+    adapter: kimi
     dry_run: true
 ```
 

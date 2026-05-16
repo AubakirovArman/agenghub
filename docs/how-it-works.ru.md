@@ -1,31 +1,31 @@
-# AgentHub: как это работает
+# AgentHub: How It Works
 
-Языки: [English](how-it-works.en.md), [Русский](how-it-works.ru.md), [中文](how-it-works.zh.md), [Қазақша](how-it-works.kk.md)
+Languages: [English](how-it-works.en.md), [Русский](how-it-works.ru.md), [中文](how-it-works.zh.md), [Қазақша](how-it-works.kk.md)
 
-## Концепция
+## Concept
 
-AgentHub рассматривает работу агента как транзакцию:
+AgentHub treats agent work as a transaction:
 
 ```text
-intent или AgentSpec -> isolated workspace -> execution -> review -> verification -> commit или rollback -> memory update
+intent or AgentSpec -> isolated workspace -> execution -> review -> verification -> commit or rollback -> memory update
 ```
 
-Агент не должен напрямую менять основной проект. Изменения выполняются во временном git worktree, затем AgentHub проверяет результат и применяет его только после успешной транзакции.
+The main project should not be mutated directly by an agent. Work happens in a temporary git worktree, then AgentHub verifies the result and only merges it back when the transaction passes.
 
-## Поток транзакции
+## Transaction Flow
 
-1. `agenthub run <spec.yaml>` загружает и валидирует AgentSpec.
-2. AgentHub создаёт `.agent/tx/<tx-id>/` и пишет `plan.yaml`, `agent_ir.txt`, `dag.json`, `journal.jsonl`.
-3. Git worktree создаётся в `.agent/workspaces/<tx-id>/`.
-4. Executor adapter пишет prompt/invocation artifacts, затем `execution.commands` выполняются в изолированном worktree.
-5. Diff guard применяет `scope.allow`, `scope.deny` и `transaction.diff_limits`.
-6. Если `topology.kind` равен `executor_reviewer_repair`, reviewer commands выполняются до verifier.
-7. Выполняются `verify.commands` и опциональные runtime smoke checks.
-8. При успехе AgentHub проверяет, что project HEAD не сдвинулся, делает commit и fast-forward merge.
-9. При ошибке AgentHub откатывает worktree и записывает failed attempt.
-10. Отчёты и память остаются в `.agent/`.
+1. `agenthub run <spec.yaml>` loads and validates AgentSpec.
+2. AgentHub creates `.agent/tx/<tx-id>/` and writes `plan.yaml`, `agent_ir.txt`, `dag.json`, and `journal.jsonl`.
+3. A git worktree is prepared under `.agent/workspaces/<tx-id>/`.
+4. The executor adapter writes its prompt/invocation artifacts, then `execution.commands` run in that isolated worktree.
+5. `scope.allow`, `scope.deny`, and `transaction.diff_limits` are enforced by the diff guard.
+6. If `topology.kind` is `executor_reviewer_repair`, reviewer commands run before verifier.
+7. `verify.commands` and optional runtime smoke checks run.
+8. On success, AgentHub checks that the project HEAD did not move, commits and fast-forwards the result.
+9. On failure, AgentHub rolls back the worktree and records a failed attempt.
+10. Reports and memory artifacts remain under `.agent/`.
 
-## Разделы AgentSpec
+## AgentSpec Sections
 
 ```yaml
 task:
@@ -66,35 +66,35 @@ transaction:
     max_lines_deleted: 20
 ```
 
-Важные поля:
+Important fields:
 
-- `task.id`: стабильное имя задачи для отчётов и памяти.
-- `workspace.type`: `code.git`, `content.git`, `data.git` или `infra.git`.
-- `agent.adapter`: `command`, `codex`, `kimi` или `gemini`.
-- `execution.commands`: детерминированные команды, которые делают изменение.
-- `scope.allow` и `scope.deny`: границы файлов для транзакции.
-- `verify.commands`: команды, которые должны пройти перед commit.
-- `transaction.diff_limits`: ограничения масштаба изменения.
-- `transaction.memory_promotion`: `on_success` продвигает память только после проверки.
+- `task.id`: stable transaction task name used in reports and memory.
+- `workspace.type`: one of `code.git`, `content.git`, `data.git`, `infra.git`.
+- `agent.adapter`: `command`, `deepseek`, or `kimi`.
+- `execution.commands`: deterministic commands that perform the change.
+- `scope.allow` and `scope.deny`: file boundaries for the transaction.
+- `verify.commands`: commands that must pass before commit.
+- `transaction.diff_limits`: blast-radius limits.
+- `transaction.memory_promotion`: `on_success` promotes staged memory only after verification.
 
 ## Natural Language Preview
 
-`agenthub ask "<request>"` генерирует AgentSpec preview, подставляет defaults и печатает required clarification questions, если blocking fields нельзя вывести из запроса. `--approval-required` помечает preview как требующий manual approval. См. [Natural language](natural-language.ru.md).
+`agenthub ask "<request>"` generates an AgentSpec preview, resolves defaults, and prints required clarification questions when blocking fields cannot be inferred. Use `--approval-required` to mark the preview for manual approval. See [Natural language](natural-language.en.md).
 
 ## Workspaces
 
-Сейчас поддерживаются шесть git-backed профилей:
+AgentHub currently supports six git-backed domain profiles:
 
-- `code.git`: исходный код, build, tests, runtime checks.
+- `code.git`: source code, builds, tests, runtime checks.
 - `content.git`: markdown, articles, docs, brand/tone rules.
 - `data.git`: reports, data artifacts, metric checks.
 - `infra.git`: plans, config, infrastructure review artifacts.
-- `media.git`: prompts, scripts, voice tracks, renders и media assets.
-- `research.git`: sources, claims, citations, graphs, critic notes и reports.
+- `media.git`: prompts, scripts, voice tracks, renders, and media assets.
+- `research.git`: sources, claims, citations, graphs, critic notes, and reports.
 
-Domain verifier profiles добавляют structural checks после configured commands: `content_quality` проверяет content artifacts, `data_quality` валидирует JSON, `infra_plan` валидирует plans, `media_render` валидирует media manifests/assets, `research_report` валидирует cited claims, `backend_tdd` валидирует test и API response artifacts, а `db_migration` валидирует migration artifacts. Подробно: [Workspaces](workspaces.ru.md), [Research](research-profile.ru.md), [Backend TDD](backend-tdd-verifier.ru.md), [DB Migration](db-migration-verifier.ru.md).
+Domain verifier profiles add structural checks after configured commands: `content_quality` checks content artifacts, `data_quality` validates JSON, `infra_plan` validates plans, `media_render` validates media manifests/assets, `research_report` validates cited claims, `backend_tdd` validates test and API response artifacts, and `db_migration` validates migration artifacts. Details: [Workspaces](workspaces.en.md), [Research](research-profile.en.md), [Backend TDD](backend-tdd-verifier.en.md), and [DB Migration](db-migration-verifier.en.md).
 
-Примеры:
+Examples:
 
 ```bash
 agenthub run examples/command-task.yaml
@@ -107,38 +107,37 @@ agenthub run examples/db-migration-task.yaml
 
 ## Agent Adapters
 
-Adapter по умолчанию — `command`. External executor adapters используют shell template и сгенерированный prompt:
+The default adapter is `command`. API-native adapters use AgentHub-owned DeepSeek/Kimi requests and generated prompts:
 
 ```yaml
 agent:
-  adapter: codex
-  model: test-model
+  adapter: deepseek
+  model: deepseek-chat
   dry_run: true
-  command_template: "codex exec --sandbox workspace-write - < {prompt}"
 ```
 
-Запуск dry-run example:
+Run the dry-run example:
 
 ```bash
 agenthub run examples/adapter-dry-run-task.yaml
 ```
 
-Полезные overrides:
+Useful overrides:
 
 ```bash
 AGENTHUB_EXECUTOR_ADAPTER=kimi AGENTHUB_ADAPTER_DRY_RUN=1 agenthub run examples/adapter-dry-run-task.yaml
 AGENTHUB_PRIVATE_MODE=1 agenthub run examples/adapter-dry-run-task.yaml
 ```
 
-Подробное поведение описано в [Agent adapters](agent-adapters.ru.md).
+Detailed adapter behavior is documented in [Agent adapters](agent-adapters.en.md).
 
 ## Topologies
 
-AgentSpec поддерживает `single_executor`, `planner_executor`, `executor_reviewer_repair`, `generator_critic`, `swarm_research`, `manager_worker` и `tournament`. Multi-role topologies попадают в `dag.json`, `agent_trace.json` и `model_call_metadata.json`. См. [Topologies](topologies.ru.md).
+AgentSpec supports `single_executor`, `planner_executor`, `executor_reviewer_repair`, `generator_critic`, `swarm_research`, `manager_worker`, and `tournament`. Multi-role topologies appear in `dag.json`, `agent_trace.json`, and `model_call_metadata.json`. See [Topologies](topologies.en.md).
 
-## Review и Repair
+## Review And Repair
 
-Используй `executor_reviewer_repair`, когда нужна отдельная review-проверка:
+Use `executor_reviewer_repair` when the transaction needs a separate review gate:
 
 ```yaml
 topology:
@@ -156,11 +155,11 @@ transaction:
   max_repair_attempts: 1
 ```
 
-Если review или verifier падает и попытки repair ещё доступны, AgentHub запускает `repair.commands`, снова проверяет diff и повторяет gate.
+If review or verifier fails and repair attempts remain, AgentHub runs `repair.commands`, checks the diff again, and retries the gate.
 
 ## Runtime Smoke Checks
 
-Для web-проектов `verify.runtime` может поднять сервер и проверить маршруты:
+For web projects, `verify.runtime` can start a server and check routes:
 
 ```yaml
 verify:
@@ -176,38 +175,38 @@ verify:
       expect: 200
 ```
 
-Результат сохраняется в `.agent/tx/<tx-id>/verifier.json` и `.agent/tx/<tx-id>/verifier.log`.
+The result is stored in `.agent/tx/<tx-id>/verifier.json` and `.agent/tx/<tx-id>/verifier.log`.
 
-Если verifier output указывает на missing environment variable, статус транзакции становится `BLOCKED_ON_HUMAN`, и AgentHub не записывает это как обычный failed attempt. Подробно: [Runtime and repair](runtime-repair.ru.md).
+If verifier output indicates a missing environment variable, the transaction status becomes `BLOCKED_ON_HUMAN` and AgentHub avoids recording it as a normal failed attempt. Full details: [Runtime and repair](runtime-repair.en.md).
 
-## Память и артефакты
+## Memory And Artifacts
 
-Каждая транзакция пишет:
+Every transaction writes:
 
-- `.agent/tx/<tx-id>/journal.jsonl`: append-only лог состояний.
-- `.agent/tx/<tx-id>/report.md`: человекочитаемый отчёт.
+- `.agent/tx/<tx-id>/journal.jsonl`: append-only state log.
+- `.agent/tx/<tx-id>/report.md`: human-readable result.
 - `.agent/tx/<tx-id>/dag.json`: execution graph.
-- `.agent/tx/<tx-id>/agent_trace.json`: выбранные executor, reviewer и repair routes.
-- `.agent/tx/<tx-id>/agent_transcript.jsonl`: transcript adapter и command events.
-- `.agent/tx/<tx-id>/agent_prompt_<role>.md`: prompt artifact роли.
-- `.agent/tx/<tx-id>/adapter_invocation_<role>.json`: details external adapter invocation, если adapter использовался.
-- `.agent/tx/<tx-id>/context_pack.json`: минимальный контекст выполнения.
-- `.agent/tx/<tx-id>/model_call_metadata.json`: metadata planned/observed model calls.
-- `.agent/tx/<tx-id>/llm_gateway_summary.json`: token/cost summary gateway.
+- `.agent/tx/<tx-id>/agent_trace.json`: selected executor, reviewer, and repair routes.
+- `.agent/tx/<tx-id>/agent_transcript.jsonl`: adapter and command transcript.
+- `.agent/tx/<tx-id>/agent_prompt_<role>.md`: role prompt artifact.
+- `.agent/tx/<tx-id>/agent_prompt_<role>.md`: prompt artifact for API-native adapter routes.
+- `.agent/tx/<tx-id>/context_pack.json`: minimal context for execution.
+- `.agent/tx/<tx-id>/model_call_metadata.json`: planned/observed model call metadata.
+- `.agent/tx/<tx-id>/llm_gateway_summary.json`: gateway token and cost summary.
 - `.agent/tx/<tx-id>/redacted_api.jsonl`: redacted gateway trace.
-- `.agent/tx/<tx-id>/memory_staging.jsonl`: память, подготовленная транзакцией.
+- `.agent/tx/<tx-id>/memory_staging.jsonl`: memory staged during the transaction.
 
-Успешные транзакции продвигают память в `.agent/memory/committed.jsonl`. Ошибочные транзакции пишут `.agent/memory/failed_attempts.jsonl` и error fingerprint.
+Successful transactions promote memory to `.agent/memory/committed.jsonl`. Failed transactions write `.agent/memory/failed_attempts.jsonl` and an error fingerprint.
 
 ## Context Maps
 
-Сканирование workspace создаёт maps для routes, components и exports:
+Scan a workspace to create route, component, and export maps:
 
 ```bash
 agenthub workspace scan --write-maps
 ```
 
-Файлы:
+Generated files:
 
 ```text
 .agent/maps/routes.map.json
@@ -215,37 +214,37 @@ agenthub workspace scan --write-maps
 .agent/maps/exports.map.json
 ```
 
-Эти maps попадут в следующие context packs.
+These maps are included in future context packs.
 
-Каждая транзакция также пишет `map_context`: subset maps, выбранный по `scope.allow` и task hints. AgentHub пересчитывает hashes mapped files; stale или missing map entries отражаются в `map_context.validation`. См. [Context maps](context-maps.ru.md).
+Each transaction also writes `map_context`, a selected subset of maps based on `scope.allow` and task hints. AgentHub recalculates mapped file hashes; stale or missing map entries are reported under `map_context.validation`. See [Context maps](context-maps.en.md).
 
 ## Command Policy
 
-Перед execution AgentHub проверяет `.agent/policies/core.yaml` и пишет `command_policy.json`. Commands из `needs_approval` требуют `transaction.approval_required: true`; иначе transaction получает `BLOCKED_ON_HUMAN`. `restricted` commands отклоняются до выполнения. См. [Command Policy](command-policy.ru.md).
+Before execution AgentHub evaluates `.agent/policies/core.yaml` and writes `command_policy.json`. `needs_approval` commands require `transaction.approval_required: true`; otherwise the transaction becomes `BLOCKED_ON_HUMAN`. `restricted` commands are rejected before execution. See [Command Policy](command-policy.en.md).
 
 ## Sandbox Levels
 
-`execution.sandbox.level` управляет command isolation. Level 0 — local controlled execution, Level 1 использует очищенное local command environment, а Levels 2-3 dispatch commands в настроенные remote runners. Каждая transaction пишет `sandbox.json`. См. [Sandbox Levels](sandbox-levels.ru.md) и [Remote Runner](remote-runner.ru.md).
+`execution.sandbox.level` controls command isolation. Level 0 is local controlled execution, Level 1 uses a sanitized local command environment, and Levels 2-3 dispatch to configured remote runners. Each transaction writes `sandbox.json`. See [Sandbox Levels](sandbox-levels.en.md) and [Remote Runner](remote-runner.en.md).
 
 ## VS Code Extension
 
-Extension в `editors/vscode` даёт:
+The extension in `editors/vscode` provides:
 
-- transaction tree из `.agent/tx`;
-- memory tree из `.agent/memory`;
-- AgentSpec drafts и examples;
-- approval queue для pending specs и transactions `BLOCKED_ON_HUMAN`;
-- открытие latest report;
-- DAG webview для `dag.json`;
-- prompt-to-AgentSpec preview через `agenthub ask`.
+- transaction tree from `.agent/tx`;
+- memory tree from `.agent/memory`;
+- AgentSpec drafts and examples;
+- approval queue for pending specs and `BLOCKED_ON_HUMAN` transactions;
+- latest report opener;
+- DAG webview for `dag.json`;
+- prompt-to-AgentSpec preview using `agenthub ask`.
 
-Код extension разбит на маленькие zero-build JavaScript модули в `editors/vscode/src/`. См. [IDE and visual layer](ide.ru.md).
+It is split into small zero-build JavaScript modules under `editors/vscode/src/`. See [IDE and visual layer](ide.en.md).
 
-## Правила разработки
+## Development Rules
 
-Файлы реализации должны оставаться модульными. Цель — меньше 200 строк на файл. Разделяй по ответственности: types, validation, execution, review, verification, storage, rendering и UI commands должны жить в отдельных модулях.
+Keep implementation files modular. The target is under 200 lines per file. Split by responsibility: types, validation, execution, review, verification, storage, rendering, and UI commands should live in separate modules.
 
-Локальная проверка размера модулей:
+Run the local size check:
 
 ```bash
 scripts/check-module-size.sh 200

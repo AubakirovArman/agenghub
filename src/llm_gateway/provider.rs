@@ -137,8 +137,7 @@ impl CliProvider {
 pub fn metadata_for_adapter(adapter: &str) -> ProviderMetadata {
     match adapter {
         "command" => metadata(adapter, "local_command", false, false),
-        "codex" | "kimi" | "gemini" => metadata(adapter, "cli_wrapper", false, true),
-        "openai" | "openai-http" | "anthropic" => metadata(adapter, "api_provider", true, true),
+        "deepseek" | "kimi" => metadata(adapter, "api_provider", true, true),
         other => metadata(other, "unknown", false, false),
     }
 }

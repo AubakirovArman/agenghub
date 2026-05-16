@@ -16,7 +16,7 @@ cat > "$HISTORY/index.jsonl" <<JSONL
 {"run_id":"suite-1","archived_at":"2026-05-14T00:00:00Z","kind":"suite","report":"$HISTORY/runs/suite-1/dogfood-report.json","provider_report":"","provider":"","provider_status":"skipped","tx_id":""}
 {"run_id":"suite-2","archived_at":"2026-05-15T00:00:00Z","kind":"suite","report":"$HISTORY/runs/suite-2/dogfood-report.json","provider_report":"","provider":"","provider_status":"skipped","tx_id":""}
 {"run_id":"suite-3","archived_at":"2026-05-16T00:00:00Z","kind":"suite","report":"$HISTORY/runs/suite-3/dogfood-report.json","provider_report":"","provider":"","provider_status":"skipped","tx_id":""}
-{"run_id":"provider-1","archived_at":"2026-05-16T01:00:00Z","kind":"provider","report":"$HISTORY/runs/provider-1/provider-dogfood-report.json","provider_report":"$HISTORY/runs/provider-1/provider-dogfood-report.json","provider":"codex","provider_status":"passed","tx_id":"tx-demo"}
+{"run_id":"provider-1","archived_at":"2026-05-16T01:00:00Z","kind":"provider","report":"$HISTORY/runs/provider-1/provider-dogfood-report.json","provider_report":"$HISTORY/runs/provider-1/provider-dogfood-report.json","provider":"deepseek","provider_status":"passed","tx_id":"tx-demo"}
 JSONL
 
 AGENTHUB_DOGFOOD_HISTORY_DIR="$HISTORY" "$ROOT/scripts/dogfood-readiness.sh" --check > "$TMP/pass.out"

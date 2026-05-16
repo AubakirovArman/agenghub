@@ -5,7 +5,7 @@ use anyhow::Result;
 use super::write_dashboard;
 use crate::agent_dir::init_project;
 use crate::memory;
-use crate::product_cli::{config, providers};
+use crate::product_cli::config;
 
 #[test]
 fn writes_static_browser_dashboard() -> Result<()> {
@@ -46,14 +46,8 @@ fn writes_static_browser_dashboard() -> Result<()> {
     memory::promote_staging(dir.path(), &tx)?;
     write_approval_spec(dir.path())?;
     write_skill(dir.path())?;
-    providers::add_openai_http(
-        dir.path(),
-        "local-vllm",
-        "http://127.0.0.1:8000",
-        Some("qwen3"),
-        Some("AGENTHUB_TEST_KEY"),
-    )?;
-    config::set_value(dir.path(), "provider.role.executor", "local-vllm")?;
+    config::set_value(dir.path(), "default_provider", "deepseek")?;
+    config::set_value(dir.path(), "provider.role.executor", "deepseek")?;
 
     let output = dir.path().join(".agent/reports/dashboard");
     let result = write_dashboard(dir.path(), &output)?;
@@ -71,7 +65,7 @@ fn writes_static_browser_dashboard() -> Result<()> {
     assert!(data.contains("\"approvals\""));
     assert!(data.contains("\"memory_browser\""));
     assert!(data.contains("\"history\""));
-    assert!(data.contains("local-vllm"));
+    assert!(data.contains("deepseek"));
     assert!(data.contains("approval_required"));
     assert!(data.contains("BLOCKED_ON_HUMAN"));
     assert!(data.contains("transaction viewer"));

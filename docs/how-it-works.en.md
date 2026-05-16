@@ -70,7 +70,7 @@ Important fields:
 
 - `task.id`: stable transaction task name used in reports and memory.
 - `workspace.type`: one of `code.git`, `content.git`, `data.git`, `infra.git`.
-- `agent.adapter`: `command`, `codex`, `kimi`, or `gemini`.
+- `agent.adapter`: `command`, `deepseek`, or `kimi`.
 - `execution.commands`: deterministic commands that perform the change.
 - `scope.allow` and `scope.deny`: file boundaries for the transaction.
 - `verify.commands`: commands that must pass before commit.
@@ -107,14 +107,13 @@ agenthub run examples/db-migration-task.yaml
 
 ## Agent Adapters
 
-The default adapter is `command`. External executor adapters use a shell template and a generated prompt:
+The default adapter is `command`. API-native adapters use AgentHub-owned DeepSeek/Kimi requests and generated prompts:
 
 ```yaml
 agent:
-  adapter: codex
-  model: test-model
+  adapter: deepseek
+  model: deepseek-chat
   dry_run: true
-  command_template: "codex exec --sandbox workspace-write - < {prompt}"
 ```
 
 Run the dry-run example:
@@ -190,7 +189,7 @@ Every transaction writes:
 - `.agent/tx/<tx-id>/agent_trace.json`: selected executor, reviewer, and repair routes.
 - `.agent/tx/<tx-id>/agent_transcript.jsonl`: adapter and command transcript.
 - `.agent/tx/<tx-id>/agent_prompt_<role>.md`: role prompt artifact.
-- `.agent/tx/<tx-id>/adapter_invocation_<role>.json`: external adapter invocation details when used.
+- `.agent/tx/<tx-id>/agent_prompt_<role>.md`: prompt artifact for API-native adapter routes.
 - `.agent/tx/<tx-id>/context_pack.json`: minimal context for execution.
 - `.agent/tx/<tx-id>/model_call_metadata.json`: planned/observed model call metadata.
 - `.agent/tx/<tx-id>/llm_gateway_summary.json`: gateway token and cost summary.

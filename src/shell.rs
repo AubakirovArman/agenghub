@@ -1,4 +1,5 @@
 mod actions;
+mod api_chat;
 mod approval;
 mod chat;
 mod chat_display;
@@ -25,7 +26,6 @@ mod product;
 mod progress;
 mod project;
 mod prompt;
-mod provider_args;
 mod run;
 mod session_browser;
 mod status;

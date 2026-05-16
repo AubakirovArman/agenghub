@@ -10,8 +10,6 @@ use crate::{
     },
 };
 
-use super::provider_args;
-
 pub(super) fn print_doctor(root: &Path) -> Result<()> {
     print!("{}", doctor::inspect(root)?.render());
     Ok(())
@@ -31,16 +29,9 @@ pub(super) fn handle_providers(root: &Path, args: Option<&str>) -> Result<()> {
             providers::setup_provider(root, required(&args, 1, "provider")?)?
         ),
         "add" => {
-            let add = provider_args::parse_add_openai_http(&args)?;
-            if add.provider != "openai-http" {
-                return Err(anyhow!(
-                    "only `openai-http` provider profiles are supported"
-                ));
-            }
-            print!(
-                "{}",
-                providers::add_openai_http(root, add.name, add.url, add.model, add.api_key_env)?
-            );
+            return Err(anyhow!(
+            "custom provider profiles are disabled in API-native mode; use `deepseek` or `kimi`"
+        ))
         }
         "test" => print!(
             "{}",

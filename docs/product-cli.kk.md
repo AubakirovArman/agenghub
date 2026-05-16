@@ -1,22 +1,22 @@
 # Product CLI
 
-Тілдер: [English](product-cli.en.md), [Русский](product-cli.ru.md), [中文](product-cli.zh.md), [Қазақша](product-cli.kk.md)
+Languages: [English](product-cli.en.md), [Русский](product-cli.ru.md), [中文](product-cli.zh.md), [Қазақша](product-cli.kk.md)
 
-PRD v3 local install, provider readiness, simple configuration және chat-first local work тексеретін user-facing commands қосады.
+AgentHub PRD v3 adds product-facing commands for local installation checks, provider readiness, simple configuration, and chat-first local work.
 
-## Chat-first shell
+## Chat-First Shell
 
 ```bash
 agenthub
 ```
 
-`agenthub` subcommand жоқ іске қосу — recommended daily entry. Ол Git және `.agent` дайындай алады, latest chat қалпына келтіреді, provider readiness көрсетеді және ordinary task бірден жазуға мүмкіндік береді. Shell draft plan жасайды, inline approval сұрайды, transaction іске қосады және `/diff`, `/logs`, `/report`, `/explain`, `/undo` ұсынады.
+Running `agenthub` without a subcommand is the recommended daily entry. It can prepare Git and `.agent`, restore the latest chat, show provider readiness, and let you type a normal task. The shell creates a draft plan, asks for inline approval, runs the transaction, and then suggests `/diff`, `/logs`, `/report`, `/explain`, and `/undo`.
 
-`/` commands үшін, `/cd <folder>` project-ті restart жасамай ауыстыру үшін, `@path` context үшін, `!command` policy-checked shell command үшін, `# note` project memory үшін қолданылады.
+Use `/` for commands, `/cd <folder>` to switch projects without restarting, `@path` for context, `!command` for policy-checked shell commands, and `# note` for project memory.
 
-Chat sessions автоматты түрде қалпына келеді. `/chats` auto titles және pin state бар sessions көрсетеді, `/search <text>` titles/messages бойынша іздейді, `/rename <title>` current chat атын өзгертеді, ал `/pin` немесе `/unpin` маңызды жұмысты жоғарыда ұстайды немесе босатады.
+Chat sessions are restored automatically. Use `/chats` to list sessions with auto titles and pin state, `/search <text>` to search titles/messages, `/rename <title>` to name the current chat, and `/pin` or `/unpin` to keep important work at the top.
 
-Task алдында `/context` current chat title, recent messages, memory summary, selected transaction report және supported mention forms preview көрсетеді.
+Use `/context` before a task to preview the current chat title, recent messages, memory summary, selected transaction report, and supported mention forms.
 
 ## Doctor
 
@@ -24,7 +24,7 @@ Task алдында `/context` current chat title, recent messages, memory summa
 agenthub doctor
 ```
 
-`doctor` — орнатудан кейінгі бірінші readiness screen. Ол AgentHub version, binary path, dev/release channel, OS/architecture, `sh` shell, Git version, Git repository status, `.agent` initialization, policy files, default provider readiness және supported provider binaries/endpoints тексереді. Optional Codex/Gemini/Kimi CLI жоқ болса warning; Git немесе `sh` жоқ болса blocking error.
+`doctor` is the first readiness screen after install. It checks the AgentHub version, binary path, dev/release channel, OS/architecture, `sh` shell availability, Git version, Git repository status, `.agent` initialization, policy files, default provider readiness, and supported provider binaries/endpoints. Missing optional DeepSeek/Kimi/Kimi APIs are warnings; missing Git or `sh` is blocking.
 
 ## Version
 
@@ -32,7 +32,7 @@ agenthub doctor
 agenthub version
 ```
 
-Орнатылған AgentHub version шығарады.
+Prints the installed AgentHub version.
 
 ## Plan And Run
 
@@ -43,9 +43,9 @@ agenthub run "Add /courses page in the current dashboard style" --no-watch
 agenthub run examples/command-task.yaml
 ```
 
-`plan` `--output` берілмесе draft AgentSpec-ті `.agent/drafts/` ішіне жазады. `run` бар AgentSpec path немесе natural request қабылдайды. Natural request алдымен draft spec-ке айналады, кейін кәдімгі transaction engine арқылы орындалады.
+`plan` writes a draft AgentSpec under `.agent/drafts/` unless `--output` is provided. `run` accepts either an existing AgentSpec path or a natural request. Natural requests are converted into a draft spec first, then executed through the normal transaction engine.
 
-Interactive terminal ішінде `run` transaction орындалып жатқанда live journal progress шығарады. Quiet one-shot run үшін `--no-watch` қолдан. Non-TTY/scripted output compact `tx-id STATUS (report)` жолын сақтайды, содан кейін task, provider, topology, verifier, memory promotion, changed files саны, report, `tx explain`, `tx watch` және dashboard path көрсетеді.
+In an interactive terminal, `run` prints live journal progress while the transaction executes. Use `--no-watch` for quiet one-shot runs. Non-TTY/scripted output keeps the compact `tx-id STATUS (report)` line, followed by task, provider, topology, verifier, memory promotion, changed file count, report, `tx explain`, `tx watch`, and dashboard path.
 
 ```bash
 agenthub tx explain tx-20260515123000-abcd1234
@@ -53,11 +53,11 @@ agenthub tx diff tx-20260515123000-abcd1234
 agenthub tx logs tx-20260515123000-abcd1234 --tail 80
 ```
 
-`tx explain` transaction неге failed немесе succeeded болғанын, не болғанын, келесі қадамды және қандай artifacts қарау керегін қысқаша түсіндіреді.
-`tx diff` available болса committed patch көрсетеді, uncommitted transactions үшін diff-guard summaries fallback қолданады.
-`tx logs` bounded command logs басып шығарады, stage және tail length бойынша filter қолдана алады.
+`tx explain` summarizes why a transaction failed or succeeded, what happened, what to do next, and which artifacts to inspect.
+`tx diff` shows the committed patch when available and falls back to diff-guard summaries for uncommitted transactions.
+`tx logs` prints bounded command logs, optionally filtered by stage and tail length.
 
-Бір transaction-ға бағытталған transaction commands explicit id немесе `latest`/`last` қабылдайды. Бұл `tx report`, `tx effects`, `tx explain`, `tx diff`, `tx logs`, `tx watch`, `tx cancel`, `tx resolve`, `tx resume` және `tx retry` үшін қолданылады.
+Transaction commands that target one transaction accept either an explicit id or `latest`/`last`. This applies to `tx report`, `tx effects`, `tx explain`, `tx diff`, `tx logs`, `tx watch`, `tx cancel`, `tx resolve`, `tx resume`, and `tx retry`.
 
 ## Undo
 
@@ -66,7 +66,7 @@ agenthub undo last
 agenthub undo tx-20260515123000-abcd1234
 ```
 
-`undo` committed AgentHub transaction үшін кәдімгі Git revert жасайды. Working tree ішінде unrelated uncommitted changes болса, команда орындалмайды және `.agent/tx/<tx-id>/undo.json` жазады.
+`undo` creates a normal Git revert for a committed AgentHub transaction. It refuses to run when the working tree has unrelated uncommitted changes and records `.agent/tx/<tx-id>/undo.json`.
 
 ## Providers
 
@@ -74,36 +74,28 @@ agenthub undo tx-20260515123000-abcd1234
 agenthub providers list
 agenthub providers status
 agenthub providers setup command
-agenthub providers setup codex
-agenthub providers setup kimi-api
-agenthub providers add openai-http --name local-vllm --url http://127.0.0.1:8000 --model qwen3
-agenthub providers test codex
-KIMI_API_KEY=... agenthub providers test kimi-api
-agenthub providers diagnose codex
-agenthub providers set executor codex
-agenthub providers fallback reviewer gemini kimi openai-http
-AGENTHUB_OPENAI_COMPAT_BASE_URL=http://127.0.0.1:8000 agenthub providers test openai-http
-AGENTHUB_OPENAI_COMPAT_BASE_URL=https://api.example.com agenthub providers diagnose openai-http
+agenthub providers setup deepseek
+agenthub providers setup kimi
+DEEPSEEK_API_KEY=... agenthub providers test deepseek
+KIMI_API_KEY=... agenthub providers test kimi
+agenthub providers diagnose deepseek
+agenthub providers set executor deepseek
+agenthub providers fallback reviewer kimi command
 ```
 
-Interactive shell ішінде `/providers` енді raw status ғана шығармай, provider wizard ашады. Ол detected providers, default markers, role assignments, fallbacks, named profiles, local endpoint examples және келесі setup/diagnose/test commands топтап көрсетеді. Shell shorthand CLI-style flags қабылдайды:
-
-```text
-/providers add openai-http --name local-vllm --url http://127.0.0.1:8000 --model qwen3
-```
+Inside the interactive shell, `/providers` opens a provider wizard with API readiness, default markers, role assignments, fallbacks, and the next setup/diagnose/test commands.
 
 Supported providers:
 
 - `command`: built-in deterministic command runner.
-- `codex`: external Codex CLI wrapper.
-- `gemini`: external Gemini CLI wrapper.
-- `kimi`: external Kimi CLI wrapper.
-- `kimi-api`: Kimi OpenAI-compatible API profile, default `https://api.moonshot.cn/v1`.
-- `openai-http`: OpenAI-compatible HTTP немесе HTTPS endpoint.
+- `deepseek`: DeepSeek OpenAI-compatible API endpoint. Defaults to `https://api.deepseek.com/v1`; reads `DEEPSEEK_API_KEY`, with `ANTHROPIC_AUTH_TOKEN` accepted for DeepSeek-compatible deployments.
+- `kimi`: Kimi/Moonshot API endpoint. Defaults to `https://api.moonshot.cn/v1`; reads `KIMI_API_KEY` or `MOONSHOT_API_KEY`.
 
-`setup` provider қолжетімді болса ғана config жазады. Сәтті болса `default_provider` жазады, CLI providers үшін command template сақтайды, binary немесе endpoint көрсетеді, dry-run mode шығарады және келесі `agenthub ask` command ұсынады.
+AgentHub also reads key files named `.deepseek` and `.kimi` from the project directory, current shell directory, or their parent directories. `DEEPSEEK_API_KEY_FILE`, `ANTHROPIC_AUTH_TOKEN_FILE`, `KIMI_API_KEY_FILE`, and `MOONSHOT_API_KEY_FILE` can point at explicit key files.
 
-Мысал:
+`setup` configures a provider only when it is available. On success it records `default_provider`, prints the endpoint, reports the dry-run mode, and shows the next `agenthub ask` command.
+
+Example:
 
 ```text
 configured	command
@@ -114,33 +106,24 @@ dry_run	built-in deterministic runner ready
 next	agenthub ask "describe the change" --output .agent/drafts/task.yaml
 ```
 
-`providers diagnose <id>` binary немесе endpoint location, version available болса, rendered command template, auth hint, status hint, install hint және provider-specific details шығарады. CLI providers үшін ол белгілі credential markers тексереді, бірақ secret values шығармайды: Codex `OPENAI_API_KEY`, `$CODEX_HOME/auth.json` және `$HOME/.codex/auth.json` тексереді; Gemini `GEMINI_API_KEY`, `GOOGLE_API_KEY` және `$HOME/.gemini` тексереді; Kimi `KIMI_API_KEY`, `MOONSHOT_API_KEY`, `$HOME/.kimi` және `$HOME/.config/kimi` тексереді. Markers табылмаса, статус `cli_managed_unknown` болады, себебі provider CLI басқа mechanism арқылы logged in болуы мүмкін. `kimi-api` diagnose endpoint, model және `KIMI_API_KEY` немесе `MOONSHOT_API_KEY` арқылы API-key env readiness көрсетеді. `openai-http` diagnose scheme, model, API-key presence көрсетіп, live request үшін `providers test` ұсынады.
+`providers diagnose <id>` prints endpoint, model, API-key marker, auth hint, status hint, install hint, scheme, and provider-specific details. It checks only environment markers and never prints secret values.
 
-`providers set <role> <provider>` `.agent/config.yaml` ішіне `provider.role.<role>` сақтайды. `providers fallback <role> ...` comma-separated fallback chain мәнін `provider.fallback.<role>` ішіне жазады. Valid roles: planner, executor, reviewer, repair, generator, critic, researcher, aggregator, manager және worker.
+`providers set <role> <provider>` stores `provider.role.<role>` in `.agent/config.yaml`. `providers fallback <role> ...` stores a comma-separated fallback chain under `provider.fallback.<role>`. Valid roles are planner, executor, reviewer, repair, generator, critic, researcher, aggregator, manager, and worker.
 
-Named provider profiles reusable OpenAI-compatible endpoints мәндерін `.agent/config.yaml` ішіне сақтайды:
+Named HTTP profiles are intentionally disabled in API-native mode. Provider logs, retries, memory, and future tool calls stay inside AgentHub for the two supported APIs.
 
-```bash
-agenthub providers add openai-http --name ollama --url http://127.0.0.1:11434 --model qwen3
-agenthub providers setup ollama
-agenthub providers test ollama
-agenthub providers set reviewer ollama
-```
-
-Profiles `local-vllm`, `ollama`, `lm-studio`, `openrouter` және company proxy endpoints үшін ыңғайлы. Optional `--api-key-env NAME` bearer token қай environment variable ішінде екенін көрсетеді.
-
-`providers test command` built-in runner тексереді. CLI providers binary discovery, version output available болса, және template readiness тексереді; live authentication provider CLI жағында қалады. `providers test openai-http` real OpenAI-compatible HTTP/HTTPS completion request орындайды, содан кейін optional `/v1/models` best-effort тексереді; models endpoint жоқ болса, бұл `models unavailable` болып шығады және provider test failed болмайды.
+`providers test command` validates the built-in runner. `providers test deepseek` and `providers test kimi` perform real OpenAI-compatible completion requests and then try optional `/v1/models`; a missing models endpoint is reported as `models unavailable`, not as a failed provider test.
 
 ## Config
 
 ```bash
 agenthub config show
-agenthub config set default_provider codex
+agenthub config set default_provider deepseek
 ```
 
-Configuration `.agent/config.yaml` ішінде simple key/value settings ретінде сақталады. Config file жоқ болса, `default_provider` мәні `command` болып есептеледі.
+Configuration is stored in `.agent/config.yaml` as simple key/value settings. `default_provider` falls back to `command` when no config file exists.
 
-`config set` тек product-supported keys қабылдайды: `default_provider`, `provider.<id>.template`, `provider.role.<role>` және `provider.fallback.<role>`. Белгісіз key қабылданбайды, сондықтан typo runtime behavior-ды үнсіз өзгертпейді.
+`config set` accepts only product-supported keys: `default_provider`, `provider.<id>.template`, `provider.role.<role>`, and `provider.fallback.<role>`. Unknown keys are rejected so typos do not silently change runtime behavior.
 
 ## Open
 
@@ -149,7 +132,7 @@ agenthub open dashboard
 agenthub open report tx-20260515123000-abcd1234
 ```
 
-`open dashboard` static dashboard жаңартып, host ішінде desktop opener болса `.agent/reports/dashboard/index.html` ашады. `open report` көрсетілген transaction үшін `report.md` ашады. CI ішінде немесе `AGENTHUB_OPEN_DRY_RUN=1` қойылса, AgentHub external process қоспай path шығарады.
+`open dashboard` refreshes the static dashboard and opens `.agent/reports/dashboard/index.html` when the host has a desktop opener. `open report` opens a transaction `report.md`. In CI or with `AGENTHUB_OPEN_DRY_RUN=1`, AgentHub prints the path without launching an external process.
 
 ## Serve
 
@@ -158,7 +141,7 @@ agenthub serve
 agenthub serve --addr 127.0.0.1:4318 --refresh-ms 1000
 ```
 
-`serve` browser dashboard-ты local auto-refresh UI ретінде іске қосады; default address `http://127.0.0.1:4317`. Ол requests кезінде dashboard data жаңартады және transaction running кезде пайдалы.
+`serve` runs the browser dashboard as a local auto-refresh UI at `http://127.0.0.1:4317` by default. It regenerates dashboard data on requests and is useful while a transaction is running.
 
 ## Memory
 
@@ -168,7 +151,7 @@ agenthub memory summary
 agenthub memory audit
 ```
 
-`inspect` committed және failed attempts raw counts шығарады. `summary` stack, active decisions және known failures үшін user-facing view береді. `audit` stale, conflicting, low-confidence және unverified records тексеріп, `.agent/memory/audit.json` жаңартады.
+`inspect` prints raw committed and failed-attempt counts. `summary` is the user-facing view of stack, active decisions, and known failures. `audit` checks stale, conflicting, low-confidence, and unverified records and refreshes `.agent/memory/audit.json`.
 
 ## Skills
 
@@ -177,4 +160,4 @@ agenthub skills list
 agenthub skills scorecard
 ```
 
-`scorecard` әр local standard-library skill үшін analytics-backed runs, success rate, rollback rate, average duration, average cost және known failure count көрсетеді.
+`scorecard` reports each local standard-library skill with analytics-backed runs, success rate, rollback rate, average duration, average cost, and known failure count.

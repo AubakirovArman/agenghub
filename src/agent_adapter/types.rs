@@ -68,7 +68,7 @@ fn routing_policy() -> Vec<String> {
     vec![
         "user_preference".to_string(),
         "private_mode".to_string(),
-        "executable_available".to_string(),
-        "dry_run".to_string(),
+        "api_native".to_string(),
+        "transaction_kernel_fallback".to_string(),
     ]
 }

@@ -1,31 +1,31 @@
-# AgentHub: қалай жұмыс істейді
+# AgentHub: How It Works
 
-Тілдер: [English](how-it-works.en.md), [Русский](how-it-works.ru.md), [中文](how-it-works.zh.md), [Қазақша](how-it-works.kk.md)
+Languages: [English](how-it-works.en.md), [Русский](how-it-works.ru.md), [中文](how-it-works.zh.md), [Қазақша](how-it-works.kk.md)
 
-## Тұжырымдама
+## Concept
 
-AgentHub агент жұмысын транзакция ретінде қарайды:
+AgentHub treats agent work as a transaction:
 
 ```text
-intent немесе AgentSpec -> isolated workspace -> execution -> review -> verification -> commit немесе rollback -> memory update
+intent or AgentSpec -> isolated workspace -> execution -> review -> verification -> commit or rollback -> memory update
 ```
 
-Агент негізгі жобаны тікелей өзгертпеуі керек. Барлық өзгеріс уақытша git worktree ішінде орындалады, содан кейін AgentHub тексеріп, сәтті болса ғана негізгі жобаға қосады.
+The main project should not be mutated directly by an agent. Work happens in a temporary git worktree, then AgentHub verifies the result and only merges it back when the transaction passes.
 
-## Транзакция ағыны
+## Transaction Flow
 
-1. `agenthub run <spec.yaml>` AgentSpec файлын оқиды және валидация жасайды.
-2. AgentHub `.agent/tx/<tx-id>/` жасайды және `plan.yaml`, `agent_ir.txt`, `dag.json`, `journal.jsonl` жазады.
-3. Git worktree `.agent/workspaces/<tx-id>/` ішінде дайындалады.
-4. Executor adapter prompt/invocation artifacts жазады, содан кейін `execution.commands` оқшауланған worktree ішінде орындалады.
-5. Diff guard `scope.allow`, `scope.deny`, `transaction.diff_limits` ережелерін қолданады.
-6. Егер `topology.kind` мәні `executor_reviewer_repair` болса, verifier алдында reviewer commands орындалады.
-7. `verify.commands` және optional runtime smoke checks орындалады.
-8. Сәтті болса, AgentHub project HEAD өзгермегенін тексеріп, commit және fast-forward merge жасайды.
-9. Қате болса, AgentHub worktree-ді rollback жасап, failed attempt жазады.
-10. Есептер және memory artifacts `.agent/` ішінде қалады.
+1. `agenthub run <spec.yaml>` loads and validates AgentSpec.
+2. AgentHub creates `.agent/tx/<tx-id>/` and writes `plan.yaml`, `agent_ir.txt`, `dag.json`, and `journal.jsonl`.
+3. A git worktree is prepared under `.agent/workspaces/<tx-id>/`.
+4. The executor adapter writes its prompt/invocation artifacts, then `execution.commands` run in that isolated worktree.
+5. `scope.allow`, `scope.deny`, and `transaction.diff_limits` are enforced by the diff guard.
+6. If `topology.kind` is `executor_reviewer_repair`, reviewer commands run before verifier.
+7. `verify.commands` and optional runtime smoke checks run.
+8. On success, AgentHub checks that the project HEAD did not move, commits and fast-forwards the result.
+9. On failure, AgentHub rolls back the worktree and records a failed attempt.
+10. Reports and memory artifacts remain under `.agent/`.
 
-## AgentSpec бөлімдері
+## AgentSpec Sections
 
 ```yaml
 task:
@@ -66,35 +66,35 @@ transaction:
     max_lines_deleted: 20
 ```
 
-Маңызды өрістер:
+Important fields:
 
-- `task.id`: report және memory үшін тұрақты task атауы.
-- `workspace.type`: `code.git`, `content.git`, `data.git`, `infra.git`.
-- `agent.adapter`: `command`, `codex`, `kimi` немесе `gemini`.
-- `execution.commands`: өзгерісті жасайтын deterministic commands.
-- `scope.allow` және `scope.deny`: транзакцияның файлдық шекарасы.
-- `verify.commands`: commit алдында өтуі тиіс командалар.
-- `transaction.diff_limits`: өзгеріс көлемін шектейді.
-- `transaction.memory_promotion`: `on_success` memory тек verification өткен соң көтеріледі.
+- `task.id`: stable transaction task name used in reports and memory.
+- `workspace.type`: one of `code.git`, `content.git`, `data.git`, `infra.git`.
+- `agent.adapter`: `command`, `deepseek`, or `kimi`.
+- `execution.commands`: deterministic commands that perform the change.
+- `scope.allow` and `scope.deny`: file boundaries for the transaction.
+- `verify.commands`: commands that must pass before commit.
+- `transaction.diff_limits`: blast-radius limits.
+- `transaction.memory_promotion`: `on_success` promotes staged memory only after verification.
 
 ## Natural Language Preview
 
-`agenthub ask "<request>"` AgentSpec preview жасайды, defaults толтырады және blocking fields анықталмаса required clarification questions шығарады. `--approval-required` preview manual approval қажет деп белгілейді. Қара: [Natural language](natural-language.kk.md).
+`agenthub ask "<request>"` generates an AgentSpec preview, resolves defaults, and prints required clarification questions when blocking fields cannot be inferred. Use `--approval-required` to mark the preview for manual approval. See [Natural language](natural-language.en.md).
 
 ## Workspaces
 
-Қазір алты git-backed domain profile бар:
+AgentHub currently supports six git-backed domain profiles:
 
 - `code.git`: source code, builds, tests, runtime checks.
 - `content.git`: markdown, articles, docs, brand/tone rules.
 - `data.git`: reports, data artifacts, metric checks.
 - `infra.git`: plans, config, infrastructure review artifacts.
-- `media.git`: prompts, scripts, voice tracks, renders және media assets.
-- `research.git`: sources, claims, citations, graphs, critic notes және reports.
+- `media.git`: prompts, scripts, voice tracks, renders, and media assets.
+- `research.git`: sources, claims, citations, graphs, critic notes, and reports.
 
-Domain verifier profiles configured commands кейін structural checks қосады: `content_quality` content artifacts тексереді, `data_quality` JSON валидтейді, `infra_plan` plans валидтейді, `media_render` media manifests/assets валидтейді, `research_report` cited claims валидтейді, `backend_tdd` test және API response artifacts валидтейді, ал `db_migration` migration artifacts валидтейді. Толығырақ: [Workspaces](workspaces.kk.md), [Research](research-profile.kk.md), [Backend TDD](backend-tdd-verifier.kk.md), [DB Migration](db-migration-verifier.kk.md).
+Domain verifier profiles add structural checks after configured commands: `content_quality` checks content artifacts, `data_quality` validates JSON, `infra_plan` validates plans, `media_render` validates media manifests/assets, `research_report` validates cited claims, `backend_tdd` validates test and API response artifacts, and `db_migration` validates migration artifacts. Details: [Workspaces](workspaces.en.md), [Research](research-profile.en.md), [Backend TDD](backend-tdd-verifier.en.md), and [DB Migration](db-migration-verifier.en.md).
 
-Мысалдар:
+Examples:
 
 ```bash
 agenthub run examples/command-task.yaml
@@ -107,38 +107,37 @@ agenthub run examples/db-migration-task.yaml
 
 ## Agent Adapters
 
-Default adapter — `command`. External executor adapters shell template және generated prompt қолданады:
+The default adapter is `command`. API-native adapters use AgentHub-owned DeepSeek/Kimi requests and generated prompts:
 
 ```yaml
 agent:
-  adapter: codex
-  model: test-model
+  adapter: deepseek
+  model: deepseek-chat
   dry_run: true
-  command_template: "codex exec --sandbox workspace-write - < {prompt}"
 ```
 
-Dry-run example іске қосу:
+Run the dry-run example:
 
 ```bash
 agenthub run examples/adapter-dry-run-task.yaml
 ```
 
-Пайдалы overrides:
+Useful overrides:
 
 ```bash
 AGENTHUB_EXECUTOR_ADAPTER=kimi AGENTHUB_ADAPTER_DRY_RUN=1 agenthub run examples/adapter-dry-run-task.yaml
 AGENTHUB_PRIVATE_MODE=1 agenthub run examples/adapter-dry-run-task.yaml
 ```
 
-Толық adapter behavior: [Agent adapters](agent-adapters.kk.md).
+Detailed adapter behavior is documented in [Agent adapters](agent-adapters.en.md).
 
 ## Topologies
 
-AgentSpec `single_executor`, `planner_executor`, `executor_reviewer_repair`, `generator_critic`, `swarm_research`, `manager_worker` және `tournament` қолдайды. Multi-role topologies `dag.json`, `agent_trace.json` және `model_call_metadata.json` ішіне кіреді. Қара: [Topologies](topologies.kk.md).
+AgentSpec supports `single_executor`, `planner_executor`, `executor_reviewer_repair`, `generator_critic`, `swarm_research`, `manager_worker`, and `tournament`. Multi-role topologies appear in `dag.json`, `agent_trace.json`, and `model_call_metadata.json`. See [Topologies](topologies.en.md).
 
-## Review және Repair
+## Review And Repair
 
-Жеке review gate керек болса, `executor_reviewer_repair` қолдан:
+Use `executor_reviewer_repair` when the transaction needs a separate review gate:
 
 ```yaml
 topology:
@@ -156,11 +155,11 @@ transaction:
   max_repair_attempts: 1
 ```
 
-Егер review немесе verifier құласа және repair attempt қалса, AgentHub `repair.commands` іске қосады, diff-ті қайта тексереді және gate-ті қайта орындайды.
+If review or verifier fails and repair attempts remain, AgentHub runs `repair.commands`, checks the diff again, and retries the gate.
 
 ## Runtime Smoke Checks
 
-Web жобаларда `verify.runtime` серверді көтеріп, routes тексере алады:
+For web projects, `verify.runtime` can start a server and check routes:
 
 ```yaml
 verify:
@@ -176,38 +175,38 @@ verify:
       expect: 200
 ```
 
-Нәтиже `.agent/tx/<tx-id>/verifier.json` және `.agent/tx/<tx-id>/verifier.log` файлдарына жазылады.
+The result is stored in `.agent/tx/<tx-id>/verifier.json` and `.agent/tx/<tx-id>/verifier.log`.
 
-Verifier output missing environment variable көрсетсе, transaction status `BLOCKED_ON_HUMAN` болады және AgentHub оны normal failed attempt ретінде жазбайды. Толық мәлімет: [Runtime and repair](runtime-repair.kk.md).
+If verifier output indicates a missing environment variable, the transaction status becomes `BLOCKED_ON_HUMAN` and AgentHub avoids recording it as a normal failed attempt. Full details: [Runtime and repair](runtime-repair.en.md).
 
-## Memory және Artifacts
+## Memory And Artifacts
 
-Әр транзакция жазады:
+Every transaction writes:
 
 - `.agent/tx/<tx-id>/journal.jsonl`: append-only state log.
-- `.agent/tx/<tx-id>/report.md`: адам оқитын есеп.
+- `.agent/tx/<tx-id>/report.md`: human-readable result.
 - `.agent/tx/<tx-id>/dag.json`: execution graph.
-- `.agent/tx/<tx-id>/agent_trace.json`: таңдалған executor, reviewer және repair routes.
-- `.agent/tx/<tx-id>/agent_transcript.jsonl`: adapter және command transcript.
+- `.agent/tx/<tx-id>/agent_trace.json`: selected executor, reviewer, and repair routes.
+- `.agent/tx/<tx-id>/agent_transcript.jsonl`: adapter and command transcript.
 - `.agent/tx/<tx-id>/agent_prompt_<role>.md`: role prompt artifact.
-- `.agent/tx/<tx-id>/adapter_invocation_<role>.json`: external adapter қолданылса invocation details.
-- `.agent/tx/<tx-id>/context_pack.json`: орындауға арналған минималды context.
+- `.agent/tx/<tx-id>/agent_prompt_<role>.md`: prompt artifact for API-native adapter routes.
+- `.agent/tx/<tx-id>/context_pack.json`: minimal context for execution.
 - `.agent/tx/<tx-id>/model_call_metadata.json`: planned/observed model call metadata.
-- `.agent/tx/<tx-id>/llm_gateway_summary.json`: gateway token/cost summary.
+- `.agent/tx/<tx-id>/llm_gateway_summary.json`: gateway token and cost summary.
 - `.agent/tx/<tx-id>/redacted_api.jsonl`: redacted gateway trace.
-- `.agent/tx/<tx-id>/memory_staging.jsonl`: транзакцияда дайындалған memory.
+- `.agent/tx/<tx-id>/memory_staging.jsonl`: memory staged during the transaction.
 
-Сәтті транзакциялар memory жазбасын `.agent/memory/committed.jsonl` ішіне көтереді. Қате транзакциялар `.agent/memory/failed_attempts.jsonl` және error fingerprint жазады.
+Successful transactions promote memory to `.agent/memory/committed.jsonl`. Failed transactions write `.agent/memory/failed_attempts.jsonl` and an error fingerprint.
 
 ## Context Maps
 
-Workspace scan routes, components, exports maps жасайды:
+Scan a workspace to create route, component, and export maps:
 
 ```bash
 agenthub workspace scan --write-maps
 ```
 
-Жасалатын файлдар:
+Generated files:
 
 ```text
 .agent/maps/routes.map.json
@@ -215,37 +214,37 @@ agenthub workspace scan --write-maps
 .agent/maps/exports.map.json
 ```
 
-Бұл maps келесі context packs ішіне кіреді.
+These maps are included in future context packs.
 
-Әр transaction `map_context` жазады: `scope.allow` және task hints бойынша таңдалған maps subset. AgentHub mapped files hashes қайта есептейді; stale немесе missing map entries `map_context.validation` ішінде көрсетіледі. Қара: [Context maps](context-maps.kk.md).
+Each transaction also writes `map_context`, a selected subset of maps based on `scope.allow` and task hints. AgentHub recalculates mapped file hashes; stale or missing map entries are reported under `map_context.validation`. See [Context maps](context-maps.en.md).
 
 ## Command Policy
 
-Execution алдында AgentHub `.agent/policies/core.yaml` тексереді және `command_policy.json` жазады. `needs_approval` commands үшін `transaction.approval_required: true` керек; әйтпесе transaction `BLOCKED_ON_HUMAN` болады. `restricted` commands орындауға дейін тоқтатылады. Қара: [Command Policy](command-policy.kk.md).
+Before execution AgentHub evaluates `.agent/policies/core.yaml` and writes `command_policy.json`. `needs_approval` commands require `transaction.approval_required: true`; otherwise the transaction becomes `BLOCKED_ON_HUMAN`. `restricted` commands are rejected before execution. See [Command Policy](command-policy.en.md).
 
 ## Sandbox Levels
 
-`execution.sandbox.level` command isolation басқарады. Level 0 — local controlled execution, Level 1 тазартылған local command environment қолданады, ал Levels 2-3 commands бапталған remote runners ішіне dispatch жасайды. Әр transaction `sandbox.json` жазады. Қара: [Sandbox Levels](sandbox-levels.kk.md) және [Remote Runner](remote-runner.kk.md).
+`execution.sandbox.level` controls command isolation. Level 0 is local controlled execution, Level 1 uses a sanitized local command environment, and Levels 2-3 dispatch to configured remote runners. Each transaction writes `sandbox.json`. See [Sandbox Levels](sandbox-levels.en.md) and [Remote Runner](remote-runner.en.md).
 
 ## VS Code Extension
 
-`editors/vscode` ішіндегі extension береді:
+The extension in `editors/vscode` provides:
 
-- `.agent/tx` бойынша transaction tree;
-- `.agent/memory` бойынша memory tree;
-- AgentSpec drafts және examples;
-- pending specs және `BLOCKED_ON_HUMAN` transactions үшін approval queue;
-- latest report ашу;
-- `dag.json` үшін DAG webview;
-- `agenthub ask` арқылы prompt-to-AgentSpec preview.
+- transaction tree from `.agent/tx`;
+- memory tree from `.agent/memory`;
+- AgentSpec drafts and examples;
+- approval queue for pending specs and `BLOCKED_ON_HUMAN` transactions;
+- latest report opener;
+- DAG webview for `dag.json`;
+- prompt-to-AgentSpec preview using `agenthub ask`.
 
-Extension коды `editors/vscode/src/` ішінде кіші zero-build JavaScript модульдеріне бөлінген. Қара: [IDE and visual layer](ide.kk.md).
+It is split into small zero-build JavaScript modules under `editors/vscode/src/`. See [IDE and visual layer](ide.en.md).
 
-## Даму ережелері
+## Development Rules
 
-Implementation файлдары модульді болуы керек. Мақсат — файлды 200 жолдан төмен ұстау. Жауапкершілік бойынша бөл: types, validation, execution, review, verification, storage, rendering және UI commands бөлек модульдерде болуы тиіс.
+Keep implementation files modular. The target is under 200 lines per file. Split by responsibility: types, validation, execution, review, verification, storage, rendering, and UI commands should live in separate modules.
 
-Модуль өлшемін жергілікті тексеру:
+Run the local size check:
 
 ```bash
 scripts/check-module-size.sh 200

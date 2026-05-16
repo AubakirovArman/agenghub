@@ -1,31 +1,31 @@
-# AgentHub：工作原理
+# AgentHub: How It Works
 
-语言: [English](how-it-works.en.md), [Русский](how-it-works.ru.md), [中文](how-it-works.zh.md), [Қазақша](how-it-works.kk.md)
+Languages: [English](how-it-works.en.md), [Русский](how-it-works.ru.md), [中文](how-it-works.zh.md), [Қазақша](how-it-works.kk.md)
 
-## 概念
+## Concept
 
-AgentHub 把 agent 工作视为事务：
+AgentHub treats agent work as a transaction:
 
 ```text
-intent 或 AgentSpec -> isolated workspace -> execution -> review -> verification -> commit 或 rollback -> memory update
+intent or AgentSpec -> isolated workspace -> execution -> review -> verification -> commit or rollback -> memory update
 ```
 
-Agent 不应直接修改主项目。所有变更先在临时 git worktree 中执行，通过检查后才合并回项目。
+The main project should not be mutated directly by an agent. Work happens in a temporary git worktree, then AgentHub verifies the result and only merges it back when the transaction passes.
 
-## 事务流程
+## Transaction Flow
 
-1. `agenthub run <spec.yaml>` 加载并验证 AgentSpec。
-2. AgentHub 创建 `.agent/tx/<tx-id>/`，写入 `plan.yaml`、`agent_ir.txt`、`dag.json`、`journal.jsonl`。
-3. 在 `.agent/workspaces/<tx-id>/` 准备 git worktree。
-4. Executor adapter 写入 prompt/invocation artifacts，然后在隔离 worktree 中运行 `execution.commands`。
-5. diff guard 强制执行 `scope.allow`、`scope.deny` 和 `transaction.diff_limits`。
-6. 如果 `topology.kind` 是 `executor_reviewer_repair`，先运行 reviewer commands。
-7. 运行 `verify.commands` 和可选 runtime smoke checks。
-8. 成功时，AgentHub 检查项目 HEAD 未移动，然后 commit 并 fast-forward merge。
-9. 失败时，AgentHub 回滚 worktree，并记录 failed attempt。
-10. 报告和记忆保存在 `.agent/` 下。
+1. `agenthub run <spec.yaml>` loads and validates AgentSpec.
+2. AgentHub creates `.agent/tx/<tx-id>/` and writes `plan.yaml`, `agent_ir.txt`, `dag.json`, and `journal.jsonl`.
+3. A git worktree is prepared under `.agent/workspaces/<tx-id>/`.
+4. The executor adapter writes its prompt/invocation artifacts, then `execution.commands` run in that isolated worktree.
+5. `scope.allow`, `scope.deny`, and `transaction.diff_limits` are enforced by the diff guard.
+6. If `topology.kind` is `executor_reviewer_repair`, reviewer commands run before verifier.
+7. `verify.commands` and optional runtime smoke checks run.
+8. On success, AgentHub checks that the project HEAD did not move, commits and fast-forwards the result.
+9. On failure, AgentHub rolls back the worktree and records a failed attempt.
+10. Reports and memory artifacts remain under `.agent/`.
 
-## AgentSpec 结构
+## AgentSpec Sections
 
 ```yaml
 task:
@@ -66,35 +66,35 @@ transaction:
     max_lines_deleted: 20
 ```
 
-关键字段：
+Important fields:
 
-- `task.id`: 用于报告和 memory 的稳定任务名。
-- `workspace.type`: `code.git`、`content.git`、`data.git`、`infra.git`。
-- `agent.adapter`: `command`、`codex`、`kimi` 或 `gemini`。
-- `execution.commands`: 执行变更的确定性命令。
-- `scope.allow` 和 `scope.deny`: 本次事务的文件边界。
-- `verify.commands`: commit 前必须通过的命令。
-- `transaction.diff_limits`: 控制变更范围。
-- `transaction.memory_promotion`: `on_success` 表示只在验证成功后提升 memory。
+- `task.id`: stable transaction task name used in reports and memory.
+- `workspace.type`: one of `code.git`, `content.git`, `data.git`, `infra.git`.
+- `agent.adapter`: `command`, `deepseek`, or `kimi`.
+- `execution.commands`: deterministic commands that perform the change.
+- `scope.allow` and `scope.deny`: file boundaries for the transaction.
+- `verify.commands`: commands that must pass before commit.
+- `transaction.diff_limits`: blast-radius limits.
+- `transaction.memory_promotion`: `on_success` promotes staged memory only after verification.
 
 ## Natural Language Preview
 
-`agenthub ask "<request>"` 会生成 AgentSpec preview、解析 defaults，并在无法推断 blocking fields 时打印 required clarification questions。`--approval-required` 可把 preview 标记为需要 manual approval。参见 [Natural language](natural-language.zh.md)。
+`agenthub ask "<request>"` generates an AgentSpec preview, resolves defaults, and prints required clarification questions when blocking fields cannot be inferred. Use `--approval-required` to mark the preview for manual approval. See [Natural language](natural-language.en.md).
 
 ## Workspaces
 
-目前支持六个 git-backed domain profiles：
+AgentHub currently supports six git-backed domain profiles:
 
-- `code.git`: 源码、build、tests、runtime checks。
-- `content.git`: markdown、articles、docs、brand/tone rules。
-- `data.git`: reports、data artifacts、metric checks。
-- `infra.git`: plans、config、infrastructure review artifacts。
-- `media.git`: prompts、scripts、voice tracks、renders 和 media assets。
-- `research.git`: sources、claims、citations、graphs、critic notes 和 reports。
+- `code.git`: source code, builds, tests, runtime checks.
+- `content.git`: markdown, articles, docs, brand/tone rules.
+- `data.git`: reports, data artifacts, metric checks.
+- `infra.git`: plans, config, infrastructure review artifacts.
+- `media.git`: prompts, scripts, voice tracks, renders, and media assets.
+- `research.git`: sources, claims, citations, graphs, critic notes, and reports.
 
-Domain verifier profiles 会在 configured commands 之后添加 structural checks：`content_quality` 检查 content artifacts，`data_quality` 验证 JSON，`infra_plan` 验证 plans，`media_render` 验证 media manifests/assets，`research_report` 验证 cited claims，`backend_tdd` 验证 test 和 API response artifacts，`db_migration` 验证 migration artifacts。详情见 [Workspaces](workspaces.zh.md)、[Research](research-profile.zh.md)、[Backend TDD](backend-tdd-verifier.zh.md) 和 [DB Migration](db-migration-verifier.zh.md)。
+Domain verifier profiles add structural checks after configured commands: `content_quality` checks content artifacts, `data_quality` validates JSON, `infra_plan` validates plans, `media_render` validates media manifests/assets, `research_report` validates cited claims, `backend_tdd` validates test and API response artifacts, and `db_migration` validates migration artifacts. Details: [Workspaces](workspaces.en.md), [Research](research-profile.en.md), [Backend TDD](backend-tdd-verifier.en.md), and [DB Migration](db-migration-verifier.en.md).
 
-示例：
+Examples:
 
 ```bash
 agenthub run examples/command-task.yaml
@@ -107,38 +107,37 @@ agenthub run examples/db-migration-task.yaml
 
 ## Agent Adapters
 
-默认 adapter 是 `command`。External executor adapters 使用 shell template 和生成的 prompt：
+The default adapter is `command`. API-native adapters use AgentHub-owned DeepSeek/Kimi requests and generated prompts:
 
 ```yaml
 agent:
-  adapter: codex
-  model: test-model
+  adapter: deepseek
+  model: deepseek-chat
   dry_run: true
-  command_template: "codex exec --sandbox workspace-write - < {prompt}"
 ```
 
-运行 dry-run 示例：
+Run the dry-run example:
 
 ```bash
 agenthub run examples/adapter-dry-run-task.yaml
 ```
 
-常用 overrides：
+Useful overrides:
 
 ```bash
 AGENTHUB_EXECUTOR_ADAPTER=kimi AGENTHUB_ADAPTER_DRY_RUN=1 agenthub run examples/adapter-dry-run-task.yaml
 AGENTHUB_PRIVATE_MODE=1 agenthub run examples/adapter-dry-run-task.yaml
 ```
 
-详细行为见 [Agent adapters](agent-adapters.zh.md)。
+Detailed adapter behavior is documented in [Agent adapters](agent-adapters.en.md).
 
 ## Topologies
 
-AgentSpec 支持 `single_executor`、`planner_executor`、`executor_reviewer_repair`、`generator_critic`、`swarm_research`、`manager_worker` 和 `tournament`。Multi-role topologies 会出现在 `dag.json`、`agent_trace.json` 和 `model_call_metadata.json`。参见 [Topologies](topologies.zh.md)。
+AgentSpec supports `single_executor`, `planner_executor`, `executor_reviewer_repair`, `generator_critic`, `swarm_research`, `manager_worker`, and `tournament`. Multi-role topologies appear in `dag.json`, `agent_trace.json`, and `model_call_metadata.json`. See [Topologies](topologies.en.md).
 
-## Review 与 Repair
+## Review And Repair
 
-需要独立 review gate 时使用 `executor_reviewer_repair`：
+Use `executor_reviewer_repair` when the transaction needs a separate review gate:
 
 ```yaml
 topology:
@@ -156,11 +155,11 @@ transaction:
   max_repair_attempts: 1
 ```
 
-如果 review 或 verifier 失败并且还有 repair 次数，AgentHub 会运行 `repair.commands`，重新检查 diff，然后重试 gate。
+If review or verifier fails and repair attempts remain, AgentHub runs `repair.commands`, checks the diff again, and retries the gate.
 
 ## Runtime Smoke Checks
 
-Web 项目可以用 `verify.runtime` 启动服务器并检查路由：
+For web projects, `verify.runtime` can start a server and check routes:
 
 ```yaml
 verify:
@@ -176,38 +175,38 @@ verify:
       expect: 200
 ```
 
-结果写入 `.agent/tx/<tx-id>/verifier.json` 和 `.agent/tx/<tx-id>/verifier.log`。
+The result is stored in `.agent/tx/<tx-id>/verifier.json` and `.agent/tx/<tx-id>/verifier.log`.
 
-如果 verifier output 表示缺少环境变量，事务状态会变成 `BLOCKED_ON_HUMAN`，AgentHub 不会把它记录为普通 failed attempt。详情见 [Runtime and repair](runtime-repair.zh.md)。
+If verifier output indicates a missing environment variable, the transaction status becomes `BLOCKED_ON_HUMAN` and AgentHub avoids recording it as a normal failed attempt. Full details: [Runtime and repair](runtime-repair.en.md).
 
-## Memory 和 Artifacts
+## Memory And Artifacts
 
-每个事务都会写入：
+Every transaction writes:
 
-- `.agent/tx/<tx-id>/journal.jsonl`: append-only 状态日志。
-- `.agent/tx/<tx-id>/report.md`: 人可读报告。
-- `.agent/tx/<tx-id>/dag.json`: execution graph。
-- `.agent/tx/<tx-id>/agent_trace.json`: 选择的 executor、reviewer 和 repair routes。
-- `.agent/tx/<tx-id>/agent_transcript.jsonl`: adapter 和 command transcript。
-- `.agent/tx/<tx-id>/agent_prompt_<role>.md`: role prompt artifact。
-- `.agent/tx/<tx-id>/adapter_invocation_<role>.json`: 使用 external adapter 时的 invocation details。
-- `.agent/tx/<tx-id>/context_pack.json`: 最小执行上下文。
-- `.agent/tx/<tx-id>/model_call_metadata.json`: planned/observed model call metadata。
-- `.agent/tx/<tx-id>/llm_gateway_summary.json`: gateway token/cost summary。
-- `.agent/tx/<tx-id>/redacted_api.jsonl`: redacted gateway trace。
-- `.agent/tx/<tx-id>/memory_staging.jsonl`: 事务阶段暂存的 memory。
+- `.agent/tx/<tx-id>/journal.jsonl`: append-only state log.
+- `.agent/tx/<tx-id>/report.md`: human-readable result.
+- `.agent/tx/<tx-id>/dag.json`: execution graph.
+- `.agent/tx/<tx-id>/agent_trace.json`: selected executor, reviewer, and repair routes.
+- `.agent/tx/<tx-id>/agent_transcript.jsonl`: adapter and command transcript.
+- `.agent/tx/<tx-id>/agent_prompt_<role>.md`: role prompt artifact.
+- `.agent/tx/<tx-id>/agent_prompt_<role>.md`: prompt artifact for API-native adapter routes.
+- `.agent/tx/<tx-id>/context_pack.json`: minimal context for execution.
+- `.agent/tx/<tx-id>/model_call_metadata.json`: planned/observed model call metadata.
+- `.agent/tx/<tx-id>/llm_gateway_summary.json`: gateway token and cost summary.
+- `.agent/tx/<tx-id>/redacted_api.jsonl`: redacted gateway trace.
+- `.agent/tx/<tx-id>/memory_staging.jsonl`: memory staged during the transaction.
 
-成功事务会把 memory 提升到 `.agent/memory/committed.jsonl`。失败事务会写入 `.agent/memory/failed_attempts.jsonl` 和 error fingerprint。
+Successful transactions promote memory to `.agent/memory/committed.jsonl`. Failed transactions write `.agent/memory/failed_attempts.jsonl` and an error fingerprint.
 
 ## Context Maps
 
-扫描 workspace 生成 routes、components、exports maps：
+Scan a workspace to create route, component, and export maps:
 
 ```bash
 agenthub workspace scan --write-maps
 ```
 
-生成文件：
+Generated files:
 
 ```text
 .agent/maps/routes.map.json
@@ -215,37 +214,37 @@ agenthub workspace scan --write-maps
 .agent/maps/exports.map.json
 ```
 
-这些 maps 会进入后续 context packs。
+These maps are included in future context packs.
 
-每个事务还会写入 `map_context`：根据 `scope.allow` 和 task hints 选择出的 maps 子集。AgentHub 会重新计算 mapped files 的 hashes；stale 或 missing map entries 会出现在 `map_context.validation`。参见 [Context maps](context-maps.zh.md)。
+Each transaction also writes `map_context`, a selected subset of maps based on `scope.allow` and task hints. AgentHub recalculates mapped file hashes; stale or missing map entries are reported under `map_context.validation`. See [Context maps](context-maps.en.md).
 
 ## Command Policy
 
-execution 前，AgentHub 会检查 `.agent/policies/core.yaml` 并写入 `command_policy.json`。`needs_approval` commands 需要 `transaction.approval_required: true`；否则 transaction 变为 `BLOCKED_ON_HUMAN`。`restricted` commands 会在执行前被拒绝。参见 [Command Policy](command-policy.zh.md)。
+Before execution AgentHub evaluates `.agent/policies/core.yaml` and writes `command_policy.json`. `needs_approval` commands require `transaction.approval_required: true`; otherwise the transaction becomes `BLOCKED_ON_HUMAN`. `restricted` commands are rejected before execution. See [Command Policy](command-policy.en.md).
 
 ## Sandbox Levels
 
-`execution.sandbox.level` 控制 command isolation。Level 0 是 local controlled execution，Level 1 使用清理后的 local command environment，Levels 2-3 会把 commands dispatch 到配置好的 remote runners。每个 transaction 都会写入 `sandbox.json`。参见 [Sandbox Levels](sandbox-levels.zh.md) 和 [Remote Runner](remote-runner.zh.md)。
+`execution.sandbox.level` controls command isolation. Level 0 is local controlled execution, Level 1 uses a sanitized local command environment, and Levels 2-3 dispatch to configured remote runners. Each transaction writes `sandbox.json`. See [Sandbox Levels](sandbox-levels.en.md) and [Remote Runner](remote-runner.en.md).
 
 ## VS Code Extension
 
-`editors/vscode` 中的 extension 提供：
+The extension in `editors/vscode` provides:
 
-- 来自 `.agent/tx` 的 transaction tree；
-- 来自 `.agent/memory` 的 memory tree；
-- AgentSpec drafts 和 examples；
-- pending specs 与 `BLOCKED_ON_HUMAN` transactions 的 approval queue；
-- 打开 latest report；
-- `dag.json` 的 DAG webview；
-- 通过 `agenthub ask` 生成 prompt-to-AgentSpec preview。
+- transaction tree from `.agent/tx`;
+- memory tree from `.agent/memory`;
+- AgentSpec drafts and examples;
+- approval queue for pending specs and `BLOCKED_ON_HUMAN` transactions;
+- latest report opener;
+- DAG webview for `dag.json`;
+- prompt-to-AgentSpec preview using `agenthub ask`.
 
-Extension 代码拆分为 `editors/vscode/src/` 下的小型 zero-build JavaScript 模块。参见 [IDE and visual layer](ide.zh.md)。
+It is split into small zero-build JavaScript modules under `editors/vscode/src/`. See [IDE and visual layer](ide.en.md).
 
-## 开发规则
+## Development Rules
 
-实现文件必须保持模块化。目标是每个文件少于 200 行。按职责拆分：types、validation、execution、review、verification、storage、rendering、UI commands 应分别放在独立模块中。
+Keep implementation files modular. The target is under 200 lines per file. Split by responsibility: types, validation, execution, review, verification, storage, rendering, and UI commands should live in separate modules.
 
-本地模块大小检查：
+Run the local size check:
 
 ```bash
 scripts/check-module-size.sh 200

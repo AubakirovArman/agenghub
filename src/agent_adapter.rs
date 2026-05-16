@@ -25,17 +25,9 @@ pub fn route_for_role(config: &AgentConfig, role: &str) -> Result<AgentRoute> {
     let model = config.model.clone().or_else(|| model_from_env(&requested));
     let dry_run =
         config.dry_run || std::env::var("AGENTHUB_ADAPTER_DRY_RUN").ok().as_deref() == Some("1");
-    let command_template = config
-        .command_template
-        .clone()
-        .or_else(|| template_from_env(&requested))
-        .or_else(|| default_template(&requested));
-
     match requested.as_str() {
         "command" => Ok(AgentRoute::selected(requested, role, model, None, dry_run)),
-        "codex" | "kimi" | "gemini" => {
-            route_cli_adapter(&requested, role, model, command_template, dry_run)
-        }
+        "deepseek" | "kimi" => route_api_adapter(&requested, role, model, dry_run),
         other => Err(anyhow!("unknown agent adapter: {other}")),
     }
 }
@@ -64,50 +56,22 @@ pub fn routes_for_spec(spec: &AgentSpec) -> Result<AgentRoutes> {
 }
 
 pub fn supported_adapters() -> Vec<&'static str> {
-    vec!["command", "codex", "kimi", "gemini"]
+    vec!["command", "deepseek", "kimi"]
 }
 
-fn route_cli_adapter(
+fn route_api_adapter(
     requested: &str,
     role: String,
     model: Option<String>,
-    template: Option<String>,
     dry_run: bool,
 ) -> Result<AgentRoute> {
-    if private_mode_enabled() {
-        return Ok(AgentRoute::selected(
-            requested.to_string(),
-            role,
-            model,
-            Some("private mode forces local command adapter".to_string()),
-            dry_run,
-        ));
-    }
-    if executable_available(requested) || dry_run {
-        return Ok(AgentRoute::external(
-            requested.to_string(),
-            role,
-            model,
-            template,
-            dry_run,
-        ));
-    }
     Ok(AgentRoute::selected(
         requested.to_string(),
         role,
         model,
-        Some(format!(
-            "adapter executable `{requested}` was not found on PATH"
-        )),
+        Some("API-native project executor is not wired into the transaction kernel yet; using deterministic command runner".to_string()),
         dry_run,
     ))
-}
-
-fn executable_available(name: &str) -> bool {
-    std::env::var_os("PATH")
-        .into_iter()
-        .flat_map(|paths| std::env::split_paths(&paths).collect::<Vec<_>>())
-        .any(|dir| dir.join(name).is_file())
 }
 
 fn command_config() -> AgentConfig {
@@ -160,20 +124,6 @@ fn apply_routing_policy(spec: &AgentSpec, route: &mut AgentRoute) {
     }
 }
 
-fn default_template(adapter: &str) -> Option<String> {
-    match adapter {
-        "codex" => Some("codex exec --sandbox workspace-write - < {prompt}".to_string()),
-        "kimi" => Some("kimi --print --afk --input-format text < {prompt}".to_string()),
-        "gemini" => Some("gemini --prompt-file {prompt}".to_string()),
-        _ => None,
-    }
-}
-
-fn template_from_env(adapter: &str) -> Option<String> {
-    let key = format!("AGENTHUB_ADAPTER_{}_TEMPLATE", adapter.to_ascii_uppercase());
-    std::env::var(key).ok()
-}
-
 fn adapter_from_env(role: &str) -> Option<String> {
     let role_key = format!("AGENTHUB_{}_ADAPTER", role.to_ascii_uppercase());
     std::env::var(role_key)
@@ -184,8 +134,4 @@ fn adapter_from_env(role: &str) -> Option<String> {
 fn model_from_env(adapter: &str) -> Option<String> {
     let key = format!("AGENTHUB_ADAPTER_{}_MODEL", adapter.to_ascii_uppercase());
     std::env::var(key).ok()
-}
-
-fn private_mode_enabled() -> bool {
-    std::env::var("AGENTHUB_PRIVATE_MODE").ok().as_deref() == Some("1")
 }

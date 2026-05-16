@@ -15,7 +15,7 @@ agents:
     model: research-model
     dry_run: true
   aggregator:
-    adapter: gemini
+    adapter: deepseek
     model: synthesis-model
     dry_run: true
   executor:

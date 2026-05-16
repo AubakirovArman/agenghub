@@ -16,6 +16,7 @@ pub mod effects;
 pub mod enterprise;
 pub mod git;
 pub mod hardening;
+pub mod home;
 pub mod intent;
 pub mod journal;
 pub mod live_run;

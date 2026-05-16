@@ -10,7 +10,7 @@ topology:
 
 agents:
   planner:
-    adapter: codex
+    adapter: deepseek
     model: planning-model
     dry_run: true
   executor:

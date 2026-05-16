@@ -145,7 +145,7 @@ transaction:
 }
 
 #[test]
-fn dry_run_cli_adapter_writes_invocation_artifacts() -> Result<()> {
+fn api_adapter_fallback_writes_prompt_without_cli_invocation() -> Result<()> {
     let repo = TestRepo::new()?;
     agent_dir::init_project(repo.path(), false)?;
     repo.commit_all("agenthub baseline")?;
@@ -157,10 +157,9 @@ task:
   id: adapter_dry_run
   type: code.command
 agent:
-  adapter: codex
+  adapter: deepseek
   model: test-model
   dry_run: true
-  command_template: "codex exec --sandbox workspace-write - < {prompt}"
 workspace:
   type: code.git
   isolation: git_worktree
@@ -193,21 +192,18 @@ transaction:
         .report_path
         .with_file_name("agent_prompt_executor.md")
         .exists());
-    assert!(outcome
+    assert!(!outcome
         .report_path
         .with_file_name("adapter_invocation_executor.json")
         .exists());
 
     let agent_trace = fs::read_to_string(outcome.report_path.with_file_name("agent_trace.json"))?;
-    let transcript =
-        fs::read_to_string(outcome.report_path.with_file_name("agent_transcript.jsonl"))?;
-    assert!(agent_trace.contains("codex"));
-    assert!(transcript.contains("\"kind\":\"adapter\""));
-    assert!(transcript.contains("\"dry_run\":true"));
+    assert!(agent_trace.contains("deepseek"));
+    assert!(agent_trace.contains("API-native project executor"));
     let provider_plan =
         fs::read_to_string(outcome.report_path.with_file_name("llm_provider_plan.json"))?;
-    assert!(provider_plan.contains("codex"));
-    assert!(provider_plan.contains("cli_wrapper"));
+    assert!(provider_plan.contains("deepseek"));
+    assert!(provider_plan.contains("local_command"));
     Ok(())
 }
 
