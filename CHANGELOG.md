@@ -4,6 +4,8 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.7-local-preview - 2026-05-16
+
 - Add API chat provider fallback chains: chat turns now honor `provider.role.chat` and `provider.fallback.chat`, emit `provider_fallback` events between failed providers, and finish the turn once with the final provider status.
 
 ## 0.4.6-local-preview - 2026-05-16
