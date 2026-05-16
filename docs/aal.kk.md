@@ -118,15 +118,19 @@ error line 2: unsupported AAL statement `mystery`
 Semantic diagnostics енді structured format береді: тұрақты `code`, `severity`, `line` және `message` fields бар. Parser мыналарды көрсетеді:
 
 - unsupported AAL versions;
+- unknown workspaces және topologies, supported values help line бірге;
 - unknown skill namespaces;
+- жарияланған, бірақ қолданылмаған imported skills;
 - unknown verifier profiles;
 - workspace/skill mismatches;
+- басқа workspace domain үшін арналған verifier profiles;
 - дәл сәйкес келетін `allow`/`deny` policy overlaps;
-- `runtime_start` жоқ `runtime_smoke route`.
+- `runtime_start` жоқ `runtime_smoke route`;
+- route checks жоқ `web_runtime_smoke` profiles.
 
 `agenthub aal parse` diagnostics мәндерін stderr ішіне шығарады және semantic errors болса YAML output алдында тоқтайды. Warnings, мысалы `runtime_start` жоқ route smoke check, YAML output-ты бұғаттамайды.
 
-CLI diagnostics енді semantic diagnostic line number берсе source line snippet қосады. Осылай workspace/skill mismatches, unknown verifier profiles, policy overlaps және runtime-smoke warnings terminal output арқылы тез түзетіледі.
+CLI diagnostics semantic diagnostic line number берсе source line snippet қосады. Осылай workspace/topology errors, workspace/skill mismatches, unknown verifier profiles, policy overlaps және runtime-smoke warnings terminal output арқылы тез түзетіледі. AAL ішінде semantic errors болса, parser төменгі `AgentSpec` validation алдында structured diagnostics қайтарады, сондықтан editor және CI tooling тұрақты AAL codes көрсете алады.
 
 Library ретінде қолдану:
 

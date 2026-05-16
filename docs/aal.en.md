@@ -118,15 +118,19 @@ error line 2: unsupported AAL statement `mystery`
 Semantic diagnostics are structured and carry stable `code`, `severity`, `line`, and `message` fields. The parser now reports:
 
 - unsupported AAL versions;
+- unknown workspaces and topologies, with a supported-values help line;
 - unknown skill namespaces;
+- imported skills that are declared but never used;
 - unknown verifier profiles;
 - workspace/skill mismatches;
+- verifier profiles that are usually tied to a different workspace domain;
 - exact `allow`/`deny` policy overlaps;
-- `runtime_smoke route` without `runtime_start`.
+- `runtime_smoke route` without `runtime_start`;
+- `web_runtime_smoke` profiles without any route checks.
 
 `agenthub aal parse` prints diagnostics to stderr and stops before YAML output when semantic errors are present. Warnings, such as a route smoke check without `runtime_start`, still allow YAML output.
 
-CLI diagnostics now include the source line snippet when a semantic diagnostic has a line number. This makes workspace/skill mismatches, unknown verifier profiles, policy overlaps, and runtime-smoke warnings easier to fix directly from terminal output.
+CLI diagnostics include the source line snippet when a semantic diagnostic has a line number. This makes workspace/topology errors, workspace/skill mismatches, unknown verifier profiles, policy overlaps, and runtime-smoke warnings easier to fix directly from terminal output. When AAL has semantic errors, the parser returns structured diagnostics before falling through to lower-level `AgentSpec` validation, so editor and CI tooling can show stable AAL codes.
 
 Library usage:
 

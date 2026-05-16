@@ -10,7 +10,7 @@ use crate::aal::section::{parse_section, Section};
 use crate::aal::semantics;
 use crate::aal::statements;
 use crate::aal::values::join;
-use crate::aal::AalParseOutput;
+use crate::aal::{AalParseOutput, AalSeverity};
 
 pub fn parse_aal(source: &str) -> Result<AalParseOutput> {
     let mut parser = AalParser::default();
@@ -84,11 +84,9 @@ impl AalParser {
             return Ok(());
         }
         match tokens.first().map(String::as_str) {
-            Some("workspace") if tokens.len() == 2 => {
-                self.draft.workspace = Some(tokens[1].clone())
-            }
+            Some("workspace") if tokens.len() == 2 => self.workspace(line_number, &tokens[1]),
             Some("goal") if tokens.len() >= 2 => self.draft.goal = Some(tokens[1..].join(" ")),
-            Some("topology") if tokens.len() == 2 => self.draft.topology = Some(tokens[1].clone()),
+            Some("topology") if tokens.len() == 2 => self.topology(line_number, &tokens[1]),
             Some("use")
                 if tokens.get(1).map(String::as_str) == Some("skill") && tokens.len() == 3 =>
             {
@@ -99,6 +97,16 @@ impl AalParser {
             None => {}
         }
         Ok(())
+    }
+
+    fn workspace(&mut self, line_number: usize, value: &str) {
+        self.draft.workspace = Some(value.to_string());
+        self.draft.workspace_line = Some(line_number);
+    }
+
+    fn topology(&mut self, line_number: usize, value: &str) {
+        self.draft.topology = Some(value.to_string());
+        self.draft.topology_line = Some(line_number);
     }
 
     fn section_item(&mut self, line_number: usize, tokens: &[String]) -> Result<()> {
@@ -140,12 +148,20 @@ impl AalParser {
         self.diagnostics.extend(semantics::validate(&self.draft));
         let normalized = formatter::format(&self.draft);
         let spec = build_spec(&self.draft);
-        spec.validate()?;
+        if !self.has_semantic_errors() {
+            spec.validate()?;
+        }
         Ok(AalParseOutput {
             spec,
             diagnostics: self.diagnostics,
             normalized,
         })
+    }
+
+    fn has_semantic_errors(&self) -> bool {
+        self.diagnostics
+            .iter()
+            .any(|diagnostic| diagnostic.severity == AalSeverity::Error)
     }
 
     fn unknown<T>(&self, line_number: usize, item: &str) -> Result<T> {

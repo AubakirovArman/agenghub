@@ -126,3 +126,53 @@ change BadSemantics {
     assert_eq!(json[0]["code"], "aal.version.unsupported");
     Ok(())
 }
+
+#[test]
+fn reports_product_semantic_lints_with_help() -> Result<()> {
+    let source = r#"
+aal "0.2"
+import skill code.nextjs.add_page@1
+
+change ProductDiagnostics {
+  workspace content.git
+  topology mystery_team
+  verify:
+    - profile web_runtime_smoke
+}
+"#;
+
+    let parsed = parse_aal(source)?;
+    let codes: Vec<_> = parsed
+        .diagnostics
+        .iter()
+        .map(|diagnostic| diagnostic.code.as_str())
+        .collect();
+
+    assert!(codes.contains(&"aal.topology.unknown"));
+    assert!(codes.contains(&"aal.import.unused_skill"));
+    assert!(codes.contains(&"aal.verify.workspace_mismatch"));
+    assert!(codes.contains(&"aal.runtime.route_missing"));
+    assert!(parsed.has_errors());
+    assert!(parsed.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == "aal.topology.unknown" && diagnostic.help.is_some()
+    }));
+    Ok(())
+}
+
+#[test]
+fn returns_structured_errors_before_spec_validation() -> Result<()> {
+    let source = r#"
+aal "0.2"
+change UnknownWorkspace {
+  workspace custom.git
+}
+"#;
+
+    let parsed = parse_aal(source)?;
+    assert!(parsed.has_errors());
+    assert!(parsed
+        .diagnostics
+        .iter()
+        .any(|diagnostic| diagnostic.code == "aal.workspace.unknown"));
+    Ok(())
+}

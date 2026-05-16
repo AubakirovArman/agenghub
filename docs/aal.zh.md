@@ -118,15 +118,19 @@ error line 2: unsupported AAL statement `mystery`
 Semantic diagnostics 现在是结构化数据，包含稳定的 `code`、`severity`、`line` 和 `message` 字段。Parser 会报告：
 
 - unsupported AAL versions；
+- unknown workspaces 和 topologies，并附带 supported values help line；
 - unknown skill namespaces；
+- 已声明但未使用的 imported skills；
 - unknown verifier profiles；
 - workspace/skill mismatches；
+- 通常属于另一个 workspace domain 的 verifier profiles；
 - 完全相同的 `allow`/`deny` policy overlaps；
-- 没有 `runtime_start` 的 `runtime_smoke route`。
+- 没有 `runtime_start` 的 `runtime_smoke route`；
+- 没有 route checks 的 `web_runtime_smoke` profiles。
 
 `agenthub aal parse` 会把 diagnostics 打到 stderr；如果存在 semantic errors，它会在输出 YAML 之前停止。Warnings，例如没有 `runtime_start` 的 route smoke check，不会阻止 YAML output。
 
-CLI diagnostics 现在会在 semantic diagnostic 有 line number 时附带 source line snippet。这样 workspace/skill mismatches、unknown verifier profiles、policy overlaps 和 runtime-smoke warnings 可以直接根据 terminal output 修复。
+CLI diagnostics 会在 semantic diagnostic 有 line number 时附带 source line snippet。这样 workspace/topology errors、workspace/skill mismatches、unknown verifier profiles、policy overlaps 和 runtime-smoke warnings 可以直接根据 terminal output 修复。当 AAL 存在 semantic errors 时，parser 会先返回 structured diagnostics，再进入底层 `AgentSpec` validation，因此 editor 和 CI tooling 能显示稳定的 AAL codes。
 
 作为 library 使用：
 

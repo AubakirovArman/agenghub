@@ -1,4 +1,5 @@
 mod builder;
+mod catalog;
 mod diagnostics;
 mod draft;
 mod formatter;
@@ -6,6 +7,8 @@ mod lexer;
 mod parser;
 mod preamble;
 mod section;
+mod semantic_imports;
+mod semantic_support;
 mod semantics;
 mod statements;
 #[cfg(test)]

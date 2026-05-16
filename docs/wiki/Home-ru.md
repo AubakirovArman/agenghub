@@ -25,6 +25,7 @@ agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 - Для local auto-refresh dashboard используй `/serve` или `agenthub serve`.
 - Для terminal dashboard с transactions, providers, memory, approvals и next actions используй `agenthub tui --live`.
 - Dashboard содержит provider status, approval inbox, memory browser, history browser и transaction viewer panes для report, diff и logs.
+- Для structured language diagnostics, подсказок по supported workspace/topology и golden AgentIR/DAG checks используй `agenthub aal check <file.aal>`.
 - Reusable local model endpoints сохраняются через `agenthub providers add openai-http --name local-vllm --url ...`.
 - Через `/chats`, `/search`, `/rename`, `/pin` и `/unpin` можно управлять chat sessions с auto titles; фильтр: `/chats status:COMMITTED provider:codex date:today`.
 - `/context` показывает current chat, recent messages, memory и selected transaction context.

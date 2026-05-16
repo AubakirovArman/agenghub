@@ -1,25 +1,18 @@
 use std::collections::HashSet;
 
-use crate::aal::diagnostics::{AalDiagnostic, AalSeverity};
+use crate::aal::catalog;
+use crate::aal::diagnostics::AalDiagnostic;
 use crate::aal::draft::Draft;
-
-const DOMAINS: &[&str] = &["code", "content", "data", "infra", "media", "research"];
-const VERIFY_PROFILES: &[&str] = &[
-    "backend_tdd",
-    "code_build",
-    "content_quality",
-    "data_quality",
-    "db_migration",
-    "infra_plan",
-    "media_render",
-    "research_report",
-    "web_runtime_smoke",
-];
+use crate::aal::semantic_imports;
+use crate::aal::semantic_support::{error, warning, workspace_domain};
 
 pub(crate) fn validate(draft: &Draft) -> Vec<AalDiagnostic> {
     let mut diagnostics = Vec::new();
     validate_version(draft, &mut diagnostics);
+    validate_workspace(draft, &mut diagnostics);
+    validate_topology(draft, &mut diagnostics);
     validate_imports(draft, &mut diagnostics);
+    semantic_imports::validate_usage(draft, &mut diagnostics);
     validate_skills(draft, &mut diagnostics);
     validate_verify_profile(draft, &mut diagnostics);
     validate_policy(draft, &mut diagnostics);
@@ -36,6 +29,44 @@ fn validate_version(draft: &Draft, diagnostics: &mut Vec<AalDiagnostic>) {
                 format!("unsupported AAL version `{version}`"),
             ));
         }
+    }
+}
+
+fn validate_workspace(draft: &Draft, diagnostics: &mut Vec<AalDiagnostic>) {
+    let Some(workspace) = draft.workspace.as_deref() else {
+        return;
+    };
+    if !catalog::WORKSPACES.contains(&workspace) {
+        diagnostics.push(
+            error(
+                "aal.workspace.unknown",
+                draft.workspace_line.unwrap_or(0),
+                format!("unknown workspace `{workspace}`"),
+            )
+            .with_help(format!(
+                "supported workspaces: {}",
+                catalog::list(catalog::WORKSPACES)
+            )),
+        );
+    }
+}
+
+fn validate_topology(draft: &Draft, diagnostics: &mut Vec<AalDiagnostic>) {
+    let Some(topology) = draft.topology.as_deref() else {
+        return;
+    };
+    if !catalog::TOPOLOGIES.contains(&topology) {
+        diagnostics.push(
+            error(
+                "aal.topology.unknown",
+                draft.topology_line.unwrap_or(0),
+                format!("unknown topology `{topology}`"),
+            )
+            .with_help(format!(
+                "supported topologies: {}",
+                catalog::list(catalog::TOPOLOGIES)
+            )),
+        );
     }
 }
 
@@ -82,7 +113,7 @@ fn validate_skill_namespace(
     let Some(domain) = skill.split('.').next() else {
         return true;
     };
-    if !DOMAINS.contains(&domain) && domain != "core" {
+    if !catalog::DOMAINS.contains(&domain) && domain != "core" {
         diagnostics.push(error(
             "aal.skill.unknown",
             line,
@@ -97,12 +128,26 @@ fn validate_verify_profile(draft: &Draft, diagnostics: &mut Vec<AalDiagnostic>) 
     let Some(profile) = draft.verify_profile.as_deref() else {
         return;
     };
-    if !VERIFY_PROFILES.contains(&profile) {
+    if !catalog::VERIFY_PROFILES.contains(&profile) {
         diagnostics.push(error(
             "aal.verify.unknown_profile",
             draft.verify_profile_line.unwrap_or(0),
             format!("unknown verifier profile `{profile}`"),
         ));
+        return;
+    }
+    let workspace = workspace_domain(draft);
+    if catalog::profile_domain(profile).is_some_and(|domain| domain != workspace) {
+        diagnostics.push(
+            warning(
+                "aal.verify.workspace_mismatch",
+                draft.verify_profile_line.unwrap_or(0),
+                format!("verifier profile `{profile}` is usually for another workspace"),
+            )
+            .with_help(format!(
+                "current workspace domain is `{workspace}`; choose a matching profile or change workspace"
+            )),
+        );
     }
 }
 
@@ -127,22 +172,14 @@ fn validate_runtime(draft: &Draft, diagnostics: &mut Vec<AalDiagnostic>) {
             "runtime_smoke routes are recorded but not executed until runtime_start is set",
         ));
     }
-}
-
-fn workspace_domain(draft: &Draft) -> &str {
-    draft
-        .workspace
-        .as_deref()
-        .unwrap_or("code.git")
-        .split('.')
-        .next()
-        .unwrap_or("code")
-}
-
-fn error(code: &str, line: usize, message: impl Into<String>) -> AalDiagnostic {
-    AalDiagnostic::with_code(AalSeverity::Error, code, line, message)
-}
-
-fn warning(code: &str, line: usize, message: impl Into<String>) -> AalDiagnostic {
-    AalDiagnostic::with_code(AalSeverity::Warning, code, line, message)
+    if draft.verify_profile.as_deref() == Some("web_runtime_smoke") && draft.routes.is_empty() {
+        diagnostics.push(
+            warning(
+                "aal.runtime.route_missing",
+                draft.verify_profile_line.unwrap_or(0),
+                "web_runtime_smoke profile has no runtime_smoke routes",
+            )
+            .with_help("add `- runtime_smoke route \"/\" expect 200` under verify"),
+        );
+    }
 }
