@@ -4,6 +4,15 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.3.1-local-preview - 2026-05-16
+
+- Fix provider setup config handling so `.agent/config.yaml` no longer blocks the first transaction after choosing Codex, Kimi, or another provider.
+- Add `.agent/config.yaml` to new project baselines so local provider settings stay out of git noise.
+- Add shell shorthand support for `/providers <provider>`, including `/providers kimi`.
+- Remember the built-in `command` provider when users decline the suggested Codex setup during onboarding.
+- Route generic empty-project web app requests to a static `index.html` app instead of an unrelated Next.js `/todo` page.
+- Make `agenthub ask` use the same project-aware intent normalization as the interactive shell.
+
 ## 0.3.0-local-preview - 2026-05-16
 
 - Make `agenthub` open a chat-first shell by default with first-run project setup, latest-chat restore, provider hints, persistent history, and slash completion.
