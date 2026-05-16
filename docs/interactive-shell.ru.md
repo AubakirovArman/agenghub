@@ -42,6 +42,18 @@ agenthub> add a /courses page in the dashboard style
 
 History хранится в `.agent/shell/history.txt`. Chat transcripts хранятся в `.agent/shell/chats/`.
 
+## Inline approval
+
+Перед execution shell показывает plan, scope, commands и risk level. Approval prompt принимает:
+
+```text
+Y          запустить transaction
+n          отменить и оставить draft
+diff       показать planned scope до execution
+details    вывести полный AgentSpec YAML
+edit       открыть draft в $VISUAL или $EDITOR и затем провалидировать
+```
+
 ## Основные slash commands
 
 ```text

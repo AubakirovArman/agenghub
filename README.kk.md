@@ -56,7 +56,7 @@ agenthub
 agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 ```
 
-AgentHub message-ті draft plan етеді, target files, provider, verifier profile, scope және commands көрсетеді, inline approval сұрайды, содан кейін interactive terminal ішінде live journal progress бар transaction іске қосады. Execution біткен соң `/diff`, `/logs`, `/report`, `/explain` және `/undo` ұсынады.
+AgentHub message-ті draft plan етеді, target files, provider, verifier profile, scope, commands және risk көрсетеді, `diff`, `details`, `edit` options бар inline approval сұрайды, содан кейін interactive terminal ішінде live journal progress бар transaction іске қосады. Execution біткен соң `/diff`, `/logs`, `/report`, `/explain` және `/undo` ұсынады.
 
 Shell ішінде:
 

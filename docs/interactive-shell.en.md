@@ -42,6 +42,18 @@ plain text        plan, ask for approval, then execute
 
 History is stored in `.agent/shell/history.txt`. Chat transcripts are stored under `.agent/shell/chats/`.
 
+## Inline Approval
+
+Before execution the shell prints the plan, scope, commands, and risk level. The approval prompt accepts:
+
+```text
+Y          run the transaction
+n          cancel and keep the draft
+diff       show the planned scope before execution
+details    print the full AgentSpec YAML
+edit       open the draft in $VISUAL or $EDITOR, then revalidate it
+```
+
 ## Core Slash Commands
 
 ```text

@@ -56,7 +56,7 @@ The default product surface is now chat-first. On first launch AgentHub can crea
 agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 ```
 
-AgentHub turns the message into a draft plan, shows the target files, provider, verifier profile, scope, and commands, asks for inline approval, then runs the transaction with live journal progress in interactive terminals. After execution it suggests `/diff`, `/logs`, `/report`, `/explain`, and `/undo`.
+AgentHub turns the message into a draft plan, shows the target files, provider, verifier profile, scope, commands, and risk, asks for inline approval with `diff`, `details`, and `edit` options, then runs the transaction with live journal progress in interactive terminals. After execution it suggests `/diff`, `/logs`, `/report`, `/explain`, and `/undo`.
 
 Inside the shell:
 

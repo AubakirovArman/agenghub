@@ -56,7 +56,7 @@ agenthub
 agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 ```
 
-AgentHub 会把消息转换成 draft plan，显示 target files、provider、verifier profile、scope 和 commands，询问 inline approval，然后在 interactive terminal 中用 live journal progress 运行 transaction。执行后会提示 `/diff`、`/logs`、`/report`、`/explain` 和 `/undo`。
+AgentHub 会把消息转换成 draft plan，显示 target files、provider、verifier profile、scope、commands 和 risk，询问带 `diff`、`details`、`edit` 选项的 inline approval，然后在 interactive terminal 中用 live journal progress 运行 transaction。执行后会提示 `/diff`、`/logs`、`/report`、`/explain` 和 `/undo`。
 
 Shell 内：
 

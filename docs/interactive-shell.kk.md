@@ -42,6 +42,18 @@ ordinary text      plan, approval, execution
 
 History `.agent/shell/history.txt` ішінде сақталады. Chat transcripts `.agent/shell/chats/` ішінде сақталады.
 
+## Inline approval
+
+Execution алдында shell plan, scope, commands және risk level көрсетеді. Approval prompt мыналарды қабылдайды:
+
+```text
+Y          transaction іске қосу
+n          cancel және draft сақтау
+diff       execution алдында planned scope көрсету
+details    толық AgentSpec YAML шығару
+edit       draft-ты $VISUAL немесе $EDITOR ішінде ашып, қайта validate ету
+```
+
 ## Негізгі slash commands
 
 ```text

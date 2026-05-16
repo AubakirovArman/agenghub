@@ -42,6 +42,18 @@ agenthub> add a /courses page in the dashboard style
 
 History 存在 `.agent/shell/history.txt`。Chat transcripts 存在 `.agent/shell/chats/`。
 
+## Inline Approval
+
+执行前，shell 会显示 plan、scope、commands 和 risk level。Approval prompt 支持：
+
+```text
+Y          运行 transaction
+n          取消并保留 draft
+diff       在 execution 前显示 planned scope
+details    打印完整 AgentSpec YAML
+edit       用 $VISUAL 或 $EDITOR 打开 draft，然后重新验证
+```
+
 ## 核心 Slash Commands
 
 ```text
