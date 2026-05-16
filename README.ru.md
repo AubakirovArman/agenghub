@@ -56,7 +56,7 @@ agenthub
 agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 ```
 
-AgentHub превращает сообщение в draft plan, показывает target files, provider, verifier profile, scope и commands, спрашивает inline approval и запускает transaction. После выполнения он подсказывает `/diff`, `/logs`, `/report`, `/explain` и `/undo`.
+AgentHub превращает сообщение в draft plan, показывает target files, provider, verifier profile, scope и commands, спрашивает inline approval и запускает transaction с live journal progress в interactive terminal. После выполнения он подсказывает `/diff`, `/logs`, `/report`, `/explain` и `/undo`.
 
 Внутри shell:
 
@@ -71,6 +71,7 @@ Scriptable commands остаются для automation:
 
 ```bash
 agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-commit
+agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-watch
 agenthub tx diff latest
 agenthub tx logs latest
 agenthub open dashboard

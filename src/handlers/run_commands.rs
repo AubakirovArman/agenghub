@@ -4,7 +4,7 @@ use anyhow::{anyhow, Result};
 use chrono::Utc;
 use serde_json::json;
 
-use agenthub::{enterprise, intent, memory, spec::AgentSpec, transaction};
+use agenthub::{enterprise, intent, live_run, memory, spec::AgentSpec};
 
 use super::run_summary;
 
@@ -47,11 +47,18 @@ pub fn handle_plan(
     Ok(())
 }
 
-pub fn handle_run(root: &Path, target: &str, no_commit: bool) -> Result<()> {
+pub fn handle_run(root: &Path, target: &str, no_commit: bool, no_watch: bool) -> Result<()> {
     let spec = resolve_run_spec(root, target)?;
     print_failed_attempt_warnings(root, &spec)?;
     let actor = enterprise::authorize(root, "transaction.run")?;
-    let outcome = match transaction::run(root, &spec, no_commit) {
+    let outcome = match live_run::run(
+        root,
+        &spec,
+        live_run::RunOptions {
+            no_commit,
+            watch: live_run::default_watch() && !no_watch,
+        },
+    ) {
         Ok(outcome) => outcome,
         Err(error) => {
             enterprise::record_event(

@@ -37,12 +37,13 @@ Prints the installed AgentHub version.
 ```bash
 agenthub plan "Add /courses page in the current dashboard style"
 agenthub run "Add /courses page in the current dashboard style"
+agenthub run "Add /courses page in the current dashboard style" --no-watch
 agenthub run examples/command-task.yaml
 ```
 
 `plan` writes a draft AgentSpec under `.agent/drafts/` unless `--output` is provided. `run` accepts either an existing AgentSpec path or a natural request. Natural requests are converted into a draft spec first, then executed through the normal transaction engine.
 
-The first output line keeps the compact `tx-id STATUS (report)` format for scripts. The following lines show task, provider, topology, verifier, memory promotion, changed file count, report, `tx explain`, `tx watch`, and dashboard path.
+In an interactive terminal, `run` prints live journal progress while the transaction executes. Use `--no-watch` for quiet one-shot runs. Non-TTY/scripted output keeps the compact `tx-id STATUS (report)` line, followed by task, provider, topology, verifier, memory promotion, changed file count, report, `tx explain`, `tx watch`, and dashboard path.
 
 ```bash
 agenthub tx explain tx-20260515123000-abcd1234

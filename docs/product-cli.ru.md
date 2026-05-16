@@ -37,12 +37,13 @@ agenthub version
 ```bash
 agenthub plan "Add /courses page in the current dashboard style"
 agenthub run "Add /courses page in the current dashboard style"
+agenthub run "Add /courses page in the current dashboard style" --no-watch
 agenthub run examples/command-task.yaml
 ```
 
 `plan` пишет draft AgentSpec в `.agent/drafts/`, если не указан `--output`. `run` принимает существующий AgentSpec path или natural request. Natural request сначала превращается в draft spec, затем выполняется через обычный transaction engine.
 
-Первая строка вывода сохраняет компактный формат `tx-id STATUS (report)` для скриптов. Следующие строки показывают task, provider, topology, verifier, memory promotion, число changed files, report, `tx explain`, `tx watch` и dashboard path.
+В interactive terminal `run` печатает live journal progress во время выполнения transaction. Используй `--no-watch` для тихого one-shot запуска. Non-TTY/scripted output сохраняет компактную строку `tx-id STATUS (report)`, затем показывает task, provider, topology, verifier, memory promotion, число changed files, report, `tx explain`, `tx watch` и dashboard path.
 
 ```bash
 agenthub tx explain tx-20260515123000-abcd1234

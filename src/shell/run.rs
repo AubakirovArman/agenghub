@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use anyhow::{Context, Result};
 use chrono::Utc;
 
-use crate::{enterprise, intent, memory, spec::AgentSpec, transaction};
+use crate::{enterprise, intent, live_run, memory, spec::AgentSpec};
 
 pub(super) fn run_request(root: &Path, request: &str, no_commit: bool) -> Result<String> {
     let path = write_draft(root, request)?;
@@ -13,7 +13,14 @@ pub(super) fn run_request(root: &Path, request: &str, no_commit: bool) -> Result
 pub(super) fn run_spec(root: &Path, spec: &Path, no_commit: bool) -> Result<String> {
     enterprise::authorize(root, "transaction.run")?;
     print_failed_attempt_warnings(root, spec)?;
-    let outcome = transaction::run(root, spec, no_commit)?;
+    let outcome = live_run::run(
+        root,
+        spec,
+        live_run::RunOptions {
+            no_commit,
+            watch: live_run::default_watch(),
+        },
+    )?;
     println!(
         "{} {} ({})",
         outcome.tx_id,

@@ -20,6 +20,7 @@ agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 ## Daily Workflow
 
 - Run `agenthub` without a subcommand to open the chat-first local shell.
+- Interactive `agenthub run` and shell task execution show live journal progress; use `--no-watch` for quiet scripts.
 - Use `/providers`, `/status`, `/diff`, `/logs`, `/report`, `/explain`, and `/dashboard` from inside the shell.
 - Use `/serve` or `agenthub serve` for the local auto-refresh dashboard.
 - Save reusable local model endpoints with `agenthub providers add openai-http --name local-vllm --url ...`.

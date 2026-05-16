@@ -24,6 +24,7 @@ Success criteria:
 10. `agenthub serve` provides a local auto-refresh dashboard server for daily work.
 11. Named provider profiles make local and proxy model endpoints reusable.
 12. Chat sessions have auto titles, search, rename, pin, and unpin flows.
+13. Interactive shell tasks and `agenthub run` show live journal progress by default, with `--no-watch` for scripts.
 
 ## Rules
 

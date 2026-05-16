@@ -56,7 +56,7 @@ agenthub
 agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 ```
 
-AgentHub 会把消息转换成 draft plan，显示 target files、provider、verifier profile、scope 和 commands，询问 inline approval，然后运行 transaction。执行后会提示 `/diff`、`/logs`、`/report`、`/explain` 和 `/undo`。
+AgentHub 会把消息转换成 draft plan，显示 target files、provider、verifier profile、scope 和 commands，询问 inline approval，然后在 interactive terminal 中用 live journal progress 运行 transaction。执行后会提示 `/diff`、`/logs`、`/report`、`/explain` 和 `/undo`。
 
 Shell 内：
 
@@ -71,6 +71,7 @@ Scriptable commands 仍然保留给 automation：
 
 ```bash
 agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-commit
+agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-watch
 agenthub tx diff latest
 agenthub tx logs latest
 agenthub open dashboard

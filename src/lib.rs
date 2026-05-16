@@ -16,6 +16,7 @@ pub mod git;
 pub mod hardening;
 pub mod intent;
 pub mod journal;
+pub mod live_run;
 pub mod llm_gateway;
 pub mod local_server;
 pub mod memory;

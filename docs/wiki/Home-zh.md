@@ -20,6 +20,7 @@ agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 ## 日常工作流
 
 - 不带 subcommand 运行 `agenthub` 会打开 chat-first local shell。
+- Interactive `agenthub run` 和 shell task execution 会显示 live journal progress；quiet scripts 可使用 `--no-watch`。
 - 在 shell 内使用 `/providers`、`/status`、`/diff`、`/logs`、`/report`、`/explain` 和 `/dashboard`。
 - 使用 `/serve` 或 `agenthub serve` 打开 local auto-refresh dashboard。
 - 使用 `agenthub providers add openai-http --name local-vllm --url ...` 保存 reusable local model endpoints。

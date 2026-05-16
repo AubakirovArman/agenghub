@@ -36,11 +36,23 @@ pub use outcome::TransactionOutcome;
 use state::RunState;
 pub use status::TransactionStatus;
 
+pub fn new_tx_id() -> String {
+    id::new_tx_id()
+}
+
 pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<TransactionOutcome> {
+    run_with_tx_id(project_root, spec_path, no_commit, new_tx_id())
+}
+
+pub fn run_with_tx_id(
+    project_root: &Path,
+    spec_path: &Path,
+    no_commit: bool,
+    tx_id: String,
+) -> Result<TransactionOutcome> {
     let started_at = Utc::now();
     let paths = ensure_runtime_dirs(project_root)?;
     let mut spec = AgentSpec::load(spec_path)?;
-    let tx_id = id::new_tx_id();
     let tx_dir = paths.tx_dir(&tx_id);
     fs::create_dir_all(&tx_dir).with_context(|| format!("create {}", tx_dir.display()))?;
     fs::copy(spec_path, tx_dir.join("plan.yaml"))

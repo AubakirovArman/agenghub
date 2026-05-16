@@ -53,6 +53,9 @@ pub enum Commands {
 
         #[arg(long)]
         no_commit: bool,
+
+        #[arg(long)]
+        no_watch: bool,
     },
     Undo {
         #[arg(default_value = "last")]

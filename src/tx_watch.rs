@@ -1,6 +1,10 @@
 use std::fs;
 use std::io::{self, BufRead, BufReader, Write};
 use std::path::Path;
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+};
 use std::thread;
 use std::time::Duration;
 
@@ -16,6 +20,24 @@ pub struct WatchOptions {
 }
 
 pub fn watch(root: &Path, tx_id: &str, options: WatchOptions) -> Result<()> {
+    watch_inner(root, tx_id, options, None)
+}
+
+pub fn watch_with_cancel(
+    root: &Path,
+    tx_id: &str,
+    options: WatchOptions,
+    cancel: Arc<AtomicBool>,
+) -> Result<()> {
+    watch_inner(root, tx_id, options, Some(cancel))
+}
+
+fn watch_inner(
+    root: &Path,
+    tx_id: &str,
+    options: WatchOptions,
+    cancel: Option<Arc<AtomicBool>>,
+) -> Result<()> {
     let path = AgentPaths::new(root).tx_dir(tx_id).join("journal.jsonl");
     let mut seen = 0usize;
     loop {
@@ -25,6 +47,12 @@ pub fn watch(root: &Path, tx_id: &str, options: WatchOptions) -> Result<()> {
         }
         seen = events.len();
         if options.once || events.last().is_some_and(|event| is_final(&event.state)) {
+            break;
+        }
+        if cancel
+            .as_ref()
+            .is_some_and(|flag| flag.load(Ordering::SeqCst))
+        {
             break;
         }
         io::stdout().flush()?;
