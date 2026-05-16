@@ -270,6 +270,8 @@ mod tests {
         assert!(events.iter().any(|event| {
             event["kind"].as_str() == Some("turn_finished")
                 && event["status"].as_str() == Some("succeeded")
+                && event["estimated_cost_usd"].as_f64().unwrap_or_default() > 0.0
+                && event["pricing_source"].as_str() == Some("configured_estimate")
         }));
         Ok(())
     }

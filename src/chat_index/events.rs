@@ -30,6 +30,10 @@ pub(super) fn read_events(path: &Path) -> Result<Vec<ChatEventView>> {
                 prompt_tokens: usize_field(&event, "prompt_tokens"),
                 completion_tokens: usize_field(&event, "completion_tokens"),
                 total_tokens: usize_field(&event, "total_tokens"),
+                estimated_input_cost_usd: f64_field(&event, "estimated_input_cost_usd"),
+                estimated_output_cost_usd: f64_field(&event, "estimated_output_cost_usd"),
+                estimated_cost_usd: f64_field(&event, "estimated_cost_usd"),
+                pricing_source: text_field(&event, "pricing_source"),
                 reason: text_field(&event, "reason"),
                 tx_id: text_field(&event, "tx_id"),
                 path: text_field(&event, "path"),
@@ -47,4 +51,8 @@ fn usize_field(event: &Value, key: &str) -> Option<usize> {
         .get(key)
         .and_then(Value::as_u64)
         .and_then(|value| usize::try_from(value).ok())
+}
+
+fn f64_field(event: &Value, key: &str) -> Option<f64> {
+    event.get(key).and_then(Value::as_f64)
 }

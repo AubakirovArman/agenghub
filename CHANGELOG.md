@@ -4,6 +4,8 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+- Add chat cost receipts: API chat `provider_finished` and `turn_finished` events now include estimated input/output/total USD cost and pricing source, so `agenthub exec --jsonl`, `/api/events`, and dashboard streams expose token and spend data together.
+
 ## 0.4.3-local-preview - 2026-05-16
 
 - Add provider lifecycle events for API chat turns: `provider_requested`, `provider_finished`, and `turn_finished` now persist request ids, provider ids, status, and token receipts into the chat/session event stream and `/api/events`.

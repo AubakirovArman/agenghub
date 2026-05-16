@@ -13,6 +13,7 @@ mod tests;
 mod trace;
 mod types;
 
+pub use costs::{estimate as estimate_cost, PriceEstimate};
 pub use http_provider::HttpProvider;
 pub use provider::{CliProvider, LlmProvider};
 pub use retry::complete_with_retry;

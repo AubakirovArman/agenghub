@@ -104,4 +104,4 @@ Local `command` adapter calls cost `0.0` by default. To configure a temporary es
 AGENTHUB_INPUT_USD_PER_1K=0.001 AGENTHUB_OUTPUT_USD_PER_1K=0.002 agenthub run examples/command-task.yaml
 ```
 
-The estimate is stored in `cost.json` and summarized in `report.md`.
+The estimate is stored in `cost.json` and summarized in `report.md`. Non-project API chat uses the same pricing table: `provider_finished` and `turn_finished` chat events include `estimated_input_cost_usd`, `estimated_output_cost_usd`, `estimated_cost_usd`, and `pricing_source`, and those fields are exposed by `agenthub exec --jsonl` and `/api/events`.

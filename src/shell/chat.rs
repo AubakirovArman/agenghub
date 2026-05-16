@@ -6,6 +6,7 @@ use chrono::Utc;
 use serde_json::{json, Value};
 use uuid::Uuid;
 
+use crate::llm_gateway::estimate_cost;
 use crate::observability::write_jsonl;
 use crate::{chat_index, home};
 
@@ -215,6 +216,7 @@ pub(super) fn append_provider_finished(
     completion_tokens: usize,
     reason: Option<&str>,
 ) -> Result<Value> {
+    let price = estimate_cost(provider, prompt_tokens, completion_tokens);
     append_event(
         session,
         "provider_finished",
@@ -225,6 +227,10 @@ pub(super) fn append_provider_finished(
             "prompt_tokens": prompt_tokens,
             "completion_tokens": completion_tokens,
             "total_tokens": prompt_tokens + completion_tokens,
+            "estimated_input_cost_usd": price.input_cost_usd,
+            "estimated_output_cost_usd": price.output_cost_usd,
+            "estimated_cost_usd": price.cost_usd,
+            "pricing_source": price.source,
             "reason": reason,
             "text": format!("{provider} request {status}")
         }),
@@ -238,6 +244,7 @@ pub(super) fn append_turn_finished(
     prompt_tokens: usize,
     completion_tokens: usize,
 ) -> Result<Value> {
+    let price = estimate_cost(provider, prompt_tokens, completion_tokens);
     append_event(
         session,
         "turn_finished",
@@ -247,6 +254,10 @@ pub(super) fn append_turn_finished(
             "prompt_tokens": prompt_tokens,
             "completion_tokens": completion_tokens,
             "total_tokens": prompt_tokens + completion_tokens,
+            "estimated_input_cost_usd": price.input_cost_usd,
+            "estimated_output_cost_usd": price.output_cost_usd,
+            "estimated_cost_usd": price.cost_usd,
+            "pricing_source": price.source,
             "text": format!("turn {status}")
         }),
     )

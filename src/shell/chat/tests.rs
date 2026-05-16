@@ -43,11 +43,21 @@ fn persists_chat_messages_and_transactions() -> Result<()> {
         event["kind"].as_str() == Some("provider_finished")
             && event["provider"].as_str() == Some("deepseek")
             && event["completion_tokens"].as_u64() == Some(7)
+            && event["estimated_cost_usd"].as_f64().unwrap_or_default() > 0.0
+            && event["pricing_source"].as_str() == Some("configured_estimate")
     }));
     assert!(events.iter().any(|event| {
         event["kind"].as_str() == Some("turn_finished")
             && event["status"].as_str() == Some("succeeded")
             && event["total_tokens"].as_u64() == Some(19)
+            && event["estimated_input_cost_usd"]
+                .as_f64()
+                .unwrap_or_default()
+                > 0.0
+            && event["estimated_output_cost_usd"]
+                .as_f64()
+                .unwrap_or_default()
+                > 0.0
     }));
     Ok(())
 }

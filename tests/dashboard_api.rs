@@ -22,8 +22,8 @@ fn dashboard_api_exposes_transactions_chats_and_sse_events() -> Result<()> {
          {\"at\":\"2026-01-01T00:00:00Z\",\"kind\":\"intent_classified\",\"intent\":\"chat\",\"mode\":\"chat\",\"reason\":\"no project runtime\",\"text\":\"review api dashboard\"}\n\
          {\"at\":\"2026-01-01T00:00:01Z\",\"kind\":\"provider_requested\",\"provider\":\"deepseek\",\"request_id\":\"chat-1\",\"prompt_tokens\":3,\"text\":\"deepseek request started\"}\n\
          {\"at\":\"2026-01-01T00:00:02Z\",\"kind\":\"assistant_delta\",\"provider\":\"deepseek\",\"text\":\"stream chunk\"}\n\
-         {\"at\":\"2026-01-01T00:00:03Z\",\"kind\":\"provider_finished\",\"provider\":\"deepseek\",\"request_id\":\"chat-1\",\"status\":\"ok\",\"prompt_tokens\":3,\"completion_tokens\":2,\"total_tokens\":5,\"text\":\"deepseek request ok\"}\n\
-         {\"at\":\"2026-01-01T00:00:04Z\",\"kind\":\"turn_finished\",\"provider\":\"deepseek\",\"status\":\"succeeded\",\"prompt_tokens\":3,\"completion_tokens\":2,\"total_tokens\":5,\"text\":\"turn succeeded\"}\n",
+         {\"at\":\"2026-01-01T00:00:03Z\",\"kind\":\"provider_finished\",\"provider\":\"deepseek\",\"request_id\":\"chat-1\",\"status\":\"ok\",\"prompt_tokens\":3,\"completion_tokens\":2,\"total_tokens\":5,\"estimated_input_cost_usd\":0.00000081,\"estimated_output_cost_usd\":0.0000022,\"estimated_cost_usd\":0.00000301,\"pricing_source\":\"configured_estimate\",\"text\":\"deepseek request ok\"}\n\
+         {\"at\":\"2026-01-01T00:00:04Z\",\"kind\":\"turn_finished\",\"provider\":\"deepseek\",\"status\":\"succeeded\",\"prompt_tokens\":3,\"completion_tokens\":2,\"total_tokens\":5,\"estimated_input_cost_usd\":0.00000081,\"estimated_output_cost_usd\":0.0000022,\"estimated_cost_usd\":0.00000301,\"pricing_source\":\"configured_estimate\",\"text\":\"turn succeeded\"}\n",
     )?;
 
     let empty = BTreeMap::new();
@@ -44,6 +44,8 @@ fn dashboard_api_exposes_transactions_chats_and_sse_events() -> Result<()> {
     assert!(events.contains("provider_requested"));
     assert!(events.contains("provider_finished"));
     assert!(events.contains("\"total_tokens\":5"));
+    assert!(events.contains("\"estimated_cost_usd\""));
+    assert!(events.contains("\"pricing_source\":\"configured_estimate\""));
     assert!(events.contains("assistant_delta"));
     assert!(events.contains("stream chunk"));
     Ok(())
