@@ -19,6 +19,7 @@ pub use render::render_dashboard;
 pub struct Dashboard {
     pub project: String,
     pub summary: DashboardSummary,
+    pub shell: ShellPanel,
     pub transactions: Vec<TransactionSummary>,
     pub latest: Option<LatestTransaction>,
     pub providers: ProviderPanel,
@@ -34,6 +35,58 @@ pub struct DashboardSummary {
     pub rolled_back: usize,
     pub blocked: usize,
     pub running: usize,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct ShellPanel {
+    pub status: ShellStatusLine,
+    pub composer: ComposerPanel,
+    pub transcript: Vec<TranscriptLine>,
+    pub event_rail: Vec<EventRailItem>,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct ShellStatusLine {
+    pub mode: String,
+    pub provider: String,
+    pub provider_ready: bool,
+    pub model: Option<String>,
+    pub git_state: String,
+    pub agent_state: String,
+    pub chat_id: Option<String>,
+    pub chat_title: Option<String>,
+    pub prompt_tokens: Option<usize>,
+    pub total_tokens: Option<usize>,
+    pub estimated_cost_usd: Option<f64>,
+    pub controls: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct ComposerPanel {
+    pub prompt: String,
+    pub slash_palette: Vec<SlashPaletteItem>,
+    pub context_mentions: Vec<String>,
+}
+
+#[derive(Debug, Clone)]
+pub struct SlashPaletteItem {
+    pub command: String,
+    pub summary: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct TranscriptLine {
+    pub at: String,
+    pub speaker: String,
+    pub text: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct EventRailItem {
+    pub at: String,
+    pub state: String,
+    pub label: String,
+    pub detail: String,
 }
 
 #[derive(Debug, Clone)]

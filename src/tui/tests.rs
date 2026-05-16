@@ -46,6 +46,18 @@ fn renders_terminal_dashboard_panels() -> Result<()> {
         tx.join("logs/execution-0.stdout.log"),
         "line one\nline two\n",
     )?;
+    let chats = dir.path().join(".agent/shell/chats");
+    fs::create_dir_all(&chats)?;
+    fs::write(
+        chats.join("chat-demo.jsonl"),
+        "{\"at\":\"2026-01-01T00:00:00Z\",\"kind\":\"user_message\",\"text\":\"check server load\"}\n\
+         {\"at\":\"2026-01-01T00:00:01Z\",\"kind\":\"intent_classified\",\"intent\":\"ops_advice\",\"mode\":\"ops\",\"reason\":\"server wording\",\"text\":\"check server load\"}\n\
+         {\"at\":\"2026-01-01T00:00:02Z\",\"kind\":\"context_built\",\"text\":\"context built\",\"prompt_tokens\":64,\"max_prompt_tokens\":6000,\"memory_tokens\":12,\"context_compressed\":true}\n\
+         {\"at\":\"2026-01-01T00:00:03Z\",\"kind\":\"provider_requested\",\"provider\":\"deepseek\",\"model\":\"deepseek-chat\",\"request_id\":\"chat-1\",\"prompt_tokens\":64,\"text\":\"deepseek request started\"}\n\
+         {\"at\":\"2026-01-01T00:00:04Z\",\"kind\":\"assistant_delta\",\"provider\":\"deepseek\",\"text\":\"stream chunk\"}\n\
+         {\"at\":\"2026-01-01T00:00:05Z\",\"kind\":\"assistant_message\",\"provider\":\"deepseek\",\"text\":\"Load is normal\"}\n\
+         {\"at\":\"2026-01-01T00:00:06Z\",\"kind\":\"turn_finished\",\"provider\":\"deepseek\",\"status\":\"succeeded\",\"prompt_tokens\":64,\"completion_tokens\":5,\"total_tokens\":69,\"estimated_cost_usd\":0.00001,\"text\":\"turn succeeded\"}\n",
+    )?;
     fs::create_dir_all(dir.path().join(".agent/specs"))?;
     fs::write(
         dir.path().join(".agent/specs/approval.yaml"),
@@ -63,6 +75,21 @@ fn renders_terminal_dashboard_panels() -> Result<()> {
     let dashboard = dashboard_text(dir.path())?;
 
     assert!(dashboard.contains("AgentHub TUI Dashboard"));
+    assert!(dashboard.contains("[Status Line]"));
+    assert!(dashboard.contains("- mode: project | provider: deepseek"));
+    assert!(dashboard.contains("- chat: chat-demo check server load"));
+    assert!(dashboard.contains("- tokens: prompt 64 total 69 | cost: 0.000010 USD"));
+    assert!(dashboard.contains("- controls: Ctrl-C interrupt | /resume | /messages | /context"));
+    assert!(dashboard.contains("[Composer]"));
+    assert!(dashboard.contains("/messages"));
+    assert!(dashboard.contains("@tx:latest"));
+    assert!(dashboard.contains("@chat:chat-demo"));
+    assert!(dashboard.contains("[Chat Transcript]"));
+    assert!(dashboard.contains("user: check server load"));
+    assert!(dashboard.contains("assistant stream: stream chunk"));
+    assert!(dashboard.contains("[Event Rail]"));
+    assert!(dashboard.contains("[streaming] assistant delta"));
+    assert!(dashboard.contains("[ready] context built: prompt 64/6000 memory 12 compressed true"));
     assert!(dashboard.contains("[Summary]"));
     assert!(dashboard.contains("- total transactions: 1"));
     assert!(dashboard.contains("- committed: 1 | rolled back: 0 | blocked: 0 | running: 0"));

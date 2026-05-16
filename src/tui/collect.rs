@@ -5,21 +5,28 @@ use anyhow::{Context, Result};
 use serde_json::Value;
 
 use crate::agent_dir::{self, AgentPaths};
+use crate::chat_index::{self, ChatEventView};
+use crate::git;
 use crate::journal::JournalEvent;
 use crate::memory;
+use crate::product_cli::config;
 use crate::tui::read::{
     array_len, count_lines, latest_output_tail, provider_label, read_json, read_jsonl,
     read_latest_jsonl, tail_lines,
 };
 use crate::tui::{
-    ApprovalPanel, Dashboard, DashboardSummary, LatestTransaction, MemoryPanel, TransactionSummary,
+    ApprovalPanel, ComposerPanel, Dashboard, DashboardSummary, EventRailItem, LatestTransaction,
+    MemoryPanel, ShellPanel, ShellStatusLine, SlashPaletteItem, TransactionSummary, TranscriptLine,
 };
+use crate::workspace;
 
 use super::providers::collect_provider_panel;
 
 pub fn collect_dashboard(project_root: &Path) -> Result<Dashboard> {
     let rows = agent_dir::list_transactions(project_root)?;
     let memory = memory::inspect(project_root)?;
+    let providers = collect_provider_panel(project_root)?;
+    let shell = collect_shell_panel(project_root, &providers)?;
     let latest = rows
         .last()
         .map(|row| collect_latest(project_root, &row.id, &row.status))
@@ -29,6 +36,7 @@ pub fn collect_dashboard(project_root: &Path) -> Result<Dashboard> {
     Ok(Dashboard {
         project: project_root.display().to_string(),
         summary: summarize_transactions(&rows),
+        shell,
         transactions: rows
             .iter()
             .rev()
@@ -39,7 +47,7 @@ pub fn collect_dashboard(project_root: &Path) -> Result<Dashboard> {
             })
             .collect(),
         latest,
-        providers: collect_provider_panel(project_root)?,
+        providers,
         memory: MemoryPanel {
             committed: memory.committed,
             failed_attempts: memory.failed_attempts,
@@ -48,6 +56,244 @@ pub fn collect_dashboard(project_root: &Path) -> Result<Dashboard> {
         approvals: collect_approvals(project_root, &rows)?,
         next_actions,
     })
+}
+
+fn collect_shell_panel(
+    project_root: &Path,
+    providers: &crate::tui::ProviderPanel,
+) -> Result<ShellPanel> {
+    let latest_chat = chat_index::list(project_root, 1)?.into_iter().next();
+    let chat_events = match latest_chat.as_ref() {
+        Some(chat) => chat_index::read_chat(project_root, &chat.id)?.unwrap_or_default(),
+        None => Vec::new(),
+    };
+    let recent_events = chat_index::recent_events(project_root, 12)?;
+    let provider = default_provider(project_root, providers);
+    Ok(ShellPanel {
+        status: ShellStatusLine {
+            mode: current_mode(project_root, &chat_events),
+            provider: provider.0,
+            provider_ready: provider.1,
+            model: provider.2,
+            git_state: git_state(project_root),
+            agent_state: agent_state(project_root),
+            chat_id: latest_chat.as_ref().map(|chat| chat.id.clone()),
+            chat_title: latest_chat.as_ref().map(|chat| chat.title.clone()),
+            prompt_tokens: latest_numeric(&recent_events, |event| event.event.prompt_tokens),
+            total_tokens: latest_numeric(&recent_events, |event| event.event.total_tokens),
+            estimated_cost_usd: latest_cost(&recent_events),
+            controls: vec![
+                "Ctrl-C interrupt".to_string(),
+                "/resume".to_string(),
+                "/messages".to_string(),
+                "/context".to_string(),
+            ],
+        },
+        composer: ComposerPanel {
+            prompt: "Type a request, / command, @ context, ! shell command, or # memory note"
+                .to_string(),
+            slash_palette: slash_palette(),
+            context_mentions: context_mentions(
+                project_root,
+                latest_chat.as_ref().map(|chat| chat.id.as_str()),
+            ),
+        },
+        transcript: transcript_lines(&chat_events),
+        event_rail: recent_events
+            .into_iter()
+            .map(|row| event_rail_item(row.event))
+            .collect(),
+    })
+}
+
+fn current_mode(project_root: &Path, events: &[ChatEventView]) -> String {
+    if workspace::detect_mode(project_root).mode == workspace::WorkspaceMode::Project {
+        return workspace::WorkspaceMode::Project.as_str().to_string();
+    }
+    events
+        .iter()
+        .rev()
+        .find_map(|event| {
+            (event.kind == "intent_classified")
+                .then(|| event.mode.clone())
+                .flatten()
+        })
+        .unwrap_or_else(|| {
+            workspace::detect_mode(project_root)
+                .mode
+                .as_str()
+                .to_string()
+        })
+}
+
+fn default_provider(
+    project_root: &Path,
+    providers: &crate::tui::ProviderPanel,
+) -> (String, bool, Option<String>) {
+    let default = config::default_provider(project_root)
+        .unwrap_or_else(|_| providers.default_provider.clone());
+    if let Some(status) = providers
+        .statuses
+        .iter()
+        .find(|status| status.id == default)
+    {
+        return (
+            status.id.clone(),
+            status.state == "ok",
+            status.model.clone(),
+        );
+    }
+    (default, false, None)
+}
+
+fn git_state(project_root: &Path) -> String {
+    if !git::is_repo(project_root) {
+        return "git optional".to_string();
+    }
+    if git::dirty(project_root) {
+        "git ~".to_string()
+    } else {
+        "git ok".to_string()
+    }
+}
+
+fn agent_state(project_root: &Path) -> String {
+    if project_root.join(".agent/project.yaml").exists() {
+        "project runtime".to_string()
+    } else {
+        "global session".to_string()
+    }
+}
+
+fn latest_numeric<F>(events: &[chat_index::ChatEventRow], pick: F) -> Option<usize>
+where
+    F: Fn(&chat_index::ChatEventRow) -> Option<usize>,
+{
+    events.iter().find_map(pick)
+}
+
+fn latest_cost(events: &[chat_index::ChatEventRow]) -> Option<f64> {
+    events
+        .iter()
+        .find_map(|event| event.event.estimated_cost_usd)
+}
+
+fn slash_palette() -> Vec<SlashPaletteItem> {
+    [
+        ("/status", "show mode, provider, git, and current tx"),
+        ("/messages", "show current chat transcript"),
+        ("/context", "preview selected files, memory, and tx"),
+        ("/providers", "inspect DeepSeek/Kimi API setup"),
+        ("/memory", "inspect memory and inbox"),
+        ("/resume", "resume blocked transaction"),
+        ("/diff", "show latest/current transaction diff"),
+        ("/logs", "show latest/current transaction logs"),
+    ]
+    .into_iter()
+    .map(|(command, summary)| SlashPaletteItem {
+        command: command.to_string(),
+        summary: summary.to_string(),
+    })
+    .collect()
+}
+
+fn context_mentions(project_root: &Path, chat_id: Option<&str>) -> Vec<String> {
+    let mut mentions = vec![
+        "@file".to_string(),
+        "@folder".to_string(),
+        "@tx:latest".to_string(),
+        "@chat:latest".to_string(),
+        "@memory:summary".to_string(),
+    ];
+    if let Some(chat_id) = chat_id {
+        mentions.push(format!("@chat:{chat_id}"));
+    }
+    if let Ok(mut rows) = agent_dir::list_transactions(project_root) {
+        if let Some(row) = rows.pop() {
+            mentions.push(format!("@tx:{}", row.id));
+        }
+    }
+    mentions
+}
+
+fn transcript_lines(events: &[ChatEventView]) -> Vec<TranscriptLine> {
+    let mut lines = events
+        .iter()
+        .filter_map(|event| {
+            let speaker = match event.kind.as_str() {
+                "user_message" => "user",
+                "assistant_message" => "assistant",
+                "assistant_delta" => "assistant stream",
+                "tool_permission" => "tool",
+                _ => return None,
+            };
+            Some(TranscriptLine {
+                at: event.at.clone(),
+                speaker: speaker.to_string(),
+                text: event.text.clone(),
+            })
+        })
+        .collect::<Vec<_>>();
+    if lines.len() > 10 {
+        lines = lines.split_off(lines.len() - 10);
+    }
+    lines
+}
+
+fn event_rail_item(event: ChatEventView) -> EventRailItem {
+    let (state, label) = match event.kind.as_str() {
+        "provider_requested" => ("running", "provider request"),
+        "assistant_delta" => ("streaming", "assistant delta"),
+        "context_built" => ("ready", "context built"),
+        "tool_permission" if event.approval_required == Some(true) => {
+            ("approval", "tool permission")
+        }
+        "tool_permission" => ("ready", "tool permission"),
+        "provider_fallback" => ("fallback", "provider fallback"),
+        "provider_finished" if event.status.as_deref() == Some("error") => {
+            ("error", "provider finished")
+        }
+        "provider_finished" => ("done", "provider finished"),
+        "turn_finished" if event.status.as_deref() == Some("failed") => ("error", "turn finished"),
+        "turn_finished" => ("done", "turn finished"),
+        "intent_classified" => ("ready", "intent"),
+        _ => ("event", event.kind.as_str()),
+    };
+    let detail = event_detail(&event);
+    EventRailItem {
+        at: event.at,
+        state: state.to_string(),
+        label: label.to_string(),
+        detail,
+    }
+}
+
+fn event_detail(event: &ChatEventView) -> String {
+    if event.kind == "context_built" {
+        return format!(
+            "prompt {}/{} memory {} compressed {}",
+            event.prompt_tokens.unwrap_or_default(),
+            event.max_prompt_tokens.unwrap_or_default(),
+            event.memory_tokens.unwrap_or_default(),
+            event.context_compressed.unwrap_or(false)
+        );
+    }
+    if event.kind == "tool_permission" {
+        return format!(
+            "{} risk {} approval {}",
+            event.profile.as_deref().unwrap_or("tool"),
+            event.risk.as_deref().unwrap_or("unknown"),
+            event.approval_required.unwrap_or(false)
+        );
+    }
+    if let Some(provider) = &event.provider {
+        let status = event.status.as_deref().unwrap_or("");
+        return format!("{provider} {status} {}", event.text);
+    }
+    if let Some(mode) = &event.mode {
+        return format!("{mode} {}", event.text);
+    }
+    event.text.clone()
 }
 
 fn summarize_transactions(rows: &[agent_dir::TransactionRow]) -> DashboardSummary {

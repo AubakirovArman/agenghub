@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.17-local-preview - 2026-05-16
+
+- Add event-backed TUI foundation panels for shell work: status line, composer prompt, slash palette, context mention hints, chat transcript, and event rail are now rendered from the existing AgentHub chat/event store.
+- Surface live streaming and provider state in `agenthub tui`: recent `provider_requested`, `assistant_delta`, `context_built`, `tool_permission`, fallback, and turn events are condensed into a visible event rail with running/streaming/approval/error/done states.
+- Keep the TUI as a presentation layer over the same `exec --jsonl` and chat index events, avoiding a second runtime while making long API turns visibly alive and controllable.
+
 ## 0.4.16-local-preview - 2026-05-16
 
 - Add memory context budgeting for API chat turns: committed memory is capped by record count and token estimate, recent conversation is trimmed to the prompt budget, and each turn writes a `memory/compacted/context_receipt.json` receipt.
