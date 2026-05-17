@@ -4,6 +4,10 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.72-local-preview - 2026-05-17
+
+- Fix readiness audit fixture history JSONL so Windows paths are serialized safely and the new readiness tests pass on the Windows CI matrix.
+
 ## 0.4.71-local-preview - 2026-05-17
 
 - Add `agenthub readiness audit [--json] [--check] [--no-refresh]`, a first-class product CLI readiness gate over the API-native 1.0 completion evidence.

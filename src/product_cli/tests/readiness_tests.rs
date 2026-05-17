@@ -192,22 +192,48 @@ fn with_readiness_fixture(
 }
 
 fn history_index(history: &std::path::Path) -> String {
-    format!(
-        "{{\"run_id\":\"suite-1\",\"archived_at\":\"2026-05-14T00:00:00Z\",\"kind\":\"suite\",\"report\":\"{}\",\"provider_status\":\"skipped\"}}\n\
-         {{\"run_id\":\"suite-2\",\"archived_at\":\"2026-05-15T00:00:00Z\",\"kind\":\"suite\",\"report\":\"{}\",\"provider_status\":\"skipped\"}}\n\
-         {{\"run_id\":\"suite-3\",\"archived_at\":\"2026-05-16T00:00:00Z\",\"kind\":\"suite\",\"report\":\"{}\",\"provider_status\":\"skipped\"}}\n\
-         {{\"run_id\":\"provider-deepseek\",\"archived_at\":\"2026-05-16T01:00:00Z\",\"kind\":\"provider\",\"report\":\"{}\",\"provider\":\"deepseek\",\"provider_status\":\"passed\"}}\n\
-         {{\"run_id\":\"provider-kimi\",\"archived_at\":\"2026-05-16T01:30:00Z\",\"kind\":\"provider\",\"report\":\"{}\",\"provider\":\"kimi\",\"provider_status\":\"passed\"}}\n",
-        history.join("runs/suite-1/dogfood-report.json").display(),
-        history.join("runs/suite-2/dogfood-report.json").display(),
-        history.join("runs/suite-3/dogfood-report.json").display(),
-        history
-            .join("runs/provider-deepseek/provider-dogfood-report.json")
-            .display(),
-        history
-            .join("runs/provider-kimi/provider-dogfood-report.json")
-            .display()
-    )
+    [
+        serde_json::json!({
+            "run_id": "suite-1",
+            "archived_at": "2026-05-14T00:00:00Z",
+            "kind": "suite",
+            "report": history.join("runs/suite-1/dogfood-report.json"),
+            "provider_status": "skipped",
+        }),
+        serde_json::json!({
+            "run_id": "suite-2",
+            "archived_at": "2026-05-15T00:00:00Z",
+            "kind": "suite",
+            "report": history.join("runs/suite-2/dogfood-report.json"),
+            "provider_status": "skipped",
+        }),
+        serde_json::json!({
+            "run_id": "suite-3",
+            "archived_at": "2026-05-16T00:00:00Z",
+            "kind": "suite",
+            "report": history.join("runs/suite-3/dogfood-report.json"),
+            "provider_status": "skipped",
+        }),
+        serde_json::json!({
+            "run_id": "provider-deepseek",
+            "archived_at": "2026-05-16T01:00:00Z",
+            "kind": "provider",
+            "report": history.join("runs/provider-deepseek/provider-dogfood-report.json"),
+            "provider": "deepseek",
+            "provider_status": "passed",
+        }),
+        serde_json::json!({
+            "run_id": "provider-kimi",
+            "archived_at": "2026-05-16T01:30:00Z",
+            "kind": "provider",
+            "report": history.join("runs/provider-kimi/provider-dogfood-report.json"),
+            "provider": "kimi",
+            "provider_status": "passed",
+        }),
+    ]
+    .into_iter()
+    .map(|entry| format!("{entry}\n"))
+    .collect()
 }
 
 fn evidence_jsonl(blocked: bool) -> String {
