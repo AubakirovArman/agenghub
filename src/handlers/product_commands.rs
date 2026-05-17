@@ -37,6 +37,9 @@ pub fn handle_providers(project_root: &Path, command: ProviderCommands) -> Resul
         ProviderCommands::Diagnose { provider } => {
             print!("{}", providers::diagnose_provider(project_root, &provider)?);
         }
+        ProviderCommands::Unblock { provider } => {
+            print!("{}", providers::unblock_provider(project_root, &provider)?);
+        }
         ProviderCommands::Set { role, provider } => {
             print!(
                 "{}",

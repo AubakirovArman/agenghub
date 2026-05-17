@@ -45,6 +45,10 @@ pub(super) fn handle_providers(root: &Path, args: Option<&str>) -> Result<()> {
             "{}",
             providers::diagnose_provider(root, required(&args, 1, "provider")?)?
         ),
+        "unblock" => print!(
+            "{}",
+            providers::unblock_provider(root, required(&args, 1, "provider")?)?
+        ),
         "set" => print!(
             "{}",
             providers::set_role_provider(

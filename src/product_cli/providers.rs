@@ -361,6 +361,53 @@ pub fn test_report_failed(report: &str) -> bool {
         .is_some_and(|line| line.starts_with("failed\t") || line.starts_with("missing\t"))
 }
 
+pub fn unblock_provider(project_root: &Path, provider: &str) -> Result<String> {
+    let status = status_for(project_root, provider)?;
+    let fallback_state = if status.available { "ok" } else { "missing" };
+    let state = status.state.as_deref().unwrap_or(fallback_state);
+    let mut out = String::new();
+    out.push_str(&format!("provider\t{}\n", status.info.id));
+    out.push_str(&format!("status\t{state}\n"));
+    out.push_str(&format!("detail\t{}\n", status_detail(&status)));
+    if let Some(endpoint) = &status.endpoint {
+        out.push_str(&format!("endpoint\t{endpoint}\n"));
+    }
+    if let Some(model) = &status.model {
+        out.push_str(&format!("model\t{model}\n"));
+    }
+    if let Some(api_key_env) = &status.api_key_env {
+        out.push_str(&format!("api_key_env\t{api_key_env}\n"));
+    }
+    if let Some(api_key_file) = &status.api_key_file {
+        out.push_str(&format!("api_key_file\t{}\n", api_key_file.display()));
+    }
+    match status.info.id.as_str() {
+        "kimi" => append_kimi_unblock_steps(project_root, &mut out),
+        "deepseek" => {
+            out.push_str("step\t1\tagenthub providers test deepseek\n");
+            out.push_str("step\t2\tagenthub providers diagnose deepseek\n");
+        }
+        _ => out.push_str(&format!(
+            "step\t1\tagenthub providers test {}\n",
+            status.info.id
+        )),
+    }
+    Ok(out)
+}
+
+fn append_kimi_unblock_steps(project_root: &Path, out: &mut String) {
+    out.push_str("action\treplace_or_rotate_kimi_moonshot_key_if_auth_failed\n");
+    out.push_str("step\t1\tagenthub providers test kimi\n");
+    let script = project_root.join("scripts/kimi-auth-check.sh");
+    if script.exists() {
+        out.push_str(&format!("step\t2\t{}\n", script.display()));
+    } else {
+        out.push_str("step\t2\tscripts/kimi-auth-check.sh\n");
+    }
+    out.push_str("step\t3\tscripts/rc-evidence-collect.sh\n");
+    out.push_str("step\t4\tscripts/rc-dogfood-gate.sh --check\n");
+}
+
 pub fn diagnose_provider(project_root: &Path, provider: &str) -> Result<String> {
     let status = status_for(project_root, provider)?;
     Ok(diagnostics::diagnose(&status))

@@ -142,6 +142,31 @@ fn providers_kimi_test_can_recheck_matching_auth_blocker() -> Result<()> {
 }
 
 #[test]
+fn providers_kimi_unblock_renders_source_backed_next_steps() -> Result<()> {
+    with_kimi_env(None, Some("kimi-test-key"), || {
+        let dir = tempfile::tempdir()?;
+        let report = dir.path().join("kimi-auth-report.json");
+        std::fs::write(
+            &report,
+            r#"{"provider":"kimi","status":"blocked","auth_key_sha256_12":"5e0492f3799a","next_action":"replace key"}"#,
+        )?;
+        std::env::set_var("AGENTHUB_KIMI_AUTH_REPORT", &report);
+
+        let unblock = providers::unblock_provider(dir.path(), "kimi")?;
+
+        assert!(unblock.contains("provider\tkimi"));
+        assert!(unblock.contains("status\tblocked"));
+        assert!(unblock.contains("detail\tlatest Kimi auth check blocked"));
+        assert!(unblock.contains("api_key_env\tKIMI_API_KEY"));
+        assert!(unblock.contains("step\t1\tagenthub providers test kimi"));
+        assert!(unblock.contains("step\t2\tscripts/kimi-auth-check.sh"));
+        assert!(unblock.contains("step\t3\tscripts/rc-evidence-collect.sh"));
+        assert!(unblock.contains("step\t4\tscripts/rc-dogfood-gate.sh --check"));
+        Ok(())
+    })
+}
+
+#[test]
 fn providers_kimi_status_ignores_stale_auth_blocker_after_key_change() -> Result<()> {
     with_kimi_env(None, Some("new-kimi-test-key"), || {
         let dir = tempfile::tempdir()?;

@@ -13,6 +13,9 @@ pub enum ProviderCommands {
     Diagnose {
         provider: String,
     },
+    Unblock {
+        provider: String,
+    },
     Set {
         role: String,
         provider: String,

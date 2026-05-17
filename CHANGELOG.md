@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.48-local-preview - 2026-05-17
+
+- Add `agenthub providers unblock <provider>` and `/providers unblock <provider>` as a concise provider unblock runbook that reports current status, safe credential source, endpoint/model, and next verification commands.
+- Add Kimi coverage for unblock output so the 1.0 RC Kimi auth blocker has a first-class CLI path instead of requiring users to remember script names.
+
 ## 0.4.47-local-preview - 2026-05-17
 
 - Keep `agenthub providers test kimi` able to re-run a live auth check even when `providers status` reports a matching source-backed Kimi blocker.
