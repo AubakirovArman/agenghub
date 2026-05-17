@@ -66,6 +66,10 @@ grep -q '"blockers":' "$TMP/readiness-blockers.json"
 run_agenthub readiness checklist --json --no-refresh > "$TMP/readiness-checklist.json"
 grep -q '"status": "incomplete"' "$TMP/readiness-checklist.json"
 grep -q '"requirements":' "$TMP/readiness-checklist.json"
+run_agenthub readiness evidence --json --no-refresh > "$TMP/readiness-evidence.json"
+grep -q '"status": "incomplete"' "$TMP/readiness-evidence.json"
+grep -q '"thresholds":' "$TMP/readiness-evidence.json"
+grep -q '"gate":' "$TMP/readiness-evidence.json"
 run_agenthub config show > "$TMP/config-show.txt"
 
 cat > "$SPEC" <<'YAML'

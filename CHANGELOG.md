@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.101-local-preview - 2026-05-17
+
+- Add `agenthub readiness evidence [--json] [--check] [--no-refresh]`, a focused RC evidence report for dogfood history, session/Ops/project/cost thresholds, provider evidence, required RC checks, Kimi auth state, open blockers, and the final dogfood gate.
+- Include the new evidence report in smoke coverage and product docs so 1.0 release triage can inspect source-backed dogfood gaps without parsing raw JSONL files or shell-script text.
+
 ## 0.4.100-local-preview - 2026-05-17
 
 - Add `agenthub readiness checklist [--json] [--check] [--no-refresh]`, a prompt-to-artifact checklist that groups API-native 1.0 requirements into concrete files, commands, evidence sources, readiness checks, blocker kinds, and recovery commands.

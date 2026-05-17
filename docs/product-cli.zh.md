@@ -168,11 +168,14 @@ Kimi Code CLI credentials are not Moonshot API keys. If a source file looks like
 agenthub readiness audit --json --check
 agenthub readiness blockers --json --check
 agenthub readiness checklist --json --check
+agenthub readiness evidence --json --check
 ```
 
 `readiness audit` is the full API-native 1.0 gate. JSON output includes source paths, RC evidence metrics, every check row, top-level `blocked_checks`, and per-check `next_commands` for incomplete rows. Text output renders matching `blocked_checks` and `check_next` lines. `readiness blockers` is the short view for humans and automation; it reuses the same recovery commands and emits the same top-level `blocked_checks` summary as the full audit.
 
 `readiness checklist` is the prompt-to-artifact view of the same gate. It groups the API-native 1.0 objective into roadmap files, DeepSeek/Kimi API evidence, Chat/Ops/Project mode evidence, memory/observability checks, the RC dogfood gate, and post-1.0 sequencing. Each requirement lists concrete files, commands, mapped readiness checks, blocker kinds, and recovery commands without printing secrets.
+
+`readiness evidence` is the focused RC evidence view. It reports dogfood history thresholds, real session/Ops/project-edit/cost counters, provider dogfood rows, required RC checks, Kimi auth evidence, open blocker state, and the final dogfood gate in one machine-readable report without reading raw JSONL files.
 
 The compatible script path, `scripts/api-native-completion-audit.sh --json --check`, now carries the same `blocker_scope`, `blocker_kinds`, per-check `blocker_kind`, per-check `next_commands`, and top-level `blocked_checks` metadata; text output also prints top-level `blocker_scope`/`blocker_kinds`/`blocked_checks` rows so release automation can distinguish external credential blockers from local implementation gaps without parsing text.
 

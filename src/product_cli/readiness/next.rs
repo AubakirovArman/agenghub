@@ -38,6 +38,7 @@ pub(super) fn check_next_commands(id: &str, detail: &str) -> Vec<String> {
     if id == "rc_dogfood_gate" {
         return vec![
             "agenthub readiness blockers --json --check".to_string(),
+            "agenthub readiness evidence --json --check".to_string(),
             "scripts/rc-evidence-collect.sh".to_string(),
             "scripts/rc-dogfood-gate.sh --check".to_string(),
         ];
@@ -58,6 +59,7 @@ pub(super) fn check_next_commands(id: &str, detail: &str) -> Vec<String> {
         return vec![
             "AGENTHUB_DOGFOOD_ACCEPTANCE=1 scripts/dogfood.sh".to_string(),
             "scripts/rc-evidence-collect.sh".to_string(),
+            "agenthub readiness evidence --json --check".to_string(),
             "agenthub readiness audit --json --check".to_string(),
         ];
     }

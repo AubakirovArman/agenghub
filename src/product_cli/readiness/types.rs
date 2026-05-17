@@ -264,6 +264,7 @@ pub(super) fn next_commands() -> Vec<String> {
         "scripts/kimi-auth-check.sh",
         "AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh",
         "agenthub readiness blockers --json --check",
+        "agenthub readiness evidence --json --check",
         "agenthub readiness audit --json --check",
         "scripts/rc-evidence-collect.sh",
         "scripts/rc-dogfood-gate.sh --check",

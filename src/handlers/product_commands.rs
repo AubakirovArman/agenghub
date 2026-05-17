@@ -266,6 +266,20 @@ pub fn handle_readiness(project_root: &Path, command: ReadinessCommands) -> Resu
                 bail!("readiness checklist incomplete");
             }
         }
+        ReadinessCommands::Evidence {
+            json,
+            check,
+            no_refresh,
+        } => {
+            let result = readiness::render_evidence(
+                project_root,
+                readiness::AuditOptions { json, no_refresh },
+            )?;
+            print!("{}", result.output);
+            if check && result.failed {
+                bail!("readiness evidence incomplete");
+            }
+        }
     }
     Ok(())
 }
