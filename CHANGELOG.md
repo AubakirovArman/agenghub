@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.38-local-preview - 2026-05-17
+
+- Teach `scripts/rc-evidence-collect.sh` to ingest `kimi-auth-report.json` and emit an explicit `kimi-auth` critical blocker when the Kimi unblock runbook is still blocked.
+- Add `scripts/test-rc-evidence-kimi-auth-blocker.sh` and include it in release readiness so RC gates report open Kimi auth blockers from source-backed artifacts.
+
 ## 0.4.37-local-preview - 2026-05-17
 
 - Add `scripts/kimi-auth-check.sh`, a safe Kimi/Moonshot unblock runbook that tests both official Kimi endpoints, writes redacted diagnostics and endpoint artifacts, and reports the exact next action.

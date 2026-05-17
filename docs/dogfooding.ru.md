@@ -127,6 +127,8 @@ scripts/dogfood.sh
 
 `scripts/kimi-auth-check.sh` — безопасный первый шаг, когда RC gate заблокирован Kimi. Он проверяет оба official Moonshot endpoints (`https://api.moonshot.ai/v1` и `https://api.moonshot.cn/v1`), пишет redacted artifacts в `target/dogfood/kimi-auth/` и report в `target/dogfood/kimi-auth-report.json`. Если оба endpoint-а возвращают `auth_failed`, Kimi/Moonshot API key нужно заменить или перевыпустить до provider dogfood.
 
+RC evidence collector читает `target/dogfood/kimi-auth-report.json`. Blocked report превращается в open critical blocker `kimi-auth` в `scripts/rc-dogfood-gate.sh --check`; passed report пишет check `kimi_auth`, но полный RC всё равно требует passed Kimi provider dogfood.
+
 The provider report records the provider, transaction id, final status, persisted report path, artifact directory, and token-observation note. The artifact directory keeps `report.md`, provider diagnostics, provider test output, the AgentSpec, command stdout/stderr, and adapter prompt metadata after the temporary project is cleaned up. Set `AGENTHUB_PROVIDER_DOGFOOD_KEEP=1` only when you need to inspect the temporary project itself.
 
 ## Failure Rule

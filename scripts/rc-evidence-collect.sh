@@ -8,6 +8,7 @@ HISTORY_DIR="${AGENTHUB_DOGFOOD_HISTORY_DIR:-$ROOT/target/dogfood/history}"
 AGENTHUB_DATA_HOME="${AGENTHUB_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/agenthub}"
 AGENTHUB_BIN="${AGENTHUB_BIN:-agenthub}"
 PERF_REPORT="${AGENTHUB_RC_PERF_REPORT:-$ROOT/target/perf/perf-profile.json}"
+KIMI_AUTH_REPORT="${AGENTHUB_RC_KIMI_AUTH_REPORT:-$ROOT/target/dogfood/kimi-auth-report.json}"
 LONG_SESSION_MIN_TX="${AGENTHUB_RC_LONG_SESSION_MIN_TX:-25}"
 
 tmp="$(mktemp "${TMPDIR:-/tmp}/agenthub-rc-evidence.XXXXXX")"
@@ -81,6 +82,16 @@ write_check() {
   esac
   checks_written="${checks_written:+$checks_written,}$id"
   write_jsonl "{\"kind\":\"check\",\"id\":\"$(json_escape "$id")\",\"status\":\"passed\",\"source\":\"$(json_escape "$source")\",\"path\":\"$(json_escape "$path")\"}"
+}
+
+write_blocker() {
+  local id="$1"
+  local severity="$2"
+  local status="$3"
+  local source="$4"
+  local path="$5"
+  local reason="$6"
+  write_jsonl "{\"kind\":\"blocker\",\"id\":\"$(json_escape "$id")\",\"severity\":\"$(json_escape "$severity")\",\"status\":\"$(json_escape "$status")\",\"source\":\"$(json_escape "$source")\",\"path\":\"$(json_escape "$path")\",\"reason\":\"$(json_escape "$reason")\"}"
 }
 
 collect_chat_file() {
@@ -174,7 +185,7 @@ collect_chat_dirs() {
 
 collect_project_transactions() {
   local tx_root="$SOURCE_ROOT/.agent/tx"
-  [[ -d "$tx_root" ]] || return
+  [[ -d "$tx_root" ]] || return 0
   while IFS= read -r report; do
     tx_dir="$(dirname "$report")"
     tx_id="$(basename "$(dirname "$report")")"
@@ -316,6 +327,41 @@ collect_acceptance_evidence_file() {
   done < "$evidence"
 }
 
+collect_kimi_auth_reports() {
+  local report
+  for report in "$KIMI_AUTH_REPORT" "$HISTORY_DIR"/runs/*/kimi-auth-report.json; do
+    [[ -f "$report" ]] || continue
+    collect_kimi_auth_report "$report"
+  done
+  return 0
+}
+
+collect_kimi_auth_report() {
+  local report="$1"
+  local line status next_action
+  line="$(tr -d '\n' < "$report")"
+  status=""
+  if grep -q '"status"[[:space:]]*:[[:space:]]*"blocked"' "$report"; then
+    status="blocked"
+  elif grep -q '"status"[[:space:]]*:[[:space:]]*"rate_limited"' "$report"; then
+    status="rate_limited"
+  elif grep -q '"status"[[:space:]]*:[[:space:]]*"network_timeout"' "$report"; then
+    status="network_timeout"
+  elif grep -q '"status"[[:space:]]*:[[:space:]]*"passed"' "$report"; then
+    status="passed"
+  fi
+  next_action="$(json_field "$line" next_action)"
+
+  case "$status" in
+    passed)
+      write_check "kimi_auth" "kimi_auth_report" "$report"
+      ;;
+    blocked|rate_limited|network_timeout)
+      write_blocker "kimi-auth" "critical" "open" "kimi_auth_report" "$report" "${next_action:-Kimi provider dogfood is blocked}"
+      ;;
+  esac
+}
+
 collect_ops_receipts() {
   local receipts="$AGENTHUB_DATA_HOME/ops/command_receipts.jsonl"
   if [[ -f "$receipts" && -s "$receipts" ]]; then
@@ -376,6 +422,7 @@ collect_project_transactions
 collect_provider_history
 collect_dogfood_reports
 collect_acceptance_evidence
+collect_kimi_auth_reports
 collect_ops_receipts
 collect_perf_checks
 collect_script_checks
