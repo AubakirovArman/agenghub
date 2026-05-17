@@ -255,6 +255,7 @@ fi
 
 kimi_status="$(json_file_field "$KIMI_REPORT" status)"
 kimi_fingerprint="$(json_file_field "$KIMI_REPORT" auth_key_sha256_12)"
+kimi_source="$(json_file_field "$KIMI_REPORT" auth_key_source)"
 kimi_next="$(json_file_field "$KIMI_REPORT" next_action)"
 kimi_warning="$(json_file_field "$KIMI_REPORT" credential_warning)"
 case "$kimi_status" in
@@ -263,6 +264,9 @@ case "$kimi_status" in
     ;;
   blocked)
     kimi_detail="key:${kimi_fingerprint:-unknown}"
+    if [[ -n "$kimi_source" ]]; then
+      kimi_detail="$kimi_detail; source:$kimi_source"
+    fi
     if [[ -n "$kimi_warning" ]]; then
       kimi_detail="$kimi_detail; warning:$kimi_warning"
     fi

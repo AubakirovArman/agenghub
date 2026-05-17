@@ -69,7 +69,7 @@ grep -q $'check\tprovider_kimi\tpassed' "$TMP/ready.out"
 grep -q $'status\tready' "$TMP/ready.out"
 
 cat > "$kimi" <<'JSON'
-{"provider":"kimi","status":"blocked","auth_key_sha256_12":"f117c7b5fb4e","credential_warning":"Kimi Code CLI OAuth credentials are not Moonshot OpenAI-compatible API keys; create a plain Moonshot API key instead","next_action":"replace or rotate the Kimi/Moonshot API key with a plain Moonshot OpenAI-compatible API key"}
+{"provider":"kimi","status":"blocked","auth_key_sha256_12":"f117c7b5fb4e","auth_key_source":"file:/tmp/.kimi","credential_warning":"Kimi Code CLI OAuth credentials are not Moonshot OpenAI-compatible API keys; create a plain Moonshot API key instead","next_action":"replace or rotate the Kimi/Moonshot API key with a plain Moonshot OpenAI-compatible API key"}
 JSON
 printf '{"kind":"blocker","id":"kimi-auth","severity":"critical","status":"open"}\n' >> "$evidence"
 if env "${common_env[@]}" "$ROOT/scripts/api-native-completion-audit.sh" --check --no-refresh > "$TMP/blocked.out" 2>&1; then
@@ -77,6 +77,7 @@ if env "${common_env[@]}" "$ROOT/scripts/api-native-completion-audit.sh" --check
   exit 1
 fi
 grep -q $'check\tkimi_auth\tblocked' "$TMP/blocked.out"
+grep -q 'source:file:/tmp/.kimi' "$TMP/blocked.out"
 grep -q 'warning:Kimi Code CLI OAuth credentials are not Moonshot OpenAI-compatible API keys; create a plain Moonshot API key instead' "$TMP/blocked.out"
 grep -q $'check\topen_blockers\tblocked' "$TMP/blocked.out"
 grep -q $'status\tincomplete' "$TMP/blocked.out"

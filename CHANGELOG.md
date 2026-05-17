@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.66-local-preview - 2026-05-17
+
+- Carry the safe Kimi auth `auth_key_source` into the blocked `kimi_auth` row of `scripts/api-native-completion-audit.sh`.
+- Keep the final API-native readiness audit aligned with provider status and doctor output when a matching Kimi credential remains blocked.
+
 ## 0.4.65-local-preview - 2026-05-17
 
 - Surface the safe `auth_key_source` from blocked Kimi auth reports in `agenthub providers status`, provider setup, and `agenthub doctor`.
