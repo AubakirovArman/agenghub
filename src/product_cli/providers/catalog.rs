@@ -17,6 +17,8 @@ pub struct ProviderInfo {
 pub struct ProviderStatus {
     pub info: ProviderInfo,
     pub available: bool,
+    pub state: Option<String>,
+    pub state_note: Option<String>,
     pub path: Option<PathBuf>,
     pub endpoint: Option<String>,
     pub model: Option<String>,

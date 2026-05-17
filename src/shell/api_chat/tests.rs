@@ -259,6 +259,8 @@ fn test_provider(id: &str, endpoint: String) -> providers::ProviderStatus {
             note: "test provider",
         },
         available: true,
+        state: None,
+        state_note: None,
         path: None,
         endpoint: Some(endpoint),
         model: Some("stub-chat".to_string()),

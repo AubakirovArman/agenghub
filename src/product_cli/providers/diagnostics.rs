@@ -8,6 +8,9 @@ use super::ProviderStatus;
 use crate::product_cli::version;
 
 pub fn status_detail(status: &ProviderStatus) -> String {
+    if let Some(note) = &status.state_note {
+        return note.clone();
+    }
     status
         .path
         .as_ref()

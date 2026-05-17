@@ -159,7 +159,7 @@ Acceptance:
 
 ## Near-Term Implementation Steps
 
-These are the next concrete engineering steps from the current `0.4.45-local-preview` bridge toward `1.0`. They are intentionally before MCP/A2A and marketplace work.
+These are the next concrete engineering steps from the current `0.4.46-local-preview` bridge toward `1.0`. They are intentionally before MCP/A2A and marketplace work.
 
 | Release | Focus | Acceptance |
 |---|---|---|
@@ -197,7 +197,8 @@ These are the next concrete engineering steps from the current `0.4.45-local-pre
 | `0.4.43` | Windows tag CI smoke stability | Done: CI smoke tests use a repo-local temp fallback when Git Bash on Windows tag builds has no `/tmp` |
 | `0.4.44` | Provider-test exit-code hardening | Done: `providers test` exits non-zero on structured `failed`/`missing` receipts, while Kimi auth and provider dogfood scripts keep diagnostic artifacts |
 | `0.4.45` | Provider-test exit-code release smoke | Done: release readiness runs a CLI-level missing-credential provider-test smoke and verifies non-zero exit with preserved structured receipt |
-| `1.0 RC` | Real dogfooding gate | Collect and pass the `0.4.45` evidence gate with real daily usage, including stable resume/rewind/stats, 20+ Ops and 20+ project-edit flows, and no Kimi/auth/latency/approval blockers |
+| `0.4.46` | Kimi blocked status visibility | Done: `providers status` and provider setup show matching source-backed Kimi auth blockers as `blocked` instead of `ok`, while stale reports are ignored after key rotation |
+| `1.0 RC` | Real dogfooding gate | Collect and pass the `0.4.46` evidence gate with real daily usage, including stable resume/rewind/stats, 20+ Ops and 20+ project-edit flows, and no Kimi/auth/latency/approval blockers |
 
 ## Current 0.4.x Bridge
 
@@ -211,7 +212,7 @@ The immediate bridge from 0.4.x to 1.0 is:
 - inject only committed/review-approved memory into API chat context;
 - keep project transaction safety inside `.agent` only after lazy bootstrap.
 
-This is why the `v0.4.8` through `v0.4.45` bridge releases focus on global Chat/Ops memory, a review-gated memory inbox, budgeted memory-aware chat context, provider diagnostics, visible mode routing, explainable tool permissions, lazy project bootstrap, context compaction receipts, event-backed TUI visibility, visible transaction approval receipts, CI-friendly headless approval receipts, recoverable session reads, native DeepSeek/Kimi command-plan tool-call receipts, dashboard observability, API-native tool-result reinjection, tool registry policy hardening, review-only automatic memory extraction, terminal live tool cards, grouped/ranked memory inbox review, Ops host profiles/runbook receipts, 1.0 RC evidence collection, 1.0 RC evidence gating, safer Kimi auth-blocker diagnostics, headless Ops execution, RC acceptance rehearsal, richer source-backed evidence harvesting, dogfood report RC evidence summaries, archived acceptance rehearsal evidence, clearer Kimi endpoint/auth failure receipts, a Kimi unblock runbook, source-backed Kimi auth blocker evidence, 1.0 preparation Kimi gating, API-native RC evidence purity, Kimi auth doctor visibility, Windows CI Ops stability, Windows tag CI smoke stability, provider-test exit-code hardening, and provider-test exit-code release smoke rather than starting MCP/A2A early.
+This is why the `v0.4.8` through `v0.4.46` bridge releases focus on global Chat/Ops memory, a review-gated memory inbox, budgeted memory-aware chat context, provider diagnostics, visible mode routing, explainable tool permissions, lazy project bootstrap, context compaction receipts, event-backed TUI visibility, visible transaction approval receipts, CI-friendly headless approval receipts, recoverable session reads, native DeepSeek/Kimi command-plan tool-call receipts, dashboard observability, API-native tool-result reinjection, tool registry policy hardening, review-only automatic memory extraction, terminal live tool cards, grouped/ranked memory inbox review, Ops host profiles/runbook receipts, 1.0 RC evidence collection, 1.0 RC evidence gating, safer Kimi auth-blocker diagnostics, headless Ops execution, RC acceptance rehearsal, richer source-backed evidence harvesting, dogfood report RC evidence summaries, archived acceptance rehearsal evidence, clearer Kimi endpoint/auth failure receipts, a Kimi unblock runbook, source-backed Kimi auth blocker evidence, 1.0 preparation Kimi gating, API-native RC evidence purity, Kimi auth doctor visibility, Windows CI Ops stability, Windows tag CI smoke stability, provider-test exit-code hardening, provider-test exit-code release smoke, and Kimi blocked status visibility rather than starting MCP/A2A early.
 
 ## Next Implementation Sequence
 

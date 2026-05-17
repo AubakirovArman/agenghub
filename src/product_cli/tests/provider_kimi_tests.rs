@@ -94,3 +94,43 @@ fn providers_kimi_rate_limit_failure_returns_diagnostic_receipt() -> Result<()> 
         Ok(())
     })
 }
+
+#[test]
+fn providers_kimi_status_surfaces_matching_auth_blocker() -> Result<()> {
+    with_kimi_env(None, Some("kimi-test-key"), || {
+        let dir = tempfile::tempdir()?;
+        let report = dir.path().join("kimi-auth-report.json");
+        std::fs::write(
+            &report,
+            r#"{"provider":"kimi","status":"blocked","auth_key_sha256_12":"5e0492f3799a","next_action":"replace key"}"#,
+        )?;
+        std::env::set_var("AGENTHUB_KIMI_AUTH_REPORT", &report);
+
+        let status = providers::render_status(dir.path())?;
+        let setup = providers::setup_provider(dir.path(), "kimi")?;
+
+        assert!(status.contains("kimi\tblocked\t-"));
+        assert!(status.contains("latest Kimi auth check blocked: key:5e0492f3799a; replace key"));
+        assert!(setup.contains("missing\tkimi\tlatest Kimi auth check blocked"));
+        Ok(())
+    })
+}
+
+#[test]
+fn providers_kimi_status_ignores_stale_auth_blocker_after_key_change() -> Result<()> {
+    with_kimi_env(None, Some("new-kimi-test-key"), || {
+        let dir = tempfile::tempdir()?;
+        let report = dir.path().join("kimi-auth-report.json");
+        std::fs::write(
+            &report,
+            r#"{"provider":"kimi","status":"blocked","auth_key_sha256_12":"5e0492f3799a","next_action":"replace key"}"#,
+        )?;
+        std::env::set_var("AGENTHUB_KIMI_AUTH_REPORT", &report);
+
+        let status = providers::render_status(dir.path())?;
+
+        assert!(status.contains("kimi\tok\t-"));
+        assert!(!status.contains("latest Kimi auth check blocked"));
+        Ok(())
+    })
+}

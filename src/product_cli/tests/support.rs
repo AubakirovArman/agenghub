@@ -41,6 +41,7 @@ pub(super) fn with_kimi_env_using_base<T>(
     let previous_moonshot_file = std::env::var_os("MOONSHOT_API_KEY_FILE");
     let previous_model = std::env::var_os("KIMI_MODEL");
     let previous_api_model = std::env::var_os("KIMI_API_MODEL");
+    let previous_auth_report = std::env::var_os("AGENTHUB_KIMI_AUTH_REPORT");
     set_optional_env("KIMI_API_BASE_URL", None);
     set_optional_env("KIMI_BASE_URL", None);
     set_optional_env("MOONSHOT_API_BASE_URL", None);
@@ -52,6 +53,7 @@ pub(super) fn with_kimi_env_using_base<T>(
     set_optional_env("MOONSHOT_API_KEY_FILE", None);
     set_optional_env("KIMI_MODEL", model);
     set_optional_env("KIMI_API_MODEL", None);
+    set_optional_env("AGENTHUB_KIMI_AUTH_REPORT", None);
     let result = run();
     restore_env("KIMI_API_BASE_URL", previous_base);
     restore_env("KIMI_BASE_URL", previous_base_short);
@@ -63,6 +65,7 @@ pub(super) fn with_kimi_env_using_base<T>(
     restore_env("MOONSHOT_API_KEY_FILE", previous_moonshot_file);
     restore_env("KIMI_MODEL", previous_model);
     restore_env("KIMI_API_MODEL", previous_api_model);
+    restore_env("AGENTHUB_KIMI_AUTH_REPORT", previous_auth_report);
     result
 }
 

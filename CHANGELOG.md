@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.46-local-preview - 2026-05-17
+
+- Surface source-backed Kimi auth blockers in `agenthub providers status` and provider setup, so a key with a matching failed auth report shows `blocked` instead of a misleading `ok`.
+- Ignore stale Kimi auth-blocker reports when the current key fingerprint no longer matches, letting a rotated key return to normal provider status before the next live test.
+
 ## 0.4.45-local-preview - 2026-05-17
 
 - Add a CLI-level provider-test exit-code smoke so release readiness verifies `agenthub providers test` exits non-zero when credentials are missing while preserving the structured receipt.

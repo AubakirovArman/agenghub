@@ -1,6 +1,8 @@
 use std::path::{Path, PathBuf};
 
 use anyhow::{anyhow, Result};
+use serde_json::Value;
+use sha2::{Digest, Sha256};
 
 use super::config;
 use super::env::find_executable;
@@ -38,6 +40,8 @@ pub fn statuses(project_root: &Path) -> Result<Vec<ProviderStatus>> {
                 return ProviderStatus {
                     info,
                     available: api_key(&api_key_env, &api_key_file).is_some(),
+                    state: None,
+                    state_note: None,
                     path: None,
                     endpoint: Some(deepseek_api_base_url()),
                     model: Some(deepseek_api_model()),
@@ -50,9 +54,15 @@ pub fn statuses(project_root: &Path) -> Result<Vec<ProviderStatus>> {
             if info.id == "kimi" {
                 let api_key_env = kimi_api_key_env();
                 let api_key_file = kimi_api_key_file(project_root);
+                let api_key = api_key(&api_key_env, &api_key_file);
+                let auth_blocker = api_key
+                    .as_deref()
+                    .and_then(|key| matching_kimi_auth_blocker(project_root, key));
                 return ProviderStatus {
                     info,
-                    available: api_key(&api_key_env, &api_key_file).is_some(),
+                    available: api_key.is_some() && auth_blocker.is_none(),
+                    state: auth_blocker.as_ref().map(|_| "blocked".to_string()),
+                    state_note: auth_blocker,
                     path: None,
                     endpoint: Some(kimi_api_base_url()),
                     model: Some(kimi_api_model()),
@@ -76,6 +86,8 @@ pub fn statuses(project_root: &Path) -> Result<Vec<ProviderStatus>> {
             ProviderStatus {
                 info,
                 available,
+                state: None,
+                state_note: None,
                 path,
                 endpoint,
                 model: None,
@@ -225,10 +237,59 @@ fn read_api_key_file(path: &Path) -> Option<String> {
         .filter(|value| !value.is_empty())
 }
 
+fn matching_kimi_auth_blocker(project_root: &Path, current_key: &str) -> Option<String> {
+    let path = kimi_auth_report_path(project_root);
+    let report = std::fs::read_to_string(path)
+        .ok()
+        .and_then(|text| serde_json::from_str::<Value>(&text).ok())?;
+    if report.get("provider").and_then(Value::as_str) != Some("kimi") {
+        return None;
+    }
+    let status = report
+        .get("status")
+        .and_then(Value::as_str)
+        .unwrap_or("unknown");
+    if status == "passed" {
+        return None;
+    }
+    let report_key = report
+        .get("auth_key_sha256_12")
+        .and_then(Value::as_str)
+        .filter(|value| !value.is_empty())?;
+    let current_key = sha256_prefix(current_key.as_bytes());
+    if report_key != current_key {
+        return None;
+    }
+    let next_action = report
+        .get("next_action")
+        .and_then(Value::as_str)
+        .unwrap_or("run scripts/kimi-auth-check.sh");
+    Some(format!(
+        "latest Kimi auth check {status}: key:{report_key}; {next_action}"
+    ))
+}
+
+fn kimi_auth_report_path(project_root: &Path) -> PathBuf {
+    std::env::var_os("AGENTHUB_KIMI_AUTH_REPORT")
+        .filter(|value| !value.is_empty())
+        .map(PathBuf::from)
+        .unwrap_or_else(|| project_root.join("target/dogfood/kimi-auth-report.json"))
+}
+
+fn sha256_prefix(bytes: &[u8]) -> String {
+    let digest = Sha256::digest(bytes);
+    digest
+        .iter()
+        .take(6)
+        .map(|byte| format!("{byte:02x}"))
+        .collect::<String>()
+}
+
 pub fn render_status(project_root: &Path) -> Result<String> {
     let mut out = String::new();
     for status in statuses(project_root)? {
-        let state = if status.available { "ok" } else { "missing" };
+        let fallback_state = if status.available { "ok" } else { "missing" };
+        let state = status.state.as_deref().unwrap_or(fallback_state);
         let marker = if status.is_default { "default" } else { "-" };
         out.push_str(&format!(
             "{}\t{}\t{}\t{}\n",
@@ -250,7 +311,8 @@ pub fn setup_provider(project_root: &Path, provider: &str) -> Result<String> {
     if !status.available {
         return Ok(format!(
             "missing\t{}\t{}\n",
-            status.info.id, status.info.note
+            status.info.id,
+            status_detail(&status)
         ));
     }
     config::set_value(project_root, "default_provider", &status.info.id)?;

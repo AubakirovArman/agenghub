@@ -126,7 +126,7 @@ fn default_provider_check(project_root: &Path, checks: &mut Vec<DoctorCheck>) ->
             "provider.default",
             format!(
                 "{default} is configured but not ready: {}",
-                status.info.note
+                providers::status_detail(status)
             ),
         )),
         None => checks.push(check(

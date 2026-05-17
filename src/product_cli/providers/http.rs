@@ -174,6 +174,8 @@ mod tests {
                 note: "Kimi API endpoint, defaulting to https://api.moonshot.ai/v1",
             },
             available: true,
+            state: None,
+            state_note: None,
             path: None,
             endpoint: Some("https://api.moonshot.ai/v1".to_string()),
             model: Some("kimi-k2.6".to_string()),
