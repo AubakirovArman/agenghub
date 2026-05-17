@@ -140,6 +140,16 @@ pub enum ReadinessCommands {
         #[arg(long)]
         no_refresh: bool,
     },
+    Checklist {
+        #[arg(long)]
+        json: bool,
+
+        #[arg(long)]
+        check: bool,
+
+        #[arg(long)]
+        no_refresh: bool,
+    },
 }
 
 #[derive(Debug, Subcommand)]

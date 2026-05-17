@@ -63,6 +63,9 @@ grep -q '"status": "incomplete"' "$TMP/readiness-audit.json"
 run_agenthub readiness blockers --json --no-refresh > "$TMP/readiness-blockers.json"
 grep -q '"status": "blocked"' "$TMP/readiness-blockers.json"
 grep -q '"blockers":' "$TMP/readiness-blockers.json"
+run_agenthub readiness checklist --json --no-refresh > "$TMP/readiness-checklist.json"
+grep -q '"status": "incomplete"' "$TMP/readiness-checklist.json"
+grep -q '"requirements":' "$TMP/readiness-checklist.json"
 run_agenthub config show > "$TMP/config-show.txt"
 
 cat > "$SPEC" <<'YAML'

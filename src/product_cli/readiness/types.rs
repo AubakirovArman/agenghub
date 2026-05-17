@@ -57,6 +57,46 @@ pub struct ReadinessBlockerReport {
 }
 
 #[derive(Debug, Serialize)]
+pub struct ReadinessChecklistReport {
+    pub objective: String,
+    pub status: String,
+    pub failed: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub blocker_scope: Option<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub blocker_kinds: Vec<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub blocked_checks: Vec<String>,
+    pub sources: ReadinessSources,
+    pub evidence: String,
+    pub dogfood_history: String,
+    pub kimi_auth_report: String,
+    pub requirements: Vec<ReadinessRequirement>,
+    pub next: Vec<String>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ReadinessRequirement {
+    pub id: String,
+    pub requirement: String,
+    pub status: String,
+    pub detail: String,
+    pub artifacts: Vec<String>,
+    pub checks: Vec<ReadinessRequirementCheck>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub next_commands: Vec<String>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ReadinessRequirementCheck {
+    pub id: String,
+    pub status: String,
+    pub detail: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub blocker_kind: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
 pub struct ReadinessSources {
     pub api_native_plan: String,
     pub post_1_0_plan: String,

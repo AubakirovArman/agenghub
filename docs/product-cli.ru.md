@@ -176,9 +176,12 @@ Kimi Code CLI credentials не являются Moonshot API key. Если sourc
 ```bash
 agenthub readiness audit --json --check
 agenthub readiness blockers --json --check
+agenthub readiness checklist --json --check
 ```
 
 `readiness audit` — полный API-native 1.0 gate. JSON output включает source paths, RC evidence metrics, все check rows, top-level `blocked_checks` и per-check `next_commands` для незакрытых rows. Text output печатает соответствующие `blocked_checks` и `check_next` строки. `readiness blockers` — короткий view для людей и automation; он использует тот же набор recovery commands и печатает тот же top-level `blocked_checks` summary, что и полный audit.
+
+`readiness checklist` — prompt-to-artifact view поверх того же gate. Он группирует API-native 1.0 objective в требования: roadmap files, DeepSeek/Kimi API evidence, Chat/Ops/Project mode evidence, memory/observability checks, RC dogfood gate и post-1.0 sequencing. Каждое требование показывает concrete files, commands, связанные readiness checks, blocker kinds и recovery commands без вывода secret values.
 
 Совместимый script path, `scripts/api-native-completion-audit.sh --json --check`, теперь несёт те же `blocker_scope`, `blocker_kinds`, per-check `blocker_kind`, per-check `next_commands` и top-level `blocked_checks`, чтобы release automation отличала external credential blockers от локальных implementation gaps без парсинга произвольного текста; text output также печатает top-level `blocker_scope`/`blocker_kinds`/`blocked_checks` rows.
 

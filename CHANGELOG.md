@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.100-local-preview - 2026-05-17
+
+- Add `agenthub readiness checklist [--json] [--check] [--no-refresh]`, a prompt-to-artifact checklist that groups API-native 1.0 requirements into concrete files, commands, evidence sources, readiness checks, blocker kinds, and recovery commands.
+- Keep `readiness audit` as the full gate while giving humans and automation a higher-level map from roadmap deliverables to source-backed proof without parsing audit rows manually.
+
 ## 0.4.99-local-preview - 2026-05-17
 
 - Add provider `check_id` and per-row `next_commands` to `agenthub providers status --json`, linking raw DeepSeek/Kimi status rows directly to readiness blocker IDs and safe recovery commands.

@@ -223,6 +223,76 @@ fn readiness_blockers_text_reports_clear_fixture() -> Result<()> {
     })
 }
 
+#[test]
+fn readiness_checklist_json_maps_requirements_to_artifacts() -> Result<()> {
+    let fixture = ReadinessFixture::ready()?;
+    with_readiness_fixture(&fixture, || {
+        let result = readiness::render_checklist(
+            fixture.root.path(),
+            readiness::AuditOptions {
+                json: true,
+                no_refresh: true,
+            },
+        )?;
+        let parsed: serde_json::Value = serde_json::from_str(&result.output)?;
+
+        assert!(!result.failed);
+        assert_eq!(parsed["status"], "ready");
+        let requirements = parsed["requirements"].as_array().unwrap();
+        let kimi = requirements
+            .iter()
+            .find(|entry| entry["id"] == "kimi_api")
+            .expect("kimi requirement");
+        assert_eq!(kimi["status"], "passed");
+        assert!(kimi["artifacts"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|artifact| artifact
+                == "command:agenthub providers rc-unblock kimi --from-file <new-key-file>"));
+        assert!(kimi["checks"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|check| check["id"] == "kimi_auth" && check["status"] == "passed"));
+        assert!(requirements
+            .iter()
+            .any(|entry| entry["id"] == "post_1_0_sequence"));
+        assert!(!result.output.contains("kimi-secret"));
+        Ok(())
+    })
+}
+
+#[test]
+fn readiness_checklist_text_surfaces_blocked_requirement_next_steps() -> Result<()> {
+    let fixture = ReadinessFixture::blocked_kimi()?;
+    with_readiness_fixture(&fixture, || {
+        let result = readiness::render_checklist(
+            fixture.root.path(),
+            readiness::AuditOptions {
+                json: false,
+                no_refresh: true,
+            },
+        )?;
+
+        assert!(result.failed);
+        assert!(result
+            .output
+            .contains("AgentHub API-native readiness checklist"));
+        assert!(result.output.contains("requirement\tkimi_api\tblocked"));
+        assert!(result
+            .output
+            .contains("requirement_check\tkimi_api\tkimi_auth\tblocked"));
+        assert!(result
+            .output
+            .contains("agenthub providers rc-unblock kimi --from-file <new-key-file>"));
+        assert!(result.output.contains("blocker_scope\texternal_only"));
+        assert!(result.output.contains("status\tincomplete"));
+        assert!(!result.output.contains("kimi-secret"));
+        Ok(())
+    })
+}
+
 struct ReadinessFixture {
     root: tempfile::TempDir,
     plan: std::path::PathBuf,
