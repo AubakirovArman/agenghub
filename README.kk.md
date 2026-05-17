@@ -12,7 +12,7 @@ AgentHub natural request немесе `AgentSpec` файлын audit-ready trans
 
 1. isolated workspace дайындайды;
 2. context, memory warnings, DAG және AgentIR құрады;
-3. configured provider немесе command adapter іске қосады;
+3. selected API provider route немесе internal deterministic runner іске қосады;
 4. scope, verifier commands, runtime smoke және smart sync тексереді;
 5. verified changes commit жасайды немесе қауіпсіз rollback жасайды;
 6. report, logs, effects, WAL, memory, analytics және dashboard data жазады.
@@ -108,10 +108,10 @@ agenthub providers test kimi
 
 Server installs can use `.deepseek` and `.kimi` key files in the project directory or parent directories. Key contents are not written to AgentHub config or git.
 
-Provider docs:
+Provider және routing docs:
 
 - [Product CLI](docs/product-cli.kk.md)
-- [Agent adapters](docs/agent-adapters.kk.md)
+- [Provider routes](docs/agent-adapters.kk.md)
 - [LLM Gateway](docs/llm-gateway.kk.md)
 - [Competitive Positioning](docs/competitive-positioning.kk.md)
 
@@ -142,6 +142,8 @@ agenthub run examples/adapter-dry-run-task.yaml
 agenthub aal check examples/add-courses.aal
 agenthub tui --live
 ```
+
+`adapter-dry-run` example is a compatibility fixture for AgentSpec routing; it does not reintroduce external AI CLI providers.
 
 Product checks іске қосу:
 

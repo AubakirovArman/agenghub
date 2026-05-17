@@ -12,7 +12,7 @@ AgentHub 将 natural request 或 `AgentSpec` 文件转换为可审计 transactio
 
 1. 准备 isolated workspace；
 2. 构建 context、memory warnings、DAG 和 AgentIR；
-3. 运行 configured provider 或 command adapter；
+3. 运行 selected API provider route 或 internal deterministic runner；
 4. 检查 scope、verifier commands、runtime smoke 和 smart sync；
 5. commit verified changes，或者安全 rollback；
 6. 写入 report、logs、effects、WAL、memory、analytics 和 dashboard data。
@@ -108,10 +108,10 @@ agenthub providers test kimi
 
 Server installs can use `.deepseek` and `.kimi` key files in the project directory or parent directories. Key contents are not written to AgentHub config or git.
 
-Provider 文档：
+Provider 和 routing 文档：
 
 - [Product CLI](docs/product-cli.zh.md)
-- [Agent adapters](docs/agent-adapters.zh.md)
+- [Provider routes](docs/agent-adapters.zh.md)
 - [LLM Gateway](docs/llm-gateway.zh.md)
 - [Competitive Positioning](docs/competitive-positioning.zh.md)
 
@@ -142,6 +142,8 @@ agenthub run examples/adapter-dry-run-task.yaml
 agenthub aal check examples/add-courses.aal
 agenthub tui --live
 ```
+
+`adapter-dry-run` example is a compatibility fixture for AgentSpec routing; it does not reintroduce external AI CLI providers.
 
 运行 product checks：
 

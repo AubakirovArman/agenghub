@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.80-local-preview - 2026-05-17
+
+- Clarify public docs around API-native provider routes: DeepSeek/Kimi are the user-facing providers, while `command` is only the internal deterministic runner.
+- Update README, how-it-works, provider-route, and dogfooding docs so compatibility `agent.adapter` language no longer reads like external CLI provider support.
+
 ## 0.4.79-local-preview - 2026-05-17
 
 - Add per-check `next_commands` to `agenthub readiness audit --json`, so the full API-native readiness gate is actionable without jumping to the focused blocker view.

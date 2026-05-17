@@ -1,12 +1,12 @@
-# AgentHub Agent Adapters
+# AgentHub Provider Routes
 
 Languages: [English](agent-adapters.en.md), [Русский](agent-adapters.ru.md), [中文](agent-adapters.zh.md), [Қазақша](agent-adapters.kk.md)
 
 ## Purpose
 
-AgentHub v0.4 moves adapter work away from external AI CLIs. User-facing AI providers are API-native `deepseek` and `kimi`; `command` remains the built-in deterministic runner used by the transaction kernel and tests.
+AgentHub v0.4 moves provider work away from external AI CLIs. User-facing AI providers are API-native `deepseek` and `kimi`; `command` remains the built-in deterministic runner used by the transaction kernel and tests.
 
-The executor adapter still runs before `execution.commands`. Diff guard, reviewer gate, verifier, rollback, commit, memory promotion, and reports continue to use the same transaction flow.
+The AgentSpec field is still named `agent.adapter` for compatibility, but in product language it is a route selector, not an external CLI integration. The selected route runs before `execution.commands`. Diff guard, reviewer gate, verifier, rollback, commit, memory promotion, and reports continue to use the same transaction flow.
 
 ## AgentSpec Fields
 
@@ -17,13 +17,13 @@ agent:
   dry_run: true
 ```
 
-- `adapter`: `command`, `deepseek`, or `kimi`.
+- `adapter`: compatibility route selector. `deepseek` and `kimi` are AgentHub-owned API routes; `command` is the internal deterministic runner.
 - `model`: optional model label recorded in traces and API requests.
-- `dry_run`: writes adapter artifacts without making a provider request.
+- `dry_run`: writes route artifacts without making a provider request.
 
 `command_template` is no longer a user-facing provider field. AgentHub owns API requests, logs, retries, and native command-plan tool calls directly.
 
-Role-specific adapters can be set under `agents`:
+Role-specific routes can be set under `agents`:
 
 ```yaml
 agents:
@@ -39,4 +39,4 @@ agents:
 
 Non-project chat mode can call DeepSeek/Kimi directly with streaming output. Project transaction routes for `deepseek` and `kimi` use AgentHub-owned API requests: the provider can call bounded builtin read/search/read-only-shell tools for context, AgentHub reinjects redacted tool results into the same turn, then the provider calls the native `agenthub_command_plan` tool or returns a JSON command-plan fallback. AgentHub validates and permission-checks those commands inside the isolated worktree, then the normal diff guard, verifier, rollback, commit, and memory promotion flow continues.
 
-Every transaction records selected routes in `.agent/tx/<tx-id>/agent_trace.json`. Adapter prompt artifacts are written as `.agent/tx/<tx-id>/agent_prompt_<role>.md`, native command-plan tool-loop receipts are written as `.agent/tx/<tx-id>/tool_loop_<role>.json`, builtin tool-result reinjection receipts with path/output/network/limit policy summaries are written as `.agent/tx/<tx-id>/tool_results_<role>.json`, and API executor plans/results are written as `.agent/tx/<tx-id>/api_execution_<role>.json`.
+Every transaction records selected routes in `.agent/tx/<tx-id>/agent_trace.json`. Provider prompt artifacts are written as `.agent/tx/<tx-id>/agent_prompt_<role>.md`, native command-plan tool-loop receipts are written as `.agent/tx/<tx-id>/tool_loop_<role>.json`, builtin tool-result reinjection receipts with path/output/network/limit policy summaries are written as `.agent/tx/<tx-id>/tool_results_<role>.json`, and API executor plans/results are written as `.agent/tx/<tx-id>/api_execution_<role>.json`.

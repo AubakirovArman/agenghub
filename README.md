@@ -12,7 +12,7 @@ AgentHub turns a natural request or an `AgentSpec` file into an auditable transa
 
 1. prepare an isolated workspace;
 2. build context, memory warnings, DAG, and AgentIR;
-3. run the configured provider or command adapter;
+3. run the selected API provider route or the internal deterministic runner;
 4. check scope, verifier commands, runtime smoke, and smart sync;
 5. commit verified changes or roll back safely;
 6. write report, logs, effects, WAL, memory, analytics, and dashboard data.
@@ -129,10 +129,10 @@ For server installs, AgentHub also discovers `.deepseek` and `.kimi` key files i
 
 Plain `agenthub` opens chat mode without requiring Git or `.agent`. Project transactions use the existing transaction kernel, while DeepSeek/Kimi project execution now asks for native AgentHub command-plan tool calls and records permission/redaction receipts before running provider-proposed commands.
 
-Provider details:
+Provider and routing details:
 
 - [Product CLI](docs/product-cli.en.md)
-- [Agent adapters](docs/agent-adapters.en.md)
+- [Provider routes](docs/agent-adapters.en.md)
 - [LLM Gateway](docs/llm-gateway.en.md)
 - [API-native runtime plan](docs/api-native-runtime.ru.md)
 - [Competitive Positioning](docs/competitive-positioning.en.md)
@@ -165,7 +165,7 @@ agenthub aal check examples/add-courses.aal
 agenthub tui --live
 ```
 
-`agenthub tui` includes a provider panel with default provider, ready/missing counts, named profiles, role assignments, and fallback chains.
+`agenthub tui` includes a provider panel with default provider, ready/missing counts, named profiles, role assignments, and fallback chains. The `adapter-dry-run` example is a compatibility fixture for AgentSpec routing; it does not reintroduce external AI CLI providers.
 
 Run product checks:
 

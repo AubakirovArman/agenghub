@@ -123,7 +123,7 @@ AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 \
 scripts/dogfood.sh
 ```
 
-`scripts/provider-dogfood.sh` can also be run directly with `AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=deepseek|kimi`. It creates a temporary Git project, initializes AgentHub, runs `providers diagnose`, runs `providers test`, invokes the selected provider adapter once, writes a no-commit transaction, verifies that main stayed clean, and writes `target/dogfood/provider-dogfood-report.json`.
+`scripts/provider-dogfood.sh` can also be run directly with `AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=deepseek|kimi`. It creates a temporary Git project, initializes AgentHub, runs `providers diagnose`, runs `providers test`, invokes the selected API provider route once, writes a no-commit transaction, verifies that main stayed clean, and writes `target/dogfood/provider-dogfood-report.json`.
 
 `scripts/kimi-auth-check.sh` — безопасный первый шаг, когда RC gate заблокирован Kimi. Он проверяет оба official Moonshot endpoints (`https://api.moonshot.ai/v1` и `https://api.moonshot.cn/v1`), пишет redacted artifacts в `target/dogfood/kimi-auth/` и report в `target/dogfood/kimi-auth-report.json`. Если один endpoint проходит, report содержит `passed_endpoint`, а next action сохраняет этот region для provider dogfood. Если оба endpoint-а возвращают `auth_failed`, Kimi/Moonshot API key нужно заменить или перевыпустить до provider dogfood.
 
@@ -133,7 +133,7 @@ scripts/dogfood.sh
 
 RC evidence collector читает `target/dogfood/kimi-auth-report.json`. Blocked report превращается в open critical blocker `kimi-auth` в `scripts/rc-dogfood-gate.sh --check`; passed report пишет check `kimi_auth`, но полный RC всё равно требует passed Kimi provider dogfood.
 
-The provider report records the provider, transaction id, final status, persisted report path, artifact directory, and token-observation note. The artifact directory keeps `report.md`, provider diagnostics, provider test output, the AgentSpec, command stdout/stderr, and adapter prompt metadata after the temporary project is cleaned up. Set `AGENTHUB_PROVIDER_DOGFOOD_KEEP=1` only when you need to inspect the temporary project itself.
+The provider report records the provider, transaction id, final status, persisted report path, artifact directory, and token-observation note. The artifact directory keeps `report.md`, provider diagnostics, provider test output, the AgentSpec, command stdout/stderr, and provider prompt metadata after the temporary project is cleaned up. Set `AGENTHUB_PROVIDER_DOGFOOD_KEEP=1` only when you need to inspect the temporary project itself.
 
 ## Failure Rule
 
