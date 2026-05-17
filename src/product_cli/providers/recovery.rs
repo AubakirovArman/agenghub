@@ -9,6 +9,10 @@ use super::{status_detail, statuses, ProviderStatus};
 pub struct ProviderRecoveryReport {
     pub objective: String,
     pub status: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub blocker_scope: Option<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub blocker_kinds: Vec<String>,
     pub providers: Vec<ProviderRecoveryItem>,
     pub next_commands: Vec<String>,
     pub gate: ProviderRecoveryGate,
@@ -75,10 +79,15 @@ fn recovery_report(project_root: &Path) -> Result<ProviderRecoveryReport> {
         "agenthub readiness blockers --json --check".to_string(),
         "agenthub readiness audit --json --check".to_string(),
     ];
+    let gate_blocker_kind = gate_blocker_kind(&status).map(str::to_string);
+    let blocker_kinds = recovery_blocker_kinds(&providers, gate_blocker_kind.as_deref());
+    let blocker_scope = recovery_blocker_scope(&providers, &blocker_kinds);
 
     Ok(ProviderRecoveryReport {
         objective: "api_native_provider_recovery".to_string(),
         status: status.clone(),
+        blocker_scope,
+        blocker_kinds,
         providers,
         next_commands,
         gate: ProviderRecoveryGate {
@@ -88,7 +97,7 @@ fn recovery_report(project_root: &Path) -> Result<ProviderRecoveryReport> {
             } else {
                 "blocked".to_string()
             },
-            blocker_kind: gate_blocker_kind(&status).map(str::to_string),
+            blocker_kind: gate_blocker_kind,
             next_command: "agenthub readiness audit --json --check".to_string(),
             next_commands: gate_next_commands,
             detail: if status == "ready" {
@@ -129,6 +138,56 @@ fn overall_status(providers: &[ProviderRecoveryItem]) -> String {
     } else {
         "ready".to_string()
     }
+}
+
+fn recovery_blocker_kinds(
+    providers: &[ProviderRecoveryItem],
+    gate_blocker_kind: Option<&str>,
+) -> Vec<String> {
+    let mut kinds = Vec::new();
+    for provider in providers {
+        if let Some(kind) = &provider.blocker_kind {
+            push_unique(&mut kinds, kind);
+        }
+    }
+    if let Some(kind) = gate_blocker_kind {
+        push_unique(&mut kinds, kind);
+    }
+    kinds
+}
+
+fn recovery_blocker_scope(
+    providers: &[ProviderRecoveryItem],
+    blocker_kinds: &[String],
+) -> Option<String> {
+    if providers
+        .iter()
+        .all(|provider| provider.available && !provider.blocked)
+        && blocker_kinds.is_empty()
+    {
+        return None;
+    }
+
+    let has_external = blocker_kinds
+        .iter()
+        .any(|kind| kind.starts_with("external_"));
+    let has_unknown_or_local = providers.iter().any(|provider| {
+        (provider.blocked || !provider.available)
+            && provider
+                .blocker_kind
+                .as_deref()
+                .map(|kind| !kind.starts_with("external_") && kind != "dependent_gate")
+                .unwrap_or(true)
+    });
+
+    let scope = if has_external && !has_unknown_or_local {
+        "external_only"
+    } else if has_external {
+        "mixed"
+    } else {
+        "local_or_unknown"
+    };
+    Some(scope.to_string())
 }
 
 fn provider_action(status: &ProviderStatus, blocked: bool) -> String {
@@ -193,6 +252,15 @@ fn render_recovery_text(report: &ProviderRecoveryReport) -> String {
     out.push_str("Provider Recovery\n\n");
     out.push_str(&format!("objective\t{}\n", report.objective));
     out.push_str(&format!("status\t{}\n", report.status));
+    if let Some(scope) = &report.blocker_scope {
+        out.push_str(&format!("blocker_scope\t{}\n", scope));
+    }
+    if !report.blocker_kinds.is_empty() {
+        out.push_str(&format!(
+            "blocker_kinds\t{}\n",
+            report.blocker_kinds.join(",")
+        ));
+    }
     for provider in &report.providers {
         let marker = if provider.default { "default" } else { "-" };
         let source = provider

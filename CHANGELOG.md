@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.90-local-preview - 2026-05-17
+
+- Add top-level `blocker_scope` and `blocker_kinds` metadata to `agenthub providers recovery` JSON/text output.
+- Keep fully ready provider recovery reports quiet by omitting those scope fields when no provider or completion-gate blockers remain.
+
 ## 0.4.89-local-preview - 2026-05-17
 
 - Add top-level `blocker_scope` and `blocker_kinds` metadata to `agenthub readiness audit` and `agenthub readiness blockers` JSON/text output.
