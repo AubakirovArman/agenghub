@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.37-local-preview - 2026-05-17
+
+- Add `scripts/kimi-auth-check.sh`, a safe Kimi/Moonshot unblock runbook that tests both official Kimi endpoints, writes redacted diagnostics and endpoint artifacts, and reports the exact next action.
+- Add `scripts/test-kimi-auth-check.sh` and include it in release readiness so the Kimi auth-blocker runbook stays reproducible without live network calls.
+
 ## 0.4.36-local-preview - 2026-05-17
 
 - Add Kimi-region endpoint hints to `agenthub providers test kimi` auth failure receipts, listing the official global and China-region Moonshot base URLs.

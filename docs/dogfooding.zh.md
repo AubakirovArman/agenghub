@@ -112,6 +112,7 @@ agenthub doctor
 agenthub providers status
 agenthub providers diagnose deepseek
 agenthub providers diagnose kimi
+scripts/kimi-auth-check.sh
 ```
 
 Run the scripted provider dogfood only when you intentionally want a live model call:
@@ -123,6 +124,8 @@ scripts/dogfood.sh
 ```
 
 `scripts/provider-dogfood.sh` can also be run directly with `AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=deepseek|kimi`. It creates a temporary Git project, initializes AgentHub, runs `providers diagnose`, runs `providers test`, invokes the selected provider adapter once, writes a no-commit transaction, verifies that main stayed clean, and writes `target/dogfood/provider-dogfood-report.json`.
+
+`scripts/kimi-auth-check.sh` is the safer first step when the RC gate is blocked on Kimi. It tests both official Moonshot endpoints (`https://api.moonshot.ai/v1` and `https://api.moonshot.cn/v1`), writes redacted artifacts under `target/dogfood/kimi-auth/`, and writes `target/dogfood/kimi-auth-report.json`. If both endpoints return `auth_failed`, replace or rotate the Kimi/Moonshot API key before running provider dogfood.
 
 The provider report records the provider, transaction id, final status, persisted report path, artifact directory, and token-observation note. The artifact directory keeps `report.md`, provider diagnostics, provider test output, the AgentSpec, command stdout/stderr, and adapter prompt metadata after the temporary project is cleaned up. Set `AGENTHUB_PROVIDER_DOGFOOD_KEEP=1` only when you need to inspect the temporary project itself.
 
