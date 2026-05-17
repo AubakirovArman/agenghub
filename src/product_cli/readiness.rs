@@ -1,3 +1,4 @@
+mod action_plan;
 mod audit;
 mod blockers;
 mod checklist;
@@ -7,6 +8,7 @@ mod next;
 mod render;
 mod types;
 
+pub use action_plan::render_next;
 pub use audit::render_audit;
 pub use blockers::render_blockers;
 pub use checklist::render_checklist;

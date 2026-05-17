@@ -5,6 +5,75 @@ use crate::product_cli::readiness;
 use super::readiness_support::{with_readiness_fixture, ReadinessFixture};
 
 #[test]
+fn readiness_next_json_prioritizes_current_external_blocker() -> Result<()> {
+    let fixture = ReadinessFixture::blocked_kimi()?;
+    with_readiness_fixture(&fixture, || {
+        let result = readiness::render_next(
+            fixture.root.path(),
+            readiness::AuditOptions {
+                json: true,
+                no_refresh: true,
+            },
+        )?;
+        let parsed: serde_json::Value = serde_json::from_str(&result.output)?;
+
+        assert!(result.failed);
+        assert_eq!(parsed["status"], "blocked");
+        assert_eq!(parsed["phase"], "external_kimi_credential_unblock");
+        assert_eq!(parsed["blocker_scope"], "external_only");
+        assert_eq!(parsed["blocked_checks"][1], "kimi_auth");
+        assert_eq!(
+            parsed["immediate_commands"][0],
+            "agenthub providers inspect-key kimi"
+        );
+        assert!(parsed["immediate_commands"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|command| command
+                == "agenthub providers rc-unblock kimi --from-file <new-key-file>"));
+        assert!(parsed["verification_commands"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|command| command == "agenthub readiness audit --json --check"));
+        assert!(parsed["deferred_tracks"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|track| track["id"] == "mcp" && track["gate"] == "after_api_native_1_0_rc"));
+        assert!(!result.output.contains("kimi-secret"));
+        Ok(())
+    })
+}
+
+#[test]
+fn readiness_next_text_reports_ready_milestone_without_actions() -> Result<()> {
+    let fixture = ReadinessFixture::ready()?;
+    with_readiness_fixture(&fixture, || {
+        let result = readiness::render_next(
+            fixture.root.path(),
+            readiness::AuditOptions {
+                json: false,
+                no_refresh: true,
+            },
+        )?;
+
+        assert!(!result.failed);
+        assert!(result.output.contains("AgentHub readiness next"));
+        assert!(result.output.contains("phase\tready_for_1_0_rc"));
+        assert!(result.output.contains("status\tready"));
+        assert!(result
+            .output
+            .contains("verify\t2\tagenthub readiness audit --json --check"));
+        assert!(result.output.contains("deferred_track\tmcp\tP0"));
+        assert!(!result.output.contains("immediate\t"));
+        assert!(!result.output.contains("blocked_checks\t"));
+        Ok(())
+    })
+}
+
+#[test]
 fn readiness_audit_json_reports_ready_fixture() -> Result<()> {
     let fixture = ReadinessFixture::ready()?;
     with_readiness_fixture(&fixture, || {

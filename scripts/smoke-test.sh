@@ -70,6 +70,11 @@ run_agenthub readiness evidence --json --no-refresh > "$TMP/readiness-evidence.j
 grep -q '"status": "incomplete"' "$TMP/readiness-evidence.json"
 grep -q '"thresholds":' "$TMP/readiness-evidence.json"
 grep -q '"gate":' "$TMP/readiness-evidence.json"
+run_agenthub readiness next --json --no-refresh > "$TMP/readiness-next.json"
+grep -q '"status": "blocked"' "$TMP/readiness-next.json"
+grep -q '"phase":' "$TMP/readiness-next.json"
+grep -q '"immediate_commands":' "$TMP/readiness-next.json"
+grep -q '"deferred_tracks":' "$TMP/readiness-next.json"
 run_agenthub config show > "$TMP/config-show.txt"
 
 cat > "$SPEC" <<'YAML'

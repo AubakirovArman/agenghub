@@ -174,11 +174,14 @@ Kimi Code CLI credentials are not Moonshot API keys. If a source file looks like
 ## Readiness
 
 ```bash
+agenthub readiness next --json --check
 agenthub readiness audit --json --check
 agenthub readiness blockers --json --check
 agenthub readiness checklist --json --check
 agenthub readiness evidence --json --check
 ```
+
+`readiness next` is the prioritized action-plan view. It uses the same source-backed audit data but collapses it into the current phase, focus, stop reason, next milestone, immediate commands, verification commands, and deferred post-1.0 ecosystem tracks. JSON output is intended for automation that needs one current next step without stitching together audit, checklist, evidence, and ecosystem reports.
 
 `readiness audit` is the full API-native 1.0 gate. JSON output includes source paths, RC evidence metrics, every check row, top-level `blocked_checks`, and per-check `next_commands` for incomplete rows. Text output renders matching `blocked_checks` and `check_next` lines. `readiness blockers` is the short view for humans and automation; it reuses the same recovery commands and emits the same top-level `blocked_checks` summary as the full audit.
 

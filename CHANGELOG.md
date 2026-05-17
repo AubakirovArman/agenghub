@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.103-local-preview - 2026-05-17
+
+- Add `agenthub readiness next [--json] [--check] [--no-refresh]`, a prioritized action-plan surface that summarizes the current readiness phase, focus, stop reason, next milestone, immediate commands, verification commands, and deferred post-1.0 tracks.
+- Cover the new readiness-next surface in unit and smoke tests so humans and automation can see the next concrete API-native step without stitching together audit, checklist, evidence, and ecosystem reports manually.
+
 ## 0.4.102-local-preview - 2026-05-17
 
 - Add redacted `credential_classification` metadata to `agenthub providers status --json` for Kimi credential blockers, matching the offline `providers inspect-key kimi --json` classification without exposing secrets.
