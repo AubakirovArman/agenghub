@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.78-local-preview - 2026-05-17
+
+- Add per-blocker `next_commands` to `agenthub readiness blockers --json`, so each incomplete readiness row carries its own source-backed recovery commands.
+- Render `blocker_next` lines in the text blocker report while keeping the clear-path output quiet.
+
 ## 0.4.77-local-preview - 2026-05-17
 
 - Add `agenthub readiness blockers --json --check` to provider recovery JSON/text output, including gate-level next commands, so automation can jump from provider recovery directly to the short source-backed blocker list.

@@ -40,7 +40,7 @@ pub struct ReadinessBlockerReport {
     pub dogfood_history: String,
     pub kimi_auth_report: String,
     pub metrics: ReadinessMetrics,
-    pub blockers: Vec<ReadinessCheck>,
+    pub blockers: Vec<ReadinessBlocker>,
     pub next: Vec<String>,
 }
 
@@ -69,6 +69,14 @@ pub struct ReadinessCheck {
     pub id: String,
     pub status: String,
     pub detail: String,
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub struct ReadinessBlocker {
+    pub id: String,
+    pub status: String,
+    pub detail: String,
+    pub next_commands: Vec<String>,
 }
 
 #[derive(Default)]

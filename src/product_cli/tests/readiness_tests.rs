@@ -108,6 +108,18 @@ fn readiness_blockers_json_reports_only_unpassed_checks() -> Result<()> {
         assert!(blocker_ids.contains(&"open_blockers"));
         assert!(blocker_ids.contains(&"rc_dogfood_gate"));
         assert!(result.output.contains("1 blocker/critical open: kimi-auth"));
+        let kimi_auth = parsed["blockers"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|entry| entry["id"] == "kimi_auth")
+            .expect("kimi auth blocker");
+        assert!(kimi_auth["next_commands"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|command| command
+                == "agenthub providers rc-unblock kimi --from-file <new-key-file>"));
         assert!(!blocker_ids.contains(&"provider_kimi"));
         assert!(!blocker_ids.contains(&"provider_surface"));
         assert!(result
@@ -135,6 +147,7 @@ fn readiness_blockers_text_reports_clear_fixture() -> Result<()> {
         assert!(result.output.contains("blockers\tclear"));
         assert!(result.output.contains("status\tclear"));
         assert!(!result.output.contains("next\t"));
+        assert!(!result.output.contains("blocker_next\t"));
         Ok(())
     })
 }
