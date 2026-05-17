@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.95-local-preview - 2026-05-17
+
+- Add top-level `blocked_checks` metadata to product `agenthub readiness audit --json` and `agenthub readiness blockers --json` reports.
+- Add matching `blocked_checks` rows to readiness text output so product readiness and script completion-audit surfaces expose the same unresolved requirement IDs.
+
 ## 0.4.94-local-preview - 2026-05-17
 
 - Add top-level `blocked_checks` metadata to `scripts/api-native-completion-audit.sh --json`, listing every incomplete completion-audit row by ID.

@@ -25,6 +25,8 @@ pub struct ReadinessAuditReport {
     pub blocker_scope: Option<String>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub blocker_kinds: Vec<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub blocked_checks: Vec<String>,
     pub sources: ReadinessSources,
     pub evidence: String,
     pub dogfood_history: String,
@@ -43,6 +45,8 @@ pub struct ReadinessBlockerReport {
     pub blocker_scope: Option<String>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub blocker_kinds: Vec<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub blocked_checks: Vec<String>,
     pub sources: ReadinessSources,
     pub evidence: String,
     pub dogfood_history: String,

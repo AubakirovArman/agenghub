@@ -13,6 +13,12 @@ pub(super) fn render_text(report: &ReadinessAuditReport) -> String {
             report.blocker_kinds.join(",")
         ));
     }
+    if !report.blocked_checks.is_empty() {
+        out.push_str(&format!(
+            "blocked_checks\t{}\n",
+            report.blocked_checks.join(",")
+        ));
+    }
     out.push_str(&format!(
         "source\tapi_native_plan\t{}\n",
         report.sources.api_native_plan

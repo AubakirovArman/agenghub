@@ -100,6 +100,14 @@ pub(super) fn blocker_kinds(checks: &[ReadinessCheck]) -> Vec<String> {
         .collect()
 }
 
+pub(super) fn blocked_checks(checks: &[ReadinessCheck]) -> Vec<String> {
+    checks
+        .iter()
+        .filter(|check| check.status != "passed")
+        .map(|check| check.id.clone())
+        .collect()
+}
+
 pub(super) fn blocker_scope(checks: &[ReadinessCheck], blocker_kinds: &[String]) -> Option<String> {
     if checks.iter().all(|check| check.status == "passed") {
         return None;

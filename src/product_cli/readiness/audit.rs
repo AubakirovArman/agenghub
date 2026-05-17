@@ -10,7 +10,7 @@ use crate::product_cli::{ecosystem, providers};
 
 use super::{
     evidence::refresh_evidence,
-    next::{blocker_kinds, blocker_scope, check_blocker_kind, check_next_commands},
+    next::{blocked_checks, blocker_kinds, blocker_scope, check_blocker_kind, check_next_commands},
     render::render_text,
     types::{
         env_usize, next_commands, AuditConfig, AuditOptions, AuditRenderResult, EvidenceSummary,
@@ -159,6 +159,7 @@ fn audit_report(project_root: &Path, config: &AuditConfig) -> Result<ReadinessAu
 
     let failed = checks.iter().any(|check| check.status != "passed");
     let blocker_kinds = blocker_kinds(&checks);
+    let blocked_checks = blocked_checks(&checks);
     let blocker_scope = blocker_scope(&checks, &blocker_kinds);
     let status = if failed { "incomplete" } else { "ready" }.to_string();
     Ok(ReadinessAuditReport {
@@ -167,6 +168,7 @@ fn audit_report(project_root: &Path, config: &AuditConfig) -> Result<ReadinessAu
         failed,
         blocker_scope,
         blocker_kinds,
+        blocked_checks,
         sources: ReadinessSources {
             api_native_plan: config.v04_plan.display().to_string(),
             post_1_0_plan: config.after_plan.display().to_string(),

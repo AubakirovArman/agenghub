@@ -25,6 +25,7 @@ pub fn render_blockers(project_root: &Path, options: AuditOptions) -> Result<Aud
         failed,
         blocker_scope: report.blocker_scope,
         blocker_kinds: report.blocker_kinds,
+        blocked_checks: report.blocked_checks,
         sources: ReadinessSources {
             api_native_plan: report.sources.api_native_plan,
             post_1_0_plan: report.sources.post_1_0_plan,
@@ -56,6 +57,12 @@ fn render_blockers_text(report: &ReadinessBlockerReport) -> String {
         out.push_str(&format!(
             "blocker_kinds\t{}\n",
             report.blocker_kinds.join(",")
+        ));
+    }
+    if !report.blocked_checks.is_empty() {
+        out.push_str(&format!(
+            "blocked_checks\t{}\n",
+            report.blocked_checks.join(",")
         ));
     }
     out.push_str(&format!("evidence\t{}\n", report.evidence));

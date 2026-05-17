@@ -22,6 +22,7 @@ fn readiness_audit_json_reports_ready_fixture() -> Result<()> {
         assert_eq!(parsed["failed"], false);
         assert!(parsed.get("blocker_scope").is_none());
         assert!(parsed.get("blocker_kinds").is_none());
+        assert!(parsed.get("blocked_checks").is_none());
         assert_eq!(parsed["metrics"]["real_sessions"], 3);
         assert!(result.output.contains(r#""id": "ecosystem_surfaces""#));
         assert!(result.output.contains(r#""id": "provider_surface""#));
@@ -50,6 +51,9 @@ fn readiness_audit_json_reports_blocked_kimi_without_secret() -> Result<()> {
         assert_eq!(parsed["blocker_scope"], "external_only");
         assert_eq!(parsed["blocker_kinds"][0], "dependent_gate");
         assert_eq!(parsed["blocker_kinds"][1], "external_credential");
+        assert_eq!(parsed["blocked_checks"][0], "open_blockers");
+        assert_eq!(parsed["blocked_checks"][1], "kimi_auth");
+        assert_eq!(parsed["blocked_checks"][2], "rc_dogfood_gate");
         assert_eq!(parsed["metrics"]["open_blockers"], 1);
         assert!(result.output.contains("1 blocker/critical open: kimi-auth"));
         assert!(result.output.contains(r#""id": "kimi_auth""#));
@@ -103,6 +107,9 @@ fn readiness_audit_text_keeps_human_checklist() -> Result<()> {
         assert!(result
             .output
             .contains("blocker_kinds\tdependent_gate,external_credential"));
+        assert!(result
+            .output
+            .contains("blocked_checks\topen_blockers,kimi_auth,rc_dogfood_gate"));
         assert!(result.output.contains("status\tincomplete"));
         assert!(result
             .output
@@ -135,6 +142,9 @@ fn readiness_blockers_json_reports_only_unpassed_checks() -> Result<()> {
         assert_eq!(parsed["blocker_scope"], "external_only");
         assert_eq!(parsed["blocker_kinds"][0], "dependent_gate");
         assert_eq!(parsed["blocker_kinds"][1], "external_credential");
+        assert_eq!(parsed["blocked_checks"][0], "open_blockers");
+        assert_eq!(parsed["blocked_checks"][1], "kimi_auth");
+        assert_eq!(parsed["blocked_checks"][2], "rc_dogfood_gate");
         assert!(blocker_ids.contains(&"kimi_auth"));
         assert!(blocker_ids.contains(&"open_blockers"));
         assert!(blocker_ids.contains(&"rc_dogfood_gate"));
@@ -179,6 +189,9 @@ fn readiness_blockers_text_reports_blocker_kind() -> Result<()> {
         assert!(result
             .output
             .contains("blocker_kinds\tdependent_gate,external_credential"));
+        assert!(result
+            .output
+            .contains("blocked_checks\topen_blockers,kimi_auth,rc_dogfood_gate"));
         assert!(result.output.contains("blocker\tkimi_auth\tblocked"));
         assert!(result
             .output
@@ -203,6 +216,7 @@ fn readiness_blockers_text_reports_clear_fixture() -> Result<()> {
         assert!(result.output.contains("AgentHub readiness blockers"));
         assert!(result.output.contains("blockers\tclear"));
         assert!(result.output.contains("status\tclear"));
+        assert!(!result.output.contains("blocked_checks\t"));
         assert!(!result.output.contains("next\t"));
         assert!(!result.output.contains("blocker_next\t"));
         Ok(())

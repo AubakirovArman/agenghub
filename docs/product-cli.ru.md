@@ -173,7 +173,7 @@ agenthub readiness audit --json --check
 agenthub readiness blockers --json --check
 ```
 
-`readiness audit` — полный API-native 1.0 gate. JSON output включает source paths, RC evidence metrics, все check rows и per-check `next_commands` для незакрытых rows. Text output печатает соответствующие `check_next` строки. `readiness blockers` — короткий view для людей и automation; он использует тот же набор recovery commands, что и полный audit.
+`readiness audit` — полный API-native 1.0 gate. JSON output включает source paths, RC evidence metrics, все check rows, top-level `blocked_checks` и per-check `next_commands` для незакрытых rows. Text output печатает соответствующие `blocked_checks` и `check_next` строки. `readiness blockers` — короткий view для людей и automation; он использует тот же набор recovery commands и печатает тот же top-level `blocked_checks` summary, что и полный audit.
 
 Совместимый script path, `scripts/api-native-completion-audit.sh --json --check`, теперь несёт те же `blocker_scope`, `blocker_kinds`, per-check `blocker_kind`, per-check `next_commands` и top-level `blocked_checks`, чтобы release automation отличала external credential blockers от локальных implementation gaps без парсинга произвольного текста; text output также печатает top-level `blocker_scope`/`blocker_kinds`/`blocked_checks` rows.
 
