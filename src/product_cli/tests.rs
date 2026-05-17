@@ -267,6 +267,7 @@ fn doctor_surfaces_blocked_kimi_auth_report() -> Result<()> {
               "provider": "kimi",
               "status": "blocked",
               "auth_key_sha256_12": "abc123def456",
+              "auth_key_source": "file:/tmp/.kimi",
               "credential_warning": "Kimi Code CLI OAuth credentials are not Moonshot OpenAI-compatible API keys; create a plain Moonshot API key instead",
               "next_action": "replace or rotate the Kimi/Moonshot API key"
             }"#,
@@ -277,6 +278,7 @@ fn doctor_surfaces_blocked_kimi_auth_report() -> Result<()> {
         assert!(rendered.contains("[warn] provider.kimi.auth"));
         assert!(rendered.contains("latest Kimi auth check blocked"));
         assert!(rendered.contains("key:abc123def456"));
+        assert!(rendered.contains("source:file:/tmp/.kimi"));
         assert!(rendered.contains(
             "warning:Kimi Code CLI OAuth credentials are not Moonshot OpenAI-compatible API keys"
         ));

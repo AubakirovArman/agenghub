@@ -277,8 +277,14 @@ fn matching_kimi_auth_blocker(project_root: &Path, current_key: &str) -> Option<
         .filter(|value| !value.is_empty())
         .map(|value| format!("; warning:{value}"))
         .unwrap_or_default();
+    let source = report
+        .get("auth_key_source")
+        .and_then(Value::as_str)
+        .filter(|value| !value.is_empty())
+        .map(|value| format!("; source:{value}"))
+        .unwrap_or_default();
     Some(format!(
-        "latest Kimi auth check {status}: key:{report_key}{warning}; {next_action}"
+        "latest Kimi auth check {status}: key:{report_key}{source}{warning}; {next_action}"
     ))
 }
 

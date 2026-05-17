@@ -102,7 +102,7 @@ fn providers_kimi_status_surfaces_matching_auth_blocker() -> Result<()> {
         let report = dir.path().join("kimi-auth-report.json");
         std::fs::write(
             &report,
-            r#"{"provider":"kimi","status":"blocked","auth_key_sha256_12":"5e0492f3799a","credential_warning":"plain Moonshot API key required","next_action":"replace key"}"#,
+            r#"{"provider":"kimi","status":"blocked","auth_key_sha256_12":"5e0492f3799a","auth_key_source":"file:/tmp/.kimi","credential_warning":"plain Moonshot API key required","next_action":"replace key"}"#,
         )?;
         std::env::set_var("AGENTHUB_KIMI_AUTH_REPORT", &report);
 
@@ -111,10 +111,10 @@ fn providers_kimi_status_surfaces_matching_auth_blocker() -> Result<()> {
 
         assert!(status.contains("kimi\tblocked\t-"));
         assert!(status.contains("latest Kimi auth check blocked: key:5e0492f3799a"));
-        assert!(status.contains("warning:plain Moonshot API key required"));
+        assert!(status.contains("source:file:/tmp/.kimi; warning:plain Moonshot API key required"));
         assert!(status.contains("; replace key"));
         assert!(setup.contains("missing\tkimi\tlatest Kimi auth check blocked"));
-        assert!(setup.contains("warning:plain Moonshot API key required"));
+        assert!(setup.contains("source:file:/tmp/.kimi; warning:plain Moonshot API key required"));
         Ok(())
     })
 }

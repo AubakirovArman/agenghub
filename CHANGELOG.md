@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.65-local-preview - 2026-05-17
+
+- Surface the safe `auth_key_source` from blocked Kimi auth reports in `agenthub providers status`, provider setup, and `agenthub doctor`.
+- Keep the Kimi recovery path redacted while making the exact credential source visible next to the matching fingerprint and warning.
+
 ## 0.4.64-local-preview - 2026-05-17
 
 - Surface Kimi auth `credential_warning` in `agenthub providers status` and setup output when the latest blocked auth report matches the current key fingerprint.
