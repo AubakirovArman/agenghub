@@ -1,15 +1,15 @@
 use std::{
     collections::{BTreeSet, HashSet},
     path::Path,
-    process::Command,
 };
 
-use anyhow::{Context, Result};
+use anyhow::Result;
 use serde_json::Value;
 
 use crate::product_cli::{ecosystem, providers};
 
 use super::{
+    evidence::refresh_evidence,
     next::check_next_commands,
     render::render_text,
     types::{
@@ -175,24 +175,6 @@ fn audit_report(project_root: &Path, config: &AuditConfig) -> Result<ReadinessAu
         checks,
         next: if failed { next_commands() } else { Vec::new() },
     })
-}
-
-fn refresh_evidence(project_root: &Path, evidence: &Path) -> Result<()> {
-    if cfg!(windows) {
-        return Ok(());
-    }
-    let script = project_root.join("scripts/rc-evidence-collect.sh");
-    if !script.exists() {
-        return Ok(());
-    }
-    let status = Command::new(&script)
-        .env("AGENTHUB_RC_EVIDENCE", evidence)
-        .status()
-        .with_context(|| format!("run {}", script.display()))?;
-    if !status.success() {
-        anyhow::bail!("{} failed with {status}", script.display());
-    }
-    Ok(())
 }
 
 fn summarize_evidence(path: &Path) -> Result<EvidenceSummary> {

@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.82-local-preview - 2026-05-17
+
+- Keep `agenthub readiness audit --json --check` and `agenthub readiness blockers --json --check` machine-readable when they refresh RC evidence by capturing collector stdout/stderr instead of leaking it into JSON output.
+- Add a CLI regression test that runs the real `agenthub` binary against a noisy evidence collector and validates that stdout remains parseable JSON while the blocked readiness exit code is preserved.
+
 ## 0.4.81-local-preview - 2026-05-17
 
 - Make `agenthub providers recovery [--json]` mark already available providers as `ready` instead of emitting redundant provider-test commands.
