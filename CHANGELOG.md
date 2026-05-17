@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.108-local-preview - 2026-05-17
+
+- Add `scripts/test-shell-ux-aliases.sh`, a release-gated non-interactive shell smoke that verifies `/mode chat|devops|project`, `/sessions`, `/cost`, `/balance`, `/hosts`, `/connect <host>`, `/provider deepseek`, and `!command` without creating Git or `.agent` in a Chat/Ops workspace.
+- Include the shell UX alias smoke in `scripts/release-readiness.sh` so daily dogfooding and release checks cover the API-native terminal controls from the v0.4 plan.
+
 ## 0.4.107-local-preview - 2026-05-17
 
 - Add a first-class API-native provider selection path: `agenthub providers select <id>` and shell `/provider <id>` now choose a ready DeepSeek/Kimi provider without entering the setup workflow.

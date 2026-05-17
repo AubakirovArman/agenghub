@@ -178,6 +178,7 @@ scripts/rc-evidence-collect.sh
 agenthub readiness completion --json --check
 agenthub readiness next --json --check
 scripts/rc-dogfood-gate.sh
+scripts/test-shell-ux-aliases.sh
 AGENTHUB_DOGFOOD_FULL=1 scripts/dogfood.sh
 scripts/perf-profile.sh
 scripts/release-readiness.sh

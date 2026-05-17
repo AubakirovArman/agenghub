@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-EXPECTED="${AGENTHUB_RELEASE_VERSION:-0.4.107-local-preview}"
+EXPECTED="${AGENTHUB_RELEASE_VERSION:-0.4.108-local-preview}"
 WORK="$ROOT/target/release-readiness"
 DIST="$WORK/dist"
 INSTALL="$WORK/install"
@@ -34,6 +34,7 @@ cargo test --manifest-path "$ROOT/Cargo.toml" --locked
 "$ROOT/scripts/test-kimi-rc-unblock.sh"
 "$ROOT/scripts/test-provider-test-exit-code.sh"
 "$ROOT/scripts/test-release-surfaces.sh"
+"$ROOT/scripts/test-shell-ux-aliases.sh"
 
 AGENTHUB_DOGFOOD_FULL="${AGENTHUB_DOGFOOD_FULL:-0}" "$ROOT/scripts/dogfood.sh"
 if [[ "${AGENTHUB_RELEASE_PERF:-0}" == "1" ]]; then
