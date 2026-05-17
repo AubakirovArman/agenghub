@@ -46,6 +46,7 @@ fn readiness_audit_json_reports_blocked_kimi_without_secret() -> Result<()> {
         assert_eq!(parsed["status"], "incomplete");
         assert_eq!(parsed["failed"], true);
         assert_eq!(parsed["metrics"]["open_blockers"], 1);
+        assert!(result.output.contains("1 blocker/critical open: kimi-auth"));
         assert!(result.output.contains(r#""id": "kimi_auth""#));
         assert!(result.output.contains(r#""status": "blocked""#));
         assert!(result
@@ -106,6 +107,7 @@ fn readiness_blockers_json_reports_only_unpassed_checks() -> Result<()> {
         assert!(blocker_ids.contains(&"kimi_auth"));
         assert!(blocker_ids.contains(&"open_blockers"));
         assert!(blocker_ids.contains(&"rc_dogfood_gate"));
+        assert!(result.output.contains("1 blocker/critical open: kimi-auth"));
         assert!(!blocker_ids.contains(&"provider_kimi"));
         assert!(!blocker_ids.contains(&"provider_surface"));
         assert!(result

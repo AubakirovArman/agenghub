@@ -228,6 +228,7 @@ cost_receipts=0
 providers_passed=""
 checks_passed=""
 open_blockers=0
+open_blocker_ids=""
 
 if [[ -f "$EVIDENCE" ]]; then
   while IFS= read -r line; do
@@ -264,6 +265,7 @@ if [[ -f "$EVIDENCE" ]]; then
       if [[ "$status" != "closed" && "$status" != "resolved" ]]; then
         if [[ "$severity" == "blocker" || "$severity" == "critical" ]]; then
           open_blockers=$((open_blockers + 1))
+          open_blocker_ids="$(csv_add_unique "$open_blocker_ids" "$(json_field "$line" id)")"
         fi
       fi
     fi
@@ -372,6 +374,8 @@ done
 
 if (( open_blockers == 0 )); then
   emit_check open_blockers passed "0 blocker/critical open"
+elif [[ -n "$open_blocker_ids" ]]; then
+  emit_check open_blockers blocked "$open_blockers blocker/critical open: $open_blocker_ids"
 else
   emit_check open_blockers blocked "$open_blockers blocker/critical open"
 fi

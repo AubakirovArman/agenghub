@@ -80,6 +80,7 @@ pub(super) struct EvidenceSummary {
     pub providers_passed: BTreeSet<String>,
     pub checks_passed: BTreeSet<String>,
     pub open_blockers: usize,
+    pub open_blocker_ids: BTreeSet<String>,
 }
 
 pub(super) struct AuditConfig {

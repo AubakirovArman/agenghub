@@ -132,7 +132,7 @@ fn audit_report(project_root: &Path, config: &AuditConfig) -> Result<ReadinessAu
         push_blocked(
             &mut checks,
             "open_blockers",
-            &format!("{} blocker/critical open", metrics.open_blockers),
+            &open_blockers_detail(&evidence),
         );
     }
     push_kimi_auth_check(&mut checks, &config.kimi_report)?;
@@ -227,10 +227,27 @@ fn summarize_evidence(path: &Path) -> Result<EvidenceSummary> {
             let severity = text(&event, "severity");
             if matches!(severity, Some("blocker" | "critical")) {
                 summary.open_blockers += 1;
+                if let Some(id) = text(&event, "id").filter(|value| !value.is_empty()) {
+                    summary.open_blocker_ids.insert(id.to_string());
+                }
             }
         }
     }
     Ok(summary)
+}
+
+fn open_blockers_detail(evidence: &EvidenceSummary) -> String {
+    let count = evidence.open_blockers;
+    if evidence.open_blocker_ids.is_empty() {
+        return format!("{count} blocker/critical open");
+    }
+    let ids = evidence
+        .open_blocker_ids
+        .iter()
+        .map(String::as_str)
+        .collect::<Vec<_>>()
+        .join(",");
+    format!("{count} blocker/critical open: {ids}")
 }
 
 fn add_history_providers(path: &Path, providers_passed: &mut BTreeSet<String>) -> Result<()> {

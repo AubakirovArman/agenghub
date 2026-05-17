@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.76-local-preview - 2026-05-17
+
+- Make the `open_blockers` readiness row source-backed by listing the open blocker IDs from RC evidence, so Kimi/auth blockers are visible without inspecting raw `rc-evidence.jsonl`.
+- Keep `agenthub readiness audit`, `agenthub readiness blockers`, and `scripts/api-native-completion-audit.sh` aligned on the same blocker detail.
+
 ## 0.4.75-local-preview - 2026-05-17
 
 - Add an `ecosystem_surfaces` row to `agenthub readiness audit [--json]`, so the API-native readiness gate verifies that the post-1.0 roadmap surface exists in the product CLI instead of only checking that roadmap files are present.
