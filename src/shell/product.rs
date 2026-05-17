@@ -57,6 +57,14 @@ pub(super) fn handle_providers(root: &Path, args: Option<&str>) -> Result<()> {
                 return Err(anyhow!("provider key preflight failed"));
             }
         }
+        "inspect-key" => {
+            let (provider, options) = inspect_key_options_from_args(&args)?;
+            let result = providers::inspect_provider_key(root, &provider, options)?;
+            print!("{}", result.output);
+            if result.failed {
+                return Err(anyhow!("provider key inspection failed"));
+            }
+        }
         "rc-unblock" => {
             let (provider, options) = rc_unblock_options_from_args(&args)?;
             let result = providers::rc_unblock_provider(root, &provider, options)?;
@@ -187,6 +195,40 @@ fn preflight_key_options_from_args(
     ))
 }
 
+fn inspect_key_options_from_args(args: &[&str]) -> Result<(String, providers::KeyInspectOptions)> {
+    let provider = required(args, 1, "provider")?.to_string();
+    let mut from_file = None;
+    let mut from_env = None;
+    let mut index = 2;
+    while index < args.len() {
+        match args[index] {
+            "--from-file" => {
+                index += 1;
+                from_file = Some(PathBuf::from(required(args, index, "from-file")?));
+            }
+            "--from-env" => {
+                index += 1;
+                from_env = Some(required(args, index, "from-env")?.to_string());
+            }
+            "--stdin" => {
+                return Err(anyhow!(
+                    "`/providers inspect-key` does not support --stdin; use the CLI command"
+                ))
+            }
+            other => return Err(anyhow!("unknown inspect-key option `{other}`")),
+        }
+        index += 1;
+    }
+    Ok((
+        provider,
+        providers::KeyInspectOptions {
+            from_file,
+            from_env,
+            stdin_value: None,
+        },
+    ))
+}
+
 fn rc_unblock_options_from_args(args: &[&str]) -> Result<(String, providers::RcUnblockOptions)> {
     let provider = required(args, 1, "provider")?.to_string();
     let mut from_file = None;
@@ -280,6 +322,17 @@ mod tests {
         let args = split_args("preflight-key kimi --from-file ./new.key");
 
         let (provider, options) = preflight_key_options_from_args(&args)?;
+
+        assert_eq!(provider, "kimi");
+        assert!(options.from_file.is_some());
+        Ok(())
+    }
+
+    #[test]
+    fn inspect_key_options_parse_rotation_source() -> Result<()> {
+        let args = split_args("inspect-key kimi --from-file ./new.key");
+
+        let (provider, options) = inspect_key_options_from_args(&args)?;
 
         assert_eq!(provider, "kimi");
         assert!(options.from_file.is_some());

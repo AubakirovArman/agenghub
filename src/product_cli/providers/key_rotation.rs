@@ -149,11 +149,14 @@ pub fn preflight_provider_key(
         }
         out.push_str("status\tblocked\n");
         out.push_str(&format!(
-            "next\t1\tagenthub providers preflight-key kimi {source_args}\n"
+            "next\t1\tagenthub providers inspect-key kimi {source_args}\n"
         ));
-        out.push_str("next\t2\treplace or rotate the Kimi/Moonshot API key candidate\n");
+        out.push_str(&format!(
+            "next\t2\tagenthub providers preflight-key kimi {source_args}\n"
+        ));
+        out.push_str("next\t3\treplace or rotate the Kimi/Moonshot API key candidate\n");
         out.push_str(
-            "next\t3\tif this is a China-region key, run with MOONSHOT_BASE_URL=https://api.moonshot.cn/v1\n",
+            "next\t4\tif this is a China-region key, run with MOONSHOT_BASE_URL=https://api.moonshot.cn/v1\n",
         );
     } else {
         if endpoint_candidates.len() == 1 {
@@ -362,7 +365,7 @@ fn normalize_replacement_key(raw_key: String) -> Result<(String, bool)> {
     Ok((key, trimmed))
 }
 
-fn unsupported_kimi_credential_reason(key: &str) -> Option<&'static str> {
+pub(super) fn unsupported_kimi_credential_reason(key: &str) -> Option<&'static str> {
     let value = serde_json::from_str::<Value>(key).ok()?;
     let object = value.as_object()?;
     if object.contains_key("access_token")

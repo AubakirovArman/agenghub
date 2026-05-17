@@ -139,6 +139,8 @@ fn provider_action(status: &ProviderStatus, blocked: bool) -> String {
 fn provider_next_commands(status: &ProviderStatus, state: &str) -> Vec<String> {
     match status.info.id.as_str() {
         "kimi" if state == "blocked" || state == "missing" => vec![
+            "agenthub providers inspect-key kimi".to_string(),
+            "agenthub providers inspect-key kimi --from-file <new-key-file>".to_string(),
             "agenthub providers preflight-key kimi --from-file <new-key-file>".to_string(),
             "agenthub providers rc-unblock kimi --from-file <new-key-file>".to_string(),
             "agenthub providers test kimi".to_string(),

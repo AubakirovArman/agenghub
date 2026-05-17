@@ -88,12 +88,12 @@ fn readiness_audit_text_keeps_human_checklist() -> Result<()> {
             .contains("AgentHub API-native readiness audit"));
         assert!(result.output.contains("check\tkimi_auth\tblocked"));
         assert!(result.output.contains(
-            "check_next\tkimi_auth\t2\tagenthub providers rc-unblock kimi --from-file <new-key-file>"
+            "check_next\tkimi_auth\t4\tagenthub providers rc-unblock kimi --from-file <new-key-file>"
         ));
         assert!(result.output.contains("status\tincomplete"));
         assert!(result
             .output
-            .contains("next\t12\tagenthub readiness audit --json --check"));
+            .contains("next\t15\tagenthub readiness audit --json --check"));
         Ok(())
     })
 }

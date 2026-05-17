@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.84-local-preview - 2026-05-17
+
+- Add `agenthub providers inspect-key kimi`, an offline, no-write Kimi credential inspection command that redacts secrets, reports fingerprint/shape/network/write policy, and uses matching Kimi auth blocker evidence to identify known Kimi Code CLI OAuth material.
+- Thread the new inspection step through Kimi unblock, provider recovery, readiness blockers, script-level completion audit, and Kimi RC unblock next actions before live preflight/rotation.
+
 ## 0.4.83-local-preview - 2026-05-17
 
 - Align `scripts/api-native-completion-audit.sh --json --check` with the product recovery path by listing `agenthub readiness blockers --json --check` before the full readiness audit.

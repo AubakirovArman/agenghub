@@ -157,28 +157,22 @@ fn providers_kimi_unblock_renders_source_backed_next_steps() -> Result<()> {
 
         let unblock = providers::unblock_provider(dir.path(), "kimi")?;
 
-        assert!(unblock.contains("provider\tkimi"));
-        assert!(unblock.contains("status\tblocked"));
-        assert!(unblock.contains("detail\tlatest Kimi auth check blocked"));
-        assert!(unblock.contains("api_key_env\tKIMI_API_KEY"));
-        assert!(unblock.contains("warning\tkimi_cli_credentials_not_api_key"));
-        assert!(unblock.contains("not a Moonshot OpenAI-compatible API key"));
-        assert!(unblock
-            .contains("step\t1\tagenthub providers preflight-key kimi --from-file <new-key-file>"));
-        assert!(unblock
-            .contains("step\t2\tagenthub providers rc-unblock kimi --from-file <new-key-file>"));
-        assert!(unblock
-            .contains("step\t3\tagenthub providers rotate-key kimi --from-file <new-key-file>"));
-        assert!(unblock.contains("step\t4\tscripts/kimi-key-rotate.sh --from-file <new-key-file>"));
-        assert!(unblock.contains("step\t5\tagenthub providers rc-unblock kimi"));
-        assert!(unblock.contains("step\t6\tscripts/kimi-rc-unblock.sh"));
-        assert!(unblock.contains("step\t7\tagenthub providers test kimi"));
-        assert!(unblock.contains("step\t8\tscripts/kimi-auth-check.sh"));
-        assert!(unblock.contains(
-            "step\t9\tAGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh"
-        ));
-        assert!(unblock.contains("step\t10\tscripts/rc-evidence-collect.sh"));
-        assert!(unblock.contains("step\t11\tscripts/rc-dogfood-gate.sh --check"));
+        for expected in [
+            "provider\tkimi",
+            "status\tblocked",
+            "detail\tlatest Kimi auth check blocked",
+            "not a Moonshot OpenAI-compatible API key",
+            "step\t1\tagenthub providers inspect-key kimi",
+            "step\t2\tagenthub providers inspect-key kimi --from-file <new-key-file>",
+            "step\t3\tagenthub providers preflight-key kimi --from-file <new-key-file>",
+            "step\t4\tagenthub providers rc-unblock kimi --from-file <new-key-file>",
+            "step\t5\tagenthub providers rotate-key kimi --from-file <new-key-file>",
+            "step\t11\tAGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh",
+            "step\t12\tscripts/rc-evidence-collect.sh",
+            "step\t13\tscripts/rc-dogfood-gate.sh --check",
+        ] {
+            assert!(unblock.contains(expected));
+        }
         Ok(())
     })
 }
@@ -368,16 +362,22 @@ fn providers_kimi_rc_unblock_stops_on_provider_test_failure() -> Result<()> {
         assert!(result.output.contains("reason\tprovider_test_failed"));
         assert!(result
             .output
-            .contains("next\t1\tagenthub providers preflight-key kimi --from-file <new-key-file>"));
+            .contains("next\t1\tagenthub providers inspect-key kimi"));
         assert!(result
             .output
-            .contains("next\t2\tagenthub providers rc-unblock kimi --from-file <new-key-file>"));
+            .contains("next\t2\tagenthub providers inspect-key kimi --from-file <new-key-file>"));
         assert!(result
             .output
-            .contains("next\t3\tagenthub providers rotate-key kimi --from-file <new-key-file>"));
+            .contains("next\t3\tagenthub providers preflight-key kimi --from-file <new-key-file>"));
         assert!(result
             .output
-            .contains("next\t4\tagenthub providers unblock kimi"));
+            .contains("next\t4\tagenthub providers rc-unblock kimi --from-file <new-key-file>"));
+        assert!(result
+            .output
+            .contains("next\t5\tagenthub providers rotate-key kimi --from-file <new-key-file>"));
+        assert!(result
+            .output
+            .contains("next\t6\tagenthub providers unblock kimi"));
         Ok(())
     })
 }

@@ -195,6 +195,8 @@ impl AuditConfig {
 pub(super) fn next_commands() -> Vec<String> {
     [
         "agenthub providers recovery --json",
+        "agenthub providers inspect-key kimi",
+        "agenthub providers inspect-key kimi --from-file <new-key-file>",
         "agenthub providers preflight-key kimi --from-file <new-key-file>",
         "agenthub providers rc-unblock kimi --from-file <new-key-file>",
         "agenthub providers unblock kimi",
@@ -205,8 +207,8 @@ pub(super) fn next_commands() -> Vec<String> {
         "agenthub providers test kimi",
         "scripts/kimi-auth-check.sh",
         "AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh",
-        "agenthub readiness audit --json --check",
         "agenthub readiness blockers --json --check",
+        "agenthub readiness audit --json --check",
         "scripts/rc-evidence-collect.sh",
         "scripts/rc-dogfood-gate.sh --check",
     ]

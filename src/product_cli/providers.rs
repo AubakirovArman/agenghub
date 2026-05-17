@@ -10,6 +10,7 @@ use super::env::find_executable;
 mod catalog;
 mod diagnostics;
 mod http;
+mod key_inspection;
 mod key_rotation;
 mod probes;
 mod rc_unblock;
@@ -19,6 +20,7 @@ mod status_json;
 mod wizard;
 
 pub use catalog::{ProviderInfo, ProviderStatus};
+pub use key_inspection::{inspect_provider_key, KeyInspectOptions, KeyInspectResult};
 pub use key_rotation::{
     preflight_provider_key, rotate_provider_key, KeyPreflightOptions, KeyPreflightResult,
     KeyRotationOptions, KeyRotationResult,
@@ -248,6 +250,10 @@ fn read_api_key_file(path: &Path) -> Option<String> {
         .filter(|value| !value.is_empty())
 }
 
+pub(super) fn kimi_auth_blocker_note(project_root: &Path, current_key: &str) -> Option<String> {
+    matching_kimi_auth_blocker(project_root, current_key)
+}
+
 fn matching_kimi_auth_blocker(project_root: &Path, current_key: &str) -> Option<String> {
     let path = kimi_auth_report_path(project_root);
     let report = std::fs::read_to_string(path)
@@ -423,35 +429,37 @@ fn append_kimi_unblock_steps(project_root: &Path, out: &mut String) {
     out.push_str(
         "warning\tkimi_cli_credentials_not_api_key\tKimi Code CLI OAuth JSON with access_token/refresh_token is not a Moonshot OpenAI-compatible API key; create a plain Moonshot API key instead\n",
     );
-    out.push_str("step\t1\tagenthub providers preflight-key kimi --from-file <new-key-file>\n");
-    out.push_str("step\t2\tagenthub providers rc-unblock kimi --from-file <new-key-file>\n");
-    out.push_str("step\t3\tagenthub providers rotate-key kimi --from-file <new-key-file>\n");
+    out.push_str("step\t1\tagenthub providers inspect-key kimi\n");
+    out.push_str("step\t2\tagenthub providers inspect-key kimi --from-file <new-key-file>\n");
+    out.push_str("step\t3\tagenthub providers preflight-key kimi --from-file <new-key-file>\n");
+    out.push_str("step\t4\tagenthub providers rc-unblock kimi --from-file <new-key-file>\n");
+    out.push_str("step\t5\tagenthub providers rotate-key kimi --from-file <new-key-file>\n");
     let rotate_script = project_root.join("scripts/kimi-key-rotate.sh");
     if rotate_script.exists() {
         out.push_str(&format!(
-            "step\t4\t{} --from-file <new-key-file>\n",
+            "step\t6\t{} --from-file <new-key-file>\n",
             rotate_script.display()
         ));
     } else {
-        out.push_str("step\t4\tscripts/kimi-key-rotate.sh --from-file <new-key-file>\n");
+        out.push_str("step\t6\tscripts/kimi-key-rotate.sh --from-file <new-key-file>\n");
     }
-    out.push_str("step\t5\tagenthub providers rc-unblock kimi\n");
+    out.push_str("step\t7\tagenthub providers rc-unblock kimi\n");
     let rc_unblock_script = project_root.join("scripts/kimi-rc-unblock.sh");
     if rc_unblock_script.exists() {
-        out.push_str(&format!("step\t6\t{}\n", rc_unblock_script.display()));
+        out.push_str(&format!("step\t8\t{}\n", rc_unblock_script.display()));
     } else {
-        out.push_str("step\t6\tscripts/kimi-rc-unblock.sh\n");
+        out.push_str("step\t8\tscripts/kimi-rc-unblock.sh\n");
     }
-    out.push_str("step\t7\tagenthub providers test kimi\n");
+    out.push_str("step\t9\tagenthub providers test kimi\n");
     let script = project_root.join("scripts/kimi-auth-check.sh");
     if script.exists() {
-        out.push_str(&format!("step\t8\t{}\n", script.display()));
+        out.push_str(&format!("step\t10\t{}\n", script.display()));
     } else {
-        out.push_str("step\t8\tscripts/kimi-auth-check.sh\n");
+        out.push_str("step\t10\tscripts/kimi-auth-check.sh\n");
     }
-    out.push_str("step\t9\tAGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh\n");
-    out.push_str("step\t10\tscripts/rc-evidence-collect.sh\n");
-    out.push_str("step\t11\tscripts/rc-dogfood-gate.sh --check\n");
+    out.push_str("step\t11\tAGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh\n");
+    out.push_str("step\t12\tscripts/rc-evidence-collect.sh\n");
+    out.push_str("step\t13\tscripts/rc-dogfood-gate.sh --check\n");
 }
 
 pub fn diagnose_provider(project_root: &Path, provider: &str) -> Result<String> {
