@@ -212,6 +212,20 @@ collect_ops_receipts() {
   local receipts="$AGENTHUB_DATA_HOME/ops/command_receipts.jsonl"
   if [[ -f "$receipts" && -s "$receipts" ]]; then
     write_check "ops_receipts" "ops_receipts" "$receipts"
+    write_check "ops_no_bootstrap" "ops_receipts" "$receipts"
+    local line id success approval
+    while IFS= read -r line; do
+      [[ -z "$line" ]] && continue
+      id="$(json_field "$line" id)"
+      success="$(json_field "$line" success)"
+      approval="$(json_field "$line" approval_required)"
+      if [[ "$success" == "true" ]]; then
+        write_session "${id:-ops-receipt}" "ops" "ops" "local-shell" "true" "ops_receipts" "$receipts"
+      fi
+      if [[ "$approval" == "true" ]]; then
+        write_check "approval_ux" "ops_receipts" "$receipts"
+      fi
+    done < "$receipts"
   fi
   return 0
 }

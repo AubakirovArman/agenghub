@@ -222,6 +222,12 @@ pub enum MemoryInboxCommands {
 
 #[derive(Debug, Subcommand)]
 pub enum OpsCommands {
+    Exec {
+        command: String,
+
+        #[arg(long)]
+        jsonl: bool,
+    },
     Hosts {
         #[command(subcommand)]
         command: Option<OpsHostCommands>,

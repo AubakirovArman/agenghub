@@ -39,9 +39,12 @@ AGENTHUB_RC_EVIDENCE="$EVIDENCE" \
 
 grep -q '"session_id":"chat-demo"' "$EVIDENCE"
 grep -q '"session_id":"tx-demo"' "$EVIDENCE"
+grep -q '"session_id":"ops-cmd-demo"' "$EVIDENCE"
 grep -q '"flow":"project_edit"' "$EVIDENCE"
+grep -q '"flow":"ops"' "$EVIDENCE"
 grep -q '"provider":"deepseek"' "$EVIDENCE"
 grep -q '"id":"chat_no_bootstrap"' "$EVIDENCE"
+grep -q '"id":"ops_no_bootstrap"' "$EVIDENCE"
 grep -q '"id":"cost_receipts"' "$EVIDENCE"
 grep -q '"id":"ops_receipts"' "$EVIDENCE"
 
@@ -49,12 +52,12 @@ AGENTHUB_DOGFOOD_HISTORY_DIR="$HISTORY" \
 AGENTHUB_DOGFOOD_MIN_SUITE_RUNS=0 \
 AGENTHUB_DOGFOOD_MIN_DAYS=1 \
 AGENTHUB_RC_EVIDENCE="$EVIDENCE" \
-AGENTHUB_RC_MIN_REAL_SESSIONS=2 \
-AGENTHUB_RC_MIN_OPS_FLOWS=0 \
+AGENTHUB_RC_MIN_REAL_SESSIONS=3 \
+AGENTHUB_RC_MIN_OPS_FLOWS=1 \
 AGENTHUB_RC_MIN_PROJECT_EDIT_FLOWS=1 \
-AGENTHUB_RC_MIN_COST_RECEIPTS=2 \
+AGENTHUB_RC_MIN_COST_RECEIPTS=3 \
 AGENTHUB_RC_REQUIRED_PROVIDERS=deepseek \
-AGENTHUB_RC_REQUIRED_CHECKS=chat_no_bootstrap,cost_receipts,ops_receipts \
+AGENTHUB_RC_REQUIRED_CHECKS=chat_no_bootstrap,ops_no_bootstrap,cost_receipts,ops_receipts \
   "$ROOT/scripts/rc-dogfood-gate.sh" --check > "$TMP/gate.out"
 
 grep -q '1.0 RC dogfood gate: ready' "$TMP/gate.out"

@@ -42,6 +42,7 @@ AgentHub $VERSION preparation checklist
 
 Required before final tag:
 - scripts/dogfood-readiness.sh --check passes with real multi-day dogfood.
+- scripts/rc-acceptance.sh passes as a local rehearsal for stats, Ops no-bootstrap/receipts, approval UX, resume, and undo/rewind mechanics.
 - scripts/rc-dogfood-gate.sh --check passes with 100+ real sessions, 20+ Ops flows, 20+ project-edit flows, required provider evidence, no open blocker/critical issues, and explicit resume/rewind/stats/cost/bootstrap checks.
 - GitHub Pages workflow has deployed successfully.
 - scripts/publish-wiki.sh has published the project wiki.

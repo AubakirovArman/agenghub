@@ -13,11 +13,17 @@ use uuid::Uuid;
 use crate::command_runner::CommandResult;
 use crate::home;
 use crate::memory::{self, TypedMemoryInput};
-use crate::observability::{redact_text, sha256_short, write_jsonl};
+use crate::observability::{redact_text, write_jsonl};
 use crate::tool_permissions::{ToolPermissionDecision, ToolPermissionProfile};
 
 const HOSTS_FILE: &str = "hosts.jsonl";
 const RECEIPTS_FILE: &str = "command_receipts.jsonl";
+
+mod exec;
+mod target;
+pub use exec::{exec_command, OpsExecOutcome, OpsExecStatus};
+pub use target::command_target;
+use target::{canonical_target, host_id};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
@@ -242,6 +248,15 @@ pub fn record_command(
     if decision.profile != ToolPermissionProfile::OpsHost {
         return Ok(None);
     }
+    record_explicit_command(root, command, decision, result)
+}
+
+pub(super) fn record_explicit_command(
+    root: &Path,
+    command: &str,
+    decision: &ToolPermissionDecision,
+    result: Option<&CommandResult>,
+) -> Result<Option<OpsCommandReceipt>> {
     let target = command_target(command);
     let profile = touch_host(root, &target)?;
     let runbook_cards = list_runbook_cards(root, Some(&profile.target))?
@@ -272,23 +287,6 @@ pub fn record_command(
     };
     append_receipt(&receipt)?;
     Ok(Some(receipt))
-}
-
-pub fn command_target(command: &str) -> String {
-    let tokens = command.split_whitespace().collect::<Vec<_>>();
-    let Some(first) = tokens.first().map(|value| value.to_ascii_lowercase()) else {
-        return "localhost".to_string();
-    };
-    match first.as_str() {
-        "ssh" => ssh_target(&tokens).unwrap_or_else(|| "unknown-ssh-host".to_string()),
-        "scp" | "rsync" => {
-            file_transfer_target(&tokens).unwrap_or_else(|| "unknown-remote".to_string())
-        }
-        "systemctl" | "service" | "journalctl" | "docker" => "localhost".to_string(),
-        "kubectl" | "helm" => "kubernetes-context".to_string(),
-        "terraform" => "terraform-workspace".to_string(),
-        _ => "localhost".to_string(),
-    }
 }
 
 fn touch_host(root: &Path, target: &str) -> Result<OpsHostProfile> {
@@ -428,67 +426,6 @@ fn truncate_words(value: &str, max_words: usize) -> String {
         return value.to_string();
     }
     format!("{}...", words[..max_words].join(" "))
-}
-
-fn ssh_target(tokens: &[&str]) -> Option<String> {
-    let mut index = 1;
-    while index < tokens.len() {
-        let token = tokens[index];
-        if matches!(token, "-p" | "-i" | "-F" | "-l" | "-o") {
-            index += 2;
-            continue;
-        }
-        if token.starts_with('-') {
-            index += 1;
-            continue;
-        }
-        return Some(canonical_target(token));
-    }
-    None
-}
-
-fn file_transfer_target(tokens: &[&str]) -> Option<String> {
-    tokens.iter().skip(1).find_map(|token| {
-        let token = token.trim_matches('"').trim_matches('\'');
-        token
-            .split_once(':')
-            .map(|(target, _)| target)
-            .filter(|target| !target.is_empty() && !target.starts_with('/'))
-            .map(canonical_target)
-    })
-}
-
-fn canonical_target(target: &str) -> String {
-    target
-        .trim()
-        .trim_matches('"')
-        .trim_matches('\'')
-        .trim_end_matches(':')
-        .to_ascii_lowercase()
-}
-
-fn host_id(target: &str) -> String {
-    let normalized = canonical_target(target);
-    let slug = normalized
-        .chars()
-        .map(|ch| {
-            if ch.is_ascii_alphanumeric() || matches!(ch, '-' | '_') {
-                ch
-            } else {
-                '_'
-            }
-        })
-        .collect::<String>()
-        .trim_matches('_')
-        .chars()
-        .take(40)
-        .collect::<String>();
-    let slug = if slug.is_empty() {
-        "host"
-    } else {
-        slug.as_str()
-    };
-    format!("ops-host-{slug}-{}", sha256_short(normalized.as_bytes()))
 }
 
 fn ops_dir() -> PathBuf {

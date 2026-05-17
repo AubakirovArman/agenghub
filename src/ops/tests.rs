@@ -67,6 +67,41 @@ fn ops_runbook_cards_derive_from_reviewed_memory_and_filter_by_host() -> Result<
 }
 
 #[test]
+fn ops_exec_records_headless_receipt_without_project_runtime() -> Result<()> {
+    let root = tempfile::tempdir()?;
+    let home = tempfile::tempdir()?;
+
+    with_agenthub_home(home.path(), || {
+        let outcome = exec_command(root.path(), "uptime")?;
+
+        assert_eq!(outcome.status, OpsExecStatus::Completed);
+        assert!(outcome.result.as_ref().is_some_and(|result| result.success));
+        assert!(outcome.receipt.is_some());
+        assert!(!root.path().join(".agent").exists());
+        assert_eq!(list_receipts(root.path(), 10, Some("localhost"))?.len(), 1);
+        Ok(())
+    })
+}
+
+#[test]
+fn ops_exec_records_approval_required_without_running_command() -> Result<()> {
+    let root = tempfile::tempdir()?;
+    let home = tempfile::tempdir()?;
+
+    with_agenthub_home(home.path(), || {
+        let outcome = exec_command(root.path(), "kubectl delete pod api-1")?;
+
+        assert_eq!(outcome.status, OpsExecStatus::ApprovalRequired);
+        assert!(outcome.result.is_none());
+        assert!(outcome
+            .receipt
+            .is_some_and(|receipt| { receipt.approval_required && receipt.success.is_none() }));
+        assert!(!root.path().join(".agent").exists());
+        Ok(())
+    })
+}
+
+#[test]
 fn command_target_extracts_remote_targets() {
     assert_eq!(
         command_target("ssh -p 2222 arman@prod uptime"),

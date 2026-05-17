@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.32-local-preview - 2026-05-17
+
+- Add headless Ops execution with `agenthub ops exec "<command>" [--jsonl]`, using AgentHub-owned tool permissions, command policy, global command logs, host profiles, and Ops receipts without creating `.agent` in empty folders.
+- Extend RC evidence collection so real Ops command receipts count as source-backed Ops flows and Ops no-bootstrap evidence, making the 1.0 gate measurable for both interactive and headless DevOps work.
+- Add `scripts/rc-acceptance.sh` plus release-readiness coverage for reproducible `stats`, Ops no-bootstrap/receipts, headless approval UX, transaction resume, and undo/rewind rehearsal artifacts.
+
 ## 0.4.31-local-preview - 2026-05-17
 
 - Add safe API-key diagnostics for DeepSeek/Kimi provider setup: `providers diagnose` now prints the credential source, trimmed key length, short SHA-256 fingerprint, and whether surrounding whitespace was removed before requests.

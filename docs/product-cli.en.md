@@ -41,6 +41,15 @@ In an initialized project, `exec` treats a file-changing request like the intera
 
 DeepSeek/Kimi project execution can first run bounded AgentHub-owned `read_file`, `list_dir`, `search`, and read-only `shell` tools, records redacted `tool_results_<role>.json` receipts with path/output/network/limit policy summaries, reinjects those results into the same provider turn, then requests a native `agenthub_command_plan` tool call or JSON fallback and permission-checks proposed commands before execution.
 
+## Headless Ops Exec
+
+```bash
+agenthub ops exec "uptime"
+agenthub ops exec "uptime" --jsonl
+```
+
+`ops exec` is the non-interactive path for DevOps-style shell checks. It uses the same AgentHub-owned tool permission and command policy classifiers as interactive `!command`, writes command logs under the AgentHub user data directory, updates host profiles, and records host-scoped Ops receipts. It does not create `.agent` in an empty folder. Commands that require approval are recorded as approval-required receipts and are not executed by the headless path.
+
 ## Chat Usage Stats
 
 ```bash

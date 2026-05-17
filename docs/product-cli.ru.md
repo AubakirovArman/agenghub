@@ -41,6 +41,15 @@ agenthub exec "ответь одним словом: ok" --jsonl
 
 DeepSeek/Kimi project execution теперь может сначала выполнить bounded AgentHub-owned `read_file`, `list_dir`, `search` и read-only `shell` tools, записать redacted `tool_results_<role>.json` receipts с path/output/network/limit policy summaries, reinject эти results в тот же provider turn, затем запросить native `agenthub_command_plan` tool call или JSON fallback и permission-checks proposed commands перед execution.
 
+## Headless Ops Exec
+
+```bash
+agenthub ops exec "uptime"
+agenthub ops exec "uptime" --jsonl
+```
+
+`ops exec` — non-interactive путь для DevOps-style shell checks. Он использует те же AgentHub-owned tool permission и command policy classifiers, что интерактивный `!command`, пишет command logs в user data directory AgentHub, обновляет host profiles и записывает host-scoped Ops receipts. В пустой папке он не создаёт `.agent`. Команды, которым нужен approval, записываются как approval-required receipts и не выполняются в headless path.
+
 ## Chat Usage Stats
 
 ```bash
