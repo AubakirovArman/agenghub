@@ -117,6 +117,31 @@ fn providers_kimi_status_surfaces_matching_auth_blocker() -> Result<()> {
 }
 
 #[test]
+fn providers_kimi_test_can_recheck_matching_auth_blocker() -> Result<()> {
+    let stub = openai_error_stub_server(
+        401,
+        r#"{"error":{"message":"Invalid Authentication","type":"invalid_authentication_error"}}"#,
+    )?;
+    let endpoint = format!("{}/v1", stub.endpoint);
+    with_kimi_env(Some(&endpoint), Some("kimi-test-key"), || {
+        let dir = tempfile::tempdir()?;
+        let report = dir.path().join("kimi-auth-report.json");
+        std::fs::write(
+            &report,
+            r#"{"provider":"kimi","status":"blocked","auth_key_sha256_12":"5e0492f3799a","next_action":"replace key"}"#,
+        )?;
+        std::env::set_var("AGENTHUB_KIMI_AUTH_REPORT", &report);
+
+        let test = providers::test_provider(dir.path(), "kimi")?;
+        let request = stub.received_request()?;
+
+        assert!(test.contains("failed\tkimi\tauth"));
+        assert!(request.contains("POST /v1/chat/completions"));
+        Ok(())
+    })
+}
+
+#[test]
 fn providers_kimi_status_ignores_stale_auth_blocker_after_key_change() -> Result<()> {
     with_kimi_env(None, Some("new-kimi-test-key"), || {
         let dir = tempfile::tempdir()?;

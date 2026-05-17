@@ -328,14 +328,22 @@ pub fn setup_provider(project_root: &Path, provider: &str) -> Result<String> {
 
 pub fn test_provider(project_root: &Path, provider: &str) -> Result<String> {
     let status = status_for(project_root, provider)?;
+    if http::is_http_provider(&status) {
+        if api_key_for_status(&status).is_none() {
+            return Ok(format!(
+                "missing\t{}\t{}\n",
+                status.info.id,
+                status_detail(&status)
+            ));
+        }
+        return http::test_provider(status);
+    }
     if !status.available {
         return Ok(format!(
             "missing\t{}\t{}\n",
-            status.info.id, status.info.note
+            status.info.id,
+            status_detail(&status)
         ));
-    }
-    if http::is_http_provider(&status) {
-        return http::test_provider(status);
     }
     if status.available {
         return Ok(diagnostics::test_success(&status));

@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.47-local-preview - 2026-05-17
+
+- Keep `agenthub providers test kimi` able to re-run a live auth check even when `providers status` reports a matching source-backed Kimi blocker.
+- Add regression coverage so the Kimi unblock runbook can refresh blocked auth evidence instead of getting stuck behind the blocked status itself.
+
 ## 0.4.46-local-preview - 2026-05-17
 
 - Surface source-backed Kimi auth blockers in `agenthub providers status` and provider setup, so a key with a matching failed auth report shows `blocked` instead of a misleading `ok`.
