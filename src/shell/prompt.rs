@@ -67,6 +67,7 @@ fn prompt_mode(root: &Path, session: &ChatSession) -> workspace::WorkspaceMode {
         .and_then(|mode| match mode {
             "ops" => Some(workspace::WorkspaceMode::Ops),
             "chat" => Some(workspace::WorkspaceMode::Chat),
+            "project" if home::project_has_runtime(root) => Some(workspace::WorkspaceMode::Project),
             _ => None,
         })
         .unwrap_or_else(|| workspace::detect_mode(root).mode)

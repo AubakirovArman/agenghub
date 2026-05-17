@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 
 use crate::{agent_dir, chat_usage, ops};
 
@@ -35,6 +35,7 @@ pub(super) fn handle(
         ShellCommand::Close => clear_current(current_tx),
         ShellCommand::Clear => print!("\x1b[2J\x1b[H"),
         ShellCommand::Mode(next) => flow::update_mode(next, mode, current_chat)?,
+        ShellCommand::WorkspaceMode(next) => update_workspace_mode(root, next, current_chat)?,
         ShellCommand::Chats(args) => chat_display::print_chats(root, args.as_deref())?,
         ShellCommand::Chat(target) => flow::update_chat(root, target.as_deref(), current_chat)?,
         ShellCommand::Search(query) => chat_display::print_search(root, &query)?,
@@ -54,7 +55,9 @@ pub(super) fn handle(
         ShellCommand::Approvals => actions::print_approvals(root)?,
         ShellCommand::Doctor => product::print_doctor(root)?,
         ShellCommand::Stats => print!("{}", chat_usage::render(root)?),
+        ShellCommand::Balance => print_balance(root)?,
         ShellCommand::Ops(args) => actions::print_ops(root, args.as_deref())?,
+        ShellCommand::Connect(target) => connect_host(root, &target)?,
         ShellCommand::Providers(args) => product::handle_providers(root, args.as_deref())?,
         ShellCommand::Config(args) => product::handle_config(root, args.as_deref())?,
         ShellCommand::Dashboard => product::open_dashboard(root)?,
@@ -122,6 +125,61 @@ pub(super) fn handle(
 fn clear_current(current_tx: &mut Option<String>) {
     *current_tx = None;
     println!("current session cleared");
+}
+
+fn update_workspace_mode(
+    root: &Path,
+    next: crate::workspace::WorkspaceMode,
+    current_chat: &ChatSession,
+) -> Result<()> {
+    if matches!(next, crate::workspace::WorkspaceMode::Project)
+        && !crate::home::project_has_runtime(root)
+    {
+        println!("workspace_mode\tproject\tpending_runtime");
+        println!("next\t/init or run a file-changing project task to bootstrap project mode");
+    } else {
+        println!("workspace_mode\t{}", next.as_str());
+    }
+    chat::append_intent(
+        current_chat,
+        "mode_override",
+        next.as_str(),
+        &format!("/mode {}", next.as_str()),
+        "explicit shell workspace mode override",
+    )?;
+    Ok(())
+}
+
+fn print_balance(root: &Path) -> Result<()> {
+    println!("provider_balance\tnot_available");
+    println!("usage:");
+    print!("{}", chat_usage::render(root)?);
+    Ok(())
+}
+
+fn connect_host(root: &Path, target: &str) -> Result<()> {
+    let target = target.trim();
+    if target.is_empty() {
+        return Err(anyhow!("usage: /connect <host>"));
+    }
+    let profile = ops::upsert_host(
+        root,
+        ops::OpsHostInput {
+            target: target.to_string(),
+            alias: None,
+            trust: ops::OpsHostTrust::Unknown,
+            note: None,
+            source: "shell/connect".to_string(),
+        },
+    )?;
+    println!(
+        "host\t{}\t{}\ttrust:{}\tcommands:{}",
+        profile.id,
+        profile.target,
+        profile.trust.as_str(),
+        profile.command_count
+    );
+    Ok(())
 }
 
 fn rename_chat(current_chat: &mut ChatSession, title: &str) -> Result<()> {

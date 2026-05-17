@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.105-local-preview - 2026-05-17
+
+- Add shell-facing plan aliases from the API-native roadmap: `/mode chat|devops|project`, `/cost`, `/balance`, `/hosts`, and `/connect <host>`.
+- Persist explicit Chat/Ops mode overrides into the chat transcript, surface them in the prompt, and document the shell controls across the product CLI and 1.0 roadmap docs.
+
 ## 0.4.104-local-preview - 2026-05-17
 
 - Add `agenthub readiness completion [--json] [--check] [--no-refresh]`, a single source-backed completion bundle that combines the final readiness decision with readiness-next, checklist, evidence, provider status, sources, blocker scope, blocked checks, and verification commands.

@@ -62,9 +62,15 @@ edit/e     draft-ты $VISUAL немесе $EDITOR ішінде ашып, қай
 ```text
 /help             shell help
 /cd <folder>      working folder ауыстыру
+/mode chat|devops|project  келесі turns үшін workspace mode таңдау
 /status           current project және transaction
+/provider <id>    дайын болса DeepSeek немесе Kimi таңдау
 /providers        provider wizard: status, roles, profiles және next actions
+/cost             chat token және cost usage көрсету
+/balance          local spend көрсету; provider balances API арқылы келмейді
 /memory           memory inspect
+/hosts            Ops host profiles тізімі
+/connect <host>   Ops host profile қосу немесе ашу
 /skills           skills inspect
 /transactions     recent transactions
 /new              new chat

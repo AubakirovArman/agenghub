@@ -1,3 +1,5 @@
+use crate::workspace::WorkspaceMode;
+
 use super::{parse_line, ShellCommand, ShellMode};
 
 #[test]
@@ -54,7 +56,17 @@ fn parses_shell_commands_and_plain_text() {
     assert_eq!(parse_line("/approvals"), ShellCommand::Approvals);
     assert_eq!(parse_line("doctor"), ShellCommand::Doctor);
     assert_eq!(parse_line("/stats"), ShellCommand::Stats);
+    assert_eq!(parse_line("/cost"), ShellCommand::Stats);
+    assert_eq!(parse_line("/balance"), ShellCommand::Balance);
     assert_eq!(parse_line("/ops"), ShellCommand::Ops(None));
+    assert_eq!(
+        parse_line("/hosts"),
+        ShellCommand::Ops(Some("hosts".into()))
+    );
+    assert_eq!(
+        parse_line("/connect prod.example.com"),
+        ShellCommand::Connect("prod.example.com".into())
+    );
     assert_eq!(
         parse_line("/ops runbooks --host prod"),
         ShellCommand::Ops(Some("runbooks --host prod".into()))
@@ -83,6 +95,18 @@ fn parses_shell_commands_and_plain_text() {
     assert_eq!(
         parse_line("mode run"),
         ShellCommand::Mode(Some(ShellMode::Run))
+    );
+    assert_eq!(
+        parse_line("/mode chat"),
+        ShellCommand::WorkspaceMode(WorkspaceMode::Chat)
+    );
+    assert_eq!(
+        parse_line("/mode devops"),
+        ShellCommand::WorkspaceMode(WorkspaceMode::Ops)
+    );
+    assert_eq!(
+        parse_line("/mode project"),
+        ShellCommand::WorkspaceMode(WorkspaceMode::Project)
     );
     assert_eq!(
         parse_line("report tx-1"),

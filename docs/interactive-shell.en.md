@@ -62,9 +62,15 @@ edit/e     open the draft in $VISUAL or $EDITOR, then revalidate it
 ```text
 /help             show shell help
 /cd <folder>      switch working folder
+/mode chat|devops|project  prefer workspace mode for following turns
 /status           show current project and transaction
+/provider <id>    select DeepSeek or Kimi when ready
 /providers        provider wizard with status, roles, profiles, and next actions
+/cost             show chat token and cost usage
+/balance          show local spend; provider balances are not exposed by APIs
 /memory           inspect memory
+/hosts            list Ops host profiles
+/connect <host>   add or reopen an Ops host profile
 /skills           inspect skills
 /transactions     list recent transactions
 /new              start a new chat

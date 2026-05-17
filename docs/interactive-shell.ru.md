@@ -62,9 +62,15 @@ edit/e     открыть draft в $VISUAL или $EDITOR и затем пров
 ```text
 /help             help по shell
 /cd <folder>      сменить working folder
+/mode chat|devops|project  предпочесть workspace mode для следующих turns
 /status           текущий project и transaction
+/provider <id>    выбрать DeepSeek или Kimi, если provider готов
 /providers        provider wizard: status, roles, profiles и next actions
+/cost             token/cost usage текущего scope
+/balance          local spend; provider balances API не отдаёт
 /memory           memory inspect
+/hosts            список Ops host profiles
+/connect <host>   добавить или открыть Ops host profile
 /skills           skills inspect
 /transactions     recent transactions
 /new              новый chat

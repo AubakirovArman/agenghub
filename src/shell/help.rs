@@ -16,11 +16,16 @@ pub(super) fn print(mode: ShellMode) {
     println!();
     println!("Project:");
     println!("  /cd <folder>       switch working folder");
+    println!("  /mode chat|devops|project  prefer workspace mode for following turns");
     println!("  /status            project, provider, selected transaction");
+    println!("  /provider <id>     select DeepSeek or Kimi when ready");
     println!("  /providers         provider status and setup actions");
     println!("  /stats             chat token and cost usage");
+    println!("  /cost, /balance    cost usage; provider balance is not exposed by APIs");
     println!("  /memory            project memory summary");
     println!("  /ops               host profiles, runbooks, and receipts");
+    println!("  /hosts             shortcut for /ops hosts");
+    println!("  /connect <host>    add or reopen an Ops host profile");
     println!("  /skills            available skills");
     println!();
     println!("Transactions:");

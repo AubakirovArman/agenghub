@@ -29,6 +29,7 @@ pub(super) fn handle_message(
     }
     chat::append_user(current_chat, mode.as_str(), request)?;
     let classified = classify_message(root, mode, &enriched.text);
+    let classified = apply_mode_override(current_chat, classified)?;
     chat::append_intent(
         current_chat,
         classified.intent,
@@ -97,6 +98,28 @@ fn classify_message(root: &Path, mode: ShellMode, request: &str) -> ClassifiedIn
             mode: "project",
             reason: "project runtime is initialized and shell mode is run",
         },
+    }
+}
+
+fn apply_mode_override(
+    current_chat: &ChatSession,
+    classified: ClassifiedIntent,
+) -> Result<ClassifiedIntent> {
+    let Some(mode) = chat::latest_intent_mode(current_chat)? else {
+        return Ok(classified);
+    };
+    match mode.as_str() {
+        "chat" => Ok(ClassifiedIntent {
+            intent: "chat",
+            mode: "chat",
+            reason: "explicit shell workspace mode override",
+        }),
+        "ops" => Ok(ClassifiedIntent {
+            intent: "ops_advice",
+            mode: "ops",
+            reason: "explicit shell workspace mode override",
+        }),
+        _ => Ok(classified),
     }
 }
 

@@ -1,3 +1,5 @@
+use crate::workspace;
+
 #[derive(Debug, PartialEq, Eq)]
 pub(super) enum ShellCommand {
     Empty,
@@ -11,6 +13,7 @@ pub(super) enum ShellCommand {
     Close,
     Clear,
     Mode(Option<ShellMode>),
+    WorkspaceMode(workspace::WorkspaceMode),
     Chats(Option<String>),
     Chat(Option<String>),
     Search(String),
@@ -28,7 +31,9 @@ pub(super) enum ShellCommand {
     Approvals,
     Doctor,
     Stats,
+    Balance,
     Ops(Option<String>),
+    Connect(String),
     Providers(Option<String>),
     Config(Option<String>),
     Dashboard,
@@ -100,7 +105,7 @@ pub(super) fn parse_line(line: &str) -> ShellCommand {
         "cd" | "project" => ShellCommand::Cd(rest.trim().to_string()),
         "close" => ShellCommand::Close,
         "clear" => ShellCommand::Clear,
-        "mode" => ShellCommand::Mode(parse_mode(rest)),
+        "mode" => parse_mode_command(rest),
         "chats" | "threads" => ShellCommand::Chats(optional(rest)),
         "chat" | "thread" => ShellCommand::Chat(optional(rest)),
         "new" => ShellCommand::Chat(Some("new".to_string())),
@@ -118,8 +123,11 @@ pub(super) fn parse_line(line: &str) -> ShellCommand {
         "approvals" | "approval" => ShellCommand::Approvals,
         "session" => parse_session(rest),
         "doctor" => ShellCommand::Doctor,
-        "stats" => ShellCommand::Stats,
+        "stats" | "cost" => ShellCommand::Stats,
+        "balance" => ShellCommand::Balance,
         "ops" => ShellCommand::Ops(optional(rest)),
+        "hosts" => ShellCommand::Ops(Some("hosts".to_string())),
+        "connect" => ShellCommand::Connect(rest.trim().to_string()),
         "providers" => ShellCommand::Providers(optional(rest)),
         "provider" => ShellCommand::Providers(Some(format!("setup {}", rest.trim()))),
         "config" => ShellCommand::Config(optional(rest)),
@@ -155,7 +163,16 @@ fn optional(value: &str) -> Option<String> {
     (!value.is_empty()).then(|| value.to_string())
 }
 
-fn parse_mode(value: &str) -> Option<ShellMode> {
+fn parse_mode_command(value: &str) -> ShellCommand {
+    match value.trim() {
+        "chat" => ShellCommand::WorkspaceMode(workspace::WorkspaceMode::Chat),
+        "devops" | "ops" => ShellCommand::WorkspaceMode(workspace::WorkspaceMode::Ops),
+        "project" => ShellCommand::WorkspaceMode(workspace::WorkspaceMode::Project),
+        _ => ShellCommand::Mode(parse_execution_mode(value)),
+    }
+}
+
+fn parse_execution_mode(value: &str) -> Option<ShellMode> {
     match value.trim() {
         "plan" | "ask" | "draft" => Some(ShellMode::Plan),
         "run" | "do" | "execute" => Some(ShellMode::Run),
