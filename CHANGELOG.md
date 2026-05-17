@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.77-local-preview - 2026-05-17
+
+- Add `agenthub readiness blockers --json --check` to provider recovery JSON/text output, including gate-level next commands, so automation can jump from provider recovery directly to the short source-backed blocker list.
+- Keep Kimi recovery paths pointed at key preflight/RC unblock while making the focused blocker surface explicit before the full readiness audit.
+
 ## 0.4.76-local-preview - 2026-05-17
 
 - Make the `open_blockers` readiness row source-backed by listing the open blocker IDs from RC evidence, so Kimi/auth blockers are visible without inspecting raw `rc-evidence.jsonl`.

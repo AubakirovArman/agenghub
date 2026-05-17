@@ -59,6 +59,7 @@ fn providers_recovery_json_turns_blocked_kimi_into_next_actions() -> Result<()> 
         assert_eq!(kimi["credential_source"], "env:KIMI_API_KEY");
         assert!(json.contains("agenthub providers preflight-key kimi --from-file <new-key-file>"));
         assert!(json.contains("agenthub providers rc-unblock kimi --from-file <new-key-file>"));
+        assert!(json.contains("agenthub readiness blockers --json --check"));
         assert!(json.contains("agenthub readiness audit --json --check"));
         assert!(!json.contains("kimi-test-key"));
         Ok(())
@@ -75,6 +76,9 @@ fn providers_recovery_text_includes_completion_audit_gate() -> Result<()> {
     assert!(rendered.contains("objective\tapi_native_provider_recovery"));
     assert!(rendered.contains(
         "gate\tapi_native_completion_audit\tblocked\tagenthub readiness audit --json --check"
+    ));
+    assert!(rendered.contains(
+        "gate_next\tapi_native_completion_audit\t1\tagenthub readiness blockers --json --check"
     ));
     Ok(())
 }

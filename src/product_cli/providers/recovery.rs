@@ -34,6 +34,7 @@ pub struct ProviderRecoveryGate {
     pub id: String,
     pub status: String,
     pub next_command: String,
+    pub next_commands: Vec<String>,
     pub detail: String,
 }
 
@@ -60,8 +61,16 @@ fn recovery_report(project_root: &Path) -> Result<ProviderRecoveryReport> {
     }
     push_unique(
         &mut next_commands,
+        "agenthub readiness blockers --json --check",
+    );
+    push_unique(
+        &mut next_commands,
         "agenthub readiness audit --json --check",
     );
+    let gate_next_commands = vec![
+        "agenthub readiness blockers --json --check".to_string(),
+        "agenthub readiness audit --json --check".to_string(),
+    ];
 
     Ok(ProviderRecoveryReport {
         objective: "api_native_provider_recovery".to_string(),
@@ -76,11 +85,11 @@ fn recovery_report(project_root: &Path) -> Result<ProviderRecoveryReport> {
                 "blocked".to_string()
             },
             next_command: "agenthub readiness audit --json --check".to_string(),
+            next_commands: gate_next_commands,
             detail: if status == "ready" {
                 "providers are ready; run the completion audit and RC dogfood gate".to_string()
             } else {
-                "provider recovery remains incomplete; fix blocked or missing providers first"
-                    .to_string()
+                "provider recovery remains incomplete; run readiness blockers for the short source-backed blocker list".to_string()
             },
         },
     })
@@ -133,11 +142,13 @@ fn provider_next_commands(status: &ProviderStatus, state: &str) -> Vec<String> {
             "agenthub providers preflight-key kimi --from-file <new-key-file>".to_string(),
             "agenthub providers rc-unblock kimi --from-file <new-key-file>".to_string(),
             "agenthub providers test kimi".to_string(),
+            "agenthub readiness blockers --json --check".to_string(),
             "agenthub readiness audit --json --check".to_string(),
         ],
         "kimi" => vec![
             "agenthub providers test kimi".to_string(),
             "AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh".to_string(),
+            "agenthub readiness blockers --json --check".to_string(),
             "agenthub readiness audit --json --check".to_string(),
         ],
         "deepseek" if state == "missing" => vec![
@@ -185,6 +196,14 @@ fn render_recovery_text(report: &ProviderRecoveryReport) -> String {
         "gate\t{}\t{}\t{}\n",
         report.gate.id, report.gate.status, report.gate.next_command
     ));
+    for (index, command) in report.gate.next_commands.iter().enumerate() {
+        out.push_str(&format!(
+            "gate_next\t{}\t{}\t{}\n",
+            report.gate.id,
+            index + 1,
+            command
+        ));
+    }
     out
 }
 
