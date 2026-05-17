@@ -13,6 +13,8 @@ pub struct ProviderRecoveryReport {
     pub blocker_scope: Option<String>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub blocker_kinds: Vec<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub blocked_checks: Vec<String>,
     pub providers: Vec<ProviderRecoveryItem>,
     pub next_commands: Vec<String>,
     pub gate: ProviderRecoveryGate,
@@ -81,6 +83,7 @@ fn recovery_report(project_root: &Path) -> Result<ProviderRecoveryReport> {
     ];
     let gate_blocker_kind = gate_blocker_kind(&status).map(str::to_string);
     let blocker_kinds = recovery_blocker_kinds(&providers, gate_blocker_kind.as_deref());
+    let blocked_checks = recovery_blocked_checks(&providers, &status);
     let blocker_scope = recovery_blocker_scope(&providers, &blocker_kinds);
 
     Ok(ProviderRecoveryReport {
@@ -88,6 +91,7 @@ fn recovery_report(project_root: &Path) -> Result<ProviderRecoveryReport> {
         status: status.clone(),
         blocker_scope,
         blocker_kinds,
+        blocked_checks,
         providers,
         next_commands,
         gate: ProviderRecoveryGate {
@@ -154,6 +158,19 @@ fn recovery_blocker_kinds(
         push_unique(&mut kinds, kind);
     }
     kinds
+}
+
+fn recovery_blocked_checks(providers: &[ProviderRecoveryItem], status: &str) -> Vec<String> {
+    let mut checks = Vec::new();
+    for provider in providers {
+        if provider.blocked || !provider.available {
+            push_unique(&mut checks, &format!("provider_{}", provider.provider));
+        }
+    }
+    if status != "ready" {
+        push_unique(&mut checks, "api_native_completion_audit");
+    }
+    checks
 }
 
 fn recovery_blocker_scope(
@@ -259,6 +276,12 @@ fn render_recovery_text(report: &ProviderRecoveryReport) -> String {
         out.push_str(&format!(
             "blocker_kinds\t{}\n",
             report.blocker_kinds.join(",")
+        ));
+    }
+    if !report.blocked_checks.is_empty() {
+        out.push_str(&format!(
+            "blocked_checks\t{}\n",
+            report.blocked_checks.join(",")
         ));
     }
     for provider in &report.providers {

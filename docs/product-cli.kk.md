@@ -109,6 +109,7 @@ agenthub providers setup kimi
 DEEPSEEK_API_KEY=... agenthub providers test deepseek
 KIMI_API_KEY=... agenthub providers test kimi
 agenthub providers diagnose deepseek
+agenthub providers recovery --json
 agenthub providers unblock kimi
 agenthub providers inspect-key kimi
 agenthub providers inspect-key kimi --json
@@ -147,6 +148,8 @@ next	agenthub ask "describe the change" --output .agent/drafts/task.yaml
 
 `providers diagnose <id>` prints endpoint, model, API-key marker, safe key source/length/fingerprint metadata, auth hint, status hint, install hint, scheme, and provider-specific details. It never prints secret values.
 
+`providers recovery --json` is the first machine-readable recovery entrypoint. It summarizes provider state, `blocker_scope`, `blocker_kinds`, top-level `blocked_checks`, per-provider actions, and the readiness gate commands without printing keys.
+
 `providers set <role> <provider>` stores `provider.role.<role>` in `.agent/config.yaml`. `providers fallback <role> ...` stores a comma-separated fallback chain under `provider.fallback.<role>`. Valid roles are planner, executor, reviewer, repair, generator, critic, researcher, aggregator, chat, manager, and worker. Chat turns use `provider.role.chat` plus `provider.fallback.chat` before falling back to any other available API provider.
 
 Named HTTP profiles are intentionally disabled in API-native mode. Provider logs, retries, memory, and future tool calls stay inside AgentHub for the two supported APIs.
@@ -164,7 +167,7 @@ agenthub readiness audit --json --check
 agenthub readiness blockers --json --check
 ```
 
-`readiness audit` is the full API-native 1.0 gate. JSON output includes source paths, RC evidence metrics, every check row, and per-check `next_commands` for incomplete rows. Text output renders matching `check_next` lines. `readiness blockers` is the short view for humans and automation; it reuses the same recovery commands as the full audit.
+`readiness audit` is the full API-native 1.0 gate. JSON output includes source paths, RC evidence metrics, every check row, top-level `blocked_checks`, and per-check `next_commands` for incomplete rows. Text output renders matching `blocked_checks` and `check_next` lines. `readiness blockers` is the short view for humans and automation; it reuses the same recovery commands and emits the same top-level `blocked_checks` summary as the full audit.
 
 The compatible script path, `scripts/api-native-completion-audit.sh --json --check`, now carries the same `blocker_scope`, `blocker_kinds`, per-check `blocker_kind`, per-check `next_commands`, and top-level `blocked_checks` metadata; text output also prints top-level `blocker_scope`/`blocker_kinds`/`blocked_checks` rows so release automation can distinguish external credential blockers from local implementation gaps without parsing text.
 

@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.96-local-preview - 2026-05-17
+
+- Add top-level `blocked_checks` metadata to `agenthub providers recovery --json`, listing blocked provider and completion-gate IDs before automation enters the readiness gate.
+- Add a matching `blocked_checks` row to provider recovery text output while omitting the field for fully ready provider recovery reports.
+
 ## 0.4.95-local-preview - 2026-05-17
 
 - Add top-level `blocked_checks` metadata to product `agenthub readiness audit --json` and `agenthub readiness blockers --json` reports.

@@ -118,6 +118,7 @@ agenthub providers setup kimi
 DEEPSEEK_API_KEY=... agenthub providers test deepseek
 KIMI_API_KEY=... agenthub providers test kimi
 agenthub providers diagnose deepseek
+agenthub providers recovery --json
 agenthub providers unblock kimi
 agenthub providers inspect-key kimi
 agenthub providers inspect-key kimi --json
@@ -155,6 +156,8 @@ next	agenthub ask "describe the change" --output .agent/drafts/task.yaml
 ```
 
 `providers diagnose <id>` печатает endpoint, model, API-key marker, безопасные key source/length/fingerprint metadata, auth hint, status hint, install hint, scheme и provider-specific details. Он никогда не печатает secret values.
+
+`providers recovery --json` — первый machine-readable recovery entrypoint. Он суммирует provider state, `blocker_scope`, `blocker_kinds`, top-level `blocked_checks`, per-provider actions и readiness gate commands без вывода ключей.
 
 `providers set <role> <provider>` сохраняет `provider.role.<role>` в `.agent/config.yaml`. `providers fallback <role> ...` сохраняет comma-separated fallback chain в `provider.fallback.<role>`. Valid roles: planner, executor, reviewer, repair, generator, critic, researcher, aggregator, chat, manager и worker. Chat turns используют `provider.role.chat` и `provider.fallback.chat`, а затем переходят к любому другому доступному API provider.
 
