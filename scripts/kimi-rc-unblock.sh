@@ -25,6 +25,9 @@ Runs the Kimi 1.0 RC unblock path after a key has been rotated:
 If the provider test fails, the auth check still runs as diagnostics so the
 redacted auth report covers both official Moonshot endpoints before the command
 returns blocked.
+
+If you have a replacement key file and want one product-CLI command, prefer:
+  agenthub providers rc-unblock kimi --from-file <new-key-file>
 USAGE
 }
 
@@ -68,16 +71,18 @@ if ! run_required provider_test "$AGENTHUB_BIN" providers test kimi; then
   run_required kimi_auth_check "$KIMI_AUTH_CHECK_CMD" || true
   printf 'status\tblocked\n'
   printf 'reason\tprovider_test_failed\n'
-  printf 'next\t1\tagenthub providers rotate-key kimi --from-file <new-key-file>\n'
-  printf 'next\t2\tagenthub providers unblock kimi\n'
+  printf 'next\t1\tagenthub providers rc-unblock kimi --from-file <new-key-file>\n'
+  printf 'next\t2\tagenthub providers rotate-key kimi --from-file <new-key-file>\n'
+  printf 'next\t3\tagenthub providers unblock kimi\n'
   exit 1
 fi
 
 if ! run_required kimi_auth_check "$KIMI_AUTH_CHECK_CMD"; then
   printf 'status\tblocked\n'
   printf 'reason\tkimi_auth_check_failed\n'
-  printf 'next\t1\tagenthub providers rotate-key kimi --from-file <new-key-file>\n'
-  printf 'next\t2\tagenthub providers unblock kimi\n'
+  printf 'next\t1\tagenthub providers rc-unblock kimi --from-file <new-key-file>\n'
+  printf 'next\t2\tagenthub providers rotate-key kimi --from-file <new-key-file>\n'
+  printf 'next\t3\tagenthub providers unblock kimi\n'
   exit 1
 fi
 

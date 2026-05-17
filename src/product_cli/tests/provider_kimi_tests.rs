@@ -159,17 +159,19 @@ fn providers_kimi_unblock_renders_source_backed_next_steps() -> Result<()> {
         assert!(unblock.contains("detail\tlatest Kimi auth check blocked"));
         assert!(unblock.contains("api_key_env\tKIMI_API_KEY"));
         assert!(unblock
-            .contains("step\t1\tagenthub providers rotate-key kimi --from-file <new-key-file>"));
-        assert!(unblock.contains("step\t2\tscripts/kimi-key-rotate.sh --from-file <new-key-file>"));
-        assert!(unblock.contains("step\t3\tagenthub providers rc-unblock kimi"));
-        assert!(unblock.contains("step\t4\tscripts/kimi-rc-unblock.sh"));
-        assert!(unblock.contains("step\t5\tagenthub providers test kimi"));
-        assert!(unblock.contains("step\t6\tscripts/kimi-auth-check.sh"));
+            .contains("step\t1\tagenthub providers rc-unblock kimi --from-file <new-key-file>"));
+        assert!(unblock
+            .contains("step\t2\tagenthub providers rotate-key kimi --from-file <new-key-file>"));
+        assert!(unblock.contains("step\t3\tscripts/kimi-key-rotate.sh --from-file <new-key-file>"));
+        assert!(unblock.contains("step\t4\tagenthub providers rc-unblock kimi"));
+        assert!(unblock.contains("step\t5\tscripts/kimi-rc-unblock.sh"));
+        assert!(unblock.contains("step\t6\tagenthub providers test kimi"));
+        assert!(unblock.contains("step\t7\tscripts/kimi-auth-check.sh"));
         assert!(unblock.contains(
-            "step\t7\tAGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh"
+            "step\t8\tAGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh"
         ));
-        assert!(unblock.contains("step\t8\tscripts/rc-evidence-collect.sh"));
-        assert!(unblock.contains("step\t9\tscripts/rc-dogfood-gate.sh --check"));
+        assert!(unblock.contains("step\t9\tscripts/rc-evidence-collect.sh"));
+        assert!(unblock.contains("step\t10\tscripts/rc-dogfood-gate.sh --check"));
         Ok(())
     })
 }
@@ -206,7 +208,10 @@ fn providers_kimi_rotate_key_installs_without_leaking_secret_and_tests_provider(
             .contains("next\t1\tagenthub providers rc-unblock kimi"));
         assert!(result
             .output
-            .contains("next\t2\tscripts/kimi-rc-unblock.sh"));
+            .contains("next\t2\tagenthub providers rc-unblock kimi --from-file <new-key-file>"));
+        assert!(result
+            .output
+            .contains("next\t3\tscripts/kimi-rc-unblock.sh"));
         assert!(result.output.contains(
             "AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh"
         ));
@@ -268,6 +273,62 @@ fn providers_kimi_rc_unblock_runs_cli_owned_sequence() -> Result<()> {
 
 #[cfg(unix)]
 #[test]
+fn providers_kimi_rc_unblock_can_rotate_key_before_sequence() -> Result<()> {
+    let stub = openai_stub_server("kimi rc rotated ok", 9)?;
+    let endpoint = format!("{}/v1", stub.endpoint);
+    with_kimi_env(Some(&endpoint), None, || {
+        let dir = tempfile::tempdir()?;
+        let scripts = dir.path().join("scripts");
+        std::fs::create_dir_all(&scripts)?;
+        write_script(&scripts.join("kimi-auth-check.sh"), "printf 'auth ok\\n'\n")?;
+        write_script(
+            &scripts.join("provider-dogfood.sh"),
+            "printf 'dogfood provider=%s live=%s\\n' \"$AGENTHUB_PROVIDER_DOGFOOD_PROVIDER\" \"$AGENTHUB_PROVIDER_DOGFOOD_LIVE\"\n",
+        )?;
+        write_script(
+            &scripts.join("rc-evidence-collect.sh"),
+            "printf 'collect ok\\n'\n",
+        )?;
+        write_script(
+            &scripts.join("rc-dogfood-gate.sh"),
+            "printf 'gate args:%s\\n' \"$*\"\n",
+        )?;
+        let source = dir.path().join("new-kimi-key.txt");
+        std::fs::write(&source, "rotated-kimi-secret\n")?;
+
+        let result = providers::rc_unblock_provider(
+            dir.path(),
+            "kimi",
+            providers::RcUnblockOptions {
+                rotate_key: Some(providers::KeyRotationOptions {
+                    from_file: Some(source),
+                    test_after_install: false,
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+        )?;
+        let stored = std::fs::read_to_string(dir.path().join(".kimi"))?;
+        let requests = stub.received_requests(2)?;
+        let joined = requests.join("\n---\n").to_ascii_lowercase();
+
+        assert!(!result.failed);
+        assert_eq!(stored, "rotated-kimi-secret\n");
+        assert!(result.output.contains("step\tkey_rotation\tbegin"));
+        assert!(result.output.contains("key_rotation\tstatus\tinstalled"));
+        assert!(result.output.contains("step\tkey_rotation\tpassed"));
+        assert!(result.output.contains("step\tprovider_test\tpassed"));
+        assert!(result.output.contains("step\tkimi_auth_check\tpassed"));
+        assert!(result.output.contains("step\tprovider_dogfood\tpassed"));
+        assert!(result.output.contains("status\tready"));
+        assert!(!result.output.contains("rotated-kimi-secret"));
+        assert!(joined.contains("authorization: bearer rotated-kimi-secret"));
+        Ok(())
+    })
+}
+
+#[cfg(unix)]
+#[test]
 fn providers_kimi_rc_unblock_stops_on_provider_test_failure() -> Result<()> {
     let stub = openai_error_stub_server(
         401,
@@ -298,6 +359,15 @@ fn providers_kimi_rc_unblock_stops_on_provider_test_failure() -> Result<()> {
         assert!(result.output.contains("step\tkimi_auth_check\tfailed"));
         assert!(result.output.contains("status\tblocked"));
         assert!(result.output.contains("reason\tprovider_test_failed"));
+        assert!(result
+            .output
+            .contains("next\t1\tagenthub providers rc-unblock kimi --from-file <new-key-file>"));
+        assert!(result
+            .output
+            .contains("next\t2\tagenthub providers rotate-key kimi --from-file <new-key-file>"));
+        assert!(result
+            .output
+            .contains("next\t3\tagenthub providers unblock kimi"));
         Ok(())
     })
 }

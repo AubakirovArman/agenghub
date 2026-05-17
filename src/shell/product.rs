@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use anyhow::{anyhow, Result};
 
@@ -50,11 +50,8 @@ pub(super) fn handle_providers(root: &Path, args: Option<&str>) -> Result<()> {
             providers::unblock_provider(root, required(&args, 1, "provider")?)?
         ),
         "rc-unblock" => {
-            let result = providers::rc_unblock_provider(
-                root,
-                required(&args, 1, "provider")?,
-                providers::RcUnblockOptions::default(),
-            )?;
+            let (provider, options) = rc_unblock_options_from_args(&args)?;
+            let result = providers::rc_unblock_provider(root, &provider, options)?;
             print!("{}", result.output);
             if result.failed {
                 return Err(anyhow!("provider RC unblock failed"));
@@ -146,6 +143,60 @@ fn required<'a>(args: &'a [&str], index: usize, name: &str) -> Result<&'a str> {
         .ok_or_else(|| anyhow!("missing {name}"))
 }
 
+fn rc_unblock_options_from_args(args: &[&str]) -> Result<(String, providers::RcUnblockOptions)> {
+    let provider = required(args, 1, "provider")?.to_string();
+    let mut from_file = None;
+    let mut from_env = None;
+    let mut target = None;
+    let mut skip_provider_dogfood = false;
+    let mut no_check = false;
+    let mut index = 2;
+    while index < args.len() {
+        match args[index] {
+            "--from-file" => {
+                index += 1;
+                from_file = Some(PathBuf::from(required(args, index, "from-file")?));
+            }
+            "--from-env" => {
+                index += 1;
+                from_env = Some(required(args, index, "from-env")?.to_string());
+            }
+            "--target" => {
+                index += 1;
+                target = Some(PathBuf::from(required(args, index, "target")?));
+            }
+            "--skip-provider-dogfood" => skip_provider_dogfood = true,
+            "--no-check" => no_check = true,
+            "--stdin" => {
+                return Err(anyhow!(
+                    "`/providers rc-unblock` does not support --stdin; use the CLI command"
+                ))
+            }
+            other => return Err(anyhow!("unknown rc-unblock option `{other}`")),
+        }
+        index += 1;
+    }
+    let rotate_key = if from_file.is_some() || from_env.is_some() || target.is_some() {
+        Some(providers::KeyRotationOptions {
+            from_file,
+            from_env,
+            target,
+            test_after_install: false,
+            ..Default::default()
+        })
+    } else {
+        None
+    };
+    Ok((
+        provider,
+        providers::RcUnblockOptions {
+            skip_provider_dogfood,
+            no_check,
+            rotate_key,
+        },
+    ))
+}
+
 fn provider_exists(root: &Path, provider: &str) -> Result<bool> {
     Ok(providers::statuses(root)?
         .into_iter()
@@ -165,6 +216,18 @@ mod tests {
         let error = handle_providers(dir.path(), Some("command")).unwrap_err();
 
         assert!(error.to_string().contains("unknown providers command"));
+        Ok(())
+    }
+
+    #[test]
+    fn rc_unblock_options_parse_rotation_source() -> Result<()> {
+        let args = split_args("rc-unblock kimi --from-file ./new.key --no-check");
+
+        let (provider, options) = rc_unblock_options_from_args(&args)?;
+
+        assert_eq!(provider, "kimi");
+        assert!(options.no_check);
+        assert!(options.rotate_key.is_some());
         Ok(())
     }
 }

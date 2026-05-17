@@ -42,15 +42,40 @@ pub fn handle_providers(project_root: &Path, command: ProviderCommands) -> Resul
         }
         ProviderCommands::RcUnblock {
             provider,
+            from_file,
+            from_env,
+            stdin,
+            target,
             skip_provider_dogfood,
             no_check,
         } => {
+            let stdin_value = if stdin {
+                let mut value = String::new();
+                std::io::stdin().read_to_string(&mut value)?;
+                Some(value)
+            } else {
+                None
+            };
+            let rotate_key =
+                if from_file.is_some() || from_env.is_some() || stdin || target.is_some() {
+                    Some(providers::KeyRotationOptions {
+                        from_file,
+                        from_env,
+                        stdin_value,
+                        target,
+                        dry_run: false,
+                        test_after_install: false,
+                    })
+                } else {
+                    None
+                };
             let result = providers::rc_unblock_provider(
                 project_root,
                 &provider,
                 providers::RcUnblockOptions {
                     skip_provider_dogfood,
                     no_check,
+                    rotate_key,
                 },
             )?;
             print!("{}", result.output);

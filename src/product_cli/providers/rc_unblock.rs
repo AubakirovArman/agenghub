@@ -9,6 +9,7 @@ use anyhow::{anyhow, Result};
 pub struct RcUnblockOptions {
     pub skip_provider_dogfood: bool,
     pub no_check: bool,
+    pub rotate_key: Option<super::KeyRotationOptions>,
 }
 
 #[derive(Debug)]
@@ -30,6 +31,16 @@ pub fn rc_unblock_provider(
 
     let mut out = String::from("AgentHub Kimi RC unblock\n");
     out.push_str("provider\tkimi\n");
+
+    if let Some(rotation_options) = options.rotate_key {
+        if !run_key_rotation(project_root, &mut out, rotation_options)? {
+            append_blocked(&mut out, "key_rotation_provider_test_failed");
+            return Ok(RcUnblockResult {
+                output: out,
+                failed: true,
+            });
+        }
+    }
 
     if !run_provider_test(project_root, &mut out)? {
         run_auth_check_after_provider_failure(project_root, &mut out)?;
@@ -129,6 +140,25 @@ pub fn rc_unblock_provider(
     })
 }
 
+fn run_key_rotation(
+    project_root: &Path,
+    out: &mut String,
+    options: super::KeyRotationOptions,
+) -> Result<bool> {
+    out.push_str("step\tkey_rotation\tbegin\n");
+    let result = super::rotate_provider_key(project_root, "kimi", options)?;
+    for line in result.output.lines() {
+        out.push_str(&format!("key_rotation\t{line}\n"));
+    }
+    if result.provider_test_failed {
+        out.push_str("step\tkey_rotation\tfailed\tprovider_test_failed\n");
+        Ok(false)
+    } else {
+        out.push_str("step\tkey_rotation\tpassed\n");
+        Ok(true)
+    }
+}
+
 fn run_provider_test(project_root: &Path, out: &mut String) -> Result<bool> {
     out.push_str("step\tprovider_test\tbegin\n");
     let report = super::test_provider(project_root, "kimi")?;
@@ -205,8 +235,9 @@ fn append_command_output(out: &mut String, label: &str, stream: &str, bytes: &[u
 fn append_blocked(out: &mut String, reason: &str) {
     out.push_str("status\tblocked\n");
     out.push_str(&format!("reason\t{reason}\n"));
-    out.push_str("next\t1\tagenthub providers rotate-key kimi --from-file <new-key-file>\n");
-    out.push_str("next\t2\tagenthub providers unblock kimi\n");
+    out.push_str("next\t1\tagenthub providers rc-unblock kimi --from-file <new-key-file>\n");
+    out.push_str("next\t2\tagenthub providers rotate-key kimi --from-file <new-key-file>\n");
+    out.push_str("next\t3\tagenthub providers unblock kimi\n");
 }
 
 fn script(project_root: &Path, name: &str) -> PathBuf {

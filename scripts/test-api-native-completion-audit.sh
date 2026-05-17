@@ -79,9 +79,11 @@ fi
 grep -q $'check\tkimi_auth\tblocked' "$TMP/blocked.out"
 grep -q $'check\topen_blockers\tblocked' "$TMP/blocked.out"
 grep -q $'status\tincomplete' "$TMP/blocked.out"
-grep -q $'next\t2\tagenthub providers rotate-key kimi --from-file <new-key-file>' "$TMP/blocked.out"
-grep -q $'next\t4\tagenthub providers rc-unblock kimi' "$TMP/blocked.out"
-grep -q $'next\t5\tscripts/kimi-rc-unblock.sh' "$TMP/blocked.out"
-grep -q $'next\t8\tAGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh' "$TMP/blocked.out"
+grep -q $'next\t1\tagenthub providers rc-unblock kimi --from-file <new-key-file>' "$TMP/blocked.out"
+grep -q $'next\t2\tagenthub providers unblock kimi' "$TMP/blocked.out"
+grep -q $'next\t3\tagenthub providers rotate-key kimi --from-file <new-key-file>' "$TMP/blocked.out"
+grep -q $'next\t5\tagenthub providers rc-unblock kimi' "$TMP/blocked.out"
+grep -q $'next\t6\tscripts/kimi-rc-unblock.sh' "$TMP/blocked.out"
+grep -q $'next\t9\tAGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh' "$TMP/blocked.out"
 
 printf 'agenthub API-native completion audit test passed\n'

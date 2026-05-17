@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.56-local-preview - 2026-05-17
+
+- Add one-shot Kimi RC unblock rotation: `agenthub providers rc-unblock kimi --from-file <new-key-file>` installs a replacement key without printing the secret, then runs the RC unblock pipeline.
+- Update Kimi unblock next steps, API-native completion audit guidance, dogfooding docs, and release surfaces so the first recovery command after receiving a new key is the product CLI one-shot path.
+
 ## 0.4.55-local-preview - 2026-05-17
 
 - Keep the new Kimi RC auth-diagnostic regression test Unix-only, matching the existing script-execution coverage and restoring Windows CI for the release matrix.

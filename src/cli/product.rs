@@ -22,6 +22,18 @@ pub enum ProviderCommands {
         provider: String,
 
         #[arg(long)]
+        from_file: Option<PathBuf>,
+
+        #[arg(long)]
+        from_env: Option<String>,
+
+        #[arg(long)]
+        stdin: bool,
+
+        #[arg(long)]
+        target: Option<PathBuf>,
+
+        #[arg(long)]
         skip_provider_dogfood: bool,
 
         #[arg(long)]
