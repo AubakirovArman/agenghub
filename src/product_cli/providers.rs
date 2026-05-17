@@ -284,6 +284,13 @@ pub fn test_provider(project_root: &Path, provider: &str) -> Result<String> {
     ))
 }
 
+pub fn test_report_failed(report: &str) -> bool {
+    report
+        .lines()
+        .next()
+        .is_some_and(|line| line.starts_with("failed\t") || line.starts_with("missing\t"))
+}
+
 pub fn diagnose_provider(project_root: &Path, provider: &str) -> Result<String> {
     let status = status_for(project_root, provider)?;
     Ok(diagnostics::diagnose(&status))
@@ -294,4 +301,17 @@ pub(super) fn status_for(project_root: &Path, provider: &str) -> Result<Provider
         .into_iter()
         .find(|status| status.info.id == provider)
         .ok_or_else(|| anyhow!("unknown provider `{provider}`"))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::test_report_failed;
+
+    #[test]
+    fn provider_test_reports_expose_failure_state() {
+        assert!(test_report_failed("failed\tkimi\tauth\nreason\t401\n"));
+        assert!(test_report_failed("missing\tkimi\tmissing key\n"));
+        assert!(!test_report_failed("ok\tkimi\tcompletion_tokens:1\n"));
+        assert!(!test_report_failed("models\tunavailable\n"));
+    }
 }

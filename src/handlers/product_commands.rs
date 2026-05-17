@@ -28,7 +28,11 @@ pub fn handle_providers(project_root: &Path, command: ProviderCommands) -> Resul
             print!("{}", providers::setup_provider(project_root, &provider)?);
         }
         ProviderCommands::Test { provider } => {
-            print!("{}", providers::test_provider(project_root, &provider)?);
+            let report = providers::test_provider(project_root, &provider)?;
+            print!("{}", report);
+            if providers::test_report_failed(&report) {
+                bail!("provider test failed for `{provider}`");
+            }
         }
         ProviderCommands::Diagnose { provider } => {
             print!("{}", providers::diagnose_provider(project_root, &provider)?);

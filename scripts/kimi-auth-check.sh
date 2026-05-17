@@ -34,7 +34,18 @@ classify_test() {
 
 run_endpoint() {
   local label="$1" endpoint="$2" output="$3"
-  KIMI_API_BASE_URL="$endpoint" "$AGENTHUB_BIN" providers test kimi > "$output"
+  set +e
+  KIMI_API_BASE_URL="$endpoint" "$AGENTHUB_BIN" providers test kimi > "$output" 2> "$output.stderr"
+  local exit_code=$?
+  set -e
+  if [[ "$exit_code" -ne 0 && ! -s "$output" ]]; then
+    {
+      printf 'failed\tkimi\ttransport\n'
+      printf 'endpoint\t%s\n' "$endpoint"
+      printf 'reason\tproviders test exited %s for %s\n' "$exit_code" "$label"
+      cat "$output.stderr"
+    } > "$output"
+  fi
 }
 
 mkdir -p "$ARTIFACT_DIR" "$(dirname "$REPORT_PATH")"

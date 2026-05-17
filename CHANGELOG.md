@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.44-local-preview - 2026-05-17
+
+- Make `agenthub providers test <provider>` exit non-zero when the structured provider-test receipt starts with `failed` or `missing`, while still printing the full diagnostic receipt.
+- Keep Kimi auth and provider dogfood scripts artifact-safe with the new non-zero provider-test behavior.
+
 ## 0.4.43-local-preview - 2026-05-17
 
 - Make the CI smoke-test temp directory portable on Windows tag builds by falling back to the repo-local `target/tmp` directory when `TMPDIR` is not available.

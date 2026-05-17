@@ -33,10 +33,14 @@ pub(super) fn handle_providers(root: &Path, args: Option<&str>) -> Result<()> {
             "custom provider profiles are disabled in API-native mode; use `deepseek` or `kimi`"
         ))
         }
-        "test" => print!(
-            "{}",
-            providers::test_provider(root, required(&args, 1, "provider")?)?
-        ),
+        "test" => {
+            let provider = required(&args, 1, "provider")?;
+            let report = providers::test_provider(root, provider)?;
+            print!("{report}");
+            if providers::test_report_failed(&report) {
+                return Err(anyhow!("provider test failed for `{provider}`"));
+            }
+        }
         "diagnose" => print!(
             "{}",
             providers::diagnose_provider(root, required(&args, 1, "provider")?)?

@@ -30,6 +30,7 @@ failed	kimi	auth
 endpoint	https://api.moonshot.ai/v1
 reason	HTTP provider returned status 401
 OUT
+      exit 1
       ;;
     https://api.moonshot.cn/v1)
       cat <<'OUT'
@@ -37,6 +38,7 @@ failed	kimi	auth
 endpoint	https://api.moonshot.cn/v1
 reason	HTTP provider returned status 401
 OUT
+      exit 1
       ;;
     *)
       printf 'unexpected endpoint: %s\n' "${KIMI_API_BASE_URL:-}" >&2

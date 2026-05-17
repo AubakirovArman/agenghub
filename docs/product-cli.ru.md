@@ -152,7 +152,7 @@ next	agenthub ask "describe the change" --output .agent/drafts/task.yaml
 
 Named HTTP profiles намеренно отключены в API-native mode. Provider logs, retries, memory и будущий tool loop остаются внутри AgentHub для двух поддерживаемых API.
 
-`providers test deepseek` и `providers test kimi` выполняют реальные OpenAI-compatible completion requests, затем best-effort проверяют optional `/v1/models`; если models endpoint отсутствует, это выводится как `models unavailable`, а не как failed provider test. Если completion request падает из-за auth, rate-limit, timeout, transport или server error, команда печатает structured failure receipt: `request_id`, endpoint, model, token estimate, `reason`, `auth_hint` и следующий `providers diagnose`.
+`providers test deepseek` и `providers test kimi` выполняют реальные OpenAI-compatible completion requests, затем best-effort проверяют optional `/v1/models`; если models endpoint отсутствует, это выводится как `models unavailable`, а не как failed provider test. Если completion request падает из-за auth, rate-limit, timeout, transport или server error, команда печатает structured failure receipt: `request_id`, endpoint, model, token estimate, `reason`, `auth_hint` и следующий `providers diagnose`, затем выходит с non-zero code для automation.
 
 ## Config
 

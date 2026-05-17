@@ -73,7 +73,16 @@ git -C "$project" add .agent
 git -C "$project" commit -q -m "Initialize AgentHub"
 
 "$AGENTHUB_BIN" --project "$project" providers diagnose "$PROVIDER" > "$ARTIFACT_DIR/diagnose.txt"
-"$AGENTHUB_BIN" --project "$project" providers test "$PROVIDER" > "$ARTIFACT_DIR/provider-test.txt"
+set +e
+"$AGENTHUB_BIN" --project "$project" providers test "$PROVIDER" > "$ARTIFACT_DIR/provider-test.txt" 2> "$ARTIFACT_DIR/provider-test.err"
+provider_test_code=$?
+set -e
+if [[ "$provider_test_code" -ne 0 ]]; then
+  write_report "provider_test_failed" "" "" "$project" ""
+  cat "$ARTIFACT_DIR/provider-test.txt" >&2 || true
+  cat "$ARTIFACT_DIR/provider-test.err" >&2 || true
+  exit "$provider_test_code"
+fi
 
 cat > "$spec" <<YAML
 task:
