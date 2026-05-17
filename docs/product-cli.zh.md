@@ -137,7 +137,7 @@ dry_run	API request test is performed by providers test
 next	agenthub ask "describe the change" --output .agent/drafts/task.yaml
 ```
 
-`providers diagnose <id>` prints endpoint, model, API-key marker, auth hint, status hint, install hint, scheme, and provider-specific details. It checks only environment markers and never prints secret values.
+`providers diagnose <id>` prints endpoint, model, API-key marker, safe key source/length/fingerprint metadata, auth hint, status hint, install hint, scheme, and provider-specific details. It never prints secret values.
 
 `providers set <role> <provider>` stores `provider.role.<role>` in `.agent/config.yaml`. `providers fallback <role> ...` stores a comma-separated fallback chain under `provider.fallback.<role>`. Valid roles are planner, executor, reviewer, repair, generator, critic, researcher, aggregator, chat, manager, and worker. Chat turns use `provider.role.chat` plus `provider.fallback.chat` before falling back to any other available API provider.
 

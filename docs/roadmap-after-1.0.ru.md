@@ -159,7 +159,7 @@ Acceptance:
 
 ## Near-Term Implementation Steps
 
-These are the next concrete engineering steps from the current `0.4.30-local-preview` bridge toward `1.0`. They are intentionally before MCP/A2A and marketplace work.
+These are the next concrete engineering steps from the current `0.4.31-local-preview` bridge toward `1.0`. They are intentionally before MCP/A2A and marketplace work.
 
 | Release | Focus | Acceptance |
 |---|---|---|
@@ -182,7 +182,8 @@ These are the next concrete engineering steps from the current `0.4.30-local-pre
 | `0.4.28` | Ops host profiles and runbooks | Done: `agenthub ops` and `/ops` now expose host profiles, trusted/untrusted metadata, reusable runbook cards backed by committed Ops memory, and host-scoped command receipts for explicit Ops shell commands |
 | `0.4.29` | 1.0 RC evidence gate | Done: `scripts/rc-dogfood-gate.sh` now checks 100+ real sessions, 20+ Ops flows, 20+ project-edit flows, cost receipts, required DeepSeek/Kimi provider evidence, explicit resume/rewind/stats/bootstrap/approval checks, and open blocker/critical issues |
 | `0.4.30` | 1.0 RC evidence collector | Done: `scripts/rc-evidence-collect.sh` builds the RC evidence ledger from observed chat turns, project transaction reports, provider dogfood history, and Ops receipts without fabricating unobserved checks |
-| `1.0 RC` | Real dogfooding gate | Collect and pass the `0.4.30` evidence gate with real daily usage, including stable resume/rewind/stats, 20+ Ops and 20+ project-edit flows, and no Kimi/auth/latency/approval blockers |
+| `0.4.31` | Kimi auth blocker diagnostics | Done: `providers diagnose deepseek|kimi` now prints safe credential source, length, SHA-256 fingerprint, and trim metadata without exposing the key, making 401 auth failures traceable to the exact env/file credential |
+| `1.0 RC` | Real dogfooding gate | Collect and pass the `0.4.31` evidence gate with real daily usage, including stable resume/rewind/stats, 20+ Ops and 20+ project-edit flows, and no Kimi/auth/latency/approval blockers |
 
 ## Current 0.4.x Bridge
 
@@ -196,7 +197,7 @@ The immediate bridge from 0.4.x to 1.0 is:
 - inject only committed/review-approved memory into API chat context;
 - keep project transaction safety inside `.agent` only after lazy bootstrap.
 
-This is why the `v0.4.8` through `v0.4.30` bridge releases focus on global Chat/Ops memory, a review-gated memory inbox, budgeted memory-aware chat context, provider diagnostics, visible mode routing, explainable tool permissions, lazy project bootstrap, context compaction receipts, event-backed TUI visibility, visible transaction approval receipts, CI-friendly headless approval receipts, recoverable session reads, native DeepSeek/Kimi command-plan tool-call receipts, dashboard observability, API-native tool-result reinjection, tool registry policy hardening, review-only automatic memory extraction, terminal live tool cards, grouped/ranked memory inbox review, Ops host profiles/runbook receipts, 1.0 RC evidence collection, and 1.0 RC evidence gating rather than starting MCP/A2A early.
+This is why the `v0.4.8` through `v0.4.31` bridge releases focus on global Chat/Ops memory, a review-gated memory inbox, budgeted memory-aware chat context, provider diagnostics, visible mode routing, explainable tool permissions, lazy project bootstrap, context compaction receipts, event-backed TUI visibility, visible transaction approval receipts, CI-friendly headless approval receipts, recoverable session reads, native DeepSeek/Kimi command-plan tool-call receipts, dashboard observability, API-native tool-result reinjection, tool registry policy hardening, review-only automatic memory extraction, terminal live tool cards, grouped/ranked memory inbox review, Ops host profiles/runbook receipts, 1.0 RC evidence collection, 1.0 RC evidence gating, and safer Kimi auth-blocker diagnostics rather than starting MCP/A2A early.
 
 ## Next Implementation Sequence
 

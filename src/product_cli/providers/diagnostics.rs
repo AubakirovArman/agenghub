@@ -1,6 +1,8 @@
 use std::path::Path;
 use std::process::Command;
 
+use sha2::{Digest, Sha256};
+
 use super::probes;
 use super::ProviderStatus;
 use crate::product_cli::version;
@@ -133,6 +135,7 @@ fn append_auth_hint(out: &mut String, status: &ProviderStatus) {
                 "auth_markers\t{}\n",
                 probes::credential_marker_list(&status.info)
             ));
+            append_api_key_metadata(out, status);
             out.push_str(&format!("auth_hint\t{}\n", status.info.auth_hint));
         }
         _ => {
@@ -150,6 +153,51 @@ fn append_auth_hint(out: &mut String, status: &ProviderStatus) {
             out.push_str(&format!("auth_hint\t{}\n", status.info.auth_hint));
         }
     }
+}
+
+fn append_api_key_metadata(out: &mut String, status: &ProviderStatus) {
+    let Some((source, raw, trimmed)) = credential_material(status) else {
+        return;
+    };
+    out.push_str(&format!("auth_key_source\t{source}\n"));
+    out.push_str(&format!("auth_key_chars\t{}\n", trimmed.chars().count()));
+    out.push_str(&format!(
+        "auth_key_sha256_12\t{}\n",
+        sha256_prefix(trimmed.as_bytes())
+    ));
+    out.push_str(&format!(
+        "auth_key_trimmed_for_request\t{}\n",
+        raw != trimmed
+    ));
+}
+
+fn credential_material(status: &ProviderStatus) -> Option<(String, String, String)> {
+    if let Some(env_name) = &status.api_key_env {
+        if let Ok(value) = std::env::var(env_name) {
+            if !value.is_empty() {
+                let trimmed = value.trim().to_string();
+                if !trimmed.is_empty() {
+                    return Some((format!("env:{env_name}"), value, trimmed));
+                }
+            }
+        }
+    }
+    let path = status.api_key_file.as_ref()?;
+    let value = std::fs::read_to_string(path).ok()?;
+    let trimmed = value.trim().to_string();
+    if trimmed.is_empty() {
+        return None;
+    }
+    Some((format!("file:{}", path.display()), value, trimmed))
+}
+
+fn sha256_prefix(bytes: &[u8]) -> String {
+    let digest = Sha256::digest(bytes);
+    digest
+        .iter()
+        .take(6)
+        .map(|byte| format!("{byte:02x}"))
+        .collect::<String>()
 }
 
 fn append_http_details(out: &mut String, status: &ProviderStatus) {

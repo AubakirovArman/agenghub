@@ -24,6 +24,10 @@ fn providers_kimi_uses_openai_compatible_endpoint() -> Result<()> {
         assert!(setup.contains("default_provider\tkimi"));
         assert!(diagnose.contains("profile_kind\tapi"));
         assert!(diagnose.contains("model\tmoonshot-test"));
+        assert!(diagnose.contains("auth_key_source\tenv:KIMI_API_KEY"));
+        assert!(diagnose.contains("auth_key_chars\t13"));
+        assert!(diagnose.contains("auth_key_sha256_12\t"));
+        assert!(diagnose.contains("auth_key_trimmed_for_request\tfalse"));
         assert!(test.contains("ok\tkimi\tcompletion_tokens:4"));
         assert!(joined.contains("POST /v1/chat/completions"));
         assert!(!joined.contains("/v1/v1/"));

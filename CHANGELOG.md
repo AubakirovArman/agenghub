@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.31-local-preview - 2026-05-17
+
+- Add safe API-key diagnostics for DeepSeek/Kimi provider setup: `providers diagnose` now prints the credential source, trimmed key length, short SHA-256 fingerprint, and whether surrounding whitespace was removed before requests.
+- Improve Kimi auth debugging without exposing secret values, so repeated `401 Invalid Authentication` failures can be tied to the exact file/env credential AgentHub used.
+- Add regression coverage for Kimi diagnostic key metadata.
+
 ## 0.4.30-local-preview - 2026-05-17
 
 - Add `scripts/rc-evidence-collect.sh` to build `target/dogfood/rc-evidence.jsonl` from real AgentHub chat sessions, project transaction reports, provider dogfood history, and Ops receipts.
