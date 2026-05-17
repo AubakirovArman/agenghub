@@ -21,6 +21,10 @@ Runs the Kimi 1.0 RC unblock path after a key has been rotated:
   3. live Kimi provider dogfood
   4. scripts/rc-evidence-collect.sh
   5. scripts/rc-dogfood-gate.sh --check
+
+If the provider test fails, the auth check still runs as diagnostics so the
+redacted auth report covers both official Moonshot endpoints before the command
+returns blocked.
 USAGE
 }
 
@@ -61,6 +65,7 @@ run_required() {
 printf 'AgentHub Kimi RC unblock\n'
 
 if ! run_required provider_test "$AGENTHUB_BIN" providers test kimi; then
+  run_required kimi_auth_check "$KIMI_AUTH_CHECK_CMD" || true
   printf 'status\tblocked\n'
   printf 'reason\tprovider_test_failed\n'
   printf 'next\t1\tagenthub providers rotate-key kimi --from-file <new-key-file>\n'

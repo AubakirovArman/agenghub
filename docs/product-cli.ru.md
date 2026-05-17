@@ -158,7 +158,7 @@ Named HTTP profiles намеренно отключены в API-native mode. Pr
 
 `providers test deepseek` и `providers test kimi` выполняют реальные OpenAI-compatible completion requests, затем best-effort проверяют optional `/v1/models`; если models endpoint отсутствует, это выводится как `models unavailable`, а не как failed provider test. Если completion request падает из-за auth, rate-limit, timeout, transport или server error, команда печатает structured failure receipt: `request_id`, endpoint, model, token estimate, `reason`, `auth_hint` и следующий `providers diagnose`, затем выходит с non-zero code для automation.
 
-Для разблокировки Kimi `providers unblock kimi` показывает текущий source-backed статус и точный порядок проверок. После установки replacement key через `providers rotate-key kimi` запустите `providers rc-unblock kimi` из репозитория AgentHub: он выполнит provider test, Kimi auth check, live Kimi provider dogfood, сбор RC evidence и RC dogfood gate в правильном порядке. `scripts/kimi-rc-unblock.sh` остаётся совместимым script path.
+Для разблокировки Kimi `providers unblock kimi` показывает текущий source-backed статус и точный порядок проверок. После установки replacement key через `providers rotate-key kimi` запустите `providers rc-unblock kimi` из репозитория AgentHub: он выполнит provider test, Kimi auth check, live Kimi provider dogfood, сбор RC evidence и RC dogfood gate в правильном порядке. Если первый provider test всё ещё падает, `providers rc-unblock kimi` всё равно запускает Kimi auth check как диагностику, чтобы обновить redacted two-endpoint auth report перед возвратом `blocked`. `scripts/kimi-rc-unblock.sh` остаётся совместимым script path.
 
 ## Config
 

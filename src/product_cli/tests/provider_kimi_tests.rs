@@ -275,6 +275,12 @@ fn providers_kimi_rc_unblock_stops_on_provider_test_failure() -> Result<()> {
     let endpoint = format!("{}/v1", stub.endpoint);
     with_kimi_env(Some(&endpoint), Some("kimi-test-key"), || {
         let dir = tempfile::tempdir()?;
+        let scripts = dir.path().join("scripts");
+        std::fs::create_dir_all(&scripts)?;
+        write_script(
+            &scripts.join("kimi-auth-check.sh"),
+            "printf 'auth diagnostic\\n'\nexit 1\n",
+        )?;
 
         let result = providers::rc_unblock_provider(
             dir.path(),
@@ -284,6 +290,11 @@ fn providers_kimi_rc_unblock_stops_on_provider_test_failure() -> Result<()> {
 
         assert!(result.failed);
         assert!(result.output.contains("step\tprovider_test\tfailed"));
+        assert!(result.output.contains("step\tkimi_auth_check\tbegin"));
+        assert!(result
+            .output
+            .contains("kimi_auth_check\tstdout\tauth diagnostic"));
+        assert!(result.output.contains("step\tkimi_auth_check\tfailed"));
         assert!(result.output.contains("status\tblocked"));
         assert!(result.output.contains("reason\tprovider_test_failed"));
         Ok(())

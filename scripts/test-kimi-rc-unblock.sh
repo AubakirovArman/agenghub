@@ -90,6 +90,9 @@ if AGENTHUB_KIMI_RC_TEST_LOG="$fail_log" \
 fi
 grep -q $'status\tblocked' "$TMP/fail.out"
 grep -q $'reason\tprovider_test_failed' "$TMP/fail.out"
+grep -q $'step\tkimi_auth_check\tbegin' "$TMP/fail.out"
+grep -q $'step\tkimi_auth_check\tpassed' "$TMP/fail.out"
+grep -q 'kimi-auth' "$fail_log"
 if grep -q 'provider-dogfood' "$fail_log"; then
   printf 'provider dogfood should not run after failed provider test\n' >&2
   exit 1

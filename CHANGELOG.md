@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.54-local-preview - 2026-05-17
+
+- Run Kimi auth diagnostics during `agenthub providers rc-unblock kimi` even when the first provider test fails, so the unblock path refreshes the redacted two-endpoint auth report before returning `blocked`.
+- Keep `scripts/kimi-rc-unblock.sh` behavior in parity with the product CLI by running `scripts/kimi-auth-check.sh` as diagnostic evidence after provider-test auth failure.
+
 ## 0.4.53-local-preview - 2026-05-17
 
 - Add `agenthub providers rc-unblock kimi`, a product CLI wrapper for the Kimi RC unblock pipeline, while keeping `scripts/kimi-rc-unblock.sh` as a compatible script path.

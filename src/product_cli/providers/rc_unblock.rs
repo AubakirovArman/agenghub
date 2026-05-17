@@ -32,6 +32,7 @@ pub fn rc_unblock_provider(
     out.push_str("provider\tkimi\n");
 
     if !run_provider_test(project_root, &mut out)? {
+        run_auth_check_after_provider_failure(project_root, &mut out)?;
         append_blocked(&mut out, "provider_test_failed");
         return Ok(RcUnblockResult {
             output: out,
@@ -141,6 +142,16 @@ fn run_provider_test(project_root: &Path, out: &mut String) -> Result<bool> {
         out.push_str("step\tprovider_test\tpassed\n");
         Ok(true)
     }
+}
+
+fn run_auth_check_after_provider_failure(project_root: &Path, out: &mut String) -> Result<()> {
+    let path = script(project_root, "kimi-auth-check.sh");
+    if path.exists() {
+        let _ = run_script(project_root, out, "kimi_auth_check", &path, &[], &[])?;
+    } else {
+        out.push_str("step\tkimi_auth_check\tskipped\tmissing_script\n");
+    }
+    Ok(())
 }
 
 fn run_script(
