@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.93-local-preview - 2026-05-17
+
+- Add top-level `blocker_scope` and `blocker_kinds` rows to text output from `scripts/api-native-completion-audit.sh`, matching the JSON completion-audit scope metadata.
+- Keep script-level human output aligned with product readiness text for the current Kimi external-only blocker classification.
+
 ## 0.4.92-local-preview - 2026-05-17
 
 - Add `blocker_scope` and `blocker_kinds` to `scripts/api-native-completion-audit.sh --json`, matching the product readiness JSON surface.

@@ -644,6 +644,14 @@ fi
 
 if [[ "$failed" == true ]]; then
   if [[ "$JSON" != true ]]; then
+    blocker_scope="$(completion_blocker_scope)"
+    blocker_kinds="$(collect_blocker_kinds)"
+    if [[ -n "$blocker_scope" ]]; then
+      printf 'blocker_scope\t%s\n' "$blocker_scope"
+    fi
+    if [[ -n "$blocker_kinds" ]]; then
+      printf 'blocker_kinds\t%s\n' "$blocker_kinds"
+    fi
     printf 'status\tincomplete\n'
   fi
   emit_next 1 'agenthub providers recovery --json'
