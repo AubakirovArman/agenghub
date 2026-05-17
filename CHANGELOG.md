@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.109-local-preview - 2026-05-17
+
+- Add `scripts/test-shell-ux-aliases.sh` to the `chat_ops_project_modes` readiness checklist artifacts, making the shell UX smoke traceable from `agenthub readiness checklist --json`.
+- Cover that prompt-to-artifact mapping in readiness checklist tests so the v0.4 API-native shell controls remain tied to source-backed evidence.
+
 ## 0.4.108-local-preview - 2026-05-17
 
 - Add `scripts/test-shell-ux-aliases.sh`, a release-gated non-interactive shell smoke that verifies `/mode chat|devops|project`, `/sessions`, `/cost`, `/balance`, `/hosts`, `/connect <host>`, `/provider deepseek`, and `!command` without creating Git or `.agent` in a Chat/Ops workspace.

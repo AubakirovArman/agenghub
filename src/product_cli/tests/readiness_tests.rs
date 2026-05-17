@@ -330,6 +330,15 @@ fn readiness_checklist_json_maps_requirements_to_artifacts() -> Result<()> {
         assert!(requirements
             .iter()
             .any(|entry| entry["id"] == "post_1_0_sequence"));
+        let chat_ops_project = requirements
+            .iter()
+            .find(|entry| entry["id"] == "chat_ops_project_modes")
+            .expect("chat ops project requirement");
+        assert!(chat_ops_project["artifacts"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|artifact| artifact == "command:scripts/test-shell-ux-aliases.sh"));
         assert!(!result.output.contains("kimi-secret"));
         Ok(())
     })

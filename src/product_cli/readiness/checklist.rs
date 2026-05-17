@@ -61,6 +61,7 @@ const REQUIREMENTS: &[RequirementSpec] = &[
             "rc_check_ops_receipts",
         ],
         artifacts: &[
+            "command:scripts/test-shell-ux-aliases.sh",
             "command:AGENTHUB_DOGFOOD_ACCEPTANCE=1 scripts/dogfood.sh",
             "command:agenthub ops exec <safe-command> --jsonl",
             "evidence:rc-evidence.jsonl",
