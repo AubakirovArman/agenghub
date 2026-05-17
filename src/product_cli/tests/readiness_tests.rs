@@ -81,6 +81,61 @@ fn readiness_audit_text_keeps_human_checklist() -> Result<()> {
     })
 }
 
+#[test]
+fn readiness_blockers_json_reports_only_unpassed_checks() -> Result<()> {
+    let fixture = ReadinessFixture::blocked_kimi()?;
+    with_readiness_fixture(&fixture, || {
+        let result = readiness::render_blockers(
+            fixture.root.path(),
+            readiness::AuditOptions {
+                json: true,
+                no_refresh: true,
+            },
+        )?;
+        let parsed: serde_json::Value = serde_json::from_str(&result.output)?;
+        let blocker_ids = parsed["blockers"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter_map(|entry| entry["id"].as_str())
+            .collect::<Vec<_>>();
+
+        assert!(result.failed);
+        assert_eq!(parsed["status"], "blocked");
+        assert!(blocker_ids.contains(&"kimi_auth"));
+        assert!(blocker_ids.contains(&"open_blockers"));
+        assert!(blocker_ids.contains(&"rc_dogfood_gate"));
+        assert!(!blocker_ids.contains(&"provider_kimi"));
+        assert!(!blocker_ids.contains(&"provider_surface"));
+        assert!(result
+            .output
+            .contains("agenthub providers preflight-key kimi --from-file"));
+        assert!(!result.output.contains("kimi-secret"));
+        Ok(())
+    })
+}
+
+#[test]
+fn readiness_blockers_text_reports_clear_fixture() -> Result<()> {
+    let fixture = ReadinessFixture::ready()?;
+    with_readiness_fixture(&fixture, || {
+        let result = readiness::render_blockers(
+            fixture.root.path(),
+            readiness::AuditOptions {
+                json: false,
+                no_refresh: true,
+            },
+        )?;
+
+        assert!(!result.failed);
+        assert!(result.output.contains("AgentHub readiness blockers"));
+        assert!(result.output.contains("blockers\tclear"));
+        assert!(result.output.contains("status\tclear"));
+        assert!(!result.output.contains("next\t"));
+        Ok(())
+    })
+}
+
 struct ReadinessFixture {
     root: tempfile::TempDir,
     plan: std::path::PathBuf,

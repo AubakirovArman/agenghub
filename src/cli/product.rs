@@ -115,6 +115,16 @@ pub enum ReadinessCommands {
         #[arg(long)]
         no_refresh: bool,
     },
+    Blockers {
+        #[arg(long)]
+        json: bool,
+
+        #[arg(long)]
+        check: bool,
+
+        #[arg(long)]
+        no_refresh: bool,
+    },
 }
 
 #[derive(Debug, Subcommand)]

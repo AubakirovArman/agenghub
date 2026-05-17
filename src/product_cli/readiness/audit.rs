@@ -18,11 +18,7 @@ use super::{
 };
 
 pub fn render_audit(project_root: &Path, options: AuditOptions) -> Result<AuditRenderResult> {
-    let config = AuditConfig::from_env(project_root);
-    if !options.no_refresh {
-        refresh_evidence(project_root, &config.evidence)?;
-    }
-    let report = audit_report(project_root, &config)?;
+    let report = build_report(project_root, options.no_refresh)?;
     let failed = report.failed;
     let output = if options.json {
         format!("{}\n", serde_json::to_string_pretty(&report)?)
@@ -30,6 +26,14 @@ pub fn render_audit(project_root: &Path, options: AuditOptions) -> Result<AuditR
         render_text(&report)
     };
     Ok(AuditRenderResult { output, failed })
+}
+
+pub(super) fn build_report(project_root: &Path, no_refresh: bool) -> Result<ReadinessAuditReport> {
+    let config = AuditConfig::from_env(project_root);
+    if !no_refresh {
+        refresh_evidence(project_root, &config.evidence)?;
+    }
+    audit_report(project_root, &config)
 }
 
 fn audit_report(project_root: &Path, config: &AuditConfig) -> Result<ReadinessAuditReport> {

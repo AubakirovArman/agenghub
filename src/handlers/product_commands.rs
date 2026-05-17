@@ -209,6 +209,20 @@ pub fn handle_readiness(project_root: &Path, command: ReadinessCommands) -> Resu
                 bail!("readiness audit incomplete");
             }
         }
+        ReadinessCommands::Blockers {
+            json,
+            check,
+            no_refresh,
+        } => {
+            let result = readiness::render_blockers(
+                project_root,
+                readiness::AuditOptions { json, no_refresh },
+            )?;
+            print!("{}", result.output);
+            if check && result.failed {
+                bail!("readiness blockers present");
+            }
+        }
     }
     Ok(())
 }

@@ -60,6 +60,9 @@ grep -q '"gate":' "$TMP/providers-recovery.json"
 run_agenthub readiness audit --json --no-refresh > "$TMP/readiness-audit.json"
 grep -q '"objective": "API-native 1.0 bridge' "$TMP/readiness-audit.json"
 grep -q '"status": "incomplete"' "$TMP/readiness-audit.json"
+run_agenthub readiness blockers --json --no-refresh > "$TMP/readiness-blockers.json"
+grep -q '"status": "blocked"' "$TMP/readiness-blockers.json"
+grep -q '"blockers":' "$TMP/readiness-blockers.json"
 run_agenthub config show > "$TMP/config-show.txt"
 
 cat > "$SPEC" <<'YAML'

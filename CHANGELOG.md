@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.73-local-preview - 2026-05-17
+
+- Add `agenthub readiness blockers [--json] [--check] [--no-refresh]`, a focused source-backed view of only the incomplete 1.0 readiness requirements and unblock commands.
+- Cover readiness blockers JSON/text fixtures and CLI smoke so Kimi/RC blockers stay visible without parsing the full readiness audit.
+
 ## 0.4.72-local-preview - 2026-05-17
 
 - Fix readiness audit fixture history JSONL so Windows paths are serialized safely and the new readiness tests pass on the Windows CI matrix.

@@ -31,6 +31,20 @@ pub struct ReadinessAuditReport {
 }
 
 #[derive(Debug, Serialize)]
+pub struct ReadinessBlockerReport {
+    pub objective: String,
+    pub status: String,
+    pub failed: bool,
+    pub sources: ReadinessSources,
+    pub evidence: String,
+    pub dogfood_history: String,
+    pub kimi_auth_report: String,
+    pub metrics: ReadinessMetrics,
+    pub blockers: Vec<ReadinessCheck>,
+    pub next: Vec<String>,
+}
+
+#[derive(Debug, Serialize)]
 pub struct ReadinessSources {
     pub api_native_plan: String,
     pub post_1_0_plan: String,
@@ -50,7 +64,7 @@ pub struct ReadinessMetrics {
     pub open_blockers: usize,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 pub struct ReadinessCheck {
     pub id: String,
     pub status: String,
@@ -181,6 +195,7 @@ pub(super) fn next_commands() -> Vec<String> {
         "scripts/kimi-auth-check.sh",
         "AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh",
         "agenthub readiness audit --json --check",
+        "agenthub readiness blockers --json --check",
         "scripts/rc-evidence-collect.sh",
         "scripts/rc-dogfood-gate.sh --check",
     ]
