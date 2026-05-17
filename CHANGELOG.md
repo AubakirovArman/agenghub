@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.99-local-preview - 2026-05-17
+
+- Add provider `check_id` and per-row `next_commands` to `agenthub providers status --json`, linking raw DeepSeek/Kimi status rows directly to readiness blocker IDs and safe recovery commands.
+- Keep the existing provider status JSON array shape intact while making blocked or missing provider rows actionable without parsing human-readable `detail`.
+
 ## 0.4.98-local-preview - 2026-05-17
 
 - Add redacted Kimi auth evidence fields to `agenthub providers status --json`, including auth status, safe fingerprint, auth key source, credential warning, and next action when the current key matches a blocked auth report.

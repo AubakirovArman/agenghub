@@ -21,6 +21,7 @@ fn providers_status_json_surfaces_blocked_kimi_without_secret() -> Result<()> {
             .and_then(|items| items.iter().find(|item| item["provider"] == "kimi"))
             .expect("kimi status row");
 
+        assert_eq!(kimi["check_id"], "provider_kimi");
         assert_eq!(kimi["state"], "blocked");
         assert_eq!(kimi["blocked"], true);
         assert_eq!(kimi["blocker_kind"], "external_credential");
@@ -33,6 +34,23 @@ fn providers_status_json_surfaces_blocked_kimi_without_secret() -> Result<()> {
             "plain Moonshot API key required"
         );
         assert_eq!(kimi["next_action"], "replace key");
+        assert!(kimi["next_commands"]
+            .as_array()
+            .expect("kimi next commands")
+            .iter()
+            .any(|command| command.as_str()
+                == Some("agenthub providers preflight-key kimi --from-file <new-key-file>")));
+        assert!(kimi["next_commands"]
+            .as_array()
+            .expect("kimi next commands")
+            .iter()
+            .any(|command| command.as_str()
+                == Some("agenthub providers rc-unblock kimi --from-file <new-key-file>")));
+        assert!(kimi["next_commands"]
+            .as_array()
+            .expect("kimi next commands")
+            .iter()
+            .any(|command| command.as_str() == Some("agenthub readiness blockers --json --check")));
         assert!(kimi["detail"]
             .as_str()
             .unwrap_or_default()
@@ -40,6 +58,47 @@ fn providers_status_json_surfaces_blocked_kimi_without_secret() -> Result<()> {
         assert!(!json.contains("kimi-test-key"));
         Ok(())
     })
+}
+
+#[test]
+fn providers_status_json_surfaces_missing_provider_recovery_hints() -> Result<()> {
+    with_env_vars(
+        &[
+            ("DEEPSEEK_API_KEY", None),
+            ("DEEPSEEK_API_KEY_FILE", None),
+            ("ANTHROPIC_AUTH_TOKEN", None),
+            ("ANTHROPIC_AUTH_TOKEN_FILE", None),
+            ("KIMI_API_KEY", None),
+            ("KIMI_API_KEY_FILE", None),
+            ("MOONSHOT_API_KEY", None),
+            ("MOONSHOT_API_KEY_FILE", None),
+            ("AGENTHUB_KIMI_AUTH_REPORT", None),
+        ],
+        || {
+            let dir = tempfile::tempdir()?;
+            let json = providers::render_status_json(dir.path())?;
+            let parsed: serde_json::Value = serde_json::from_str(&json)?;
+            let deepseek = parsed
+                .as_array()
+                .and_then(|items| items.iter().find(|item| item["provider"] == "deepseek"))
+                .expect("deepseek status row");
+
+            assert_eq!(deepseek["check_id"], "provider_deepseek");
+            assert_eq!(deepseek["state"], "missing");
+            assert_eq!(deepseek["blocker_kind"], "external_credential");
+            assert!(deepseek["next_commands"]
+                .as_array()
+                .expect("deepseek next commands")
+                .iter()
+                .any(|command| command.as_str() == Some("agenthub providers diagnose deepseek")));
+            assert!(deepseek["next_commands"]
+                .as_array()
+                .expect("deepseek next commands")
+                .iter()
+                .any(|command| command.as_str() == Some("agenthub providers test deepseek")));
+            Ok(())
+        },
+    )
 }
 
 #[test]

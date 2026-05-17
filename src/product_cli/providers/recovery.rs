@@ -243,7 +243,7 @@ fn gate_blocker_kind(status: &str) -> Option<&'static str> {
     }
 }
 
-fn provider_next_commands(status: &ProviderStatus, state: &str) -> Vec<String> {
+pub(super) fn provider_next_commands(status: &ProviderStatus, state: &str) -> Vec<String> {
     match status.info.id.as_str() {
         "kimi" if state == "blocked" || state == "missing" => vec![
             "agenthub providers inspect-key kimi".to_string(),

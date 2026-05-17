@@ -3,11 +3,15 @@ use std::path::Path;
 use anyhow::Result;
 use serde::Serialize;
 
-use super::{kimi_auth_blocker_evidence_for_status, status_detail, statuses, ProviderStatus};
+use super::{
+    kimi_auth_blocker_evidence_for_status, recovery::provider_next_commands, status_detail,
+    statuses, ProviderStatus,
+};
 
 #[derive(Debug, Serialize)]
 pub struct ProviderStatusJson {
     pub provider: String,
+    pub check_id: String,
     pub state: String,
     pub available: bool,
     pub default: bool,
@@ -31,6 +35,8 @@ pub struct ProviderStatusJson {
     pub credential_warning: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub next_action: Option<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub next_commands: Vec<String>,
 }
 
 pub fn render_status_json(project_root: &Path) -> Result<String> {
@@ -41,6 +47,7 @@ pub fn render_status_json(project_root: &Path) -> Result<String> {
             let auth_evidence = kimi_auth_blocker_evidence_for_status(project_root, &status);
             ProviderStatusJson {
                 provider: status.info.id.clone(),
+                check_id: format!("provider_{}", status.info.id),
                 state: state.clone(),
                 available: status.available,
                 default: status.is_default,
@@ -69,6 +76,7 @@ pub fn render_status_json(project_root: &Path) -> Result<String> {
                     .as_ref()
                     .and_then(|evidence| evidence.credential_warning.clone()),
                 next_action: auth_evidence.map(|evidence| evidence.next_action),
+                next_commands: provider_next_commands(&status, &state),
             }
         })
         .collect::<Vec<_>>();
