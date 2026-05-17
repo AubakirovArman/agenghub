@@ -5,6 +5,7 @@ pub mod ecosystem;
 mod env;
 pub mod open;
 pub mod providers;
+pub mod readiness;
 
 #[cfg(test)]
 mod tests;

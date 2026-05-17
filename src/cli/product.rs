@@ -104,6 +104,20 @@ pub enum EcosystemCommands {
 }
 
 #[derive(Debug, Subcommand)]
+pub enum ReadinessCommands {
+    Audit {
+        #[arg(long)]
+        json: bool,
+
+        #[arg(long)]
+        check: bool,
+
+        #[arg(long)]
+        no_refresh: bool,
+    },
+}
+
+#[derive(Debug, Subcommand)]
 pub enum OpenCommands {
     Dashboard,
     Report { tx_id: String },

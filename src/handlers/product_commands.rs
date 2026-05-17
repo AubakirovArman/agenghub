@@ -2,9 +2,11 @@ use std::{io::Read, path::Path};
 
 use anyhow::{bail, Result};
 
-use agenthub::product_cli::{config, doctor, ecosystem, open, providers, version};
+use agenthub::product_cli::{config, doctor, ecosystem, open, providers, readiness, version};
 
-use crate::cli::{ConfigCommands, EcosystemCommands, OpenCommands, ProviderCommands};
+use crate::cli::{
+    ConfigCommands, EcosystemCommands, OpenCommands, ProviderCommands, ReadinessCommands,
+};
 
 pub fn handle_doctor(project_root: &Path) -> Result<()> {
     let report = doctor::inspect(project_root)?;
@@ -186,6 +188,26 @@ pub fn handle_ecosystem(command: EcosystemCommands) -> Result<()> {
     match command {
         EcosystemCommands::Status { json } => {
             print!("{}", ecosystem::render_status(json));
+        }
+    }
+    Ok(())
+}
+
+pub fn handle_readiness(project_root: &Path, command: ReadinessCommands) -> Result<()> {
+    match command {
+        ReadinessCommands::Audit {
+            json,
+            check,
+            no_refresh,
+        } => {
+            let result = readiness::render_audit(
+                project_root,
+                readiness::AuditOptions { json, no_refresh },
+            )?;
+            print!("{}", result.output);
+            if check && result.failed {
+                bail!("readiness audit incomplete");
+            }
         }
     }
     Ok(())

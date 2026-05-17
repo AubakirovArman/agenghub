@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.71-local-preview - 2026-05-17
+
+- Add `agenthub readiness audit [--json] [--check] [--no-refresh]`, a first-class product CLI readiness gate over the API-native 1.0 completion evidence.
+- Keep provider recovery, smoke tests, and completion-audit next steps pointed at the product readiness gate while preserving the script path as compatible evidence tooling.
+
 ## 0.4.70-local-preview - 2026-05-17
 
 - Add `--json` to `scripts/api-native-completion-audit.sh` so the final API-native 1.0 readiness answer is available as machine-readable redacted evidence.

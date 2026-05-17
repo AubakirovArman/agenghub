@@ -19,7 +19,8 @@ mod tx_commands;
 pub use aal_commands::handle_aal;
 pub use plugin_commands::handle_plugins;
 pub use product_commands::{
-    handle_config, handle_doctor, handle_ecosystem, handle_open, handle_providers, handle_version,
+    handle_config, handle_doctor, handle_ecosystem, handle_open, handle_providers,
+    handle_readiness, handle_version,
 };
 pub use run_commands::{handle_ask, handle_plan, handle_run};
 pub use tx_commands::handle_tx;

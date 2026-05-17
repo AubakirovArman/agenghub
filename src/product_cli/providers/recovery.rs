@@ -60,7 +60,7 @@ fn recovery_report(project_root: &Path) -> Result<ProviderRecoveryReport> {
     }
     push_unique(
         &mut next_commands,
-        "scripts/api-native-completion-audit.sh --check",
+        "agenthub readiness audit --json --check",
     );
 
     Ok(ProviderRecoveryReport {
@@ -75,7 +75,7 @@ fn recovery_report(project_root: &Path) -> Result<ProviderRecoveryReport> {
             } else {
                 "blocked".to_string()
             },
-            next_command: "scripts/api-native-completion-audit.sh --check".to_string(),
+            next_command: "agenthub readiness audit --json --check".to_string(),
             detail: if status == "ready" {
                 "providers are ready; run the completion audit and RC dogfood gate".to_string()
             } else {
@@ -133,12 +133,12 @@ fn provider_next_commands(status: &ProviderStatus, state: &str) -> Vec<String> {
             "agenthub providers preflight-key kimi --from-file <new-key-file>".to_string(),
             "agenthub providers rc-unblock kimi --from-file <new-key-file>".to_string(),
             "agenthub providers test kimi".to_string(),
-            "scripts/api-native-completion-audit.sh --check".to_string(),
+            "agenthub readiness audit --json --check".to_string(),
         ],
         "kimi" => vec![
             "agenthub providers test kimi".to_string(),
             "AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh".to_string(),
-            "scripts/api-native-completion-audit.sh --check".to_string(),
+            "agenthub readiness audit --json --check".to_string(),
         ],
         "deepseek" if state == "missing" => vec![
             "agenthub providers diagnose deepseek".to_string(),

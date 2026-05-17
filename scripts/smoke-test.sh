@@ -57,6 +57,9 @@ grep -q '"state":' "$TMP/providers-status.json"
 run_agenthub providers recovery --json > "$TMP/providers-recovery.json"
 grep -q '"objective": "api_native_provider_recovery"' "$TMP/providers-recovery.json"
 grep -q '"gate":' "$TMP/providers-recovery.json"
+run_agenthub readiness audit --json --no-refresh > "$TMP/readiness-audit.json"
+grep -q '"objective": "API-native 1.0 bridge' "$TMP/readiness-audit.json"
+grep -q '"status": "incomplete"' "$TMP/readiness-audit.json"
 run_agenthub config show > "$TMP/config-show.txt"
 
 cat > "$SPEC" <<'YAML'

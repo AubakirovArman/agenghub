@@ -107,6 +107,29 @@ pub(super) fn with_deepseek_env<T>(
     result
 }
 
+pub(super) fn with_env_vars<T>(
+    values: &[(&str, Option<String>)],
+    run: impl FnOnce() -> Result<T>,
+) -> Result<T> {
+    let lock = ENV_LOCK.get_or_init(|| Mutex::new(()));
+    let _guard = lock.lock().expect("env lock poisoned");
+    let previous = values
+        .iter()
+        .map(|(key, _)| (*key, std::env::var_os(key)))
+        .collect::<Vec<_>>();
+    for (key, value) in values {
+        match value {
+            Some(value) => std::env::set_var(key, value),
+            None => std::env::remove_var(key),
+        }
+    }
+    let result = run();
+    for (key, value) in previous {
+        restore_env(key, value);
+    }
+    result
+}
+
 pub(super) fn openai_stub_server(content: &str, tokens: usize) -> Result<OpenAiStub> {
     let listener = TcpListener::bind("127.0.0.1:0")?;
     let endpoint = format!("http://{}", listener.local_addr()?);
