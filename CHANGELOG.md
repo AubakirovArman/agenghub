@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.60-local-preview - 2026-05-17
+
+- Make `scripts/kimi-auth-check.sh` record the passing Moonshot endpoint in `kimi-auth-report.json` and print a region-preserving provider dogfood next action.
+- Make `scripts/kimi-rc-unblock.sh` retry provider test and provider dogfood with the passing Kimi endpoint from the auth report, keeping the script path aligned with product CLI `rc-unblock`.
+
 ## 0.4.59-local-preview - 2026-05-17
 
 - Make `agenthub providers rc-unblock kimi --from-file <new-key-file>` run the no-write Kimi key preflight before installing the replacement key.

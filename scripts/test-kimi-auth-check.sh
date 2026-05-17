@@ -33,6 +33,13 @@ OUT
       exit 1
       ;;
     https://api.moonshot.cn/v1)
+      if [[ "${KIMI_AUTH_FAKE_CHINA_PASSES:-0}" == "1" ]]; then
+        cat <<'OUT'
+ok	kimi	completion_tokens:1
+endpoint	https://api.moonshot.cn/v1
+OUT
+        exit 0
+      fi
       cat <<'OUT'
 failed	kimi	auth
 endpoint	https://api.moonshot.cn/v1
@@ -70,5 +77,22 @@ grep -q '"base_url": "https://api.moonshot.cn/v1"' "$REPORT"
 test -f "$ARTIFACTS/diagnose.txt"
 test -f "$ARTIFACTS/global.txt"
 test -f "$ARTIFACTS/china.txt"
+
+REPORT2="$TMP/report-china.json"
+ARTIFACTS2="$TMP/artifacts-china"
+KIMI_AUTH_FAKE_CHINA_PASSES=1 \
+AGENTHUB_BIN="$FAKE" \
+AGENTHUB_KIMI_AUTH_REPORT="$REPORT2" \
+AGENTHUB_KIMI_AUTH_ARTIFACT_DIR="$ARTIFACTS2" \
+  "$ROOT/scripts/kimi-auth-check.sh" > "$TMP/out-china.txt" 2> "$TMP/err-china.txt"
+
+grep -q 'status: passed' "$TMP/out-china.txt"
+grep -q 'global: auth_failed' "$TMP/out-china.txt"
+grep -q 'china: passed' "$TMP/out-china.txt"
+grep -q 'passed_endpoint: https://api.moonshot.cn/v1' "$TMP/out-china.txt"
+grep -q '"status": "passed"' "$REPORT2"
+grep -q '"passed_endpoint_label": "china"' "$REPORT2"
+grep -q '"passed_endpoint": "https://api.moonshot.cn/v1"' "$REPORT2"
+grep -q 'KIMI_API_BASE_URL=https://api.moonshot.cn/v1' "$REPORT2"
 
 printf 'agenthub Kimi auth check test passed\n'

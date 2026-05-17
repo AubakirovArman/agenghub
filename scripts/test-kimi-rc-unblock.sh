@@ -26,6 +26,20 @@ exit 1
 SH
 chmod +x "$TMP/agenthub-fail"
 
+cat > "$TMP/agenthub-region" <<'SH'
+#!/usr/bin/env bash
+set -euo pipefail
+printf '%s endpoint=%s\n' "$*" "${KIMI_API_BASE_URL:-}" >> "$AGENTHUB_KIMI_RC_TEST_LOG"
+if [[ "$1 $2 $3" == "providers test kimi" && "${KIMI_API_BASE_URL:-}" == "https://api.moonshot.cn/v1" ]]; then
+  printf 'ok\tkimi\tcompletion_tokens:1\n'
+  printf 'endpoint\thttps://api.moonshot.cn/v1\n'
+  exit 0
+fi
+printf 'failed\tkimi\tauth\n'
+exit 1
+SH
+chmod +x "$TMP/agenthub-region"
+
 cat > "$TMP/kimi-auth" <<'SH'
 #!/usr/bin/env bash
 set -euo pipefail
@@ -34,10 +48,27 @@ printf 'AgentHub Kimi auth check\nstatus\tpassed\n'
 SH
 chmod +x "$TMP/kimi-auth"
 
+cat > "$TMP/kimi-auth-region" <<'SH'
+#!/usr/bin/env bash
+set -euo pipefail
+printf 'kimi-auth-region\n' >> "$AGENTHUB_KIMI_RC_TEST_LOG"
+cat > "$AGENTHUB_KIMI_AUTH_REPORT" <<'JSON'
+{
+  "provider": "kimi",
+  "status": "passed",
+  "passed_endpoint_label": "china",
+  "passed_endpoint": "https://api.moonshot.cn/v1",
+  "next_action": "run KIMI_API_BASE_URL=https://api.moonshot.cn/v1 AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh"
+}
+JSON
+printf 'AgentHub Kimi auth check\nstatus: passed\npassed_endpoint: https://api.moonshot.cn/v1\n'
+SH
+chmod +x "$TMP/kimi-auth-region"
+
 cat > "$TMP/provider-dogfood" <<'SH'
 #!/usr/bin/env bash
 set -euo pipefail
-printf 'provider-dogfood provider=%s live=%s\n' "${AGENTHUB_PROVIDER_DOGFOOD_PROVIDER:-}" "${AGENTHUB_PROVIDER_DOGFOOD_LIVE:-}" >> "$AGENTHUB_KIMI_RC_TEST_LOG"
+printf 'provider-dogfood provider=%s live=%s endpoint=%s\n' "${AGENTHUB_PROVIDER_DOGFOOD_PROVIDER:-}" "${AGENTHUB_PROVIDER_DOGFOOD_LIVE:-}" "${KIMI_API_BASE_URL:-}" >> "$AGENTHUB_KIMI_RC_TEST_LOG"
 printf 'agenthub provider dogfood passed: tx-demo committed\n'
 SH
 chmod +x "$TMP/provider-dogfood"
@@ -76,6 +107,26 @@ grep -q $'status\tready' "$TMP/success.out"
 grep -q 'providers test kimi' "$log"
 grep -q 'provider-dogfood provider=kimi live=1' "$log"
 grep -q 'gate --check' "$log"
+
+region_log="$TMP/region.log"
+AGENTHUB_KIMI_RC_TEST_LOG="$region_log" \
+AGENTHUB_BIN="$TMP/agenthub-region" \
+AGENTHUB_KIMI_AUTH_REPORT="$TMP/region-report.json" \
+AGENTHUB_KIMI_AUTH_CHECK_CMD="$TMP/kimi-auth-region" \
+AGENTHUB_PROVIDER_DOGFOOD_CMD="$TMP/provider-dogfood" \
+AGENTHUB_RC_EVIDENCE_COLLECT_CMD="$TMP/collect" \
+AGENTHUB_RC_DOGFOOD_GATE_CMD="$TMP/gate" \
+  "$ROOT/scripts/kimi-rc-unblock.sh" > "$TMP/region.out"
+
+grep -q $'step\tprovider_test\tfailed' "$TMP/region.out"
+grep -q $'step\tkimi_auth_check\tpassed' "$TMP/region.out"
+grep -q $'endpoint_override\tKIMI_API_BASE_URL\thttps://api.moonshot.cn/v1' "$TMP/region.out"
+grep -q $'step\tprovider_test\tpassed' "$TMP/region.out"
+grep -q $'step\tprovider_dogfood\tpassed' "$TMP/region.out"
+grep -q $'status\tready' "$TMP/region.out"
+grep -q 'providers test kimi endpoint=$' "$region_log"
+grep -q 'providers test kimi endpoint=https://api.moonshot.cn/v1' "$region_log"
+grep -q 'provider-dogfood provider=kimi live=1 endpoint=https://api.moonshot.cn/v1' "$region_log"
 
 fail_log="$TMP/fail.log"
 if AGENTHUB_KIMI_RC_TEST_LOG="$fail_log" \

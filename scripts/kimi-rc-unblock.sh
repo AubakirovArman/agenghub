@@ -3,6 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 AGENTHUB_BIN="${AGENTHUB_BIN:-agenthub}"
+KIMI_AUTH_REPORT="${AGENTHUB_KIMI_AUTH_REPORT:-$ROOT/target/dogfood/kimi-auth-report.json}"
 KIMI_AUTH_CHECK_CMD="${AGENTHUB_KIMI_AUTH_CHECK_CMD:-$ROOT/scripts/kimi-auth-check.sh}"
 PROVIDER_DOGFOOD_CMD="${AGENTHUB_PROVIDER_DOGFOOD_CMD:-$ROOT/scripts/provider-dogfood.sh}"
 RC_EVIDENCE_COLLECT_CMD="${AGENTHUB_RC_EVIDENCE_COLLECT_CMD:-$ROOT/scripts/rc-evidence-collect.sh}"
@@ -68,20 +69,54 @@ run_required() {
   fi
 }
 
-printf 'AgentHub Kimi RC unblock\n'
+json_field() {
+  local key="$1" file="$2"
+  if [[ ! -f "$file" ]]; then
+    return 0
+  fi
+  sed -n "s/.*\"$key\"[[:space:]]*:[[:space:]]*\"\\([^\"]*\\)\".*/\\1/p" "$file" | head -n1
+}
 
-if ! run_required provider_test "$AGENTHUB_BIN" providers test kimi; then
-  run_required kimi_auth_check "$KIMI_AUTH_CHECK_CMD" || true
+run_provider_test() {
+  local endpoint="${1:-}"
+  if [[ -n "$endpoint" ]]; then
+    printf 'endpoint_override\tKIMI_API_BASE_URL\t%s\n' "$endpoint"
+    KIMI_API_BASE_URL="$endpoint" run_required provider_test "$AGENTHUB_BIN" providers test kimi
+  else
+    run_required provider_test "$AGENTHUB_BIN" providers test kimi
+  fi
+}
+
+run_kimi_auth_check() {
+  AGENTHUB_KIMI_AUTH_REPORT="$KIMI_AUTH_REPORT" run_required kimi_auth_check "$KIMI_AUTH_CHECK_CMD"
+}
+
+blocked_after_provider_test() {
   printf 'status\tblocked\n'
   printf 'reason\tprovider_test_failed\n'
   printf 'next\t1\tagenthub providers preflight-key kimi --from-file <new-key-file>\n'
   printf 'next\t2\tagenthub providers rc-unblock kimi --from-file <new-key-file>\n'
   printf 'next\t3\tagenthub providers rotate-key kimi --from-file <new-key-file>\n'
   printf 'next\t4\tagenthub providers unblock kimi\n'
-  exit 1
-fi
+}
 
-if ! run_required kimi_auth_check "$KIMI_AUTH_CHECK_CMD"; then
+printf 'AgentHub Kimi RC unblock\n'
+
+endpoint_override=""
+if ! run_provider_test ""; then
+  if run_kimi_auth_check; then
+    endpoint_override="$(json_field passed_endpoint "$KIMI_AUTH_REPORT")"
+    if [[ -n "$endpoint_override" ]] && run_provider_test "$endpoint_override"; then
+      :
+    else
+      blocked_after_provider_test
+      exit 1
+    fi
+  else
+    blocked_after_provider_test
+    exit 1
+  fi
+elif ! run_kimi_auth_check; then
   printf 'status\tblocked\n'
   printf 'reason\tkimi_auth_check_failed\n'
   printf 'next\t1\tagenthub providers preflight-key kimi --from-file <new-key-file>\n'
@@ -90,12 +125,17 @@ if ! run_required kimi_auth_check "$KIMI_AUTH_CHECK_CMD"; then
   printf 'next\t4\tagenthub providers unblock kimi\n'
   exit 1
 fi
+endpoint_override="${endpoint_override:-$(json_field passed_endpoint "$KIMI_AUTH_REPORT")}"
+if [[ -n "$endpoint_override" ]]; then
+  printf 'endpoint_override\tKIMI_API_BASE_URL\t%s\n' "$endpoint_override"
+fi
 
 if [[ "$SKIP_PROVIDER_DOGFOOD" == true ]]; then
   printf 'step\tprovider_dogfood\tskipped\n'
   printf 'warning\tprovider_dogfood_required_for_rc_gate\n'
 else
-  if ! AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi \
+  if ! KIMI_API_BASE_URL="$endpoint_override" \
+    AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi \
     AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 \
     run_required provider_dogfood "$PROVIDER_DOGFOOD_CMD"; then
     printf 'status\tblocked\n'

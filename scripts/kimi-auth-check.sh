@@ -61,9 +61,18 @@ global_status="$(classify_test "$global_out")"
 china_status="$(classify_test "$china_out")"
 overall="blocked"
 next_action="replace or rotate the Kimi/Moonshot API key, then run agenthub providers test kimi"
+passed_endpoint=""
+passed_endpoint_label=""
 if [[ "$global_status" == "passed" || "$china_status" == "passed" ]]; then
   overall="passed"
-  next_action="run AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh"
+  if [[ "$global_status" == "passed" ]]; then
+    passed_endpoint_label="global"
+    passed_endpoint="https://api.moonshot.ai/v1"
+  else
+    passed_endpoint_label="china"
+    passed_endpoint="https://api.moonshot.cn/v1"
+  fi
+  next_action="run KIMI_API_BASE_URL=$passed_endpoint AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh"
 elif [[ "$global_status" == "rate_limited" || "$china_status" == "rate_limited" ]]; then
   overall="rate_limited"
   next_action="wait for Kimi/Moonshot quota reset or raise limits, then rerun scripts/kimi-auth-check.sh"
@@ -87,6 +96,8 @@ cat > "$REPORT_PATH" <<JSON
   "auth_key_chars": "$(json_escape "$auth_chars")",
   "auth_key_sha256_12": "$(json_escape "$auth_sha")",
   "auth_key_trimmed_for_request": "$(json_escape "$auth_trimmed")",
+  "passed_endpoint_label": "$(json_escape "$passed_endpoint_label")",
+  "passed_endpoint": "$(json_escape "$passed_endpoint")",
   "endpoints": [
     {
       "label": "global",
@@ -110,6 +121,9 @@ printf 'AgentHub Kimi auth check\n'
 printf 'status: %s\n' "$overall"
 printf 'global: %s\n' "$global_status"
 printf 'china: %s\n' "$china_status"
+if [[ -n "$passed_endpoint" ]]; then
+  printf 'passed_endpoint: %s\n' "$passed_endpoint"
+fi
 printf 'auth_key_source: %s\n' "${auth_source:-unknown}"
 printf 'auth_key_sha256_12: %s\n' "${auth_sha:-unknown}"
 printf 'report: %s\n' "$REPORT_PATH"
