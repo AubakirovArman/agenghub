@@ -252,3 +252,29 @@ fn doctor_warns_when_default_provider_is_configured_but_missing() -> Result<()> 
         Ok(())
     })
 }
+
+#[test]
+fn doctor_surfaces_blocked_kimi_auth_report() -> Result<()> {
+    with_deepseek_env(None, None, || {
+        let dir = tempfile::tempdir()?;
+        let report_dir = dir.path().join("target/dogfood");
+        std::fs::create_dir_all(&report_dir)?;
+        std::fs::write(
+            report_dir.join("kimi-auth-report.json"),
+            r#"{
+              "provider": "kimi",
+              "status": "blocked",
+              "auth_key_sha256_12": "abc123def456",
+              "next_action": "replace or rotate the Kimi/Moonshot API key"
+            }"#,
+        )?;
+
+        let rendered = doctor::inspect(dir.path())?.render();
+
+        assert!(rendered.contains("[warn] provider.kimi.auth"));
+        assert!(rendered.contains("latest Kimi auth check blocked"));
+        assert!(rendered.contains("key:abc123def456"));
+        assert!(rendered.contains("replace or rotate the Kimi/Moonshot API key"));
+        Ok(())
+    })
+}

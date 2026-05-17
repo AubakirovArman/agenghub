@@ -1,7 +1,9 @@
-use std::path::Path;
+use std::fs;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use anyhow::Result;
+use serde_json::Value;
 
 use super::{check, CheckLevel, DoctorCheck};
 use crate::git;
@@ -17,6 +19,7 @@ pub(super) fn collect(project_root: &Path, checks: &mut Vec<DoctorCheck>) -> Res
     policy_check(project_root, checks);
     default_provider_check(project_root, checks)?;
     provider_checks(project_root, checks)?;
+    provider_auth_report_checks(project_root, checks);
     Ok(())
 }
 
@@ -149,6 +152,55 @@ fn provider_checks(project_root: &Path, checks: &mut Vec<DoctorCheck>) -> Result
         ));
     }
     Ok(())
+}
+
+fn provider_auth_report_checks(project_root: &Path, checks: &mut Vec<DoctorCheck>) {
+    let path = kimi_auth_report_path(project_root);
+    let Some(report) = read_json_report(&path) else {
+        return;
+    };
+    if report.get("provider").and_then(Value::as_str) != Some("kimi") {
+        return;
+    }
+
+    let status = report
+        .get("status")
+        .and_then(Value::as_str)
+        .unwrap_or("unknown");
+    let next_action = report
+        .get("next_action")
+        .and_then(Value::as_str)
+        .unwrap_or("run scripts/kimi-auth-check.sh");
+    let fingerprint = report
+        .get("auth_key_sha256_12")
+        .and_then(Value::as_str)
+        .filter(|value| !value.is_empty())
+        .map(|value| format!(" key:{value}"))
+        .unwrap_or_default();
+    let message = match status {
+        "passed" => "latest Kimi auth check passed".to_string(),
+        "blocked" => format!("latest Kimi auth check blocked:{fingerprint}; {next_action}"),
+        other => format!("latest Kimi auth check {other}:{fingerprint}; {next_action}"),
+    };
+    let level = if status == "passed" {
+        CheckLevel::Ok
+    } else {
+        CheckLevel::Warn
+    };
+    checks.push(check(level, "provider.kimi.auth", message));
+}
+
+fn kimi_auth_report_path(project_root: &Path) -> PathBuf {
+    std::env::var_os("AGENTHUB_KIMI_AUTH_REPORT")
+        .filter(|value| !value.is_empty())
+        .map(PathBuf::from)
+        .unwrap_or_else(|| project_root.join("target/dogfood/kimi-auth-report.json"))
+}
+
+fn read_json_report(path: &Path) -> Option<Value> {
+    fs::read_to_string(path)
+        .ok()
+        .and_then(|text| serde_json::from_str(&text).ok())
 }
 
 fn command_version(binary: &str, args: &[&str]) -> Option<String> {

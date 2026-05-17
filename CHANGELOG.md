@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.41-local-preview - 2026-05-17
+
+- Teach `agenthub doctor` to read the latest local `kimi-auth-report.json` and surface blocked Kimi auth as a warning with the safe key fingerprint and next action.
+- Keep provider readiness more honest during 1.0 preparation: a configured Kimi key can still be shown as configured, while a known failed live auth report is no longer hidden from doctor output.
+
 ## 0.4.40-local-preview - 2026-05-17
 
 - Keep 1.0 RC provider evidence API-native by filtering legacy CLI provider records out of `rc-evidence`.
