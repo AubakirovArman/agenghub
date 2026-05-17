@@ -161,10 +161,14 @@ fn providers_kimi_unblock_renders_source_backed_next_steps() -> Result<()> {
         assert!(unblock
             .contains("step\t1\tagenthub providers rotate-key kimi --from-file <new-key-file>"));
         assert!(unblock.contains("step\t2\tscripts/kimi-key-rotate.sh --from-file <new-key-file>"));
-        assert!(unblock.contains("step\t3\tagenthub providers test kimi"));
-        assert!(unblock.contains("step\t4\tscripts/kimi-auth-check.sh"));
-        assert!(unblock.contains("step\t5\tscripts/rc-evidence-collect.sh"));
-        assert!(unblock.contains("step\t6\tscripts/rc-dogfood-gate.sh --check"));
+        assert!(unblock.contains("step\t3\tscripts/kimi-rc-unblock.sh"));
+        assert!(unblock.contains("step\t4\tagenthub providers test kimi"));
+        assert!(unblock.contains("step\t5\tscripts/kimi-auth-check.sh"));
+        assert!(unblock.contains(
+            "step\t6\tAGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh"
+        ));
+        assert!(unblock.contains("step\t7\tscripts/rc-evidence-collect.sh"));
+        assert!(unblock.contains("step\t8\tscripts/rc-dogfood-gate.sh --check"));
         Ok(())
     })
 }
@@ -196,6 +200,12 @@ fn providers_kimi_rotate_key_installs_without_leaking_secret_and_tests_provider(
         assert!(result.output.contains("AgentHub Kimi key rotation"));
         assert!(result.output.contains("source\tfile:"));
         assert!(result.output.contains("status\tinstalled"));
+        assert!(result
+            .output
+            .contains("next\t1\tscripts/kimi-rc-unblock.sh"));
+        assert!(result.output.contains(
+            "AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh"
+        ));
         assert!(result.output.contains("trimmed_for_write\ttrue"));
         assert!(result
             .output

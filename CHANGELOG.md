@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.52-local-preview - 2026-05-17
+
+- Add `scripts/kimi-rc-unblock.sh`, a one-shot Kimi RC unblock runner that executes provider test, Kimi auth check, live Kimi provider dogfood, RC evidence collection, and the RC dogfood gate in order after key rotation.
+- Update `providers unblock kimi`, key rotation output, API-native completion audit, and dogfooding docs so the Kimi provider dogfood step is explicit before RC gate checks.
+
 ## 0.4.51-local-preview - 2026-05-17
 
 - Add `agenthub providers rotate-key kimi`, a first-class CLI key rotation command that installs Kimi/Moonshot keys from file/env/stdin without printing secrets, supports dry-run and explicit target paths, writes file keys atomically, and can immediately run the provider test.
