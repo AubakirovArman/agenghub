@@ -256,12 +256,18 @@ fi
 kimi_status="$(json_file_field "$KIMI_REPORT" status)"
 kimi_fingerprint="$(json_file_field "$KIMI_REPORT" auth_key_sha256_12)"
 kimi_next="$(json_file_field "$KIMI_REPORT" next_action)"
+kimi_warning="$(json_file_field "$KIMI_REPORT" credential_warning)"
 case "$kimi_status" in
   passed)
     emit_check kimi_auth passed "Kimi auth passed"
     ;;
   blocked)
-    emit_check kimi_auth blocked "key:${kimi_fingerprint:-unknown}; ${kimi_next:-replace or rotate the Kimi/Moonshot API key}"
+    kimi_detail="key:${kimi_fingerprint:-unknown}"
+    if [[ -n "$kimi_warning" ]]; then
+      kimi_detail="$kimi_detail; warning:$kimi_warning"
+    fi
+    kimi_detail="$kimi_detail; ${kimi_next:-replace or rotate the Kimi/Moonshot API key}"
+    emit_check kimi_auth blocked "$kimi_detail"
     ;;
   "")
     emit_check kimi_auth missing "no Kimi auth report"

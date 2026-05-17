@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.63-local-preview - 2026-05-17
+
+- Make `scripts/kimi-auth-check.sh` print and record a `credential_warning` that Kimi Code CLI OAuth credentials are not Moonshot OpenAI-compatible API keys.
+- Make `scripts/api-native-completion-audit.sh` include that warning in the blocked `kimi_auth` checklist row so the final RC audit explains the exact credential trap.
+
 ## 0.4.62-local-preview - 2026-05-17
 
 - Add an explicit `providers unblock kimi` warning that Kimi Code CLI OAuth JSON is not a Moonshot OpenAI-compatible API key.

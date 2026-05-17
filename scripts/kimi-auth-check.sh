@@ -60,7 +60,8 @@ run_endpoint "china" "https://api.moonshot.cn/v1" "$china_out"
 global_status="$(classify_test "$global_out")"
 china_status="$(classify_test "$china_out")"
 overall="blocked"
-next_action="replace or rotate the Kimi/Moonshot API key, then run agenthub providers test kimi"
+credential_warning="Kimi Code CLI OAuth credentials are not Moonshot OpenAI-compatible API keys; create a plain Moonshot API key instead"
+next_action="replace or rotate the Kimi/Moonshot API key with a plain Moonshot OpenAI-compatible API key, then run agenthub providers test kimi"
 passed_endpoint=""
 passed_endpoint_label=""
 if [[ "$global_status" == "passed" || "$china_status" == "passed" ]]; then
@@ -96,6 +97,7 @@ cat > "$REPORT_PATH" <<JSON
   "auth_key_chars": "$(json_escape "$auth_chars")",
   "auth_key_sha256_12": "$(json_escape "$auth_sha")",
   "auth_key_trimmed_for_request": "$(json_escape "$auth_trimmed")",
+  "credential_warning": "$(json_escape "$credential_warning")",
   "passed_endpoint_label": "$(json_escape "$passed_endpoint_label")",
   "passed_endpoint": "$(json_escape "$passed_endpoint")",
   "endpoints": [
@@ -126,6 +128,7 @@ if [[ -n "$passed_endpoint" ]]; then
 fi
 printf 'auth_key_source: %s\n' "${auth_source:-unknown}"
 printf 'auth_key_sha256_12: %s\n' "${auth_sha:-unknown}"
+printf 'credential_warning: %s\n' "$credential_warning"
 printf 'report: %s\n' "$REPORT_PATH"
 printf 'artifacts: %s\n' "$ARTIFACT_DIR"
 printf 'next: %s\n' "$next_action"
