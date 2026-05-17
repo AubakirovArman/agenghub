@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.33-local-preview - 2026-05-17
+
+- Extend `scripts/rc-evidence-collect.sh` to detect source-backed `resume`, `rewind`, and project approval UX checks from transaction artifacts such as `resume.json`, `undo.json`, `command_policy.json`, and blocked journals.
+- Collect `stats` as a read-only runtime check by default when `agenthub stats` is available, while keeping the check disableable with `AGENTHUB_RC_COLLECT_RUN_STATS=0`.
+- Add perf-profile-backed `long_session_latency` detection through `AGENTHUB_RC_PERF_REPORT` and `AGENTHUB_RC_LONG_SESSION_MIN_TX`, so latency evidence can be counted only when a real perf artifact meets the configured transaction threshold.
+
 ## 0.4.32-local-preview - 2026-05-17
 
 - Add headless Ops execution with `agenthub ops exec "<command>" [--jsonl]`, using AgentHub-owned tool permissions, command policy, global command logs, host profiles, and Ops receipts without creating `.agent` in empty folders.

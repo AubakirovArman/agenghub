@@ -9,8 +9,14 @@ PROJECT="$TMP/project"
 HOME_DIR="$TMP/home"
 HISTORY="$TMP/history"
 EVIDENCE="$TMP/rc-evidence.jsonl"
+PERF="$TMP/perf-profile.json"
+AGENTHUB_BIN="${AGENTHUB_BIN:-$ROOT/target/debug/agenthub}"
 
-mkdir -p "$HOME_DIR/sessions/no-project/chats" "$HOME_DIR/ops" "$PROJECT/.agent/tx/tx-demo" "$HISTORY/runs/provider-deepseek"
+if [[ ! -x "$AGENTHUB_BIN" ]]; then
+  cargo build --manifest-path "$ROOT/Cargo.toml" --locked >/dev/null
+fi
+
+mkdir -p "$HOME_DIR/sessions/no-project/chats" "$HOME_DIR/ops" "$PROJECT/.agent/tx/tx-demo" "$PROJECT/.agent/tx/tx-control" "$HISTORY/runs/provider-deepseek"
 cat > "$HOME_DIR/sessions/no-project/chats/chat-demo.jsonl" <<'JSONL'
 {"at":"2026-05-17T00:00:00Z","kind":"created"}
 {"at":"2026-05-17T00:00:01Z","kind":"intent_classified","intent":"chat","mode":"chat","reason":"no project runtime in current folder","text":"hello"}
@@ -26,6 +32,17 @@ AgentHub transaction committed
 Files changed: 1
 TEXT
 printf '{"total_tokens":12,"estimated_cost_usd":0.00002}\n' > "$PROJECT/.agent/tx/tx-demo/cost.json"
+cat > "$PROJECT/.agent/tx/tx-control/report.md" <<'TEXT'
+tx-control BLOCKED_ON_HUMAN (/tmp/report.md)
+
+- Status: `BLOCKED_ON_HUMAN`
+TEXT
+printf '{"resumed_tx_id":"tx-resumed","status":"COMMITTED"}\n' > "$PROJECT/.agent/tx/tx-control/resume.json"
+printf '{"tx_id":"tx-control","revert_head":"abc"}\n' > "$PROJECT/.agent/tx/tx-control/undo.json"
+printf '{"commands":[{"classification":"needs_approval"}]}\n' > "$PROJECT/.agent/tx/tx-control/command_policy.json"
+cat > "$PERF" <<'JSON'
+{"tx_count":25,"metrics":[{"name":"transactions_no_commit","success":true,"avg_ms":1200},{"name":"tx_status","success":true}]}
+JSON
 touch "$HISTORY/runs/provider-deepseek/provider-dogfood-report.json"
 cat > "$HISTORY/index.jsonl" <<JSONL
 {"run_id":"provider-deepseek","archived_at":"2026-05-17T00:00:04Z","kind":"provider","report":"$HISTORY/runs/provider-deepseek/provider-dogfood-report.json","provider_report":"$HISTORY/runs/provider-deepseek/provider-dogfood-report.json","provider":"deepseek","provider_status":"passed","tx_id":"tx-demo"}
@@ -35,6 +52,8 @@ AGENTHUB_HOME="$HOME_DIR" \
 AGENTHUB_RC_SOURCE_ROOT="$PROJECT" \
 AGENTHUB_DOGFOOD_HISTORY_DIR="$HISTORY" \
 AGENTHUB_RC_EVIDENCE="$EVIDENCE" \
+AGENTHUB_RC_PERF_REPORT="$PERF" \
+AGENTHUB_BIN="$AGENTHUB_BIN" \
   "$ROOT/scripts/rc-evidence-collect.sh" > "$TMP/collect.out"
 
 grep -q '"session_id":"chat-demo"' "$EVIDENCE"
@@ -47,6 +66,11 @@ grep -q '"id":"chat_no_bootstrap"' "$EVIDENCE"
 grep -q '"id":"ops_no_bootstrap"' "$EVIDENCE"
 grep -q '"id":"cost_receipts"' "$EVIDENCE"
 grep -q '"id":"ops_receipts"' "$EVIDENCE"
+grep -q '"id":"resume"' "$EVIDENCE"
+grep -q '"id":"rewind"' "$EVIDENCE"
+grep -q '"id":"stats"' "$EVIDENCE"
+grep -q '"id":"approval_ux"' "$EVIDENCE"
+grep -q '"id":"long_session_latency"' "$EVIDENCE"
 
 AGENTHUB_DOGFOOD_HISTORY_DIR="$HISTORY" \
 AGENTHUB_DOGFOOD_MIN_SUITE_RUNS=0 \
@@ -57,7 +81,7 @@ AGENTHUB_RC_MIN_OPS_FLOWS=1 \
 AGENTHUB_RC_MIN_PROJECT_EDIT_FLOWS=1 \
 AGENTHUB_RC_MIN_COST_RECEIPTS=3 \
 AGENTHUB_RC_REQUIRED_PROVIDERS=deepseek \
-AGENTHUB_RC_REQUIRED_CHECKS=chat_no_bootstrap,ops_no_bootstrap,cost_receipts,ops_receipts \
+AGENTHUB_RC_REQUIRED_CHECKS=chat_no_bootstrap,ops_no_bootstrap,cost_receipts,ops_receipts,resume,rewind,stats,approval_ux,long_session_latency \
   "$ROOT/scripts/rc-dogfood-gate.sh" --check > "$TMP/gate.out"
 
 grep -q '1.0 RC dogfood gate: ready' "$TMP/gate.out"

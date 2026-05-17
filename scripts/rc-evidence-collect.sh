@@ -7,6 +7,8 @@ EVIDENCE="${AGENTHUB_RC_EVIDENCE:-$ROOT/target/dogfood/rc-evidence.jsonl}"
 HISTORY_DIR="${AGENTHUB_DOGFOOD_HISTORY_DIR:-$ROOT/target/dogfood/history}"
 AGENTHUB_DATA_HOME="${AGENTHUB_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/agenthub}"
 AGENTHUB_BIN="${AGENTHUB_BIN:-agenthub}"
+PERF_REPORT="${AGENTHUB_RC_PERF_REPORT:-$ROOT/target/perf/perf-profile.json}"
+LONG_SESSION_MIN_TX="${AGENTHUB_RC_LONG_SESSION_MIN_TX:-25}"
 
 tmp="$(mktemp "${TMPDIR:-/tmp}/agenthub-rc-evidence.XXXXXX")"
 trap 'rm -f "$tmp"' EXIT INT TERM
@@ -167,7 +169,19 @@ collect_project_transactions() {
   local tx_root="$SOURCE_ROOT/.agent/tx"
   [[ -d "$tx_root" ]] || return
   while IFS= read -r report; do
+    tx_dir="$(dirname "$report")"
     tx_id="$(basename "$(dirname "$report")")"
+    if [[ -f "$tx_dir/resume.json" ]]; then
+      write_check "resume" "project_tx" "$tx_dir/resume.json"
+    fi
+    if [[ -f "$tx_dir/undo.json" ]]; then
+      write_check "rewind" "project_tx" "$tx_dir/undo.json"
+    fi
+    if [[ -f "$tx_dir/command_policy.json" ]] && grep -q "needs_approval" "$tx_dir/command_policy.json"; then
+      write_check "approval_ux" "project_tx" "$tx_dir/command_policy.json"
+    elif [[ -f "$tx_dir/journal.jsonl" ]] && grep -q "BLOCKED_ON_HUMAN" "$tx_dir/journal.jsonl"; then
+      write_check "approval_ux" "project_tx" "$tx_dir/journal.jsonl"
+    fi
     if ! grep -q "AgentHub transaction committed" "$report" && ! grep -q "^$tx_id COMMITTED" "$report"; then
       continue
     fi
@@ -176,7 +190,7 @@ collect_project_transactions() {
       continue
     fi
     cost_receipt=false
-    if [[ -f "$(dirname "$report")/cost.json" ]]; then
+    if [[ -f "$tx_dir/cost.json" ]]; then
       cost_receipt=true
     fi
     write_session "$tx_id" "project" "project_edit" "transaction" "$cost_receipt" "project_tx" "$report"
@@ -234,10 +248,24 @@ collect_script_checks() {
   if (( cost_sessions_written > 0 )); then
     write_check "cost_receipts" "collector" "$EVIDENCE"
   fi
-  if [[ "${AGENTHUB_RC_COLLECT_RUN_STATS:-0}" == "1" ]]; then
+  if [[ "${AGENTHUB_RC_COLLECT_RUN_STATS:-1}" == "1" ]]; then
     if "$AGENTHUB_BIN" stats >/dev/null 2>&1; then
       write_check "stats" "agenthub_stats" "$SOURCE_ROOT"
     fi
+  fi
+  return 0
+}
+
+collect_perf_checks() {
+  [[ -f "$PERF_REPORT" ]] || return 0
+  local tx_count success_false
+  tx_count="$(json_field "$(tr -d '\n' < "$PERF_REPORT")" tx_count)"
+  success_false="$(grep -c '"success"[[:space:]]*:[[:space:]]*false' "$PERF_REPORT" || true)"
+  case "$tx_count" in
+    ''|*[!0-9]*) return 0 ;;
+  esac
+  if (( tx_count >= LONG_SESSION_MIN_TX )) && [[ "$success_false" == "0" ]]; then
+    write_check "long_session_latency" "perf_profile" "$PERF_REPORT"
   fi
   return 0
 }
@@ -253,6 +281,7 @@ collect_chat_dirs
 collect_project_transactions
 collect_provider_history
 collect_ops_receipts
+collect_perf_checks
 collect_script_checks
 
 mkdir -p "$(dirname "$EVIDENCE")"
