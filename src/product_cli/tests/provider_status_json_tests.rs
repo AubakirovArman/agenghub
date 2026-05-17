@@ -26,6 +26,7 @@ fn providers_status_json_surfaces_blocked_kimi_without_secret() -> Result<()> {
         assert_eq!(kimi["blocked"], true);
         assert_eq!(kimi["blocker_kind"], "external_credential");
         assert_eq!(kimi["credential_source"], "env:KIMI_API_KEY");
+        assert_eq!(kimi["credential_classification"], "known_auth_blocker");
         assert_eq!(kimi["auth_status"], "blocked");
         assert_eq!(kimi["auth_key_sha256_12"], "5e0492f3799a");
         assert_eq!(kimi["auth_key_source"], "env:KIMI_API_KEY");
@@ -58,6 +59,46 @@ fn providers_status_json_surfaces_blocked_kimi_without_secret() -> Result<()> {
         assert!(!json.contains("kimi-test-key"));
         Ok(())
     })
+}
+
+#[test]
+fn providers_status_json_blocks_kimi_cli_oauth_without_auth_report() -> Result<()> {
+    with_env_vars(
+        &[
+            ("DEEPSEEK_API_KEY", None),
+            ("DEEPSEEK_API_KEY_FILE", None),
+            (
+                "KIMI_API_KEY",
+                Some(r#"{"access_token":"oauth-secret","scope":"kimi-code"}"#.to_string()),
+            ),
+            ("KIMI_API_KEY_FILE", None),
+            ("MOONSHOT_API_KEY", None),
+            ("MOONSHOT_API_KEY_FILE", None),
+            ("AGENTHUB_KIMI_AUTH_REPORT", None),
+        ],
+        || {
+            let dir = tempfile::tempdir()?;
+            let json = providers::render_status_json(dir.path())?;
+            let parsed: serde_json::Value = serde_json::from_str(&json)?;
+            let kimi = parsed
+                .as_array()
+                .and_then(|items| items.iter().find(|item| item["provider"] == "kimi"))
+                .expect("kimi status row");
+
+            assert_eq!(kimi["state"], "blocked");
+            assert_eq!(kimi["available"], false);
+            assert_eq!(kimi["blocker_kind"], "external_credential");
+            assert_eq!(kimi["credential_source"], "env:KIMI_API_KEY");
+            assert_eq!(kimi["credential_classification"], "kimi_code_cli_oauth");
+            assert!(kimi["auth_status"].is_null());
+            assert!(kimi["detail"]
+                .as_str()
+                .unwrap_or_default()
+                .contains("Kimi Code CLI OAuth credentials"));
+            assert!(!json.contains("oauth-secret"));
+            Ok(())
+        },
+    )
 }
 
 #[test]

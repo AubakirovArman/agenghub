@@ -69,14 +69,19 @@ pub fn statuses(project_root: &Path) -> Result<Vec<ProviderStatus>> {
                 let api_key_env = kimi_api_key_env();
                 let api_key_file = kimi_api_key_file(project_root);
                 let api_key = api_key(&api_key_env, &api_key_file);
+                let credential_blocker = api_key.as_deref().and_then(|key| {
+                    key_rotation::unsupported_kimi_credential_reason(key)
+                        .map(|reason| format!("unsupported Kimi credential shape: {reason}"))
+                });
                 let auth_blocker = api_key
                     .as_deref()
                     .and_then(|key| kimi_auth_blocker_note(project_root, key));
+                let blocker = auth_blocker.or(credential_blocker);
                 return ProviderStatus {
                     info,
-                    available: api_key.is_some() && auth_blocker.is_none(),
-                    state: auth_blocker.as_ref().map(|_| "blocked".to_string()),
-                    state_note: auth_blocker,
+                    available: api_key.is_some() && blocker.is_none(),
+                    state: blocker.as_ref().map(|_| "blocked".to_string()),
+                    state_note: blocker,
                     path: None,
                     endpoint: Some(kimi_api_base_url()),
                     model: Some(kimi_api_model()),

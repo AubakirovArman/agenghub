@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.102-local-preview - 2026-05-17
+
+- Add redacted `credential_classification` metadata to `agenthub providers status --json` for Kimi credential blockers, matching the offline `providers inspect-key kimi --json` classification without exposing secrets.
+- Block Kimi Code CLI OAuth JSON directly in provider status even before a Kimi auth report exists, so raw provider automation sees `kimi_code_cli_oauth`/`kimi_code_cli_oauth_reported` as machine-readable external credential evidence.
+
 ## 0.4.101-local-preview - 2026-05-17
 
 - Add `agenthub readiness evidence [--json] [--check] [--no-refresh]`, a focused RC evidence report for dogfood history, session/Ops/project/cost thresholds, provider evidence, required RC checks, Kimi auth state, open blockers, and the final dogfood gate.
