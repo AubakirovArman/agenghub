@@ -178,6 +178,7 @@ fn run() -> Result<()> {
             }
         },
         Commands::Providers { command } => handlers::handle_providers(&project_root, command)?,
+        Commands::Ecosystem { command } => handlers::handle_ecosystem(command)?,
         Commands::Config { command } => handlers::handle_config(&project_root, command)?,
     }
 

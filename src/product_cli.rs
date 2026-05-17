@@ -1,6 +1,7 @@
 pub mod bootstrap;
 pub mod config;
 pub mod doctor;
+pub mod ecosystem;
 mod env;
 pub mod open;
 pub mod providers;

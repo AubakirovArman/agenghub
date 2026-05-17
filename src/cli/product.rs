@@ -89,6 +89,14 @@ pub enum ConfigCommands {
 }
 
 #[derive(Debug, Subcommand)]
+pub enum EcosystemCommands {
+    Status {
+        #[arg(long)]
+        json: bool,
+    },
+}
+
+#[derive(Debug, Subcommand)]
 pub enum OpenCommands {
     Dashboard,
     Report { tx_id: String },

@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.67-local-preview - 2026-05-17
+
+- Add `agenthub ecosystem status` with text and JSON output for the post-1.0 MCP/A2A foundation.
+- Keep MCP/A2A disabled by default while surfacing scope, transports, policy gates, and next implementation files for the roadmap.
+
 ## 0.4.66-local-preview - 2026-05-17
 
 - Carry the safe Kimi auth `auth_key_source` into the blocked `kimi_auth` row of `scripts/api-native-completion-audit.sh`.

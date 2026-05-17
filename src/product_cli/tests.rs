@@ -2,7 +2,7 @@ use anyhow::Result;
 
 use crate::agent_dir;
 
-use super::{config, doctor, providers};
+use super::{config, doctor, ecosystem, providers};
 
 mod bootstrap_tests;
 mod open_tests;
@@ -52,6 +52,33 @@ fn config_rejects_non_api_provider_values() -> Result<()> {
 
     assert!(error.to_string().contains("supports deepseek and kimi"));
     assert!(!config::path(dir.path()).exists());
+    Ok(())
+}
+
+#[test]
+fn ecosystem_status_surfaces_post_1_0_protocol_plan_without_enabling_network() -> Result<()> {
+    let rendered = ecosystem::render_status(false);
+
+    assert!(rendered.contains("phase\tpost_1_0_foundation"));
+    assert!(rendered.contains("default\tno_external_protocol_connections"));
+    assert!(rendered.contains("protocol\tmcp"));
+    assert!(rendered.contains("scope\ttools,resources,prompts"));
+    assert!(rendered.contains("transports\tstdio,streamable-http"));
+    assert!(rendered.contains("protocol\ta2a"));
+    assert!(rendered.contains("scope\tagent_cards,tasks,messages,artifacts"));
+    assert!(rendered.contains("disabled_until_explicit_registry_approval"));
+    assert!(rendered.contains("disabled_until_trusted_agent_card_approval"));
+    Ok(())
+}
+
+#[test]
+fn ecosystem_status_json_is_machine_readable() -> Result<()> {
+    let rendered = ecosystem::render_status(true);
+    let parsed: serde_json::Value = serde_json::from_str(&rendered)?;
+
+    assert_eq!(parsed.as_array().map(Vec::len), Some(2));
+    assert_eq!(parsed[0]["protocol"], "mcp");
+    assert_eq!(parsed[1]["protocol"], "a2a");
     Ok(())
 }
 

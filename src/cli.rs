@@ -7,7 +7,7 @@ mod product;
 mod tx;
 
 pub use admin::{AgentCommands, EnterpriseCommands, PluginCommands};
-pub use product::{ConfigCommands, OpenCommands, ProviderCommands};
+pub use product::{ConfigCommands, EcosystemCommands, OpenCommands, ProviderCommands};
 pub use tx::TxCommands;
 
 #[derive(Debug, Parser)]
@@ -141,6 +141,10 @@ pub enum Commands {
     Providers {
         #[command(subcommand)]
         command: ProviderCommands,
+    },
+    Ecosystem {
+        #[command(subcommand)]
+        command: EcosystemCommands,
     },
     Config {
         #[command(subcommand)]

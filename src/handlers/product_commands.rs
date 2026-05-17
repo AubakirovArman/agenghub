@@ -2,9 +2,9 @@ use std::{io::Read, path::Path};
 
 use anyhow::{bail, Result};
 
-use agenthub::product_cli::{config, doctor, open, providers, version};
+use agenthub::product_cli::{config, doctor, ecosystem, open, providers, version};
 
-use crate::cli::{ConfigCommands, OpenCommands, ProviderCommands};
+use crate::cli::{ConfigCommands, EcosystemCommands, OpenCommands, ProviderCommands};
 
 pub fn handle_doctor(project_root: &Path) -> Result<()> {
     let report = doctor::inspect(project_root)?;
@@ -168,6 +168,15 @@ pub fn handle_config(project_root: &Path, command: ConfigCommands) -> Result<()>
         ConfigCommands::Set { key, value } => {
             let path = config::set_value(project_root, &key, &value)?;
             println!("set\t{}\t{}\t{}", key, value, path.display());
+        }
+    }
+    Ok(())
+}
+
+pub fn handle_ecosystem(command: EcosystemCommands) -> Result<()> {
+    match command {
+        EcosystemCommands::Status { json } => {
+            print!("{}", ecosystem::render_status(json));
         }
     }
     Ok(())
