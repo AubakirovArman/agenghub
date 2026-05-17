@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.98-local-preview - 2026-05-17
+
+- Add redacted Kimi auth evidence fields to `agenthub providers status --json`, including auth status, safe fingerprint, auth key source, credential warning, and next action when the current key matches a blocked auth report.
+- Keep the provider status JSON secret-safe by carrying only existing redacted auth-report metadata and never the raw API key.
+
 ## 0.4.97-local-preview - 2026-05-17
 
 - Add per-provider `blocker_kind` metadata to `agenthub providers status --json`, classifying missing or blocked DeepSeek/Kimi rows as external credential blockers.

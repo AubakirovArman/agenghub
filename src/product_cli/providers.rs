@@ -1,12 +1,12 @@
 use std::path::{Path, PathBuf};
 
 use anyhow::{anyhow, Result};
-use serde_json::Value;
 use sha2::{Digest, Sha256};
 
 use super::config;
 use super::env::find_executable;
 
+mod auth_evidence;
 mod catalog;
 mod diagnostics;
 mod http;
@@ -19,6 +19,7 @@ mod roles;
 mod status_json;
 mod wizard;
 
+pub(super) use auth_evidence::{kimi_auth_blocker_evidence_for_status, kimi_auth_blocker_note};
 pub use catalog::{ProviderInfo, ProviderStatus};
 pub use key_inspection::{inspect_provider_key, KeyInspectOptions, KeyInspectResult};
 pub use key_rotation::{
@@ -70,7 +71,7 @@ pub fn statuses(project_root: &Path) -> Result<Vec<ProviderStatus>> {
                 let api_key = api_key(&api_key_env, &api_key_file);
                 let auth_blocker = api_key
                     .as_deref()
-                    .and_then(|key| matching_kimi_auth_blocker(project_root, key));
+                    .and_then(|key| kimi_auth_blocker_note(project_root, key));
                 return ProviderStatus {
                     info,
                     available: api_key.is_some() && auth_blocker.is_none(),
@@ -250,70 +251,6 @@ fn read_api_key_file(path: &Path) -> Option<String> {
         .filter(|value| !value.is_empty())
 }
 
-pub(super) fn kimi_auth_blocker_note(project_root: &Path, current_key: &str) -> Option<String> {
-    matching_kimi_auth_blocker(project_root, current_key)
-}
-
-fn matching_kimi_auth_blocker(project_root: &Path, current_key: &str) -> Option<String> {
-    let path = kimi_auth_report_path(project_root);
-    let report = std::fs::read_to_string(path)
-        .ok()
-        .and_then(|text| serde_json::from_str::<Value>(&text).ok())?;
-    if report.get("provider").and_then(Value::as_str) != Some("kimi") {
-        return None;
-    }
-    let status = report
-        .get("status")
-        .and_then(Value::as_str)
-        .unwrap_or("unknown");
-    if status == "passed" {
-        return None;
-    }
-    let report_key = report
-        .get("auth_key_sha256_12")
-        .and_then(Value::as_str)
-        .filter(|value| !value.is_empty())?;
-    let current_key = sha256_prefix(current_key.as_bytes());
-    if report_key != current_key {
-        return None;
-    }
-    let next_action = report
-        .get("next_action")
-        .and_then(Value::as_str)
-        .unwrap_or("run scripts/kimi-auth-check.sh");
-    let warning = report
-        .get("credential_warning")
-        .and_then(Value::as_str)
-        .filter(|value| !value.is_empty())
-        .map(|value| format!("; warning:{value}"))
-        .unwrap_or_default();
-    let source = report
-        .get("auth_key_source")
-        .and_then(Value::as_str)
-        .filter(|value| !value.is_empty())
-        .map(|value| format!("; source:{value}"))
-        .unwrap_or_default();
-    Some(format!(
-        "latest Kimi auth check {status}: key:{report_key}{source}{warning}; {next_action}"
-    ))
-}
-
-fn kimi_auth_report_path(project_root: &Path) -> PathBuf {
-    std::env::var_os("AGENTHUB_KIMI_AUTH_REPORT")
-        .filter(|value| !value.is_empty())
-        .map(PathBuf::from)
-        .unwrap_or_else(|| project_root.join("target/dogfood/kimi-auth-report.json"))
-}
-
-fn sha256_prefix(bytes: &[u8]) -> String {
-    let digest = Sha256::digest(bytes);
-    digest
-        .iter()
-        .take(6)
-        .map(|byte| format!("{byte:02x}"))
-        .collect::<String>()
-}
-
 pub fn render_status(project_root: &Path) -> Result<String> {
     let mut out = String::new();
     for status in statuses(project_root)? {
@@ -333,6 +270,15 @@ pub fn render_status(project_root: &Path) -> Result<String> {
 
 pub fn status_detail(status: &ProviderStatus) -> String {
     diagnostics::status_detail(status)
+}
+
+fn sha256_prefix(bytes: &[u8]) -> String {
+    let digest = Sha256::digest(bytes);
+    digest
+        .iter()
+        .take(6)
+        .map(|byte| format!("{byte:02x}"))
+        .collect::<String>()
 }
 
 pub fn setup_provider(project_root: &Path, provider: &str) -> Result<String> {

@@ -134,7 +134,7 @@ agenthub providers fallback reviewer deepseek kimi
 
 В interactive shell команда `/providers` открывает wizard с API readiness, default markers, role assignments, fallbacks и следующими setup/diagnose/test командами.
 
-`providers status --json` — raw machine-readable provider state. Blocked или missing DeepSeek/Kimi rows включают `blocker_kind: "external_credential"`, чтобы automation классифицировала auth/setup blockers ещё до recovery.
+`providers status --json` — raw machine-readable provider state. Blocked или missing DeepSeek/Kimi rows включают `blocker_kind: "external_credential"`, чтобы automation классифицировала auth/setup blockers ещё до recovery. Если Kimi row совпадает с blocked auth report, тот же JSON row добавляет redacted `auth_status`, `auth_key_sha256_12`, `auth_key_source`, `credential_warning` и `next_action`, чтобы automation не парсила human `detail` string.
 
 Поддерживаемые providers:
 

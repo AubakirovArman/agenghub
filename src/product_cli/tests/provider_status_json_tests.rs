@@ -25,6 +25,14 @@ fn providers_status_json_surfaces_blocked_kimi_without_secret() -> Result<()> {
         assert_eq!(kimi["blocked"], true);
         assert_eq!(kimi["blocker_kind"], "external_credential");
         assert_eq!(kimi["credential_source"], "env:KIMI_API_KEY");
+        assert_eq!(kimi["auth_status"], "blocked");
+        assert_eq!(kimi["auth_key_sha256_12"], "5e0492f3799a");
+        assert_eq!(kimi["auth_key_source"], "env:KIMI_API_KEY");
+        assert_eq!(
+            kimi["credential_warning"],
+            "plain Moonshot API key required"
+        );
+        assert_eq!(kimi["next_action"], "replace key");
         assert!(kimi["detail"]
             .as_str()
             .unwrap_or_default()

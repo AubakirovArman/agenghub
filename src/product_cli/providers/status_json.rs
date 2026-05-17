@@ -3,7 +3,7 @@ use std::path::Path;
 use anyhow::Result;
 use serde::Serialize;
 
-use super::{status_detail, statuses, ProviderStatus};
+use super::{kimi_auth_blocker_evidence_for_status, status_detail, statuses, ProviderStatus};
 
 #[derive(Debug, Serialize)]
 pub struct ProviderStatusJson {
@@ -21,6 +21,16 @@ pub struct ProviderStatusJson {
     pub blocked: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub blocker_kind: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub auth_status: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub auth_key_sha256_12: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub auth_key_source: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub credential_warning: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub next_action: Option<String>,
 }
 
 pub fn render_status_json(project_root: &Path) -> Result<String> {
@@ -28,6 +38,7 @@ pub fn render_status_json(project_root: &Path) -> Result<String> {
         .into_iter()
         .map(|status| {
             let state = status_state(&status).to_string();
+            let auth_evidence = kimi_auth_blocker_evidence_for_status(project_root, &status);
             ProviderStatusJson {
                 provider: status.info.id.clone(),
                 state: state.clone(),
@@ -45,6 +56,19 @@ pub fn render_status_json(project_root: &Path) -> Result<String> {
                 credential_source: credential_source(&status),
                 blocked: status.state.as_deref() == Some("blocked"),
                 blocker_kind: blocker_kind(&status, &state).map(str::to_string),
+                auth_status: auth_evidence
+                    .as_ref()
+                    .map(|evidence| evidence.status.clone()),
+                auth_key_sha256_12: auth_evidence
+                    .as_ref()
+                    .map(|evidence| evidence.auth_key_sha256_12.clone()),
+                auth_key_source: auth_evidence
+                    .as_ref()
+                    .and_then(|evidence| evidence.auth_key_source.clone()),
+                credential_warning: auth_evidence
+                    .as_ref()
+                    .and_then(|evidence| evidence.credential_warning.clone()),
+                next_action: auth_evidence.map(|evidence| evidence.next_action),
             }
         })
         .collect::<Vec<_>>();
