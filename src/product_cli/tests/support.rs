@@ -42,6 +42,8 @@ pub(super) fn with_kimi_env_using_base<T>(
     let previous_model = std::env::var_os("KIMI_MODEL");
     let previous_api_model = std::env::var_os("KIMI_API_MODEL");
     let previous_auth_report = std::env::var_os("AGENTHUB_KIMI_AUTH_REPORT");
+    let previous_test_global = std::env::var_os("AGENTHUB_TEST_KIMI_GLOBAL_ENDPOINT");
+    let previous_test_china = std::env::var_os("AGENTHUB_TEST_KIMI_CHINA_ENDPOINT");
     set_optional_env("KIMI_API_BASE_URL", None);
     set_optional_env("KIMI_BASE_URL", None);
     set_optional_env("MOONSHOT_API_BASE_URL", None);
@@ -54,6 +56,8 @@ pub(super) fn with_kimi_env_using_base<T>(
     set_optional_env("KIMI_MODEL", model);
     set_optional_env("KIMI_API_MODEL", None);
     set_optional_env("AGENTHUB_KIMI_AUTH_REPORT", None);
+    set_optional_env("AGENTHUB_TEST_KIMI_GLOBAL_ENDPOINT", None);
+    set_optional_env("AGENTHUB_TEST_KIMI_CHINA_ENDPOINT", None);
     let result = run();
     restore_env("KIMI_API_BASE_URL", previous_base);
     restore_env("KIMI_BASE_URL", previous_base_short);
@@ -66,6 +70,8 @@ pub(super) fn with_kimi_env_using_base<T>(
     restore_env("KIMI_MODEL", previous_model);
     restore_env("KIMI_API_MODEL", previous_api_model);
     restore_env("AGENTHUB_KIMI_AUTH_REPORT", previous_auth_report);
+    restore_env("AGENTHUB_TEST_KIMI_GLOBAL_ENDPOINT", previous_test_global);
+    restore_env("AGENTHUB_TEST_KIMI_CHINA_ENDPOINT", previous_test_china);
     result
 }
 

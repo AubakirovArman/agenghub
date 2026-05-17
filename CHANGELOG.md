@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.58-local-preview - 2026-05-17
+
+- Make `agenthub providers preflight-key kimi --from-file <new-key-file>` test both official Moonshot endpoints when the configured Kimi endpoint is official, without writing `.kimi` or printing the secret.
+- When only the China endpoint passes, print the exact `MOONSHOT_BASE_URL=https://api.moonshot.cn/v1 agenthub providers rc-unblock kimi --from-file <new-key-file>` next step so the successful preflight route is preserved during RC unblock.
+
 ## 0.4.57-local-preview - 2026-05-17
 
 - Add `agenthub providers preflight-key kimi --from-file <new-key-file>` to live-test a replacement Kimi/Moonshot key without writing `.kimi` or printing the secret.

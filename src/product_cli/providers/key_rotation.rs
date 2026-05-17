@@ -10,6 +10,9 @@ use anyhow::{anyhow, Result};
 #[cfg(unix)]
 use std::os::unix::fs::{OpenOptionsExt, PermissionsExt};
 
+const KIMI_GLOBAL_ENDPOINT: &str = "https://api.moonshot.ai/v1";
+const KIMI_CHINA_ENDPOINT: &str = "https://api.moonshot.cn/v1";
+
 #[derive(Debug, Default)]
 pub struct KeyRotationOptions {
     pub from_file: Option<PathBuf>,
@@ -87,27 +90,84 @@ pub fn preflight_provider_key(
         status.model.as_deref().unwrap_or("default")
     ));
 
-    let report = super::http::test_provider_with_key(status, Some(candidate_key))?;
-    let provider_test_failed = super::test_report_failed(&report);
-    out.push_str("provider_test\tbegin\n");
-    for line in report.lines() {
-        out.push_str(&format!("provider_test\t{line}\n"));
+    let configured_endpoint = status.endpoint.clone();
+    let endpoint_candidates = preflight_endpoint_candidates(configured_endpoint.as_deref());
+    let mut passed_endpoint = None;
+    let provider_test_failed;
+    if endpoint_candidates.len() == 1 {
+        let endpoint = endpoint_candidates[0].endpoint.clone();
+        status.endpoint = Some(endpoint.clone());
+        let report = super::http::test_provider_with_key(status.clone(), Some(candidate_key))?;
+        provider_test_failed = super::test_report_failed(&report);
+        if !provider_test_failed {
+            passed_endpoint = Some(endpoint);
+        }
+        out.push_str("provider_test\tbegin\n");
+        for line in report.lines() {
+            out.push_str(&format!("provider_test\t{line}\n"));
+        }
+    } else {
+        for candidate in &endpoint_candidates {
+            let mut endpoint_status = status.clone();
+            endpoint_status.endpoint = Some(candidate.endpoint.clone());
+            let report =
+                super::http::test_provider_with_key(endpoint_status, Some(candidate_key.clone()))?;
+            let failed = super::test_report_failed(&report);
+            out.push_str(&format!("endpoint_test\t{}\tbegin\n", candidate.label));
+            out.push_str(&format!(
+                "endpoint_test\t{}\tendpoint\t{}\n",
+                candidate.label, candidate.endpoint
+            ));
+            for line in report.lines() {
+                out.push_str(&format!("endpoint_test\t{}\t{line}\n", candidate.label));
+            }
+            out.push_str(&format!(
+                "endpoint_test\t{}\t{}\n",
+                candidate.label,
+                if failed { "failed" } else { "passed" }
+            ));
+            if !failed && passed_endpoint.is_none() {
+                passed_endpoint = Some(candidate.endpoint.clone());
+            }
+        }
+        provider_test_failed = passed_endpoint.is_none();
+        out.push_str(&format!(
+            "provider_test\t{}\n",
+            if provider_test_failed {
+                "failed"
+            } else {
+                "passed"
+            }
+        ));
     }
     if provider_test_failed {
-        out.push_str("provider_test\tfailed\n");
+        if endpoint_candidates.len() == 1 {
+            out.push_str("provider_test\tfailed\n");
+        }
         out.push_str("status\tblocked\n");
         out.push_str(&format!(
             "next\t1\tagenthub providers preflight-key kimi {source_args}\n"
         ));
         out.push_str("next\t2\treplace or rotate the Kimi/Moonshot API key candidate\n");
         out.push_str(
-            "next\t3\ttry MOONSHOT_BASE_URL=https://api.moonshot.cn/v1 for China-region keys\n",
+            "next\t3\tif this is a China-region key, run with MOONSHOT_BASE_URL=https://api.moonshot.cn/v1\n",
         );
     } else {
-        out.push_str("provider_test\tpassed\n");
+        if endpoint_candidates.len() == 1 {
+            out.push_str("provider_test\tpassed\n");
+        }
         out.push_str("status\tvalid\n");
+        let passed_endpoint = passed_endpoint
+            .as_deref()
+            .or(configured_endpoint.as_deref())
+            .unwrap_or(KIMI_GLOBAL_ENDPOINT);
         out.push_str(&format!(
-            "next\t1\tagenthub providers rc-unblock kimi {source_args}\n"
+            "next\t1\t{}\n",
+            rc_unblock_command_for_endpoint(
+                &source_args,
+                configured_endpoint.as_deref(),
+                passed_endpoint
+            )
         ));
         out.push_str("next\t2\tagenthub providers unblock kimi\n");
     }
@@ -193,6 +253,81 @@ pub fn rotate_provider_key(
         output: out,
         provider_test_failed,
     })
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct EndpointCandidate {
+    label: &'static str,
+    endpoint: String,
+}
+
+fn preflight_endpoint_candidates(configured: Option<&str>) -> Vec<EndpointCandidate> {
+    let official = official_kimi_endpoints();
+    let Some(configured) = configured else {
+        return official;
+    };
+    if !official
+        .iter()
+        .any(|candidate| candidate.endpoint == configured)
+    {
+        return vec![EndpointCandidate {
+            label: "configured",
+            endpoint: configured.to_string(),
+        }];
+    }
+
+    let mut candidates = Vec::new();
+    for candidate in official {
+        if candidate.endpoint == configured {
+            candidates.insert(0, candidate);
+        } else {
+            candidates.push(candidate);
+        }
+    }
+    candidates
+}
+
+fn official_kimi_endpoints() -> Vec<EndpointCandidate> {
+    #[cfg(test)]
+    if let (Ok(global), Ok(china)) = (
+        std::env::var("AGENTHUB_TEST_KIMI_GLOBAL_ENDPOINT"),
+        std::env::var("AGENTHUB_TEST_KIMI_CHINA_ENDPOINT"),
+    ) {
+        return vec![
+            EndpointCandidate {
+                label: "global",
+                endpoint: global,
+            },
+            EndpointCandidate {
+                label: "china",
+                endpoint: china,
+            },
+        ];
+    }
+
+    vec![
+        EndpointCandidate {
+            label: "global",
+            endpoint: KIMI_GLOBAL_ENDPOINT.to_string(),
+        },
+        EndpointCandidate {
+            label: "china",
+            endpoint: KIMI_CHINA_ENDPOINT.to_string(),
+        },
+    ]
+}
+
+fn rc_unblock_command_for_endpoint(
+    source_args: &str,
+    configured_endpoint: Option<&str>,
+    passed_endpoint: &str,
+) -> String {
+    let base = format!("agenthub providers rc-unblock kimi {source_args}");
+    if configured_endpoint == Some(passed_endpoint) {
+        base
+    } else {
+        format!("MOONSHOT_BASE_URL={passed_endpoint} {base}")
+    }
 }
 
 fn key_source_args(options: &KeyPreflightOptions) -> String {
