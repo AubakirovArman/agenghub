@@ -43,13 +43,13 @@ First-time note: GitHub 可能要等第一篇 wiki page 在 browser 中保存后
 scripts/prepare-1.0-release.sh
 ```
 
-如果希望 dogfood readiness 未通过时脚本失败，设置 `AGENTHUB_PREPARE_REQUIRE_DOGFOOD=1`。
+如果希望 dogfood readiness 未通过时脚本失败，设置 `AGENTHUB_PREPARE_REQUIRE_DOGFOOD=1`。Set `AGENTHUB_PREPARE_REQUIRE_KIMI_AUTH=1` when Kimi auth must pass instead of being reported as a non-enforced preparation blocker.
 
 For a final 1.0 RC rehearsal, also require the product evidence gate:
 
 ```bash
 scripts/rc-evidence-collect.sh
-AGENTHUB_PREPARE_REQUIRE_DOGFOOD=1 AGENTHUB_PREPARE_REQUIRE_RC_DOGFOOD=1 scripts/prepare-1.0-release.sh
+AGENTHUB_PREPARE_REQUIRE_DOGFOOD=1 AGENTHUB_PREPARE_REQUIRE_KIMI_AUTH=1 AGENTHUB_PREPARE_REQUIRE_RC_DOGFOOD=1 scripts/prepare-1.0-release.sh
 ```
 
 That gate runs `scripts/rc-dogfood-gate.sh --check`, which requires real-session evidence for Chat/Ops/Project usage, provider dogfood for DeepSeek/Kimi, cost receipts, resume/rewind/stats checks, no Chat/Ops bootstrap side effects, and no open blocker/critical release issues.

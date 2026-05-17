@@ -5,6 +5,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VERSION="${AGENTHUB_1_0_VERSION:-1.0.0}"
 REQUIRE_DOGFOOD="${AGENTHUB_PREPARE_REQUIRE_DOGFOOD:-0}"
 REQUIRE_RC_DOGFOOD="${AGENTHUB_PREPARE_REQUIRE_RC_DOGFOOD:-0}"
+REQUIRE_KIMI_AUTH="${AGENTHUB_PREPARE_REQUIRE_KIMI_AUTH:-0}"
 SKIP_RELEASE_READINESS="${AGENTHUB_PREPARE_SKIP_RELEASE_READINESS:-0}"
 
 run_step() {
@@ -29,6 +30,14 @@ else
   printf 'dogfood gate not enforced; set AGENTHUB_PREPARE_REQUIRE_DOGFOOD=1 for final tag gating\n'
 fi
 
+if [[ "$REQUIRE_KIMI_AUTH" == "1" ]]; then
+  run_step "Kimi auth unblock gate" "$ROOT/scripts/kimi-auth-check.sh"
+else
+  if ! "$ROOT/scripts/kimi-auth-check.sh"; then
+    printf 'Kimi auth gate not enforced; set AGENTHUB_PREPARE_REQUIRE_KIMI_AUTH=1 for final Kimi gating\n'
+  fi
+fi
+
 run_step "1.0 RC dogfood gate summary" "$ROOT/scripts/rc-dogfood-gate.sh"
 if [[ "$REQUIRE_RC_DOGFOOD" == "1" ]]; then
   run_step "1.0 RC dogfood gate" "$ROOT/scripts/rc-dogfood-gate.sh" --check
@@ -43,6 +52,7 @@ AgentHub $VERSION preparation checklist
 Required before final tag:
 - scripts/dogfood-readiness.sh --check passes with real multi-day dogfood.
 - scripts/rc-acceptance.sh passes as a local rehearsal for stats, Ops no-bootstrap/receipts, approval UX, resume, and undo/rewind mechanics.
+- scripts/kimi-auth-check.sh passes and Kimi provider dogfood is archived with provider_status=passed.
 - scripts/rc-dogfood-gate.sh --check passes with 100+ real sessions, 20+ Ops flows, 20+ project-edit flows, required provider evidence, no open blocker/critical issues, and explicit resume/rewind/stats/cost/bootstrap checks.
 - GitHub Pages workflow has deployed successfully.
 - scripts/publish-wiki.sh has published the project wiki.

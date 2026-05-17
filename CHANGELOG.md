@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.39-local-preview - 2026-05-17
+
+- Wire `scripts/kimi-auth-check.sh` into `scripts/prepare-1.0-release.sh` so 1.0 preparation refreshes source-backed Kimi auth blocker evidence before the RC gate.
+- Add `AGENTHUB_PREPARE_REQUIRE_KIMI_AUTH=1` for final release gating when Kimi auth must pass instead of being reported as a non-enforced preparation blocker.
+
 ## 0.4.38-local-preview - 2026-05-17
 
 - Teach `scripts/rc-evidence-collect.sh` to ingest `kimi-auth-report.json` and emit an explicit `kimi-auth` critical blocker when the Kimi unblock runbook is still blocked.

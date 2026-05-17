@@ -43,13 +43,13 @@ Use the release preparation script before creating a final tag:
 scripts/prepare-1.0-release.sh
 ```
 
-Set `AGENTHUB_PREPARE_REQUIRE_DOGFOOD=1` when you want the script to fail until `scripts/dogfood-readiness.sh --check` passes.
+Set `AGENTHUB_PREPARE_REQUIRE_DOGFOOD=1` when you want the script to fail until `scripts/dogfood-readiness.sh --check` passes. Set `AGENTHUB_PREPARE_REQUIRE_KIMI_AUTH=1` when Kimi auth must pass instead of being reported as a non-enforced preparation blocker.
 
 For a final 1.0 RC rehearsal, also require the product evidence gate:
 
 ```bash
 scripts/rc-evidence-collect.sh
-AGENTHUB_PREPARE_REQUIRE_DOGFOOD=1 AGENTHUB_PREPARE_REQUIRE_RC_DOGFOOD=1 scripts/prepare-1.0-release.sh
+AGENTHUB_PREPARE_REQUIRE_DOGFOOD=1 AGENTHUB_PREPARE_REQUIRE_KIMI_AUTH=1 AGENTHUB_PREPARE_REQUIRE_RC_DOGFOOD=1 scripts/prepare-1.0-release.sh
 ```
 
 That gate runs `scripts/rc-dogfood-gate.sh --check`, which requires real-session evidence for Chat/Ops/Project usage, provider dogfood for DeepSeek/Kimi, cost receipts, resume/rewind/stats checks, no Chat/Ops bootstrap side effects, and no open blocker/critical release issues.
