@@ -4,6 +4,10 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.45-local-preview - 2026-05-17
+
+- Add a CLI-level provider-test exit-code smoke so release readiness verifies `agenthub providers test` exits non-zero when credentials are missing while preserving the structured receipt.
+
 ## 0.4.44-local-preview - 2026-05-17
 
 - Make `agenthub providers test <provider>` exit non-zero when the structured provider-test receipt starts with `failed` or `missing`, while still printing the full diagnostic receipt.
