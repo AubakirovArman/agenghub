@@ -14,6 +14,10 @@ OPS_COUNT=0
 OPS_COMPLETED=0
 OPS_COST_RECEIPTS=0
 OPS_PROJECT_PATH=""
+ACCEPTANCE_STATUS="skipped"
+ACCEPTANCE_EVIDENCE="${AGENTHUB_RC_ACCEPTANCE_EVIDENCE:-$ROOT/target/dogfood/rc-acceptance-evidence.jsonl}"
+ACCEPTANCE_WORK="${AGENTHUB_RC_ACCEPTANCE_WORK:-$ROOT/target/rc-acceptance}"
+ACCEPTANCE_ARTIFACTS=""
 PROVIDER_DOGFOOD_STATUS="skipped"
 PROVIDER_DOGFOOD_REPORT=""
 
@@ -140,6 +144,26 @@ run_ops_smoke() {
 
 run_step "ops headless checks" run_ops_smoke
 
+run_acceptance_rehearsal() {
+  if [[ "${AGENTHUB_DOGFOOD_ACCEPTANCE:-0}" != "1" ]]; then
+    printf 'skip RC acceptance rehearsal; set AGENTHUB_DOGFOOD_ACCEPTANCE=1 to run stats, approval, resume and rewind checks\n'
+    return
+  fi
+
+  local output
+  mkdir -p "$(dirname "$ACCEPTANCE_EVIDENCE")" "$ROOT/target/dogfood"
+  output="$ROOT/target/dogfood/rc-acceptance.out"
+  rm -f "$ACCEPTANCE_EVIDENCE"
+  AGENTHUB_RC_ACCEPTANCE_EVIDENCE="$ACCEPTANCE_EVIDENCE" \
+    AGENTHUB_RC_ACCEPTANCE_WORK="$ACCEPTANCE_WORK" \
+    "$ROOT/scripts/rc-acceptance.sh" > "$output"
+  grep -q 'AgentHub RC acceptance rehearsal passed' "$output"
+  ACCEPTANCE_STATUS="passed"
+  ACCEPTANCE_ARTIFACTS="$output"
+}
+
+run_step "rc acceptance rehearsal" run_acceptance_rehearsal
+
 run_provider_dogfood() {
   if [[ -z "${AGENTHUB_DOGFOOD_PROVIDER:-}" ]]; then
     printf 'skip provider dogfood; set AGENTHUB_DOGFOOD_PROVIDER=deepseek|kimi and AGENTHUB_PROVIDER_DOGFOOD_LIVE=1\n'
@@ -191,6 +215,13 @@ write_report() {
     "ops_sessions": $OPS_COMPLETED,
     "ops_cost_receipts": $OPS_COST_RECEIPTS
   },
+  "acceptance": {
+    "requested": ${AGENTHUB_DOGFOOD_ACCEPTANCE:-0},
+    "status": "$(json_escape "$ACCEPTANCE_STATUS")",
+    "evidence": "$(json_escape "$ACCEPTANCE_EVIDENCE")",
+    "work": "$(json_escape "$ACCEPTANCE_WORK")",
+    "artifacts": "$(json_escape "$ACCEPTANCE_ARTIFACTS")"
+  },
   "provider": {
     "requested_provider": "$(json_escape "${AGENTHUB_DOGFOOD_PROVIDER:-}")",
     "status": "$(json_escape "$PROVIDER_DOGFOOD_STATUS")",
@@ -203,7 +234,13 @@ JSON
 
 write_report
 if [[ "${AGENTHUB_DOGFOOD_ARCHIVE:-1}" == "1" ]]; then
-  "$ROOT/scripts/archive-dogfood.sh"
+  if [[ "$ACCEPTANCE_STATUS" == "passed" ]]; then
+    AGENTHUB_RC_ACCEPTANCE_EVIDENCE="$ACCEPTANCE_EVIDENCE" \
+      AGENTHUB_RC_ACCEPTANCE_WORK="$ACCEPTANCE_WORK" \
+      "$ROOT/scripts/archive-dogfood.sh"
+  else
+    "$ROOT/scripts/archive-dogfood.sh"
+  fi
 else
   printf 'skip dogfood evidence archive; AGENTHUB_DOGFOOD_ARCHIVE=0\n'
 fi

@@ -23,4 +23,19 @@ grep -q '"flow":"ops"' "$EVIDENCE"
 grep -q '"flow":"project_edit"' "$EVIDENCE"
 test ! -e "$WORK/ops-empty/.agent"
 
+REPORT="$TMP/dogfood-report.json"
+HISTORY="$TMP/history"
+cat > "$REPORT" <<'JSON'
+{"status":"passed"}
+JSON
+AGENTHUB_DOGFOOD_ARCHIVE_SOURCE="$REPORT" \
+AGENTHUB_DOGFOOD_HISTORY_DIR="$HISTORY" \
+AGENTHUB_DOGFOOD_ARCHIVE_ID="acceptance-test" \
+AGENTHUB_RC_ACCEPTANCE_EVIDENCE="$EVIDENCE" \
+AGENTHUB_RC_ACCEPTANCE_WORK="$WORK" \
+  "$ROOT/scripts/archive-dogfood.sh" > "$TMP/archive.out"
+test -f "$HISTORY/runs/acceptance-test/rc-acceptance-evidence.jsonl"
+test -f "$HISTORY/runs/acceptance-test/rc-acceptance-artifacts/ops-exec.jsonl"
+grep -q '"acceptance_evidence":' "$HISTORY/index.jsonl"
+
 printf 'agenthub RC acceptance rehearsal test passed\n'

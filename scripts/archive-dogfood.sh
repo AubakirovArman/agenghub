@@ -5,6 +5,8 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SOURCE="${AGENTHUB_DOGFOOD_ARCHIVE_SOURCE:-$ROOT/target/dogfood/dogfood-report.json}"
 HISTORY_DIR="${AGENTHUB_DOGFOOD_HISTORY_DIR:-$ROOT/target/dogfood/history}"
 PROVIDER_REPORT="${AGENTHUB_PROVIDER_DOGFOOD_REPORT:-}"
+ACCEPTANCE_EVIDENCE="${AGENTHUB_RC_ACCEPTANCE_EVIDENCE:-}"
+ACCEPTANCE_WORK="${AGENTHUB_RC_ACCEPTANCE_WORK:-}"
 KIND="${AGENTHUB_DOGFOOD_ARCHIVE_KIND:-suite}"
 ARCHIVED_AT="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 RUN_ID="${AGENTHUB_DOGFOOD_ARCHIVE_ID:-$(date -u +"%Y%m%dT%H%M%SZ")-$$}"
@@ -54,6 +56,7 @@ archived_report="$RUN_DIR/$source_name"
 cp "$SOURCE" "$archived_report"
 
 archived_provider_report=""
+archived_acceptance_evidence=""
 provider=""
 provider_status=""
 tx_id=""
@@ -71,6 +74,15 @@ if [[ -f "$PROVIDER_REPORT" ]]; then
   copy_provider_artifacts "$(json_value "$PROVIDER_REPORT" artifact_dir)"
 fi
 
+if [[ -n "$ACCEPTANCE_EVIDENCE" && -f "$ACCEPTANCE_EVIDENCE" ]]; then
+  archived_acceptance_evidence="$RUN_DIR/rc-acceptance-evidence.jsonl"
+  cp "$ACCEPTANCE_EVIDENCE" "$archived_acceptance_evidence"
+  if [[ -n "$ACCEPTANCE_WORK" && -d "$ACCEPTANCE_WORK/artifacts" ]]; then
+    mkdir -p "$RUN_DIR/rc-acceptance-artifacts"
+    cp -R "$ACCEPTANCE_WORK/artifacts"/. "$RUN_DIR/rc-acceptance-artifacts/"
+  fi
+fi
+
 if [[ -z "$provider" ]]; then
   provider="$(json_value "$SOURCE" requested_provider)"
 fi
@@ -79,7 +91,7 @@ if [[ -z "$provider_status" ]]; then
 fi
 
 line=$(cat <<JSON
-{"run_id":"$(json_escape "$RUN_ID")","archived_at":"$ARCHIVED_AT","kind":"$(json_escape "$KIND")","report":"$(json_escape "$archived_report")","provider_report":"$(json_escape "$archived_provider_report")","provider":"$(json_escape "$provider")","provider_status":"$(json_escape "$provider_status")","tx_id":"$(json_escape "$tx_id")"}
+{"run_id":"$(json_escape "$RUN_ID")","archived_at":"$ARCHIVED_AT","kind":"$(json_escape "$KIND")","report":"$(json_escape "$archived_report")","provider_report":"$(json_escape "$archived_provider_report")","acceptance_evidence":"$(json_escape "$archived_acceptance_evidence")","provider":"$(json_escape "$provider")","provider_status":"$(json_escape "$provider_status")","tx_id":"$(json_escape "$tx_id")"}
 JSON
 )
 

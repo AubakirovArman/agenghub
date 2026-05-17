@@ -273,6 +273,49 @@ collect_dogfood_report() {
   fi
 }
 
+collect_acceptance_evidence() {
+  local evidence
+  for evidence in "$ROOT/target/dogfood/rc-acceptance-evidence.jsonl" "$HISTORY_DIR"/runs/*/rc-acceptance-evidence.jsonl; do
+    [[ -f "$evidence" ]] || continue
+    collect_acceptance_evidence_file "$evidence"
+  done
+  return 0
+}
+
+collect_acceptance_evidence_file() {
+  local evidence="$1"
+  local run_id prefix line kind status id mode flow provider cost_receipt
+  run_id="$(basename "$(dirname "$evidence")")"
+  prefix=""
+  if [[ "$run_id" != "." && "$run_id" != "dogfood" && "$run_id" != "target" ]]; then
+    prefix="acceptance-${run_id}-"
+  fi
+
+  while IFS= read -r line; do
+    [[ -z "$line" ]] && continue
+    status="$(json_field "$line" status)"
+    [[ "$status" == "passed" ]] || continue
+    kind="$(json_field "$line" kind)"
+    case "$kind" in
+      session)
+        id="$(json_field "$line" session_id)"
+        mode="$(json_field "$line" mode)"
+        flow="$(json_field "$line" flow)"
+        provider="$(json_field "$line" provider)"
+        cost_receipt="$(json_field "$line" cost_receipt)"
+        [[ -n "$id" ]] || continue
+        [[ "$cost_receipt" == "true" ]] || cost_receipt=false
+        write_session "${prefix}${id}" "$mode" "$flow" "$provider" "$cost_receipt" "acceptance_rehearsal" "$evidence"
+        ;;
+      check)
+        id="$(json_field "$line" id)"
+        [[ -n "$id" ]] || continue
+        write_check "$id" "acceptance_rehearsal" "$evidence"
+        ;;
+    esac
+  done < "$evidence"
+}
+
 collect_ops_receipts() {
   local receipts="$AGENTHUB_DATA_HOME/ops/command_receipts.jsonl"
   if [[ -f "$receipts" && -s "$receipts" ]]; then
@@ -332,6 +375,7 @@ collect_chat_dirs
 collect_project_transactions
 collect_provider_history
 collect_dogfood_reports
+collect_acceptance_evidence
 collect_ops_receipts
 collect_perf_checks
 collect_script_checks

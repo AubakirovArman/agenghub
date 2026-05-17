@@ -16,7 +16,7 @@ if [[ ! -x "$AGENTHUB_BIN" ]]; then
   cargo build --manifest-path "$ROOT/Cargo.toml" --locked >/dev/null
 fi
 
-mkdir -p "$HOME_DIR/sessions/no-project/chats" "$HOME_DIR/ops" "$PROJECT/.agent/tx/tx-demo" "$PROJECT/.agent/tx/tx-control" "$HISTORY/runs/provider-deepseek" "$HISTORY/runs/suite-stress"
+mkdir -p "$HOME_DIR/sessions/no-project/chats" "$HOME_DIR/ops" "$PROJECT/.agent/tx/tx-demo" "$PROJECT/.agent/tx/tx-control" "$HISTORY/runs/provider-deepseek" "$HISTORY/runs/suite-stress" "$HISTORY/runs/suite-acceptance"
 cat > "$HOME_DIR/sessions/no-project/chats/chat-demo.jsonl" <<'JSONL'
 {"at":"2026-05-17T00:00:00Z","kind":"created"}
 {"at":"2026-05-17T00:00:01Z","kind":"intent_classified","intent":"chat","mode":"chat","reason":"no project runtime in current folder","text":"hello"}
@@ -54,6 +54,13 @@ cat > "$HISTORY/runs/suite-stress/dogfood-report.json" <<'JSON'
   }
 }
 JSON
+cat > "$HISTORY/runs/suite-acceptance/rc-acceptance-evidence.jsonl" <<'JSONL'
+{"kind":"check","id":"approval_ux","status":"passed","evidence_type":"acceptance_rehearsal","source":"headless_exec","path":"/tmp/headless-approval.jsonl"}
+{"kind":"check","id":"resume","status":"passed","evidence_type":"acceptance_rehearsal","source":"tx_resume","path":"/tmp/resume-resume.txt"}
+{"kind":"check","id":"rewind","status":"passed","evidence_type":"acceptance_rehearsal","source":"tx_undo","path":"/tmp/rewind-undo.txt"}
+{"kind":"session","session_id":"acceptance-ops-exec","mode":"ops","flow":"ops","provider":"local-shell","status":"passed","cost_receipt":true,"evidence_type":"acceptance_rehearsal","path":"/tmp/ops-exec.jsonl"}
+{"kind":"session","session_id":"acceptance-project-resume","mode":"project","flow":"project_edit","provider":"transaction","status":"passed","cost_receipt":true,"evidence_type":"acceptance_rehearsal","path":"/tmp/resume-resume.txt"}
+JSONL
 cat > "$HISTORY/index.jsonl" <<JSONL
 {"run_id":"provider-deepseek","archived_at":"2026-05-17T00:00:04Z","kind":"provider","report":"$HISTORY/runs/provider-deepseek/provider-dogfood-report.json","provider_report":"$HISTORY/runs/provider-deepseek/provider-dogfood-report.json","provider":"deepseek","provider_status":"passed","tx_id":"tx-demo"}
 {"run_id":"suite-stress","archived_at":"2026-05-17T00:00:05Z","kind":"suite","report":"$HISTORY/runs/suite-stress/dogfood-report.json","provider_report":"","provider":"","provider_status":"skipped","tx_id":""}
@@ -72,6 +79,8 @@ grep -q '"session_id":"tx-demo"' "$EVIDENCE"
 grep -q '"session_id":"ops-cmd-demo"' "$EVIDENCE"
 grep -q '"session_id":"dogfood-suite-stress-project-1"' "$EVIDENCE"
 grep -q '"session_id":"dogfood-suite-stress-ops-1"' "$EVIDENCE"
+grep -q '"session_id":"acceptance-suite-acceptance-acceptance-project-resume"' "$EVIDENCE"
+grep -q '"source":"acceptance_rehearsal"' "$EVIDENCE"
 grep -q '"flow":"project_edit"' "$EVIDENCE"
 grep -q '"flow":"ops"' "$EVIDENCE"
 grep -q '"provider":"deepseek"' "$EVIDENCE"
@@ -89,10 +98,10 @@ AGENTHUB_DOGFOOD_HISTORY_DIR="$HISTORY" \
 AGENTHUB_DOGFOOD_MIN_SUITE_RUNS=0 \
 AGENTHUB_DOGFOOD_MIN_DAYS=1 \
 AGENTHUB_RC_EVIDENCE="$EVIDENCE" \
-AGENTHUB_RC_MIN_REAL_SESSIONS=7 \
-AGENTHUB_RC_MIN_OPS_FLOWS=3 \
-AGENTHUB_RC_MIN_PROJECT_EDIT_FLOWS=3 \
-AGENTHUB_RC_MIN_COST_RECEIPTS=7 \
+AGENTHUB_RC_MIN_REAL_SESSIONS=9 \
+AGENTHUB_RC_MIN_OPS_FLOWS=4 \
+AGENTHUB_RC_MIN_PROJECT_EDIT_FLOWS=4 \
+AGENTHUB_RC_MIN_COST_RECEIPTS=9 \
 AGENTHUB_RC_REQUIRED_PROVIDERS=deepseek \
 AGENTHUB_RC_REQUIRED_CHECKS=chat_no_bootstrap,ops_no_bootstrap,cost_receipts,ops_receipts,resume,rewind,stats,approval_ux,long_session_latency \
   "$ROOT/scripts/rc-dogfood-gate.sh" --check > "$TMP/gate.out"

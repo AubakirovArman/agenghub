@@ -69,6 +69,8 @@ scripts/rc-dogfood-gate.sh --check
 
 `scripts/dogfood.sh` can also produce source-backed RC session evidence. Set `AGENTHUB_DOGFOOD_STRESS_COUNT` to create project-edit stress transactions and `AGENTHUB_DOGFOOD_OPS_COUNT` to run headless Ops checks through `agenthub ops exec`; the dogfood report records an `rc_evidence` summary that the collector can count later from the archive.
 
+Set `AGENTHUB_DOGFOOD_ACCEPTANCE=1` to run the RC acceptance rehearsal during dogfood. The suite archives `rc-acceptance-evidence.jsonl` plus the rehearsal artifacts, and the collector counts those archived checks for stats, Ops no-bootstrap, approval UX, resume, and rewind.
+
 The RC gate reads `target/dogfood/rc-evidence.jsonl` by default. The default thresholds require 100 passed real sessions, 20 Ops flows, 20 project-edit flows, cost/token receipts for every counted session, passed DeepSeek and Kimi provider evidence, no open blocker/critical blockers, and explicit passed checks for Chat/Ops no-bootstrap, resume, rewind, stats, cost receipts, Ops receipts, approval UX, and long-session latency. Use `AGENTHUB_RC_EVIDENCE`, `AGENTHUB_RC_SOURCE_ROOT`, `AGENTHUB_RC_MIN_REAL_SESSIONS`, `AGENTHUB_RC_MIN_OPS_FLOWS`, `AGENTHUB_RC_MIN_PROJECT_EDIT_FLOWS`, `AGENTHUB_RC_REQUIRED_PROVIDERS`, and `AGENTHUB_RC_REQUIRED_CHECKS` only for local test fixtures or intentionally narrower release rehearsals.
 
 Example RC evidence lines:

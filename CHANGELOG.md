@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.35-local-preview - 2026-05-17
+
+- Add optional dogfood RC acceptance rehearsal via `AGENTHUB_DOGFOOD_ACCEPTANCE=1`, covering stats, Ops no-bootstrap, approval UX, transaction resume, and undo/rewind.
+- Archive `rc-acceptance-evidence.jsonl` and acceptance artifacts alongside dogfood suite evidence when the acceptance rehearsal runs.
+- Teach `scripts/rc-evidence-collect.sh` to count current and archived acceptance rehearsal evidence as source-backed RC checks and sessions.
+
 ## 0.4.34-local-preview - 2026-05-17
 
 - Add optional dogfood Ops runs with `AGENTHUB_DOGFOOD_OPS_COUNT`, exercising headless `agenthub ops exec` without creating `.agent` in the target folder.
