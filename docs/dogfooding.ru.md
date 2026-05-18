@@ -67,11 +67,11 @@ scripts/rc-dogfood-gate.sh --check
 
 `scripts/rc-evidence-collect.sh` пишет `target/dogfood/rc-evidence.jsonl` из наблюдаемых AgentHub artifacts: global/project chat `turn_finished` events, project transaction reports с cost receipts, transaction control artifacts (`resume.json`, `undo.json`, blocked approval policy/journal records), provider dogfood history, Ops command receipts, read-only `agenthub stats` и perf profile artifacts. Collector намеренно консервативный: он пишет только source-backed passed checks и оставляет long-session latency отсутствующим, если `AGENTHUB_RC_PERF_REPORT` не указывает на успешный perf profile с transaction count не ниже `AGENTHUB_RC_LONG_SESSION_MIN_TX`.
 
-`scripts/dogfood.sh` тоже может производить source-backed RC session evidence. Укажи `AGENTHUB_DOGFOOD_STRESS_COUNT`, чтобы создать project-edit stress transactions, и `AGENTHUB_DOGFOOD_OPS_COUNT`, чтобы прогнать headless Ops checks через `agenthub ops exec`; dogfood report запишет `rc_evidence` summary, который collector потом считает из архива.
+`scripts/dogfood.sh` тоже может производить source-backed RC session evidence. Укажи `AGENTHUB_DOGFOOD_STRESS_COUNT`, чтобы создать project-edit stress transactions, и `AGENTHUB_DOGFOOD_OPS_COUNT`, чтобы прогнать headless Ops checks через `agenthub ops exec`; dogfood report запишет `rc_evidence` summary плюс `shell_ux_status`/`shell_ux_artifact`, которые collector потом считает из архива.
 
 Укажи `AGENTHUB_DOGFOOD_ACCEPTANCE=1`, чтобы dogfood запускал RC acceptance rehearsal. Suite архивирует `rc-acceptance-evidence.jsonl` вместе с rehearsal artifacts, а collector считает эти archived checks для stats, Ops no-bootstrap, approval UX, resume и rewind.
 
-RC gate по умолчанию читает `target/dogfood/rc-evidence.jsonl`. Дефолтные пороги требуют 100 passed real sessions, 20 Ops flows, 20 project-edit flows, cost/token receipts для каждой учтённой сессии, passed DeepSeek и Kimi provider evidence, отсутствие open blocker/critical blockers, а также явные passed checks для Chat/Ops no-bootstrap, resume, rewind, stats, cost receipts, Ops receipts, approval UX и long-session latency. `AGENTHUB_RC_EVIDENCE`, `AGENTHUB_RC_SOURCE_ROOT`, `AGENTHUB_RC_MIN_REAL_SESSIONS`, `AGENTHUB_RC_MIN_OPS_FLOWS`, `AGENTHUB_RC_MIN_PROJECT_EDIT_FLOWS`, `AGENTHUB_RC_REQUIRED_PROVIDERS` и `AGENTHUB_RC_REQUIRED_CHECKS` используй только для локальных test fixtures или осознанно суженных release rehearsals.
+RC gate по умолчанию читает `target/dogfood/rc-evidence.jsonl`. Дефолтные пороги требуют 100 passed real sessions, 20 Ops flows, 20 project-edit flows, cost/token receipts для каждой учтённой сессии, passed DeepSeek и Kimi provider evidence, отсутствие open blocker/critical blockers, а также явные passed checks для Chat/Ops no-bootstrap, resume, rewind, stats, cost receipts, Ops receipts, approval UX, long-session latency и shell UX aliases. `AGENTHUB_RC_EVIDENCE`, `AGENTHUB_RC_SOURCE_ROOT`, `AGENTHUB_RC_MIN_REAL_SESSIONS`, `AGENTHUB_RC_MIN_OPS_FLOWS`, `AGENTHUB_RC_MIN_PROJECT_EDIT_FLOWS`, `AGENTHUB_RC_REQUIRED_PROVIDERS` и `AGENTHUB_RC_REQUIRED_CHECKS` используй только для локальных test fixtures или осознанно суженных release rehearsals.
 
 Примеры строк RC evidence:
 
@@ -81,6 +81,7 @@ RC gate по умолчанию читает `target/dogfood/rc-evidence.jsonl`.
 {"kind":"session","session_id":"project-001","mode":"project","flow":"project_edit","status":"passed","cost_receipt":true}
 {"kind":"provider","provider":"deepseek","status":"passed"}
 {"kind":"check","id":"chat_no_bootstrap","status":"passed"}
+{"kind":"check","id":"shell_ux_aliases","status":"passed"}
 {"kind":"blocker","id":"kimi-auth","severity":"critical","status":"open"}
 ```
 

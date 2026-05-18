@@ -16,7 +16,7 @@ min_project="${AGENTHUB_RC_MIN_PROJECT_EDIT_FLOWS:-20}"
 min_cost="${AGENTHUB_RC_MIN_COST_RECEIPTS:-$min_sessions}"
 required_providers="${AGENTHUB_RC_REQUIRED_PROVIDERS:-deepseek,kimi}"
 api_providers="${AGENTHUB_RC_API_PROVIDERS:-$required_providers}"
-required_checks="${AGENTHUB_RC_REQUIRED_CHECKS:-chat_no_bootstrap,ops_no_bootstrap,resume,rewind,stats,cost_receipts,ops_receipts,approval_ux,long_session_latency}"
+required_checks="${AGENTHUB_RC_REQUIRED_CHECKS:-chat_no_bootstrap,ops_no_bootstrap,resume,rewind,stats,cost_receipts,ops_receipts,approval_ux,long_session_latency,shell_ux_aliases}"
 
 json_field() {
   local line="$1"

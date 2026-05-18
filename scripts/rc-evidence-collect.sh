@@ -267,7 +267,7 @@ collect_dogfood_reports() {
 
 collect_dogfood_report() {
   local report="$1"
-  local line run_id project_sessions project_costs ops_sessions ops_costs index
+  local line run_id project_sessions project_costs ops_sessions ops_costs shell_ux_status shell_ux_artifact index
   line="$(tr -d '\n' < "$report")"
   run_id="$(basename "$(dirname "$report")")"
   [[ "$run_id" == "." || "$run_id" == "target" || "$run_id" == "dogfood" ]] && run_id="current"
@@ -275,6 +275,8 @@ collect_dogfood_report() {
   project_costs="$(json_field "$line" project_cost_receipts)"
   ops_sessions="$(json_field "$line" ops_sessions)"
   ops_costs="$(json_field "$line" ops_cost_receipts)"
+  shell_ux_status="$(json_field "$line" shell_ux_status)"
+  shell_ux_artifact="$(json_field "$line" shell_ux_artifact)"
 
   project_sessions="$(number_or_zero "$project_sessions")"
   project_costs="$(number_or_zero "$project_costs")"
@@ -297,6 +299,9 @@ collect_dogfood_report() {
   done
   if (( project_sessions >= LONG_SESSION_MIN_TX )); then
     write_check "long_session_latency" "dogfood_report" "$report"
+  fi
+  if [[ "$shell_ux_status" == "passed" ]]; then
+    write_check "shell_ux_aliases" "dogfood_report" "${shell_ux_artifact:-$report}"
   fi
 }
 

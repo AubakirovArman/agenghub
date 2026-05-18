@@ -59,6 +59,7 @@ const REQUIREMENTS: &[RequirementSpec] = &[
             "rc_check_chat_no_bootstrap",
             "rc_check_ops_no_bootstrap",
             "rc_check_ops_receipts",
+            "rc_check_shell_ux_aliases",
         ],
         artifacts: &[
             "command:scripts/test-shell-ux-aliases.sh",

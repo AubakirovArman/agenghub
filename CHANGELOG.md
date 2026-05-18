@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.110-local-preview - 2026-05-18
+
+- Promote the release-gated shell UX alias smoke into source-backed RC evidence: dogfood now records `shell_ux_status`/artifact paths, the RC evidence collector emits `shell_ux_aliases`, and the default RC dogfood gate plus product/script readiness audits require it.
+- Map `rc_check_shell_ux_aliases` into the Chat/Ops/Project readiness checklist and evidence status tests, so `/mode`, `/sessions`, `/cost`, `/balance`, `/hosts`, `/connect`, `/provider`, and `!command` coverage is a blocking 1.0 readiness check rather than only a release-smoke artifact.
+
 ## 0.4.109-local-preview - 2026-05-17
 
 - Add `scripts/test-shell-ux-aliases.sh` to the `chat_ops_project_modes` readiness checklist artifacts, making the shell UX smoke traceable from `agenthub readiness checklist --json`.

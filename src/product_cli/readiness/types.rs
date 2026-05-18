@@ -226,7 +226,7 @@ impl AuditConfig {
                     "AGENTHUB_API_AUDIT_REQUIRED_CHECKS",
                     "AGENTHUB_RC_REQUIRED_CHECKS",
                 ],
-                "chat_no_bootstrap,ops_no_bootstrap,resume,rewind,stats,cost_receipts,ops_receipts,approval_ux,long_session_latency",
+                "chat_no_bootstrap,ops_no_bootstrap,resume,rewind,stats,cost_receipts,ops_receipts,approval_ux,long_session_latency,shell_ux_aliases",
             ),
             min_sessions,
             min_ops: env_usize(

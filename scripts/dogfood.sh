@@ -20,6 +20,8 @@ ACCEPTANCE_WORK="${AGENTHUB_RC_ACCEPTANCE_WORK:-$ROOT/target/rc-acceptance}"
 ACCEPTANCE_ARTIFACTS=""
 PROVIDER_DOGFOOD_STATUS="skipped"
 PROVIDER_DOGFOOD_REPORT=""
+SHELL_UX_STATUS="skipped"
+SHELL_UX_ARTIFACT="${AGENTHUB_DOGFOOD_SHELL_UX_ARTIFACT:-$ROOT/target/dogfood/shell-ux-aliases.out}"
 
 json_escape() {
   printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
@@ -43,6 +45,14 @@ run_step "rollback smoke" "$ROOT/scripts/test-transaction-rollback.sh"
 run_step "smart sync smoke" "$ROOT/scripts/test-smart-sync.sh"
 run_step "provider dry-run smoke" "$ROOT/scripts/test-provider-dry-run.sh"
 run_step "dashboard smoke" "$ROOT/scripts/test-dashboard.sh"
+
+run_shell_ux_smoke() {
+  mkdir -p "$(dirname "$SHELL_UX_ARTIFACT")"
+  AGENTHUB_BIN="$AGENTHUB_BIN" "$ROOT/scripts/test-shell-ux-aliases.sh" > "$SHELL_UX_ARTIFACT"
+  SHELL_UX_STATUS="passed"
+}
+
+run_step "shell UX alias smoke" run_shell_ux_smoke
 
 run_stress() {
   local count="${AGENTHUB_DOGFOOD_STRESS_COUNT:-0}"
@@ -194,6 +204,12 @@ write_report() {
   "finished_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
   "binary": "$(json_escape "$AGENTHUB_BIN")",
   "full_fixtures": ${AGENTHUB_DOGFOOD_FULL:-0},
+  "shell_ux_status": "$(json_escape "$SHELL_UX_STATUS")",
+  "shell_ux_artifact": "$(json_escape "$SHELL_UX_ARTIFACT")",
+  "shell_ux": {
+    "status": "$(json_escape "$SHELL_UX_STATUS")",
+    "artifact": "$(json_escape "$SHELL_UX_ARTIFACT")"
+  },
   "stress": {
     "requested_count": ${AGENTHUB_DOGFOOD_STRESS_COUNT:-0},
     "completed_count": $STRESS_COUNT,

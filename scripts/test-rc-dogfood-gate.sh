@@ -37,6 +37,7 @@ cat > "$EVIDENCE" <<'JSONL'
 {"kind":"check","id":"ops_receipts","status":"passed"}
 {"kind":"check","id":"approval_ux","status":"passed"}
 {"kind":"check","id":"long_session_latency","status":"passed"}
+{"kind":"check","id":"shell_ux_aliases","status":"passed"}
 JSONL
 
 common_env=(

@@ -339,6 +339,14 @@ fn readiness_checklist_json_maps_requirements_to_artifacts() -> Result<()> {
             .unwrap()
             .iter()
             .any(|artifact| artifact == "command:scripts/test-shell-ux-aliases.sh"));
+        assert!(
+            chat_ops_project["checks"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|check| check["id"] == "rc_check_shell_ux_aliases"
+                    && check["status"] == "passed")
+        );
         assert!(!result.output.contains("kimi-secret"));
         Ok(())
     })
@@ -414,6 +422,11 @@ fn readiness_evidence_json_reports_thresholds_and_gate_inputs() -> Result<()> {
             .unwrap()
             .iter()
             .any(|entry| entry["id"] == "approval_ux" && entry["status"] == "passed"));
+        assert!(parsed["rc_checks"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|entry| entry["id"] == "shell_ux_aliases" && entry["status"] == "passed"));
         assert_eq!(parsed["kimi_auth"]["status"], "passed");
         assert_eq!(parsed["gate"]["status"], "passed");
         assert!(!result.output.contains("kimi-secret"));
