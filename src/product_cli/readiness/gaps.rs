@@ -67,6 +67,7 @@ fn gap_from_spec(spec: &GapSpec, checks: &[ReadinessCheck]) -> Option<ReadinessG
             status: check.status.clone(),
             detail: check.detail.clone(),
             blocker_kind: check.blocker_kind.clone(),
+            next_commands: check.next_commands.clone(),
         })
         .collect::<Vec<_>>();
 
@@ -90,11 +91,8 @@ fn gap_from_spec(spec: &GapSpec, checks: &[ReadinessCheck]) -> Option<ReadinessG
         .collect::<BTreeSet<_>>()
         .into_iter()
         .collect::<Vec<_>>();
-    let next_commands = spec
-        .checks
+    let next_commands = gap_checks
         .iter()
-        .filter_map(|id| checks.iter().find(|check| check.id == *id))
-        .filter(|check| check.status != "passed")
         .flat_map(|check| check.next_commands.iter().cloned())
         .collect::<BTreeSet<_>>()
         .into_iter()
@@ -132,6 +130,15 @@ pub(super) fn render_gaps(out: &mut String, gaps: &[ReadinessGap]) {
                 out.push_str(&format!(
                     "gap_check_blocker_kind\t{}\t{}\t{}\n",
                     gap.id, check.id, kind
+                ));
+            }
+            for (index, command) in check.next_commands.iter().enumerate() {
+                out.push_str(&format!(
+                    "gap_check_next\t{}\t{}\t{}\t{}\n",
+                    gap.id,
+                    check.id,
+                    index + 1,
+                    command
                 ));
             }
         }

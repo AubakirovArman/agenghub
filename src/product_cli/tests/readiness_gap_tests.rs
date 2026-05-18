@@ -28,6 +28,24 @@ fn readiness_completion_evidence_and_checklist_surface_named_gaps() -> Result<()
                 .iter()
                 .any(|gap| gap["id"] == id));
         }
+        let kimi_gap = parsed["gaps"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|gap| gap["id"] == "kimi")
+            .expect("kimi gap");
+        let kimi_auth = kimi_gap["checks"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|check| check["id"] == "kimi_auth")
+            .expect("kimi auth gap check");
+        assert!(kimi_auth["next_commands"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|command| command
+                == "agenthub providers rc-unblock kimi --from-file <new-key-file>"));
 
         let checklist = readiness::render_checklist(
             fixture.root.path(),
@@ -53,6 +71,9 @@ fn readiness_completion_evidence_and_checklist_surface_named_gaps() -> Result<()
             assert!(output.contains("gap_check\tdogfood\treal_sessions\tmissing\t1/3"));
             assert!(output.contains("gap_check\tapproval\trc_check_approval_ux\tmissing"));
             assert!(output.contains("gap_next\tkimi\t"));
+            assert!(output.contains(
+                "gap_check_next\tkimi\tkimi_auth\t5\tagenthub providers rc-unblock kimi --from-file <new-key-file>"
+            ));
             assert!(!output.contains("kimi-secret"));
         }
         Ok(())

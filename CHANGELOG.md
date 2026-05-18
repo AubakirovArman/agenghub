@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.116-local-preview - 2026-05-18
+
+- Surface per-check recovery commands inside named readiness gaps, so `completion`, `evidence`, and `checklist` JSON can show the exact Kimi unblock or RC refresh commands beside the unresolved check that needs them.
+- Add `gap_check_next` rows to human-readable readiness gap output, keeping Kimi/auth/dogfood recovery paths visible without joining separate audit and action-plan reports.
+
 ## 0.4.115-local-preview - 2026-05-18
 
 - Add `agenthub memory context`, a no-network CLI path that builds and writes the active memory context receipt so compaction, budget drops, and pending-memory exclusion can be verified outside a live provider call.

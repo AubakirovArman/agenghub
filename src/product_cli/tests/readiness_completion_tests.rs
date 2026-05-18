@@ -35,6 +35,24 @@ fn readiness_completion_json_bundles_audit_evidence_next_and_provider_status() -
             .unwrap()
             .iter()
             .any(|entry| entry["provider"] == "kimi"));
+        let kimi_gap = parsed["gaps"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|gap| gap["id"] == "kimi")
+            .expect("kimi gap");
+        let kimi_auth = kimi_gap["checks"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|check| check["id"] == "kimi_auth")
+            .expect("kimi auth gap check");
+        assert!(kimi_auth["next_commands"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|command| command
+                == "agenthub providers rc-unblock kimi --from-file <new-key-file>"));
         assert!(parsed["verification_commands"]
             .as_array()
             .unwrap()

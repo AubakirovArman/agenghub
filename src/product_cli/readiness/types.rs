@@ -96,6 +96,8 @@ pub struct ReadinessGapCheck {
     pub detail: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub blocker_kind: Option<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub next_commands: Vec<String>,
 }
 
 #[derive(Debug, Serialize)]
