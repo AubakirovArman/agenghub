@@ -4,6 +4,7 @@ use anyhow::Result;
 
 use super::{
     audit::build_report,
+    gaps::{readiness_gaps, render_gaps},
     types::{
         AuditOptions, AuditRenderResult, ReadinessAuditReport, ReadinessCheck,
         ReadinessChecklistReport, ReadinessRequirement, ReadinessRequirementCheck,
@@ -161,6 +162,7 @@ fn checklist_report(audit: ReadinessAuditReport) -> ReadinessChecklistReport {
         evidence: audit.evidence,
         dogfood_history: audit.dogfood_history,
         kimi_auth_report: audit.kimi_auth_report,
+        gaps: readiness_gaps(&audit.checks),
         requirements,
         next: if failed { audit.next } else { Vec::new() },
     }
@@ -279,6 +281,7 @@ fn render_checklist_text(report: &ReadinessChecklistReport) -> String {
             report.blocked_checks.join(",")
         ));
     }
+    render_gaps(&mut out, &report.gaps);
     for requirement in &report.requirements {
         out.push_str(&format!(
             "requirement\t{}\t{}\t{}\n",

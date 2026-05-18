@@ -71,8 +71,31 @@ pub struct ReadinessChecklistReport {
     pub evidence: String,
     pub dogfood_history: String,
     pub kimi_auth_report: String,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub gaps: Vec<ReadinessGap>,
     pub requirements: Vec<ReadinessRequirement>,
     pub next: Vec<String>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub struct ReadinessGap {
+    pub id: String,
+    pub status: String,
+    pub detail: String,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub blocker_kinds: Vec<String>,
+    pub checks: Vec<ReadinessGapCheck>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub next_commands: Vec<String>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub struct ReadinessGapCheck {
+    pub id: String,
+    pub status: String,
+    pub detail: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub blocker_kind: Option<String>,
 }
 
 #[derive(Debug, Serialize)]

@@ -5,6 +5,7 @@ mod checklist;
 mod completion;
 mod evidence;
 mod evidence_status;
+mod gaps;
 mod next;
 mod render;
 mod types;

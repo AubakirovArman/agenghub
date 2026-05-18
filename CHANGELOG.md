@@ -4,6 +4,10 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.113-local-preview - 2026-05-18
+
+- Add named readiness gap summaries to `agenthub readiness completion`, `agenthub readiness evidence`, and `agenthub readiness checklist` so shell UX, Kimi, dogfood, latency, and approval gaps are visible without reading raw RC evidence JSONL.
+
 ## 0.4.112-local-preview - 2026-05-18
 
 - Keep the Kimi replacement-key rehearsal release line intact and fix the new Unix-only test helper import so `cargo test --locked` compiles cleanly on Windows CI.

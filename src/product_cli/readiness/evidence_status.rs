@@ -9,9 +9,10 @@ use serde_json::Value;
 
 use super::{
     audit::build_report,
+    gaps::{readiness_gaps, render_gaps},
     types::{
         env_usize, AuditOptions, AuditRenderResult, ReadinessAuditReport, ReadinessCheck,
-        ReadinessMetrics, OBJECTIVE,
+        ReadinessGap, ReadinessMetrics, OBJECTIVE,
     },
 };
 
@@ -32,6 +33,8 @@ struct EvidenceStatusReport {
     metrics: ReadinessMetrics,
     history: DogfoodHistoryStatus,
     thresholds: Vec<EvidenceThreshold>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    gaps: Vec<ReadinessGap>,
     providers: Vec<EvidenceItem>,
     kimi_auth: EvidenceItem,
     rc_checks: Vec<EvidenceItem>,
@@ -113,6 +116,7 @@ fn evidence_status_report(audit: ReadinessAuditReport) -> Result<EvidenceStatusR
     );
     let failed = audit.failed;
     let status = if failed { "incomplete" } else { "ready" }.to_string();
+    let gaps = readiness_gaps(&audit.checks);
 
     Ok(EvidenceStatusReport {
         objective: OBJECTIVE.to_string(),
@@ -127,6 +131,7 @@ fn evidence_status_report(audit: ReadinessAuditReport) -> Result<EvidenceStatusR
         metrics: audit.metrics,
         history,
         thresholds,
+        gaps,
         providers,
         kimi_auth,
         rc_checks,
@@ -320,6 +325,7 @@ fn render_evidence_text(report: &EvidenceStatusReport) -> String {
             ));
         }
     }
+    render_gaps(&mut out, &report.gaps);
     for provider in &report.providers {
         render_item(&mut out, "provider", provider);
     }

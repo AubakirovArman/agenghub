@@ -10,7 +10,11 @@ use super::{
     action_plan,
     audit::build_report,
     checklist, evidence_status,
-    types::{AuditOptions, AuditRenderResult, ReadinessAuditReport, ReadinessSources, OBJECTIVE},
+    gaps::{readiness_gaps, render_gaps},
+    types::{
+        AuditOptions, AuditRenderResult, ReadinessAuditReport, ReadinessGap, ReadinessSources,
+        OBJECTIVE,
+    },
 };
 
 #[derive(Debug, Serialize)]
@@ -31,6 +35,8 @@ struct ReadinessCompletionReport {
     evidence: String,
     dogfood_history: String,
     kimi_auth_report: String,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    gaps: Vec<ReadinessGap>,
     current_action: Value,
     prompt_to_artifact: Value,
     evidence_status: Value,
@@ -89,6 +95,7 @@ fn completion_report(
         .unwrap_or_default();
     let completion_status = completion_status(&audit);
     let decision = completion_decision(&completion_status);
+    let gaps = readiness_gaps(&audit.checks);
 
     Ok(ReadinessCompletionReport {
         objective: OBJECTIVE.to_string(),
@@ -104,6 +111,7 @@ fn completion_report(
         evidence: audit.evidence,
         dogfood_history: audit.dogfood_history,
         kimi_auth_report: audit.kimi_auth_report,
+        gaps,
         current_action,
         prompt_to_artifact,
         evidence_status,
@@ -178,6 +186,7 @@ fn render_completion_text(report: &ReadinessCompletionReport) -> String {
         report.sources.repo_roadmap
     ));
     out.push_str(&format!("evidence\t{}\n", report.evidence));
+    render_gaps(&mut out, &report.gaps);
     render_current_action(&mut out, &report.current_action);
     render_requirements(&mut out, &report.prompt_to_artifact);
     render_provider_statuses(&mut out, &report.provider_statuses);
