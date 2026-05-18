@@ -39,6 +39,7 @@ pub struct ReadinessAuditReport {
 #[derive(Debug, Serialize)]
 pub struct ReadinessBlockerReport {
     pub objective: String,
+    pub package_version: String,
     pub status: String,
     pub failed: bool,
     #[serde(skip_serializing_if = "Option::is_none")]

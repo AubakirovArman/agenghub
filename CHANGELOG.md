@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.119-local-preview - 2026-05-18
+
+- Add `package_version` to `agenthub readiness next` JSON/text output so the prioritized action-plan snapshot is tied to the installed AgentHub build.
+- Add `package_version` to `agenthub readiness blockers` JSON/text output so focused blocker snapshots carry the same release identity as `readiness completion`.
+- Keep the Kimi unblock itself externally blocked until a valid plain Moonshot/OpenAI-compatible API key is available.
+
 ## 0.4.118-local-preview - 2026-05-18
 
 - Add a Kimi RC operator receipt to `agenthub providers rc-unblock kimi`: after provider test, Kimi auth check, live provider dogfood, RC evidence collection, and the RC gate run, AgentHub now writes `target/dogfood/kimi-rc-operator-receipt.json`.

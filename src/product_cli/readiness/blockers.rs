@@ -2,6 +2,8 @@ use std::path::Path;
 
 use anyhow::Result;
 
+use crate::product_cli::version;
+
 use super::{
     audit::build_report,
     types::{
@@ -21,6 +23,7 @@ pub fn render_blockers(project_root: &Path, options: AuditOptions) -> Result<Aud
     let failed = !blockers.is_empty();
     let blocker_report = ReadinessBlockerReport {
         objective: report.objective,
+        package_version: version().to_string(),
         status: if failed { "blocked" } else { "clear" }.to_string(),
         failed,
         blocker_scope: report.blocker_scope,
@@ -50,6 +53,7 @@ fn render_blockers_text(report: &ReadinessBlockerReport) -> String {
     let mut out = String::new();
     out.push_str("AgentHub readiness blockers\n");
     out.push_str(&format!("objective\t{}\n", report.objective));
+    out.push_str(&format!("package_version\t{}\n", report.package_version));
     if let Some(scope) = &report.blocker_scope {
         out.push_str(&format!("blocker_scope\t{}\n", scope));
     }

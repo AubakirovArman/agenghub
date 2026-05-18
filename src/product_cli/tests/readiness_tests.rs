@@ -18,6 +18,7 @@ fn readiness_next_json_prioritizes_current_external_blocker() -> Result<()> {
         let parsed: serde_json::Value = serde_json::from_str(&result.output)?;
 
         assert!(result.failed);
+        assert_eq!(parsed["package_version"], crate::product_cli::version());
         assert_eq!(parsed["status"], "blocked");
         assert_eq!(parsed["phase"], "external_kimi_credential_unblock");
         assert_eq!(parsed["blocker_scope"], "external_only");
@@ -61,6 +62,10 @@ fn readiness_next_text_reports_ready_milestone_without_actions() -> Result<()> {
 
         assert!(!result.failed);
         assert!(result.output.contains("AgentHub readiness next"));
+        assert!(result.output.contains(&format!(
+            "package_version\t{}",
+            crate::product_cli::version()
+        )));
         assert!(result.output.contains("phase\tready_for_1_0_rc"));
         assert!(result.output.contains("status\tready"));
         assert!(result
@@ -210,6 +215,7 @@ fn readiness_blockers_json_reports_only_unpassed_checks() -> Result<()> {
             .collect::<Vec<_>>();
 
         assert!(result.failed);
+        assert_eq!(parsed["package_version"], crate::product_cli::version());
         assert_eq!(parsed["status"], "blocked");
         assert_eq!(parsed["blocker_scope"], "external_only");
         assert_eq!(parsed["blocker_kinds"][0], "dependent_gate");
@@ -257,6 +263,10 @@ fn readiness_blockers_text_reports_blocker_kind() -> Result<()> {
         )?;
 
         assert!(result.failed);
+        assert!(result.output.contains(&format!(
+            "package_version\t{}",
+            crate::product_cli::version()
+        )));
         assert!(result.output.contains("blocker_scope\texternal_only"));
         assert!(result
             .output

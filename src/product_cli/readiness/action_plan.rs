@@ -3,7 +3,7 @@ use std::{collections::BTreeSet, path::Path};
 use anyhow::Result;
 use serde::Serialize;
 
-use crate::product_cli::ecosystem;
+use crate::product_cli::{ecosystem, version};
 
 use super::{
     audit::build_report,
@@ -13,6 +13,7 @@ use super::{
 #[derive(Debug, Serialize)]
 struct ReadinessNextReport {
     objective: String,
+    package_version: String,
     status: String,
     failed: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -67,6 +68,7 @@ fn next_report(audit: ReadinessAuditReport) -> ReadinessNextReport {
 
     ReadinessNextReport {
         objective: OBJECTIVE.to_string(),
+        package_version: version().to_string(),
         status,
         failed,
         blocker_scope: audit.blocker_scope,
@@ -226,6 +228,7 @@ fn render_next_text(report: &ReadinessNextReport) -> String {
     let mut out = String::new();
     out.push_str("AgentHub readiness next\n");
     out.push_str(&format!("objective\t{}\n", report.objective));
+    out.push_str(&format!("package_version\t{}\n", report.package_version));
     out.push_str(&format!("phase\t{}\n", report.phase));
     out.push_str(&format!("focus\t{}\n", report.focus));
     out.push_str(&format!("stop_reason\t{}\n", report.stop_reason));
