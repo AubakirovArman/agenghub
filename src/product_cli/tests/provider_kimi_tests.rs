@@ -1,9 +1,10 @@
 use anyhow::Result;
 
 use super::providers;
+#[cfg(unix)]
+use super::support::write_script;
 use super::support::{
     openai_error_stub_server, openai_stub_server, with_kimi_env, with_kimi_env_using_base,
-    write_script,
 };
 
 #[test]

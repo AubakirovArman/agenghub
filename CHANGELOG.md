@@ -4,6 +4,10 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.112-local-preview - 2026-05-18
+
+- Keep the Kimi replacement-key rehearsal release line intact and fix the new Unix-only test helper import so `cargo test --locked` compiles cleanly on Windows CI.
+
 ## 0.4.111-local-preview - 2026-05-18
 
 - Add `agenthub providers rehearse-unblock kimi`, an offline replacement-key rehearsal that inspects the active Kimi blocker and a candidate key source without network access, without writing `.kimi`, and without printing secret material.
