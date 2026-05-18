@@ -54,6 +54,35 @@ pub fn handle_providers(project_root: &Path, command: ProviderCommands) -> Resul
         ProviderCommands::Unblock { provider } => {
             print!("{}", providers::unblock_provider(project_root, &provider)?);
         }
+        ProviderCommands::RehearseUnblock {
+            provider,
+            json,
+            from_file,
+            from_env,
+            stdin,
+        } => {
+            let stdin_value = if stdin {
+                let mut value = String::new();
+                std::io::stdin().read_to_string(&mut value)?;
+                Some(value)
+            } else {
+                None
+            };
+            let result = providers::rehearse_provider_unblock(
+                project_root,
+                &provider,
+                providers::KimiUnblockRehearsalOptions {
+                    json,
+                    from_file,
+                    from_env,
+                    stdin_value,
+                },
+            )?;
+            print!("{}", result.output);
+            if result.failed {
+                bail!("provider unblock rehearsal failed for `{provider}`");
+            }
+        }
         ProviderCommands::RcUnblock {
             provider,
             from_file,

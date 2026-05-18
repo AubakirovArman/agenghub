@@ -182,7 +182,8 @@ fn evidence_jsonl(blocked: bool) -> String {
          {\"kind\":\"check\",\"id\":\"ops_receipts\",\"status\":\"passed\"}\n\
          {\"kind\":\"check\",\"id\":\"approval_ux\",\"status\":\"passed\"}\n\
          {\"kind\":\"check\",\"id\":\"long_session_latency\",\"status\":\"passed\"}\n\
-         {\"kind\":\"check\",\"id\":\"shell_ux_aliases\",\"status\":\"passed\"}\n",
+         {\"kind\":\"check\",\"id\":\"shell_ux_aliases\",\"status\":\"passed\"}\n\
+         {\"kind\":\"check\",\"id\":\"kimi_unblock_rehearsal\",\"status\":\"passed\"}\n",
     );
     if blocked {
         evidence.push_str(

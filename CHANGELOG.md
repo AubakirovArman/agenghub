@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.111-local-preview - 2026-05-18
+
+- Add `agenthub providers rehearse-unblock kimi`, an offline replacement-key rehearsal that inspects the active Kimi blocker and a candidate key source without network access, without writing `.kimi`, and without printing secret material.
+- Feed that rehearsal into dogfood and RC evidence as `kimi_unblock_rehearsal`, and require it in the default RC dogfood gate plus script/product readiness audits.
+- Update Kimi recovery, readiness next actions, provider status/recovery JSON, and docs so the replacement-key path is now `inspect-key -> rehearse-unblock -> preflight-key -> rc-unblock`.
+
 ## 0.4.110-local-preview - 2026-05-18
 
 - Promote the release-gated shell UX alias smoke into source-backed RC evidence: dogfood now records `shell_ux_status`/artifact paths, the RC evidence collector emits `shell_ux_aliases`, and the default RC dogfood gate plus product/script readiness audits require it.

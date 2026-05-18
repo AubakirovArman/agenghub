@@ -145,9 +145,10 @@ grep -q $'step\tkimi_auth_check\tbegin' "$TMP/fail.out"
 grep -q $'step\tkimi_auth_check\tpassed' "$TMP/fail.out"
 grep -q $'next\t1\tagenthub providers inspect-key kimi' "$TMP/fail.out"
 grep -q $'next\t2\tagenthub providers inspect-key kimi --from-file <new-key-file>' "$TMP/fail.out"
-grep -q $'next\t3\tagenthub providers preflight-key kimi --from-file <new-key-file>' "$TMP/fail.out"
-grep -q $'next\t4\tagenthub providers rc-unblock kimi --from-file <new-key-file>' "$TMP/fail.out"
-grep -q $'next\t6\tagenthub providers unblock kimi' "$TMP/fail.out"
+grep -q $'next\t3\tagenthub providers rehearse-unblock kimi --from-file <new-key-file>' "$TMP/fail.out"
+grep -q $'next\t4\tagenthub providers preflight-key kimi --from-file <new-key-file>' "$TMP/fail.out"
+grep -q $'next\t5\tagenthub providers rc-unblock kimi --from-file <new-key-file>' "$TMP/fail.out"
+grep -q $'next\t7\tagenthub providers unblock kimi' "$TMP/fail.out"
 grep -q 'kimi-auth' "$fail_log"
 if grep -q 'provider-dogfood' "$fail_log"; then
   printf 'provider dogfood should not run after failed provider test\n' >&2

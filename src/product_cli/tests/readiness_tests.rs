@@ -170,7 +170,7 @@ fn readiness_audit_text_keeps_human_checklist() -> Result<()> {
             .output
             .contains("check_blocker_kind\tkimi_auth\texternal_credential"));
         assert!(result.output.contains(
-            "check_next\tkimi_auth\t4\tagenthub providers rc-unblock kimi --from-file <new-key-file>"
+            "check_next\tkimi_auth\t5\tagenthub providers rc-unblock kimi --from-file <new-key-file>"
         ));
         assert!(result.output.contains("blocker_scope\texternal_only"));
         assert!(result
@@ -182,10 +182,10 @@ fn readiness_audit_text_keeps_human_checklist() -> Result<()> {
         assert!(result.output.contains("status\tincomplete"));
         assert!(result
             .output
-            .contains("next\t15\tagenthub readiness evidence --json --check"));
+            .contains("next\t16\tagenthub readiness evidence --json --check"));
         assert!(result
             .output
-            .contains("next\t16\tagenthub readiness audit --json --check"));
+            .contains("next\t17\tagenthub readiness audit --json --check"));
         Ok(())
     })
 }
@@ -321,7 +321,19 @@ fn readiness_checklist_json_maps_requirements_to_artifacts() -> Result<()> {
             .unwrap()
             .iter()
             .any(|artifact| artifact
+                == "command:agenthub providers rehearse-unblock kimi --from-file <new-key-file>"));
+        assert!(kimi["artifacts"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|artifact| artifact
                 == "command:agenthub providers rc-unblock kimi --from-file <new-key-file>"));
+        assert!(kimi["checks"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|check| check["id"] == "rc_check_kimi_unblock_rehearsal"
+                && check["status"] == "passed"));
         assert!(kimi["checks"]
             .as_array()
             .unwrap()
@@ -427,6 +439,11 @@ fn readiness_evidence_json_reports_thresholds_and_gate_inputs() -> Result<()> {
             .unwrap()
             .iter()
             .any(|entry| entry["id"] == "shell_ux_aliases" && entry["status"] == "passed"));
+        assert!(parsed["rc_checks"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|entry| entry["id"] == "kimi_unblock_rehearsal" && entry["status"] == "passed"));
         assert_eq!(parsed["kimi_auth"]["status"], "passed");
         assert_eq!(parsed["gate"]["status"], "passed");
         assert!(!result.output.contains("kimi-secret"));

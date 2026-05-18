@@ -28,6 +28,21 @@ pub enum ProviderCommands {
     Unblock {
         provider: String,
     },
+    RehearseUnblock {
+        provider: String,
+
+        #[arg(long)]
+        json: bool,
+
+        #[arg(long)]
+        from_file: Option<PathBuf>,
+
+        #[arg(long)]
+        from_env: Option<String>,
+
+        #[arg(long)]
+        stdin: bool,
+    },
     RcUnblock {
         provider: String,
 

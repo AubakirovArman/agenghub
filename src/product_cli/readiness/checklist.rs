@@ -39,9 +39,15 @@ const REQUIREMENTS: &[RequirementSpec] = &[
     },
     RequirementSpec {
         id: "kimi_api",
-        requirement: "Kimi/Moonshot has a plain OpenAI-compatible API key, passed auth, and passed provider dogfood evidence.",
-        checks: &["provider_kimi", "kimi_auth"],
+        requirement: "Kimi/Moonshot has a rehearsed replacement-key path, a plain OpenAI-compatible API key, passed auth, and passed provider dogfood evidence.",
+        checks: &[
+            "rc_check_kimi_unblock_rehearsal",
+            "provider_kimi",
+            "kimi_auth",
+        ],
         artifacts: &[
+            "command:agenthub providers rehearse-unblock kimi --from-file <new-key-file>",
+            "command:scripts/test-kimi-unblock-rehearsal.sh",
             "command:agenthub providers inspect-key kimi",
             "command:agenthub providers preflight-key kimi --from-file <new-key-file>",
             "command:agenthub providers rc-unblock kimi --from-file <new-key-file>",

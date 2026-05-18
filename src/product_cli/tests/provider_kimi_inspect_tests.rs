@@ -30,9 +30,12 @@ fn providers_kimi_inspect_key_reports_current_oauth_file_without_secret() -> Res
         assert!(result.output.contains("writes_key\tfalse"));
         assert!(result.output.contains("network\tfalse"));
         assert!(result.output.contains("Moonshot OpenAI-compatible API key"));
+        assert!(result.output.contains(
+            "next\t2\tagenthub providers rehearse-unblock kimi --from-file <new-key-file>"
+        ));
         assert!(result
             .output
-            .contains("next\t2\tagenthub providers preflight-key kimi --from-file <new-key-file>"));
+            .contains("next\t3\tagenthub providers preflight-key kimi --from-file <new-key-file>"));
         assert!(!result.output.contains("cli-access-secret"));
         assert!(!result.output.contains("cli-refresh-secret"));
         Ok(())
@@ -68,7 +71,11 @@ fn providers_kimi_inspect_key_reports_plain_candidate_without_network_or_write()
         assert!(result.output.contains("writes_key\tfalse"));
         assert!(result.output.contains("network\tfalse"));
         assert!(result.output.contains(&format!(
-            "next\t1\tagenthub providers preflight-key kimi --from-file {}",
+            "next\t1\tagenthub providers rehearse-unblock kimi --from-file {}",
+            source.display()
+        )));
+        assert!(result.output.contains(&format!(
+            "next\t2\tagenthub providers preflight-key kimi --from-file {}",
             source.display()
         )));
         assert!(!result.output.contains("candidate-kimi-secret"));
@@ -105,7 +112,7 @@ fn providers_kimi_inspect_key_json_is_machine_readable_without_secret() -> Resul
         assert_eq!(
             parsed["next_commands"][0],
             format!(
-                "agenthub providers preflight-key kimi --from-file {}",
+                "agenthub providers rehearse-unblock kimi --from-file {}",
                 source.display()
             )
         );
@@ -136,7 +143,10 @@ fn providers_kimi_inspect_key_can_read_from_env_without_printing_value() -> Resu
                 .output
                 .contains("classification\tplain_api_key_candidate"));
             assert!(result.output.contains(
-                "next\t1\tagenthub providers preflight-key kimi --from-env KIMI_API_KEY"
+                "next\t1\tagenthub providers rehearse-unblock kimi --from-env KIMI_API_KEY"
+            ));
+            assert!(result.output.contains(
+                "next\t2\tagenthub providers preflight-key kimi --from-env KIMI_API_KEY"
             ));
             assert!(!result.output.contains("env-kimi-secret"));
             Ok(())

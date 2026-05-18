@@ -49,6 +49,8 @@ cat > "$HISTORY/runs/suite-stress/dogfood-report.json" <<'JSON'
 {
   "shell_ux_status": "passed",
   "shell_ux_artifact": "/tmp/shell-ux-aliases.out",
+  "kimi_rehearsal_status": "passed",
+  "kimi_rehearsal_artifact": "/tmp/kimi-unblock-rehearsal.out",
   "rc_evidence": {
     "project_edit_sessions": 2,
     "project_cost_receipts": 2,
@@ -103,6 +105,7 @@ grep -q '"id":"stats"' "$EVIDENCE"
 grep -q '"id":"approval_ux"' "$EVIDENCE"
 grep -q '"id":"long_session_latency"' "$EVIDENCE"
 grep -q '"id":"shell_ux_aliases"' "$EVIDENCE"
+grep -q '"id":"kimi_unblock_rehearsal"' "$EVIDENCE"
 
 AGENTHUB_DOGFOOD_HISTORY_DIR="$HISTORY" \
 AGENTHUB_DOGFOOD_MIN_SUITE_RUNS=0 \
@@ -113,7 +116,7 @@ AGENTHUB_RC_MIN_OPS_FLOWS=4 \
 AGENTHUB_RC_MIN_PROJECT_EDIT_FLOWS=4 \
 AGENTHUB_RC_MIN_COST_RECEIPTS=9 \
 AGENTHUB_RC_REQUIRED_PROVIDERS=deepseek \
-AGENTHUB_RC_REQUIRED_CHECKS=chat_no_bootstrap,ops_no_bootstrap,cost_receipts,ops_receipts,resume,rewind,stats,approval_ux,long_session_latency,shell_ux_aliases \
+AGENTHUB_RC_REQUIRED_CHECKS=chat_no_bootstrap,ops_no_bootstrap,cost_receipts,ops_receipts,resume,rewind,stats,approval_ux,long_session_latency,shell_ux_aliases,kimi_unblock_rehearsal \
   "$ROOT/scripts/rc-dogfood-gate.sh" --check > "$TMP/gate.out"
 
 grep -q '1.0 RC dogfood gate: ready' "$TMP/gate.out"

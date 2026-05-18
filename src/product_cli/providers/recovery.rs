@@ -248,6 +248,7 @@ pub(super) fn provider_next_commands(status: &ProviderStatus, state: &str) -> Ve
         "kimi" if state == "blocked" || state == "missing" => vec![
             "agenthub providers inspect-key kimi".to_string(),
             "agenthub providers inspect-key kimi --from-file <new-key-file>".to_string(),
+            "agenthub providers rehearse-unblock kimi --from-file <new-key-file>".to_string(),
             "agenthub providers preflight-key kimi --from-file <new-key-file>".to_string(),
             "agenthub providers rc-unblock kimi --from-file <new-key-file>".to_string(),
             "agenthub providers test kimi".to_string(),

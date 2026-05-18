@@ -43,6 +43,7 @@ cat > "$evidence" <<'JSONL'
 {"kind":"check","id":"approval_ux","status":"passed"}
 {"kind":"check","id":"long_session_latency","status":"passed"}
 {"kind":"check","id":"shell_ux_aliases","status":"passed"}
+{"kind":"check","id":"kimi_unblock_rehearsal","status":"passed"}
 JSONL
 
 cat > "$kimi" <<'JSON'
@@ -94,13 +95,14 @@ fi
 grep -q $'check\tkimi_auth\tblocked' "$TMP/blocked.out"
 grep -q $'check_blocker_kind\tkimi_auth\texternal_credential' "$TMP/blocked.out"
 grep -q $'check_next\tkimi_auth\t1\tagenthub providers inspect-key kimi' "$TMP/blocked.out"
-grep -q $'check_next\tkimi_auth\t4\tagenthub providers rc-unblock kimi --from-file <new-key-file>' "$TMP/blocked.out"
 grep -q 'source:file:/tmp/.kimi' "$TMP/blocked.out"
 grep -q 'warning:Kimi Code CLI OAuth credentials are not Moonshot OpenAI-compatible API keys; create a plain Moonshot API key instead' "$TMP/blocked.out"
 grep -q $'check\topen_blockers\tblocked' "$TMP/blocked.out"
 grep -q $'check_blocker_kind\topen_blockers\texternal_credential' "$TMP/blocked.out"
 grep -q $'check_blocker_kind\tprovider_kimi\texternal_provider_evidence' "$TMP/blocked.out"
 grep -q $'check_blocker_kind\trc_dogfood_gate\tdependent_gate' "$TMP/blocked.out"
+grep -q $'check_next\tkimi_auth\t3\tagenthub providers rehearse-unblock kimi --from-file <new-key-file>' "$TMP/blocked.out"
+grep -q $'check_next\tkimi_auth\t5\tagenthub providers rc-unblock kimi --from-file <new-key-file>' "$TMP/blocked.out"
 grep -q $'blocker_scope\texternal_only' "$TMP/blocked.out"
 grep -q $'blocker_kinds\tdependent_gate,external_credential,external_provider_evidence' "$TMP/blocked.out"
 grep -q $'blocked_checks\tprovider_kimi,open_blockers,kimi_auth,rc_dogfood_gate' "$TMP/blocked.out"
@@ -108,16 +110,17 @@ grep -q $'status\tincomplete' "$TMP/blocked.out"
 grep -q $'next\t1\tagenthub providers recovery --json' "$TMP/blocked.out"
 grep -q $'next\t2\tagenthub providers inspect-key kimi' "$TMP/blocked.out"
 grep -q $'next\t3\tagenthub providers inspect-key kimi --from-file <new-key-file>' "$TMP/blocked.out"
-grep -q $'next\t4\tagenthub providers preflight-key kimi --from-file <new-key-file>' "$TMP/blocked.out"
-grep -q $'next\t5\tagenthub providers rc-unblock kimi --from-file <new-key-file>' "$TMP/blocked.out"
-grep -q $'next\t6\tagenthub providers unblock kimi' "$TMP/blocked.out"
-grep -q $'next\t7\tagenthub providers rotate-key kimi --from-file <new-key-file>' "$TMP/blocked.out"
-grep -q $'next\t9\tagenthub providers rc-unblock kimi' "$TMP/blocked.out"
-grep -q $'next\t10\tscripts/kimi-rc-unblock.sh' "$TMP/blocked.out"
-grep -q $'next\t13\tAGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh' "$TMP/blocked.out"
-grep -q $'next\t14\tagenthub readiness blockers --json --check' "$TMP/blocked.out"
-grep -q $'next\t15\tagenthub readiness evidence --json --check' "$TMP/blocked.out"
-grep -q $'next\t16\tagenthub readiness audit --json --check' "$TMP/blocked.out"
+grep -q $'next\t4\tagenthub providers rehearse-unblock kimi --from-file <new-key-file>' "$TMP/blocked.out"
+grep -q $'next\t5\tagenthub providers preflight-key kimi --from-file <new-key-file>' "$TMP/blocked.out"
+grep -q $'next\t6\tagenthub providers rc-unblock kimi --from-file <new-key-file>' "$TMP/blocked.out"
+grep -q $'next\t7\tagenthub providers unblock kimi' "$TMP/blocked.out"
+grep -q $'next\t8\tagenthub providers rotate-key kimi --from-file <new-key-file>' "$TMP/blocked.out"
+grep -q $'next\t10\tagenthub providers rc-unblock kimi' "$TMP/blocked.out"
+grep -q $'next\t11\tscripts/kimi-rc-unblock.sh' "$TMP/blocked.out"
+grep -q $'next\t14\tAGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh' "$TMP/blocked.out"
+grep -q $'next\t15\tagenthub readiness blockers --json --check' "$TMP/blocked.out"
+grep -q $'next\t16\tagenthub readiness evidence --json --check' "$TMP/blocked.out"
+grep -q $'next\t17\tagenthub readiness audit --json --check' "$TMP/blocked.out"
 if env "${common_env[@]}" "$ROOT/scripts/api-native-completion-audit.sh" --json --check --no-refresh > "$TMP/blocked.json" 2>&1; then
   printf 'expected JSON API-native completion audit to fail while Kimi auth is blocked\n' >&2
   exit 1

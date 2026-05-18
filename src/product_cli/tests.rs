@@ -9,6 +9,7 @@ mod open_tests;
 mod provider_kimi_inspect_tests;
 mod provider_kimi_preflight_tests;
 mod provider_kimi_rc_unblock_tests;
+mod provider_kimi_rehearsal_tests;
 mod provider_kimi_tests;
 mod provider_status_json_tests;
 mod readiness_completion_tests;

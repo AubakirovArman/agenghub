@@ -267,7 +267,7 @@ collect_dogfood_reports() {
 
 collect_dogfood_report() {
   local report="$1"
-  local line run_id project_sessions project_costs ops_sessions ops_costs shell_ux_status shell_ux_artifact index
+  local line run_id project_sessions project_costs ops_sessions ops_costs shell_ux_status shell_ux_artifact kimi_rehearsal_status kimi_rehearsal_artifact index
   line="$(tr -d '\n' < "$report")"
   run_id="$(basename "$(dirname "$report")")"
   [[ "$run_id" == "." || "$run_id" == "target" || "$run_id" == "dogfood" ]] && run_id="current"
@@ -277,6 +277,8 @@ collect_dogfood_report() {
   ops_costs="$(json_field "$line" ops_cost_receipts)"
   shell_ux_status="$(json_field "$line" shell_ux_status)"
   shell_ux_artifact="$(json_field "$line" shell_ux_artifact)"
+  kimi_rehearsal_status="$(json_field "$line" kimi_rehearsal_status)"
+  kimi_rehearsal_artifact="$(json_field "$line" kimi_rehearsal_artifact)"
 
   project_sessions="$(number_or_zero "$project_sessions")"
   project_costs="$(number_or_zero "$project_costs")"
@@ -302,6 +304,9 @@ collect_dogfood_report() {
   fi
   if [[ "$shell_ux_status" == "passed" ]]; then
     write_check "shell_ux_aliases" "dogfood_report" "${shell_ux_artifact:-$report}"
+  fi
+  if [[ "$kimi_rehearsal_status" == "passed" ]]; then
+    write_check "kimi_unblock_rehearsal" "dogfood_report" "${kimi_rehearsal_artifact:-$report}"
   fi
 }
 

@@ -226,7 +226,7 @@ impl AuditConfig {
                     "AGENTHUB_API_AUDIT_REQUIRED_CHECKS",
                     "AGENTHUB_RC_REQUIRED_CHECKS",
                 ],
-                "chat_no_bootstrap,ops_no_bootstrap,resume,rewind,stats,cost_receipts,ops_receipts,approval_ux,long_session_latency,shell_ux_aliases",
+                "chat_no_bootstrap,ops_no_bootstrap,resume,rewind,stats,cost_receipts,ops_receipts,approval_ux,long_session_latency,shell_ux_aliases,kimi_unblock_rehearsal",
             ),
             min_sessions,
             min_ops: env_usize(
@@ -253,6 +253,7 @@ pub(super) fn next_commands() -> Vec<String> {
         "agenthub providers recovery --json",
         "agenthub providers inspect-key kimi",
         "agenthub providers inspect-key kimi --from-file <new-key-file>",
+        "agenthub providers rehearse-unblock kimi --from-file <new-key-file>",
         "agenthub providers preflight-key kimi --from-file <new-key-file>",
         "agenthub providers rc-unblock kimi --from-file <new-key-file>",
         "agenthub providers unblock kimi",

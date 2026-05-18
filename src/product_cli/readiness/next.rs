@@ -7,6 +7,7 @@ pub(super) fn check_next_commands(id: &str, detail: &str) -> Vec<String> {
         return vec![
             "agenthub providers inspect-key kimi".to_string(),
             "agenthub providers inspect-key kimi --from-file <new-key-file>".to_string(),
+            "agenthub providers rehearse-unblock kimi --from-file <new-key-file>".to_string(),
             "agenthub providers preflight-key kimi --from-file <new-key-file>".to_string(),
             "agenthub providers rc-unblock kimi --from-file <new-key-file>".to_string(),
             "agenthub providers test kimi".to_string(),
@@ -16,6 +17,7 @@ pub(super) fn check_next_commands(id: &str, detail: &str) -> Vec<String> {
     if id == "provider_kimi" {
         return vec![
             "agenthub providers inspect-key kimi --from-file <new-key-file>".to_string(),
+            "agenthub providers rehearse-unblock kimi --from-file <new-key-file>".to_string(),
             "agenthub providers preflight-key kimi --from-file <new-key-file>".to_string(),
             "agenthub providers rc-unblock kimi --from-file <new-key-file>".to_string(),
             "AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh".to_string(),
@@ -30,6 +32,10 @@ pub(super) fn check_next_commands(id: &str, detail: &str) -> Vec<String> {
             commands.insert(
                 0,
                 "agenthub providers rc-unblock kimi --from-file <new-key-file>".to_string(),
+            );
+            commands.insert(
+                0,
+                "agenthub providers rehearse-unblock kimi --from-file <new-key-file>".to_string(),
             );
             commands.insert(0, "agenthub providers inspect-key kimi".to_string());
         }

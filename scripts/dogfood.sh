@@ -22,6 +22,8 @@ PROVIDER_DOGFOOD_STATUS="skipped"
 PROVIDER_DOGFOOD_REPORT=""
 SHELL_UX_STATUS="skipped"
 SHELL_UX_ARTIFACT="${AGENTHUB_DOGFOOD_SHELL_UX_ARTIFACT:-$ROOT/target/dogfood/shell-ux-aliases.out}"
+KIMI_REHEARSAL_STATUS="skipped"
+KIMI_REHEARSAL_ARTIFACT="${AGENTHUB_DOGFOOD_KIMI_REHEARSAL_ARTIFACT:-$ROOT/target/dogfood/kimi-unblock-rehearsal.out}"
 
 json_escape() {
   printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
@@ -53,6 +55,14 @@ run_shell_ux_smoke() {
 }
 
 run_step "shell UX alias smoke" run_shell_ux_smoke
+
+run_kimi_rehearsal_smoke() {
+  mkdir -p "$(dirname "$KIMI_REHEARSAL_ARTIFACT")"
+  AGENTHUB_BIN="$AGENTHUB_BIN" "$ROOT/scripts/test-kimi-unblock-rehearsal.sh" > "$KIMI_REHEARSAL_ARTIFACT"
+  KIMI_REHEARSAL_STATUS="passed"
+}
+
+run_step "Kimi unblock rehearsal smoke" run_kimi_rehearsal_smoke
 
 run_stress() {
   local count="${AGENTHUB_DOGFOOD_STRESS_COUNT:-0}"
@@ -209,6 +219,12 @@ write_report() {
   "shell_ux": {
     "status": "$(json_escape "$SHELL_UX_STATUS")",
     "artifact": "$(json_escape "$SHELL_UX_ARTIFACT")"
+  },
+  "kimi_rehearsal_status": "$(json_escape "$KIMI_REHEARSAL_STATUS")",
+  "kimi_rehearsal_artifact": "$(json_escape "$KIMI_REHEARSAL_ARTIFACT")",
+  "kimi_unblock_rehearsal": {
+    "status": "$(json_escape "$KIMI_REHEARSAL_STATUS")",
+    "artifact": "$(json_escape "$KIMI_REHEARSAL_ARTIFACT")"
   },
   "stress": {
     "requested_count": ${AGENTHUB_DOGFOOD_STRESS_COUNT:-0},

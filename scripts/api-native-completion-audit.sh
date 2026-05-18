@@ -32,7 +32,7 @@ V04_PLAN="${AGENTHUB_API_AUDIT_V04_PLAN:-/mnt/hf_model_weights/arman/3bit/agenth
 AFTER_PLAN="${AGENTHUB_API_AUDIT_AFTER_PLAN:-/mnt/hf_model_weights/arman/3bit/agenthub_after_10_roadmap.md}"
 ROADMAP_DOC="${AGENTHUB_API_AUDIT_ROADMAP_DOC:-$ROOT/docs/roadmap-after-1.0.ru.md}"
 REQUIRED_PROVIDERS="${AGENTHUB_API_AUDIT_REQUIRED_PROVIDERS:-${AGENTHUB_RC_REQUIRED_PROVIDERS:-deepseek,kimi}}"
-REQUIRED_CHECKS="${AGENTHUB_API_AUDIT_REQUIRED_CHECKS:-${AGENTHUB_RC_REQUIRED_CHECKS:-chat_no_bootstrap,ops_no_bootstrap,resume,rewind,stats,cost_receipts,ops_receipts,approval_ux,long_session_latency,shell_ux_aliases}}"
+REQUIRED_CHECKS="${AGENTHUB_API_AUDIT_REQUIRED_CHECKS:-${AGENTHUB_RC_REQUIRED_CHECKS:-chat_no_bootstrap,ops_no_bootstrap,resume,rewind,stats,cost_receipts,ops_receipts,approval_ux,long_session_latency,shell_ux_aliases,kimi_unblock_rehearsal}}"
 MIN_SESSIONS="${AGENTHUB_API_AUDIT_MIN_REAL_SESSIONS:-${AGENTHUB_RC_MIN_REAL_SESSIONS:-100}}"
 MIN_OPS="${AGENTHUB_API_AUDIT_MIN_OPS_FLOWS:-${AGENTHUB_RC_MIN_OPS_FLOWS:-20}}"
 MIN_PROJECT="${AGENTHUB_API_AUDIT_MIN_PROJECT_EDIT_FLOWS:-${AGENTHUB_RC_MIN_PROJECT_EDIT_FLOWS:-20}}"
@@ -119,6 +119,7 @@ check_next_commands() {
     printf '%s\n' \
       'agenthub providers inspect-key kimi' \
       'agenthub providers inspect-key kimi --from-file <new-key-file>' \
+      'agenthub providers rehearse-unblock kimi --from-file <new-key-file>' \
       'agenthub providers preflight-key kimi --from-file <new-key-file>' \
       'agenthub providers rc-unblock kimi --from-file <new-key-file>' \
       'agenthub providers test kimi' \
@@ -128,6 +129,7 @@ check_next_commands() {
   if [[ "$id" == "provider_kimi" ]]; then
     printf '%s\n' \
       'agenthub providers inspect-key kimi --from-file <new-key-file>' \
+      'agenthub providers rehearse-unblock kimi --from-file <new-key-file>' \
       'agenthub providers preflight-key kimi --from-file <new-key-file>' \
       'agenthub providers rc-unblock kimi --from-file <new-key-file>' \
       'AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh'
@@ -137,6 +139,7 @@ check_next_commands() {
     if [[ "$detail" == *"kimi-auth"* ]]; then
       printf '%s\n' \
         'agenthub providers inspect-key kimi' \
+        'agenthub providers rehearse-unblock kimi --from-file <new-key-file>' \
         'agenthub providers rc-unblock kimi --from-file <new-key-file>'
     fi
     printf '%s\n' \
@@ -693,21 +696,22 @@ if [[ "$failed" == true ]]; then
   emit_next 1 'agenthub providers recovery --json'
   emit_next 2 'agenthub providers inspect-key kimi'
   emit_next 3 'agenthub providers inspect-key kimi --from-file <new-key-file>'
-  emit_next 4 'agenthub providers preflight-key kimi --from-file <new-key-file>'
-  emit_next 5 'agenthub providers rc-unblock kimi --from-file <new-key-file>'
-  emit_next 6 'agenthub providers unblock kimi'
-  emit_next 7 'agenthub providers rotate-key kimi --from-file <new-key-file>'
-  emit_next 8 'scripts/kimi-key-rotate.sh --from-file <new-key-file>'
-  emit_next 9 'agenthub providers rc-unblock kimi'
-  emit_next 10 'scripts/kimi-rc-unblock.sh'
-  emit_next 11 'agenthub providers test kimi'
-  emit_next 12 'scripts/kimi-auth-check.sh'
-  emit_next 13 'AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh'
-  emit_next 14 'agenthub readiness blockers --json --check'
-  emit_next 15 'agenthub readiness evidence --json --check'
-  emit_next 16 'agenthub readiness audit --json --check'
-  emit_next 17 'scripts/rc-evidence-collect.sh'
-  emit_next 18 'scripts/rc-dogfood-gate.sh --check'
+  emit_next 4 'agenthub providers rehearse-unblock kimi --from-file <new-key-file>'
+  emit_next 5 'agenthub providers preflight-key kimi --from-file <new-key-file>'
+  emit_next 6 'agenthub providers rc-unblock kimi --from-file <new-key-file>'
+  emit_next 7 'agenthub providers unblock kimi'
+  emit_next 8 'agenthub providers rotate-key kimi --from-file <new-key-file>'
+  emit_next 9 'scripts/kimi-key-rotate.sh --from-file <new-key-file>'
+  emit_next 10 'agenthub providers rc-unblock kimi'
+  emit_next 11 'scripts/kimi-rc-unblock.sh'
+  emit_next 12 'agenthub providers test kimi'
+  emit_next 13 'scripts/kimi-auth-check.sh'
+  emit_next 14 'AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh'
+  emit_next 15 'agenthub readiness blockers --json --check'
+  emit_next 16 'agenthub readiness evidence --json --check'
+  emit_next 17 'agenthub readiness audit --json --check'
+  emit_next 18 'scripts/rc-evidence-collect.sh'
+  emit_next 19 'scripts/rc-dogfood-gate.sh --check'
   if [[ "$JSON" == true ]]; then
     render_json incomplete
   fi

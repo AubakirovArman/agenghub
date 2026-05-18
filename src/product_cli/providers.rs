@@ -15,6 +15,7 @@ mod key_rotation;
 mod probes;
 mod rc_unblock;
 mod recovery;
+mod rehearsal;
 mod roles;
 mod status_json;
 mod wizard;
@@ -28,6 +29,9 @@ pub use key_rotation::{
 };
 pub use rc_unblock::{rc_unblock_provider, RcUnblockOptions, RcUnblockResult};
 pub use recovery::{render_recovery, ProviderRecoveryReport};
+pub use rehearsal::{
+    rehearse_provider_unblock, KimiUnblockRehearsalOptions, KimiUnblockRehearsalResult,
+};
 pub use roles::{set_role_fallback, set_role_provider};
 pub use status_json::{render_status_json, ProviderStatusJson};
 pub use wizard::render_wizard;
@@ -430,35 +434,36 @@ fn append_kimi_unblock_steps(project_root: &Path, out: &mut String) {
     );
     out.push_str("step\t1\tagenthub providers inspect-key kimi\n");
     out.push_str("step\t2\tagenthub providers inspect-key kimi --from-file <new-key-file>\n");
-    out.push_str("step\t3\tagenthub providers preflight-key kimi --from-file <new-key-file>\n");
-    out.push_str("step\t4\tagenthub providers rc-unblock kimi --from-file <new-key-file>\n");
-    out.push_str("step\t5\tagenthub providers rotate-key kimi --from-file <new-key-file>\n");
+    out.push_str("step\t3\tagenthub providers rehearse-unblock kimi --from-file <new-key-file>\n");
+    out.push_str("step\t4\tagenthub providers preflight-key kimi --from-file <new-key-file>\n");
+    out.push_str("step\t5\tagenthub providers rc-unblock kimi --from-file <new-key-file>\n");
+    out.push_str("step\t6\tagenthub providers rotate-key kimi --from-file <new-key-file>\n");
     let rotate_script = project_root.join("scripts/kimi-key-rotate.sh");
     if rotate_script.exists() {
         out.push_str(&format!(
-            "step\t6\t{} --from-file <new-key-file>\n",
+            "step\t7\t{} --from-file <new-key-file>\n",
             rotate_script.display()
         ));
     } else {
-        out.push_str("step\t6\tscripts/kimi-key-rotate.sh --from-file <new-key-file>\n");
+        out.push_str("step\t7\tscripts/kimi-key-rotate.sh --from-file <new-key-file>\n");
     }
-    out.push_str("step\t7\tagenthub providers rc-unblock kimi\n");
+    out.push_str("step\t8\tagenthub providers rc-unblock kimi\n");
     let rc_unblock_script = project_root.join("scripts/kimi-rc-unblock.sh");
     if rc_unblock_script.exists() {
-        out.push_str(&format!("step\t8\t{}\n", rc_unblock_script.display()));
+        out.push_str(&format!("step\t9\t{}\n", rc_unblock_script.display()));
     } else {
-        out.push_str("step\t8\tscripts/kimi-rc-unblock.sh\n");
+        out.push_str("step\t9\tscripts/kimi-rc-unblock.sh\n");
     }
-    out.push_str("step\t9\tagenthub providers test kimi\n");
+    out.push_str("step\t10\tagenthub providers test kimi\n");
     let script = project_root.join("scripts/kimi-auth-check.sh");
     if script.exists() {
-        out.push_str(&format!("step\t10\t{}\n", script.display()));
+        out.push_str(&format!("step\t11\t{}\n", script.display()));
     } else {
-        out.push_str("step\t10\tscripts/kimi-auth-check.sh\n");
+        out.push_str("step\t11\tscripts/kimi-auth-check.sh\n");
     }
-    out.push_str("step\t11\tAGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh\n");
-    out.push_str("step\t12\tscripts/rc-evidence-collect.sh\n");
-    out.push_str("step\t13\tscripts/rc-dogfood-gate.sh --check\n");
+    out.push_str("step\t12\tAGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh\n");
+    out.push_str("step\t13\tscripts/rc-evidence-collect.sh\n");
+    out.push_str("step\t14\tscripts/rc-dogfood-gate.sh --check\n");
 }
 
 pub fn diagnose_provider(project_root: &Path, provider: &str) -> Result<String> {

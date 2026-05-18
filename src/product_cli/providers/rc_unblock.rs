@@ -329,10 +329,11 @@ fn append_blocked(out: &mut String, reason: &str) {
     out.push_str(&format!("reason\t{reason}\n"));
     out.push_str("next\t1\tagenthub providers inspect-key kimi\n");
     out.push_str("next\t2\tagenthub providers inspect-key kimi --from-file <new-key-file>\n");
-    out.push_str("next\t3\tagenthub providers preflight-key kimi --from-file <new-key-file>\n");
-    out.push_str("next\t4\tagenthub providers rc-unblock kimi --from-file <new-key-file>\n");
-    out.push_str("next\t5\tagenthub providers rotate-key kimi --from-file <new-key-file>\n");
-    out.push_str("next\t6\tagenthub providers unblock kimi\n");
+    out.push_str("next\t3\tagenthub providers rehearse-unblock kimi --from-file <new-key-file>\n");
+    out.push_str("next\t4\tagenthub providers preflight-key kimi --from-file <new-key-file>\n");
+    out.push_str("next\t5\tagenthub providers rc-unblock kimi --from-file <new-key-file>\n");
+    out.push_str("next\t6\tagenthub providers rotate-key kimi --from-file <new-key-file>\n");
+    out.push_str("next\t7\tagenthub providers unblock kimi\n");
 }
 
 fn script(project_root: &Path, name: &str) -> PathBuf {

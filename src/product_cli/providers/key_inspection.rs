@@ -81,11 +81,13 @@ pub fn inspect_provider_key(
     let next_commands = if failed {
         vec![
             "create a plain Moonshot OpenAI-compatible API key".to_string(),
+            "agenthub providers rehearse-unblock kimi --from-file <new-key-file>".to_string(),
             "agenthub providers preflight-key kimi --from-file <new-key-file>".to_string(),
             "agenthub providers rc-unblock kimi --from-file <new-key-file>".to_string(),
         ]
     } else {
         vec![
+            format!("agenthub providers rehearse-unblock kimi {source_args}"),
             format!("agenthub providers preflight-key kimi {source_args}"),
             format!("agenthub providers rc-unblock kimi {source_args}"),
         ]

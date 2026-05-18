@@ -40,6 +40,12 @@ fn providers_status_json_surfaces_blocked_kimi_without_secret() -> Result<()> {
             .expect("kimi next commands")
             .iter()
             .any(|command| command.as_str()
+                == Some("agenthub providers rehearse-unblock kimi --from-file <new-key-file>")));
+        assert!(kimi["next_commands"]
+            .as_array()
+            .expect("kimi next commands")
+            .iter()
+            .any(|command| command.as_str()
                 == Some("agenthub providers preflight-key kimi --from-file <new-key-file>")));
         assert!(kimi["next_commands"]
             .as_array()
@@ -174,6 +180,9 @@ fn providers_recovery_json_turns_blocked_kimi_into_next_actions() -> Result<()> 
         assert_eq!(kimi["action"], "replace_or_rotate_kimi_moonshot_key");
         assert_eq!(kimi["blocker_kind"], "external_credential");
         assert_eq!(kimi["credential_source"], "env:KIMI_API_KEY");
+        assert!(
+            json.contains("agenthub providers rehearse-unblock kimi --from-file <new-key-file>")
+        );
         assert!(json.contains("agenthub providers preflight-key kimi --from-file <new-key-file>"));
         assert!(json.contains("agenthub providers rc-unblock kimi --from-file <new-key-file>"));
         assert!(json.contains("agenthub readiness blockers --json --check"));

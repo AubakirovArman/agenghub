@@ -209,6 +209,19 @@ impl OpenAiStub {
     }
 }
 
+#[cfg(unix)]
+pub(super) fn write_script(path: &std::path::Path, body: &str) -> Result<()> {
+    use std::os::unix::fs::PermissionsExt;
+    std::fs::write(
+        path,
+        format!("#!/usr/bin/env bash\nset -euo pipefail\n{body}"),
+    )?;
+    let mut permissions = std::fs::metadata(path)?.permissions();
+    permissions.set_mode(0o755);
+    std::fs::set_permissions(path, permissions)?;
+    Ok(())
+}
+
 fn set_optional_env(key: &str, value: Option<&str>) {
     match value {
         Some(value) => std::env::set_var(key, value),

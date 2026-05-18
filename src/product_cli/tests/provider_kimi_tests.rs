@@ -3,6 +3,7 @@ use anyhow::Result;
 use super::providers;
 use super::support::{
     openai_error_stub_server, openai_stub_server, with_kimi_env, with_kimi_env_using_base,
+    write_script,
 };
 
 #[test]
@@ -112,7 +113,7 @@ fn providers_kimi_status_surfaces_matching_auth_blocker() -> Result<()> {
         assert!(setup.contains("missing\tkimi\tlatest Kimi auth check blocked"));
         assert!(selected.contains("not_selected\tkimi\tblocked"));
         assert!(selected
-            .contains("step\t4\tagenthub providers rc-unblock kimi --from-file <new-key-file>"));
+            .contains("step\t5\tagenthub providers rc-unblock kimi --from-file <new-key-file>"));
         assert!(!selected.contains("kimi-test-key"));
         Ok(())
     })
@@ -163,12 +164,13 @@ fn providers_kimi_unblock_renders_source_backed_next_steps() -> Result<()> {
             "not a Moonshot OpenAI-compatible API key",
             "step\t1\tagenthub providers inspect-key kimi",
             "step\t2\tagenthub providers inspect-key kimi --from-file <new-key-file>",
-            "step\t3\tagenthub providers preflight-key kimi --from-file <new-key-file>",
-            "step\t4\tagenthub providers rc-unblock kimi --from-file <new-key-file>",
-            "step\t5\tagenthub providers rotate-key kimi --from-file <new-key-file>",
-            "step\t11\tAGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh",
-            "step\t12\tscripts/rc-evidence-collect.sh",
-            "step\t13\tscripts/rc-dogfood-gate.sh --check",
+            "step\t3\tagenthub providers rehearse-unblock kimi --from-file <new-key-file>",
+            "step\t4\tagenthub providers preflight-key kimi --from-file <new-key-file>",
+            "step\t5\tagenthub providers rc-unblock kimi --from-file <new-key-file>",
+            "step\t6\tagenthub providers rotate-key kimi --from-file <new-key-file>",
+            "step\t12\tAGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh",
+            "step\t13\tscripts/rc-evidence-collect.sh",
+            "step\t14\tscripts/rc-dogfood-gate.sh --check",
         ] {
             assert!(unblock.contains(expected));
         }
@@ -365,18 +367,21 @@ fn providers_kimi_rc_unblock_stops_on_provider_test_failure() -> Result<()> {
         assert!(result
             .output
             .contains("next\t2\tagenthub providers inspect-key kimi --from-file <new-key-file>"));
+        assert!(result.output.contains(
+            "next\t3\tagenthub providers rehearse-unblock kimi --from-file <new-key-file>"
+        ));
         assert!(result
             .output
-            .contains("next\t3\tagenthub providers preflight-key kimi --from-file <new-key-file>"));
+            .contains("next\t4\tagenthub providers preflight-key kimi --from-file <new-key-file>"));
         assert!(result
             .output
-            .contains("next\t4\tagenthub providers rc-unblock kimi --from-file <new-key-file>"));
+            .contains("next\t5\tagenthub providers rc-unblock kimi --from-file <new-key-file>"));
         assert!(result
             .output
-            .contains("next\t5\tagenthub providers rotate-key kimi --from-file <new-key-file>"));
+            .contains("next\t6\tagenthub providers rotate-key kimi --from-file <new-key-file>"));
         assert!(result
             .output
-            .contains("next\t6\tagenthub providers unblock kimi"));
+            .contains("next\t7\tagenthub providers unblock kimi"));
         Ok(())
     })
 }
@@ -482,18 +487,4 @@ fn providers_kimi_status_ignores_stale_auth_blocker_after_key_change() -> Result
         assert!(!status.contains("latest Kimi auth check blocked"));
         Ok(())
     })
-}
-
-#[cfg(unix)]
-fn write_script(path: &std::path::Path, body: &str) -> Result<()> {
-    use std::os::unix::fs::PermissionsExt;
-
-    std::fs::write(
-        path,
-        format!("#!/usr/bin/env bash\nset -euo pipefail\n{body}"),
-    )?;
-    let mut permissions = std::fs::metadata(path)?.permissions();
-    permissions.set_mode(0o755);
-    std::fs::set_permissions(path, permissions)?;
-    Ok(())
 }

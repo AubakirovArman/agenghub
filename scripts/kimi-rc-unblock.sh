@@ -30,6 +30,7 @@ returns blocked.
 If you have a replacement key file, inspect it offline and verify it live
 without writing first:
   agenthub providers inspect-key kimi --from-file <new-key-file>
+  agenthub providers rehearse-unblock kimi --from-file <new-key-file>
   agenthub providers preflight-key kimi --from-file <new-key-file>
 
 Then run the one product-CLI unblock command:
@@ -98,10 +99,11 @@ blocked_after_provider_test() {
   printf 'reason\tprovider_test_failed\n'
   printf 'next\t1\tagenthub providers inspect-key kimi\n'
   printf 'next\t2\tagenthub providers inspect-key kimi --from-file <new-key-file>\n'
-  printf 'next\t3\tagenthub providers preflight-key kimi --from-file <new-key-file>\n'
-  printf 'next\t4\tagenthub providers rc-unblock kimi --from-file <new-key-file>\n'
-  printf 'next\t5\tagenthub providers rotate-key kimi --from-file <new-key-file>\n'
-  printf 'next\t6\tagenthub providers unblock kimi\n'
+  printf 'next\t3\tagenthub providers rehearse-unblock kimi --from-file <new-key-file>\n'
+  printf 'next\t4\tagenthub providers preflight-key kimi --from-file <new-key-file>\n'
+  printf 'next\t5\tagenthub providers rc-unblock kimi --from-file <new-key-file>\n'
+  printf 'next\t6\tagenthub providers rotate-key kimi --from-file <new-key-file>\n'
+  printf 'next\t7\tagenthub providers unblock kimi\n'
 }
 
 printf 'AgentHub Kimi RC unblock\n'
@@ -125,10 +127,11 @@ elif ! run_kimi_auth_check; then
   printf 'reason\tkimi_auth_check_failed\n'
   printf 'next\t1\tagenthub providers inspect-key kimi\n'
   printf 'next\t2\tagenthub providers inspect-key kimi --from-file <new-key-file>\n'
-  printf 'next\t3\tagenthub providers preflight-key kimi --from-file <new-key-file>\n'
-  printf 'next\t4\tagenthub providers rc-unblock kimi --from-file <new-key-file>\n'
-  printf 'next\t5\tagenthub providers rotate-key kimi --from-file <new-key-file>\n'
-  printf 'next\t6\tagenthub providers unblock kimi\n'
+  printf 'next\t3\tagenthub providers rehearse-unblock kimi --from-file <new-key-file>\n'
+  printf 'next\t4\tagenthub providers preflight-key kimi --from-file <new-key-file>\n'
+  printf 'next\t5\tagenthub providers rc-unblock kimi --from-file <new-key-file>\n'
+  printf 'next\t6\tagenthub providers rotate-key kimi --from-file <new-key-file>\n'
+  printf 'next\t7\tagenthub providers unblock kimi\n'
   exit 1
 fi
 endpoint_override="${endpoint_override:-$(json_field passed_endpoint "$KIMI_AUTH_REPORT")}"

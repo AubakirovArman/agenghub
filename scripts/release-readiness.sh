@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-EXPECTED="${AGENTHUB_RELEASE_VERSION:-0.4.110-local-preview}"
+EXPECTED="${AGENTHUB_RELEASE_VERSION:-0.4.111-local-preview}"
 WORK="$ROOT/target/release-readiness"
 DIST="$WORK/dist"
 INSTALL="$WORK/install"
@@ -31,6 +31,7 @@ cargo test --manifest-path "$ROOT/Cargo.toml" --locked
 "$ROOT/scripts/test-rc-acceptance.sh"
 "$ROOT/scripts/test-kimi-auth-check.sh"
 "$ROOT/scripts/test-kimi-key-rotate.sh"
+"$ROOT/scripts/test-kimi-unblock-rehearsal.sh"
 "$ROOT/scripts/test-kimi-rc-unblock.sh"
 "$ROOT/scripts/test-provider-test-exit-code.sh"
 "$ROOT/scripts/test-release-surfaces.sh"
