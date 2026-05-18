@@ -7,6 +7,7 @@ use super::{config, doctor, ecosystem, providers};
 mod bootstrap_tests;
 mod open_tests;
 mod provider_kimi_inspect_tests;
+mod provider_kimi_operator_receipt_tests;
 mod provider_kimi_preflight_tests;
 mod provider_kimi_rc_unblock_tests;
 mod provider_kimi_rehearsal_tests;

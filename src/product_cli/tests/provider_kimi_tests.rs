@@ -230,52 +230,6 @@ fn providers_kimi_rotate_key_installs_without_leaking_secret_and_tests_provider(
 
 #[cfg(unix)]
 #[test]
-fn providers_kimi_rc_unblock_runs_cli_owned_sequence() -> Result<()> {
-    let stub = openai_stub_server("kimi rc ok", 8)?;
-    let endpoint = format!("{}/v1", stub.endpoint);
-    with_kimi_env(Some(&endpoint), Some("kimi-test-key"), || {
-        let dir = tempfile::tempdir()?;
-        let scripts = dir.path().join("scripts");
-        std::fs::create_dir_all(&scripts)?;
-        write_script(&scripts.join("kimi-auth-check.sh"), "printf 'auth ok\\n'\n")?;
-        write_script(
-            &scripts.join("provider-dogfood.sh"),
-            "printf 'dogfood provider=%s live=%s\\n' \"$AGENTHUB_PROVIDER_DOGFOOD_PROVIDER\" \"$AGENTHUB_PROVIDER_DOGFOOD_LIVE\"\n",
-        )?;
-        write_script(
-            &scripts.join("rc-evidence-collect.sh"),
-            "printf 'collect ok\\n'\n",
-        )?;
-        write_script(
-            &scripts.join("rc-dogfood-gate.sh"),
-            "printf 'gate args:%s\\n' \"$*\"\n",
-        )?;
-
-        let result = providers::rc_unblock_provider(
-            dir.path(),
-            "kimi",
-            providers::RcUnblockOptions::default(),
-        )?;
-
-        assert!(!result.failed);
-        assert!(result.output.contains("step\tprovider_test\tpassed"));
-        assert!(result.output.contains("step\tkimi_auth_check\tpassed"));
-        assert!(result.output.contains("step\tprovider_dogfood\tpassed"));
-        assert!(result
-            .output
-            .contains("provider_dogfood\tstdout\tdogfood provider=kimi live=1"));
-        assert!(result.output.contains("step\trc_evidence_collect\tpassed"));
-        assert!(result.output.contains("step\trc_dogfood_gate\tpassed"));
-        assert!(result
-            .output
-            .contains("rc_dogfood_gate\tstdout\tgate args:--check"));
-        assert!(result.output.contains("status\tready"));
-        Ok(())
-    })
-}
-
-#[cfg(unix)]
-#[test]
 fn providers_kimi_rc_unblock_can_rotate_key_before_sequence() -> Result<()> {
     let stub = openai_stub_server("kimi rc rotated ok", 9)?;
     let endpoint = format!("{}/v1", stub.endpoint);

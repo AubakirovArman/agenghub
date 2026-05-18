@@ -12,6 +12,7 @@ mod diagnostics;
 mod http;
 mod key_inspection;
 mod key_rotation;
+mod operator_receipt;
 mod probes;
 mod rc_unblock;
 mod recovery;

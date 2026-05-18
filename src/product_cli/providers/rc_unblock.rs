@@ -139,7 +139,7 @@ pub fn rc_unblock_provider(
     } else {
         "rc_dogfood_gate"
     };
-    if !run_script(
+    let gate_passed = run_script(
         project_root,
         &mut out,
         gate_label,
@@ -147,7 +147,13 @@ pub fn rc_unblock_provider(
         &gate_args,
         &[],
         endpoint_override.as_deref(),
-    )? {
+    )?;
+    super::operator_receipt::append_kimi_rc_operator_receipt(
+        project_root,
+        &mut out,
+        endpoint_override.as_deref(),
+    )?;
+    if !gate_passed {
         append_blocked(&mut out, "rc_dogfood_gate_failed");
         return Ok(RcUnblockResult {
             output: out,

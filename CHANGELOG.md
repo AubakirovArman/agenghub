@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.118-local-preview - 2026-05-18
+
+- Add a Kimi RC operator receipt to `agenthub providers rc-unblock kimi`: after provider test, Kimi auth check, live provider dogfood, RC evidence collection, and the RC gate run, AgentHub now writes `target/dogfood/kimi-rc-operator-receipt.json`.
+- Print short `operator_receipt` rows with provider, model, endpoint, token/cost observation, provider dogfood status, dogfood run/transaction ids, readiness completion status, and remaining blockers.
+- Keep the live Kimi unblock itself externally blocked until a valid plain Moonshot/OpenAI-compatible API key replaces the current Kimi Code CLI/OAuth credential.
+
 ## 0.4.117-local-preview - 2026-05-18
 
 - Keep Kimi provider-dogfood recovery self-contained at the individual check level: `provider_kimi.next_commands` now starts with current credential inspection, includes candidate inspection/rehearsal/preflight/RC unblock, then repeats provider test, Kimi auth check, and live provider dogfood.
